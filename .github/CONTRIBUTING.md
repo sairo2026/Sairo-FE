@@ -9,7 +9,7 @@
 3. Issue의 Development에 작업 브랜치를 연결한다.
 4. 브랜치에서 변경하고 검증한 뒤 커밋한다.
 5. Pull Request를 만들고 Assignee·Label·관련 Issue를 확인한다.
-6. 필수 CI 통과 후 squash merge한다. `main`에 직접 push하지 않는다.
+6. 변경 내용을 검토한 뒤 squash merge하고, `main` 병합 후 Vercel 배포 상태를 확인한다. `main`에 직접 push하지 않는다.
 
 ## 제목과 브랜치
 
