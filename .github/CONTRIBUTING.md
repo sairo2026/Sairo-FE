@@ -2,6 +2,8 @@
 
 이 문서는 사이로 프론트엔드 저장소의 브랜치 전략, Issue, 커밋과 Pull Request 작성 기준을 설명한다.
 
+React·Next.js·TypeScript 코드 구조와 작성 규칙은 [`docs/CODE_CONVENTION.md`](../docs/CODE_CONVENTION.md)를 따른다. PR 전 `npm run check`를 통과해야 한다.
+
 ## 브랜치 전략
 
 저장소는 `main`과 `dev` 두 개의 상시 브랜치만 유지한다.
@@ -24,25 +26,25 @@
 
 ## 제목과 브랜치
 
-| 대상 | 형식 | 예시 |
-|---|---|---|
-| Issue | `[SAIRO-FE] <type>: <한글 요약>` | `[SAIRO-FE] feat: 마이페이지 개발` |
-| 브랜치 | `<type>/<영문-kebab-case>` (`dev`에서 분기) | `feat/my-page` |
-| 커밋 | `<type>: <한글 요약>` | `feat: 마이페이지 화면 추가` |
-| Pull Request | `<type>: <한글 요약>` (base는 보통 `dev`) | `feat: 마이페이지 개발` |
+| 대상         | 형식                                        | 예시                               |
+| ------------ | ------------------------------------------- | ---------------------------------- |
+| Issue        | `[SAIRO-FE] <type>: <한글 요약>`            | `[SAIRO-FE] feat: 마이페이지 개발` |
+| 브랜치       | `<type>/<영문-kebab-case>` (`dev`에서 분기) | `feat/my-page`                     |
+| 커밋         | `<type>: <한글 요약>`                       | `feat: 마이페이지 화면 추가`       |
+| Pull Request | `<type>: <한글 요약>` (base는 보통 `dev`)   | `feat: 마이페이지 개발`            |
 
 ## type과 Label
 
-| type | Label |
-|---|---|
-| `feat` | `✨ Feature` |
-| `fix` | `🐞 Fix` |
+| type       | Label         |
+| ---------- | ------------- |
+| `feat`     | `✨ Feature`  |
+| `fix`      | `🐞 Fix`      |
 | `refactor` | `🔨 Refactor` |
-| `infra` | `🏗️ infra` |
-| `deploy` | `🌏 Deploy` |
-| `chore` | `🧹chore` |
-| `docs` | `📃 Docs` |
-| `setting` | `⚙️ Setting` |
+| `infra`    | `🏗️ infra`    |
+| `deploy`   | `🌏 Deploy`   |
+| `chore`    | `🧹chore`     |
+| `docs`     | `📃 Docs`     |
+| `setting`  | `⚙️ Setting`  |
 
 ## 작성 원칙
 
