@@ -10,6 +10,7 @@
 - API 응답을 컴포넌트 곳곳에서 임의 변환하지 않고 API 계층의 schema와 mapper에서 정규화한다.
 - 타입 오류를 `any`, non-null assertion, 무분별한 type assertion으로 덮지 않는다.
 - 추상화와 라이브러리는 실제 반복·복잡성이 생긴 뒤 도입한다.
+- §1-13만이 최종 판단 기준이다. §14는 근거 기록일 뿐이며, 규칙을 바꿀 때는 원본이 아니라 이 문서를 PR로 고친다.
 
 ## 2. 폴더 구조와 의존 방향
 
@@ -29,8 +30,26 @@ src
 │  │  ├─ schemas
 │  │  └─ utils
 │  ├─ office
+│  │  ├─ api
+│  │  ├─ components
+│  │  ├─ hooks
+│  │  ├─ model
+│  │  ├─ schemas
+│  │  └─ utils
 │  ├─ property
+│  │  ├─ api
+│  │  ├─ components
+│  │  ├─ hooks
+│  │  ├─ model
+│  │  ├─ schemas
+│  │  └─ utils
 │  └─ coordination
+│     ├─ api
+│     ├─ components
+│     ├─ hooks
+│     ├─ model
+│     ├─ schemas
+│     └─ utils
 └─ shared
    ├─ api
    ├─ components
@@ -39,6 +58,8 @@ src
    ├─ styles
    └─ types
 ```
+
+네 feature(`auth`, `office`, `property`, `coordination`) 모두 위 6종 하위 폴더 구성을 예외 없이 동일하게 쓴다. feature마다 다른 하위 구조를 임의로 만들지 않는다.
 
 - 의존 방향은 `shared → features → app`이다.
 - feature끼리 직접 import하지 않는다. 함께 쓰는 개념은 `shared`로 승격하거나 상위 `app`에서 조합한다.
@@ -59,7 +80,7 @@ src
 ## 4. 컴포넌트
 
 - 컴포넌트는 한 가지 UI 책임을 가진다. 데이터 취득·권한·복잡한 상태 전이·큰 JSX가 한 파일에 모이면 분리한다.
-- 합성(composition)과 `children`을 우선하고 boolean prop 여러 개로 변형을 조합하지 않는다.
+- 컴포넌트 합성과 `children`을 우선하고 boolean prop 여러 개로 변형을 조합하지 않는다.
 - 파생 가능한 값은 state로 저장하지 않는다. effect는 외부 시스템 동기화에만 사용한다.
 - 이벤트 핸들러는 `handleSubmit`, 전달 prop은 `onSubmit`처럼 구분한다.
 - 목록 key로 index를 쓰지 않는다. 데이터의 안정적인 식별자를 사용한다.
@@ -78,7 +99,7 @@ src
 ## 6. API 계층과 매핑
 
 - 공통 API client 한 곳에서 base URL, credentials, timeout, 공통 헤더와 오류 파싱을 처리한다.
-- endpoint별 파일은 요청·응답 schema, fetch 함수, query/mutation hook을 함께 배치한다.
+- endpoint 하나당 `api/`에는 fetch 함수, `schemas/`에는 요청·응답 schema, `hooks/`에는 query/mutation hook을 두되, 세 파일의 이름을 같은 endpoint 이름으로 맞춘다.
 - 외부 JSON은 신뢰하지 않고 경계에서 schema로 검증한다. API DTO와 화면 model이 다르면 전용 mapper로 변환한다.
 - 컴포넌트와 Hook 안에 반복적인 날짜·상태·nullable 매핑 로직을 넣지 않는다.
 - mapper는 순수 함수로 작성하고 네트워크 요청·store 변경·toast 같은 부수효과를 넣지 않는다.
@@ -87,7 +108,7 @@ src
 ## 7. TypeScript
 
 - `strict`, `noUncheckedIndexedAccess`, `noImplicitOverride`, `useUnknownInCatchVariables`를 유지한다.
-- `any`와 non-null assertion(`!`)은 금지한다. 외부 입력은 `unknown`으로 받고 narrowing 또는 schema validation을 거친다.
+- `any`와 non-null assertion `!`은 금지한다. 외부 입력은 `unknown`으로 받고 narrowing 또는 schema validation을 거친다.
 - 객체 형태는 `type`을 기본으로 하고 선언 병합이나 확장이 필요한 공개 계약에만 `interface`를 사용한다.
 - 타입 전용 import는 `import type`을 사용한다.
 - 반복되는 문자열 상태는 union 또는 `as const` 객체로 정의한다. TypeScript `enum`은 런타임 객체가 꼭 필요할 때만 사용한다.
@@ -154,10 +175,18 @@ PR에서는 다음을 확인한다.
 
 ## 14. 기준 자료
 
-- Next.js App Router 공식 문서: route·layout·Server/Client Component·colocation
-- React 공식 문서: 순수 컴포넌트, state 구조, effect와 합성
-- TypeScript 및 typescript-eslint 공식 strict 규칙
-- Prettier 공식 지침: 포맷과 lint 책임 분리
-- Bulletproof React: feature-first 구조, 단방향 의존, API 선언·server state 분리
+아래 표는 규칙별 근거 기록이다. 재판단 출처가 아니므로 원본을 다시 찾아가지 않는다 — 판단 기준은 항상 본문 §1-13이며, 규칙을 바꿀 때만 원본을 인용해 이 문서를 고친다.
+
+| 규칙                                                      | 문서 위치 | 근거 자료                                                         |
+| --------------------------------------------------------- | --------- | ----------------------------------------------------------------- |
+| feature-first 구조, 단방향 의존                           | §2        | Bulletproof React                                                 |
+| feature 간 직접 import 금지                               | §2        | ESLint `import/no-restricted-paths`                               |
+| 가독성·예측가능성·응집도 기본 원칙                        | §1        | Toss Frontend Fundamentals                                        |
+| Server Component 기본값, `"use client"` 최소 경계         | §5        | Next.js App Router 공식 문서                                      |
+| 컴포넌트 합성, 파생 state 금지, effect는 외부 동기화 전용 | §4        | React 공식 문서                                                   |
+| `any`·non-null assertion 금지, strict 타입, `import type` | §7        | TypeScript 공식 strict 컴파일러 옵션, typescript-eslint 공식 규칙 |
+| 포맷                                                      | 전체      | Prettier 공식 지침                                                |
+| 함수·변수의 `camelCase` 네이밍                            | §3        | Airbnb JavaScript Style Guide                                     |
+| feature별 API 계층 분리                                   | §6        | Bulletproof React의 API 계층 분리 패턴                            |
 
 참고 저장소의 규칙을 그대로 복사하지 않고 SAIRO의 Next.js 16·React 19·App Router 구조에 맞게 이 문서로 확정한다. 충돌 시 이 문서가 저장소의 기준이다.
