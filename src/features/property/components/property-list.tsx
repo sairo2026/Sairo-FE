@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { ApiError } from "@/shared/api/client";
 import { getProperties } from "../api/property.api";
 import { dealTypeLabels } from "../model/property";
 import type { PropertySummary } from "../schemas/property.schema";
@@ -10,15 +11,15 @@ export function PropertyList() {
   const [properties, setProperties] = useState<PropertySummary[]>([]);
   const [query, setQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<"unauthenticated" | "unknown" | null>(null);
 
   async function loadProperties() {
     setIsLoading(true);
-    setError("");
+    setError(null);
     try {
       setProperties(await getProperties());
-    } catch {
-      setError("매물 목록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
+    } catch (caught: unknown) {
+      setError(caught instanceof ApiError && caught.status === 401 ? "unauthenticated" : "unknown");
     } finally {
       setIsLoading(false);
     }
@@ -27,7 +28,11 @@ export function PropertyList() {
   useEffect(() => {
     getProperties()
       .then(setProperties)
-      .catch(() => setError("매물 목록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요."))
+      .catch((caught: unknown) =>
+        setError(
+          caught instanceof ApiError && caught.status === 401 ? "unauthenticated" : "unknown",
+        ),
+      )
       .finally(() => setIsLoading(false));
   }, []);
 
@@ -80,15 +85,23 @@ export function PropertyList() {
         {error ? (
           <div className="px-8 py-16 text-center">
             <p role="alert" className="mb-4 text-red-600">
-              {error}
+              {error === "unauthenticated"
+                ? "로그인이 필요합니다."
+                : "매물 목록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요."}
             </p>
-            <button
-              type="button"
-              onClick={() => void loadProperties()}
-              className="font-semibold text-[#3937b8]"
-            >
-              다시 시도
-            </button>
+            {error === "unauthenticated" ? (
+              <Link href="/login" className="font-semibold text-[#3937b8]">
+                로그인하러 가기
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={() => void loadProperties()}
+                className="font-semibold text-[#3937b8]"
+              >
+                다시 시도
+              </button>
+            )}
           </div>
         ) : null}
         {!isLoading && !error && visibleProperties.length === 0 ? (
