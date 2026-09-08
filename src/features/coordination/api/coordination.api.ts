@@ -1,5 +1,6 @@
 import { apiFetch } from "@/shared/api/client";
 import {
+  parseBuyerLinkCreateResult,
   parseCoordinationCreateResult,
   parseCoordinationProperty,
 } from "../schemas/coordination.schema";
@@ -24,5 +25,11 @@ export async function createCoordination(propertyId: number, input: Coordination
         candidateTimes: input.candidateTimes.map((date) => ({ startsAt: date.toISOString() })),
       },
     }),
+  );
+}
+
+export async function createBuyerLink(coordinationId: number) {
+  return parseBuyerLinkCreateResult(
+    await apiFetch<unknown>(`/api/coordinations/${coordinationId}/buyers`, { method: "POST" }),
   );
 }

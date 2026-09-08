@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { parseCoordinationCreateResult, parseCoordinationProperty } from "./coordination.schema";
+import {
+  parseBuyerLinkCreateResult,
+  parseCoordinationCreateResult,
+  parseCoordinationProperty,
+} from "./coordination.schema";
 
 describe("coordination API schemas", () => {
   it("parses a coordination property response", () => {
@@ -52,5 +56,25 @@ describe("coordination API schemas", () => {
 
   it("rejects a malformed create response", () => {
     expect(() => parseCoordinationCreateResult({ coordinationId: 10 })).toThrow();
+  });
+
+  it("parses a buyer link create response", () => {
+    expect(
+      parseBuyerLinkCreateResult({
+        buyerResponseId: 30,
+        customerLinkUrl: "https://app.sairo.agency/visit-responses/buyer-token",
+        linkExpiresAt: "2026-09-15T00:00:00Z",
+        coordinationStatus: "BUYER_CHECKING",
+      }),
+    ).toEqual({
+      buyerResponseId: 30,
+      customerLinkUrl: "https://app.sairo.agency/visit-responses/buyer-token",
+      linkExpiresAt: "2026-09-15T00:00:00Z",
+      coordinationStatus: "BUYER_CHECKING",
+    });
+  });
+
+  it("rejects a malformed buyer link response", () => {
+    expect(() => parseBuyerLinkCreateResult({ buyerResponseId: 30 })).toThrow();
   });
 });
