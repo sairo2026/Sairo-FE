@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   formatCandidateLabel,
+  formatRemainingLinkTime,
+  formatShortSchedule,
   generateTimeSlots,
   isPastSlot,
   isSameDay,
@@ -57,5 +59,25 @@ describe("formatCandidateLabel", () => {
 
   it("formats an afternoon time in Korean", () => {
     expect(formatCandidateLabel(new Date(2026, 7, 20, 14, 0))).toBe("8월 20일 오후 2:00");
+  });
+});
+
+describe("formatShortSchedule", () => {
+  it("formats an ISO string as MM/DD HH:mm", () => {
+    expect(formatShortSchedule(new Date(2026, 7, 22, 19, 30).toISOString())).toBe("08/22 19:30");
+  });
+});
+
+describe("formatRemainingLinkTime", () => {
+  it("reports days, hours, and minutes remaining", () => {
+    const now = new Date(2026, 7, 20, 0, 0, 0);
+    const expiresAt = new Date(2026, 7, 26, 3, 2, 0).toISOString();
+    expect(formatRemainingLinkTime(expiresAt, now)).toBe("6일 3시간 2분 뒤 링크가 만료됩니다.");
+  });
+
+  it("reports expiry once the deadline has passed", () => {
+    const now = new Date(2026, 7, 20, 0, 0, 0);
+    const expiresAt = new Date(2026, 7, 19, 0, 0, 0).toISOString();
+    expect(formatRemainingLinkTime(expiresAt, now)).toBe("링크가 만료되었습니다.");
   });
 });
