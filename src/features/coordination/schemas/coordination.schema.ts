@@ -17,6 +17,13 @@ export type CoordinationCreateResult = {
   linkExpiresAt: string;
 };
 
+export type BuyerLinkCreateResult = {
+  buyerResponseId: number;
+  customerLinkUrl: string;
+  linkExpiresAt: string;
+  coordinationStatus: string;
+};
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
@@ -66,5 +73,23 @@ export function parseCoordinationCreateResult(value: unknown): CoordinationCreat
     tenantResponseId: value.tenantResponseId,
     customerLinkUrl: value.customerLinkUrl,
     linkExpiresAt: value.linkExpiresAt,
+  };
+}
+
+export function parseBuyerLinkCreateResult(value: unknown): BuyerLinkCreateResult {
+  if (
+    !isRecord(value) ||
+    typeof value.buyerResponseId !== "number" ||
+    typeof value.customerLinkUrl !== "string" ||
+    typeof value.linkExpiresAt !== "string" ||
+    typeof value.coordinationStatus !== "string"
+  ) {
+    throw new Error("구매자용 링크 생성 응답 형식이 올바르지 않습니다.");
+  }
+  return {
+    buyerResponseId: value.buyerResponseId,
+    customerLinkUrl: value.customerLinkUrl,
+    linkExpiresAt: value.linkExpiresAt,
+    coordinationStatus: value.coordinationStatus,
   };
 }
