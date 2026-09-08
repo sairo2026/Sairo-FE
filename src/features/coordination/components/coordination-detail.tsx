@@ -62,15 +62,17 @@ function DetailBody({
     detail.candidateTimes.map((candidate) => [candidate.candidateTimeId, candidate]),
   );
 
-  const canManageBuyers =
-    detail.status !== "TENANT_CHECKING" && detail.status !== "VISIT_COMPLETED";
+  const isFinalized = detail.status === "SCHEDULE_CONFIRMED" || detail.status === "VISIT_COMPLETED";
+  const canManageBuyers = !isFinalized && detail.status !== "TENANT_CHECKING";
 
   return (
     <section className="max-w-[1010px]">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-3xl font-bold">임장 조율 상세</h1>
         <div className="flex flex-wrap gap-3">
-          {detail.tenantResponse.customerLinkUrl && detail.tenantResponse.linkExpiresAt ? (
+          {!isFinalized &&
+          detail.tenantResponse.customerLinkUrl &&
+          detail.tenantResponse.linkExpiresAt ? (
             <button
               type="button"
               onClick={() =>
@@ -150,6 +152,7 @@ function DetailBody({
           candidateTimesById={candidateTimesById}
           allowedRestartCandidates={detail.candidateTimes}
           restartDialogTitle="세입자와 임장 일정을 조율하는 링크입니다."
+          isFinalized={isFinalized}
           onChanged={onChanged}
           onOpenLink={(url, expiresAt) =>
             setOpenLinkDialog({
@@ -185,6 +188,7 @@ function DetailBody({
                     .map((id) => candidateTimesById.get(id))
                     .filter((item): item is CoordinationCandidateTimeItem => item !== undefined)}
                   restartDialogTitle="구매희망자와 임장 일정을 조율하는 링크입니다."
+                  isFinalized={isFinalized}
                   onChanged={onChanged}
                   onOpenLink={(url, expiresAt) =>
                     setOpenLinkDialog({
@@ -252,6 +256,7 @@ function ResponseBlock({
   candidateTimesById,
   allowedRestartCandidates,
   restartDialogTitle,
+  isFinalized,
   onChanged,
   onOpenLink,
 }: {
@@ -260,10 +265,12 @@ function ResponseBlock({
   candidateTimesById: Map<number, CoordinationCandidateTimeItem>;
   allowedRestartCandidates: CoordinationCandidateTimeItem[];
   restartDialogTitle: string;
+  isFinalized: boolean;
   onChanged: () => void;
   onOpenLink: (url: string, expiresAt: string) => void;
 }) {
-  const canRestart = response.result === "NONE_AVAILABLE" || response.result === "EXPIRED";
+  const canRestart =
+    !isFinalized && (response.result === "NONE_AVAILABLE" || response.result === "EXPIRED");
   const offeredCandidates = response.offeredCandidateIds
     .map((id) => candidateTimesById.get(id))
     .filter((item): item is CoordinationCandidateTimeItem => item !== undefined);
@@ -311,7 +318,7 @@ function ResponseBlock({
         <span className="text-sm font-semibold">
           {customerResponseResultLabels[response.result]}
         </span>
-        {response.customerLinkUrl && response.linkExpiresAt ? (
+        {!isFinalized && response.customerLinkUrl && response.linkExpiresAt ? (
           <button
             type="button"
             onClick={() => onOpenLink(response.customerLinkUrl ?? "", response.linkExpiresAt ?? "")}
@@ -498,13 +505,15 @@ function BottomActions({
         </p>
       ) : null}
       <div className="flex flex-wrap gap-4">
-        <button
-          type="button"
-          disabled
-          className="cursor-not-allowed rounded-lg bg-[#f0f0ff] px-8 py-4 font-semibold text-slate-400"
-        >
-          조율 취소
-        </button>
+        {status !== "SCHEDULE_CONFIRMED" ? (
+          <button
+            type="button"
+            disabled
+            className="cursor-not-allowed rounded-lg bg-[#f0f0ff] px-8 py-4 font-semibold text-slate-400"
+          >
+            조율 취소
+          </button>
+        ) : null}
         {status === "SCHEDULE_CONFIRMED" ? (
           <button
             type="button"

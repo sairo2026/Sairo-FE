@@ -167,6 +167,54 @@ describe("CoordinationDetail", () => {
     expect(completeVisit).toHaveBeenCalledWith(1);
   });
 
+  it("확정 완료 상태에서는 임장 완료 외 다른 조작 버튼을 두지 않는다", async () => {
+    vi.mocked(getCoordinationDetail).mockResolvedValue(
+      baseDetail({
+        status: "SCHEDULE_CONFIRMED",
+        scheduledAt: "2026-09-22T10:30:00Z",
+        tenantResponse: {
+          ...baseDetail().tenantResponse,
+          result: "AVAILABLE_SUBMITTED",
+          selectedCandidateIds: [100],
+        },
+        buyerResponses: [
+          {
+            responseId: 20,
+            role: "BUYER",
+            name: null,
+            phone: null,
+            result: "CONFIRMED",
+            offeredCandidateIds: [100, 101],
+            selectedCandidateIds: [100],
+            submittedAt: "2026-09-05T00:00:00Z",
+            customerLinkUrl: "https://app.sairo.agency/visit-responses/buyer-token",
+            linkExpiresAt: "2026-09-27T00:00:00Z",
+          },
+          {
+            responseId: 21,
+            role: "BUYER",
+            name: null,
+            phone: null,
+            result: "NOT_SELECTED",
+            offeredCandidateIds: [100, 101],
+            selectedCandidateIds: [],
+            submittedAt: "2026-09-05T00:00:00Z",
+            customerLinkUrl: "https://app.sairo.agency/visit-responses/buyer-token-2",
+            linkExpiresAt: "2026-09-27T00:00:00Z",
+          },
+        ],
+      }),
+    );
+    render(<CoordinationDetail coordinationId={1} />);
+
+    await screen.findByRole("button", { name: "임장 완료" });
+    expect(screen.queryByText("조율 취소")).toBeNull();
+    expect(screen.queryByText("🔗 세입자용 링크")).toBeNull();
+    expect(screen.queryByText("🔗 구매희망자용 링크")).toBeNull();
+    expect(screen.queryByText("+ 구매희망자 링크 추가 생성")).toBeNull();
+    expect(screen.queryByText("링크 다시 보기")).toBeNull();
+  });
+
   it("임장 완료 상태에서는 조율 취소 없이 목록·홈 이동 CTA만 보여준다", async () => {
     vi.mocked(getCoordinationDetail).mockResolvedValue(
       baseDetail({
@@ -177,6 +225,20 @@ describe("CoordinationDetail", () => {
           result: "AVAILABLE_SUBMITTED",
           selectedCandidateIds: [100],
         },
+        buyerResponses: [
+          {
+            responseId: 20,
+            role: "BUYER",
+            name: null,
+            phone: null,
+            result: "CONFIRMED",
+            offeredCandidateIds: [100, 101],
+            selectedCandidateIds: [100],
+            submittedAt: "2026-09-05T00:00:00Z",
+            customerLinkUrl: "https://app.sairo.agency/visit-responses/buyer-token",
+            linkExpiresAt: "2026-09-27T00:00:00Z",
+          },
+        ],
       }),
     );
     render(<CoordinationDetail coordinationId={1} />);
@@ -185,6 +247,9 @@ describe("CoordinationDetail", () => {
     expect(screen.getByText("홈으로")).not.toBeNull();
     expect(screen.queryByText("조율 취소")).toBeNull();
     expect(screen.queryByRole("button", { name: "임장 완료" })).toBeNull();
+    expect(screen.queryByText("🔗 세입자용 링크")).toBeNull();
+    expect(screen.queryByText("🔗 구매희망자용 링크")).toBeNull();
+    expect(screen.queryByText("링크 다시 보기")).toBeNull();
   });
 
   it("여러 구매희망자가 있으면 각각 번호를 붙여 보여준다", async () => {
