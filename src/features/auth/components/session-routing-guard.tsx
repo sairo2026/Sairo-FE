@@ -34,7 +34,17 @@ export function SessionRoutingGuard({ children }: { children: ReactNode }) {
   }, [router]);
 
   if (!isSessionChecked) {
-    return <p className="p-8 text-slate-500">로그인 상태를 확인하는 중입니다.</p>;
+    return (
+      <main className="flex flex-1 items-center justify-center bg-slate-50 px-4 py-16">
+        <div className="flex w-full max-w-sm flex-col items-center gap-4 rounded-3xl bg-white p-10 shadow-sm">
+          <div
+            aria-hidden
+            className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-[#3937b8]"
+          />
+          <p className="text-sm text-slate-500">로그인 상태를 확인하는 중입니다.</p>
+        </div>
+      </main>
+    );
   }
 
   return children;
