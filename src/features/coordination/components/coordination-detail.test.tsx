@@ -1,8 +1,13 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { completeVisit, confirmCoordination, getCoordinationDetail } from "../api/coordination.api";
+import {
+  cancelCoordination,
+  completeVisit,
+  confirmCoordination,
+  getCoordinationDetail,
+} from "../api/coordination.api";
 import { formatCandidateLabelFromIso } from "../model/coordination";
 import type { CoordinationDetailResult } from "../schemas/coordination.schema";
 import { CoordinationDetail } from "./coordination-detail";
@@ -11,16 +16,11 @@ const CANDIDATE_100_ISO = "2026-09-20T01:30:00Z";
 const CANDIDATE_101_ISO = "2026-09-20T02:30:00Z";
 const CANDIDATE_100_LABEL = formatCandidateLabelFromIso(CANDIDATE_100_ISO);
 
-const push = vi.fn();
-
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push }),
-}));
-
 vi.mock("../api/coordination.api", () => ({
   getCoordinationDetail: vi.fn(),
   confirmCoordination: vi.fn(),
   completeVisit: vi.fn(),
+  cancelCoordination: vi.fn(),
 }));
 
 function baseDetail(overrides: Partial<CoordinationDetailResult> = {}): CoordinationDetailResult {
@@ -108,7 +108,32 @@ describe("CoordinationDetail", () => {
     expect(screen.getAllByRole("button", { name: "조율 취소" }).length).toBe(1);
   });
 
-  it("세입자가 가능한 시간이 없으면 조율 취소 버튼이 활성화되고 API 호출 없이 목록으로 이동한다", async () => {
+  it("세입자가 가능한 시간이 없으면 조율 취소 버튼을 눌러 실제 취소 API를 호출하고 배지·임장일정에 반영한다", async () => {
+    const activeDetail = baseDetail({
+      status: "TENANT_CHECKING",
+      tenantResponse: {
+        ...baseDetail().tenantResponse,
+        result: "NONE_AVAILABLE",
+      },
+    });
+    vi.mocked(getCoordinationDetail)
+      .mockResolvedValueOnce(activeDetail)
+      .mockResolvedValueOnce({ ...activeDetail, status: "CANCELLED" });
+    vi.mocked(cancelCoordination).mockResolvedValue(undefined);
+    const user = userEvent.setup();
+    render(<CoordinationDetail coordinationId={1} />);
+
+    const cancelButton = await screen.findByRole("button", { name: "조율 취소" });
+    expect(cancelButton.hasAttribute("disabled")).toBe(false);
+    await user.click(cancelButton);
+
+    expect(cancelCoordination).toHaveBeenCalledWith(1);
+    await waitFor(() => expect(screen.queryByRole("button", { name: "조율 취소" })).toBeNull());
+    expect(screen.getAllByText("조율 취소").length).toBeGreaterThanOrEqual(2);
+    expect(completeVisit).not.toHaveBeenCalled();
+  });
+
+  it("조율 취소 API가 실패하면 오류 문구를 보여주고 버튼을 유지한다", async () => {
     vi.mocked(getCoordinationDetail).mockResolvedValue(
       baseDetail({
         status: "TENANT_CHECKING",
@@ -118,15 +143,15 @@ describe("CoordinationDetail", () => {
         },
       }),
     );
+    vi.mocked(cancelCoordination).mockRejectedValue(new Error("network"));
     const user = userEvent.setup();
     render(<CoordinationDetail coordinationId={1} />);
 
     const cancelButton = await screen.findByRole("button", { name: "조율 취소" });
-    expect(cancelButton.hasAttribute("disabled")).toBe(false);
     await user.click(cancelButton);
 
-    expect(push).toHaveBeenCalledWith("/coordinations");
-    expect(completeVisit).not.toHaveBeenCalled();
+    await screen.findByText("조율 취소를 처리하지 못했습니다. 잠시 후 다시 시도해주세요.");
+    expect(screen.getByRole("button", { name: "조율 취소" })).not.toBeNull();
   });
 
   it("구매희망자는 가능한 시간 없음이어도 재시작·조율 취소 버튼을 보여주지 않는다", async () => {

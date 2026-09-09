@@ -1,11 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ApiError } from "@/shared/api/client";
 import { EntityLoadError } from "@/shared/components/entity-load-error";
-import { completeVisit, confirmCoordination } from "../api/coordination.api";
+import { cancelCoordination, completeVisit, confirmCoordination } from "../api/coordination.api";
 import {
   customerResponseResultLabels,
   dealTypeLabels,
@@ -63,9 +62,11 @@ function DetailBody({
   );
 
   const isFinalized = detail.status === "SCHEDULE_CONFIRMED" || detail.status === "VISIT_COMPLETED";
+  const isCancelled = detail.status === "CANCELLED";
   const isTenantNoneAvailable = !isFinalized && detail.tenantResponse.result === "NONE_AVAILABLE";
   const canCreateBuyerLink =
     !isFinalized &&
+    !isCancelled &&
     !isTenantNoneAvailable &&
     detail.status !== "TENANT_CHECKING" &&
     detail.buyerResponses.length === 0;
@@ -128,7 +129,11 @@ function DetailBody({
           <div>
             <p className="mb-2 text-xs font-semibold text-slate-500">임장 일정</p>
             <p className="flex h-11 items-center rounded-lg border border-[#dfe3ec] px-4 font-semibold">
-              {detail.scheduledAt ? formatShortSchedule(detail.scheduledAt) : "미정"}
+              {isCancelled
+                ? "조율 취소"
+                : detail.scheduledAt
+                  ? formatShortSchedule(detail.scheduledAt)
+                  : "미정"}
             </p>
           </div>
           <div>
@@ -158,9 +163,11 @@ function DetailBody({
 
         <StepHeading step={2} label="세입자님의 선택" />
         <ResponseBlock
+          coordinationId={coordinationId}
           response={detail.tenantResponse}
           candidateTimesById={candidateTimesById}
           isFinalized={isFinalized}
+          isCancelled={isCancelled}
           onOpenLink={(url, expiresAt) =>
             setOpenLinkDialog({
               title: "세입자와 임장 일정을 조율하는 링크입니다.",
@@ -168,6 +175,7 @@ function DetailBody({
               expiresAt,
             })
           }
+          onCancelled={onChanged}
         />
 
         {!isTenantNoneAvailable ? (
@@ -181,9 +189,11 @@ function DetailBody({
               detail.buyerResponses.map((buyer) => (
                 <div key={buyer.responseId} className="mb-8">
                   <ResponseBlock
+                    coordinationId={coordinationId}
                     response={buyer}
                     candidateTimesById={candidateTimesById}
                     isFinalized={isFinalized}
+                    isCancelled={isCancelled}
                     onOpenLink={(url, expiresAt) =>
                       setOpenLinkDialog({
                         title: "구매희망자와 임장 일정을 조율하는 링크입니다.",
@@ -191,6 +201,7 @@ function DetailBody({
                         expiresAt,
                       })
                     }
+                    onCancelled={onChanged}
                   />
                 </div>
               ))
@@ -239,18 +250,38 @@ function StepHeading({ step, label }: { step: number; label: string }) {
 }
 
 function ResponseBlock({
+  coordinationId,
   response,
   candidateTimesById,
   isFinalized,
+  isCancelled,
   onOpenLink,
+  onCancelled,
 }: {
+  coordinationId: number;
   response: CoordinationCustomerResponseItem;
   candidateTimesById: Map<number, CoordinationCandidateTimeItem>;
   isFinalized: boolean;
+  isCancelled: boolean;
   onOpenLink: (url: string, expiresAt: string) => void;
+  onCancelled: () => void;
 }) {
-  const router = useRouter();
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState("");
   const isTenantNoneAvailable = response.role === "TENANT" && response.result === "NONE_AVAILABLE";
+
+  async function handleCancel() {
+    setIsCancelling(true);
+    setCancelError("");
+    try {
+      await cancelCoordination(coordinationId);
+      onCancelled();
+    } catch {
+      setCancelError("조율 취소를 처리하지 못했습니다. 잠시 후 다시 시도해주세요.");
+    } finally {
+      setIsCancelling(false);
+    }
+  }
 
   if (isTenantNoneAvailable) {
     return (
@@ -259,13 +290,23 @@ function ResponseBlock({
           세입자가 위 선택지 중 가능한 시간이 없다고 답변했습니다. 새로운 후보를 선택해 다시 요청해
           주세요.
         </p>
-        <button
-          type="button"
-          onClick={() => router.push("/coordinations")}
-          className="rounded-lg bg-[#f0f0ff] px-8 py-4 font-semibold text-slate-600"
-        >
-          조율 취소
-        </button>
+        {isCancelled ? null : (
+          <>
+            <button
+              type="button"
+              onClick={() => void handleCancel()}
+              disabled={isCancelling}
+              className="rounded-lg bg-[#f0f0ff] px-8 py-4 font-semibold text-slate-600 disabled:opacity-50"
+            >
+              {isCancelling ? "처리 중" : "조율 취소"}
+            </button>
+            {cancelError ? (
+              <p role="alert" className="mt-4 text-sm text-red-600">
+                {cancelError}
+              </p>
+            ) : null}
+          </>
+        )}
       </div>
     );
   }
