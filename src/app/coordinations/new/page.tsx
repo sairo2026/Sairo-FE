@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CoordinationRequestFlow } from "@/features/coordination";
-import { OfficeShell } from "@/shared/components/office-shell";
+import { AuthenticatedOfficeShell } from "@/features/auth/components/session-routing-guard";
 
 export const metadata: Metadata = { title: "임장 조율 생성 | 사이로" };
 
@@ -14,7 +14,7 @@ export default async function NewCoordinationPage({
   const id = propertyId === undefined ? NaN : Number(propertyId);
 
   return (
-    <OfficeShell active="coordinations">
+    <AuthenticatedOfficeShell active="coordinations">
       {Number.isSafeInteger(id) && id >= 1 ? (
         <CoordinationRequestFlow propertyId={id} />
       ) : (
@@ -29,6 +29,6 @@ export default async function NewCoordinationPage({
           </Link>
         </div>
       )}
-    </OfficeShell>
+    </AuthenticatedOfficeShell>
   );
 }

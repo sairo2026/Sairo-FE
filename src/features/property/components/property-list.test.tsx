@@ -2,6 +2,7 @@
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { ApiError } from "@/shared/api/client";
 import { getProperties } from "../api/property.api";
 import { PropertyList } from "./property-list";
 
@@ -37,6 +38,21 @@ describe("PropertyList", () => {
     render(<PropertyList />);
 
     await screen.findByText("등록된 매물이 없습니다.");
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
+  it("shows a login link on an unauthenticated response", async () => {
+    vi.mocked(getProperties).mockRejectedValue(
+      new ApiError(401, { code: "UNAUTHORIZED", message: "인증 필요", traceId: "trace-1" }),
+    );
+
+    render(<PropertyList />);
+
+    await screen.findByText("로그인이 필요합니다.");
+    expect(screen.getByRole("link", { name: "로그인하러 가기" }).getAttribute("href")).toBe(
+      "/login",
+    );
+    expect(screen.queryByRole("button", { name: "다시 시도" })).toBeNull();
   });
 
   it("shows a retry button on load failure and refetches on click", async () => {
