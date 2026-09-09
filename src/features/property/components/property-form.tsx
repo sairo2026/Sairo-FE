@@ -2,9 +2,20 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { ApiError } from "@/shared/api/client";
 import { checkDuplicateAddress, createProperty, updateProperty } from "../api/property.api";
 import { dealTypeLabels, optionalText } from "../model/property";
 import { propertyDealTypes, type PropertyDealType } from "../schemas/property.schema";
+
+function toFieldErrorMap(error: unknown): Record<string, string> {
+  if (!(error instanceof ApiError) || !error.fieldErrors?.length) return {};
+  return Object.fromEntries(error.fieldErrors.map((item) => [item.field, item.message]));
+}
+
+function toGeneralErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof ApiError && !error.fieldErrors?.length) return error.message;
+  return fallback;
+}
 
 type PropertyFormProps = {
   mode: "create" | "edit";
@@ -27,6 +38,7 @@ export function PropertyForm({ mode, propertyId, initialValues }: PropertyFormPr
   const [isDuplicateOpen, setIsDuplicateOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const dialogRef = useRef<HTMLDivElement>(null);
   const dialogTriggerRef = useRef<HTMLElement | null>(null);
 
@@ -69,6 +81,7 @@ export function PropertyForm({ mode, propertyId, initialValues }: PropertyFormPr
   async function save() {
     setIsSubmitting(true);
     setError("");
+    setFieldErrors({});
     try {
       if (mode === "create") {
         await createProperty({
@@ -87,8 +100,14 @@ export function PropertyForm({ mode, propertyId, initialValues }: PropertyFormPr
         router.push(`/properties/${propertyId}`);
       }
       router.refresh();
-    } catch {
-      setError("매물 정보를 저장하지 못했습니다. 입력 내용을 확인하고 다시 시도해주세요.");
+    } catch (caught: unknown) {
+      setFieldErrors(toFieldErrorMap(caught));
+      setError(
+        toGeneralErrorMessage(
+          caught,
+          "매물 정보를 저장하지 못했습니다. 입력 내용을 확인하고 다시 시도해주세요.",
+        ),
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -106,6 +125,7 @@ export function PropertyForm({ mode, propertyId, initialValues }: PropertyFormPr
     }
     setIsSubmitting(true);
     setError("");
+    setFieldErrors({});
     try {
       const duplicates = await checkDuplicateAddress(address.trim());
       if (duplicates.length > 0) {
@@ -115,8 +135,13 @@ export function PropertyForm({ mode, propertyId, initialValues }: PropertyFormPr
         return;
       }
       await save();
-    } catch {
-      setError("중복 주소를 확인하지 못했습니다. 잠시 후 다시 시도해주세요.");
+    } catch (caught: unknown) {
+      setError(
+        toGeneralErrorMessage(
+          caught,
+          "중복 주소를 확인하지 못했습니다. 잠시 후 다시 시도해주세요.",
+        ),
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -135,6 +160,7 @@ export function PropertyForm({ mode, propertyId, initialValues }: PropertyFormPr
             onChange={setAddress}
             placeholder="매물의 주소를 입력해 주세요."
             required
+            error={fieldErrors.address}
           />
           <FormField
             label="매물 상세 주소"
@@ -142,6 +168,7 @@ export function PropertyForm({ mode, propertyId, initialValues }: PropertyFormPr
             value={addressDetail}
             onChange={setAddressDetail}
             placeholder="호수 등 매물의 상세 주소를 입력해 주세요."
+            error={fieldErrors.addressDetail}
           />
           <FormField
             label="매물명"
@@ -149,6 +176,7 @@ export function PropertyForm({ mode, propertyId, initialValues }: PropertyFormPr
             value={propertyName}
             onChange={setPropertyName}
             placeholder="매물을 간단하게 저장할 이름을 입력해 주세요."
+            error={fieldErrors.propertyName}
           />
           <fieldset>
             <legend className="mb-5 text-lg font-bold">
@@ -170,6 +198,11 @@ export function PropertyForm({ mode, propertyId, initialValues }: PropertyFormPr
                 </button>
               ))}
             </div>
+            {fieldErrors.dealType ? (
+              <p role="alert" className="mt-3 text-sm text-red-600">
+                {fieldErrors.dealType}
+              </p>
+            ) : null}
           </fieldset>
         </div>
         {error ? (
@@ -240,8 +273,17 @@ type FormFieldProps = {
   onChange: (value: string) => void;
   placeholder: string;
   required?: boolean;
+  error?: string;
 };
-function FormField({ label, optional, value, onChange, placeholder, required }: FormFieldProps) {
+function FormField({
+  label,
+  optional,
+  value,
+  onChange,
+  placeholder,
+  required,
+  error,
+}: FormFieldProps) {
   return (
     <label className="block">
       <span className="mb-5 block text-lg font-bold">
@@ -252,8 +294,14 @@ function FormField({ label, optional, value, onChange, placeholder, required }: 
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         required={required}
-        className="h-14 w-full rounded-lg border border-[#dfe3ec] bg-[#f8f9fd] px-5"
+        aria-invalid={error ? true : undefined}
+        className={`h-14 w-full rounded-lg border bg-[#f8f9fd] px-5 ${error ? "border-red-500" : "border-[#dfe3ec]"}`}
       />
+      {error ? (
+        <p role="alert" className="mt-3 text-sm text-red-600">
+          {error}
+        </p>
+      ) : null}
     </label>
   );
 }

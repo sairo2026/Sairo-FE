@@ -2,6 +2,7 @@
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { ApiError } from "@/shared/api/client";
 import { checkDuplicateAddress, createProperty } from "../api/property.api";
 import { PropertyForm } from "./property-form";
 
@@ -109,5 +110,42 @@ describe("PropertyForm duplicate address modal", () => {
 
     await waitFor(() => expect(createProperty).toHaveBeenCalledTimes(1));
     expect(screen.queryByRole("dialog")).toBeNull();
+  });
+});
+
+describe("PropertyForm save error handling", () => {
+  it("등록 실패 응답의 fieldErrors를 각 입력 필드 아래에 표시한다", async () => {
+    vi.mocked(checkDuplicateAddress).mockResolvedValue([]);
+    vi.mocked(createProperty).mockRejectedValue(
+      new ApiError(400, {
+        code: "INVALID_REQUEST",
+        message: "요청 형식이 올바르지 않습니다.",
+        traceId: "trace-id",
+        fieldErrors: [{ field: "address", message: "주소 형식이 올바르지 않습니다." }],
+      }),
+    );
+
+    render(<PropertyForm mode="create" />);
+    await fillAddressAndSubmit("LLLO");
+
+    expect(await screen.findByText("주소 형식이 올바르지 않습니다.")).not.toBeNull();
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it("fieldErrors가 없는 실패 응답은 백엔드 메시지를 그대로 보여준다", async () => {
+    vi.mocked(checkDuplicateAddress).mockResolvedValue([]);
+    vi.mocked(createProperty).mockRejectedValue(
+      new ApiError(500, {
+        code: "INTERNAL_ERROR",
+        message: "일시적인 오류가 발생했습니다.",
+        traceId: "trace-id",
+      }),
+    );
+
+    render(<PropertyForm mode="create" />);
+    await fillAddressAndSubmit("서울특별시 강남구 테헤란로 1");
+
+    expect(await screen.findByText("일시적인 오류가 발생했습니다.")).not.toBeNull();
+    expect(push).not.toHaveBeenCalled();
   });
 });
