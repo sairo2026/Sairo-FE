@@ -67,6 +67,12 @@ function DetailBody({
 
   return (
     <section className="max-w-[1010px]">
+      <Link
+        href="/coordinations"
+        className="mb-6 inline-flex items-center gap-1 text-sm font-semibold text-slate-500 hover:text-[#3937b8]"
+      >
+        ← 임장 조율 목록으로
+      </Link>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-3xl font-bold">임장 조율 상세</h1>
         <div className="flex flex-wrap gap-3">

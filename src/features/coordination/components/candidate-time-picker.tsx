@@ -18,6 +18,11 @@ type CandidateTimePickerProps = {
   onBack: () => void;
   onSubmit: () => void;
   isSubmitting: boolean;
+  /** 지정하면 이 목록에 포함된 일시만 선택할 수 있다(재시작 등 후보 범위가 고정된 경우). 생략하면 미래의 모든 날짜·시간을 자유롭게 선택한다. */
+  allowedSlots?: Date[];
+  title?: string;
+  backLabel?: string;
+  submitLabel?: string;
 };
 
 function startOfMonth(date: Date): Date {
@@ -40,14 +45,32 @@ export function CandidateTimePicker({
   onBack,
   onSubmit,
   isSubmitting,
+  allowedSlots,
+  title = "임장 후보 시간 등록",
+  backLabel = "뒤로",
+  submitLabel = "완료",
 }: CandidateTimePickerProps) {
   const now = useMemo(() => new Date(), []);
   const today = useMemo(() => new Date(now.getFullYear(), now.getMonth(), now.getDate()), [now]);
-  const [activeMonth, setActiveMonth] = useState(() => startOfMonth(today));
-  const [selectedDate, setSelectedDate] = useState(today);
+  const firstAllowedSlot = allowedSlots?.[0];
+  const initialDate = firstAllowedSlot
+    ? new Date(
+        firstAllowedSlot.getFullYear(),
+        firstAllowedSlot.getMonth(),
+        firstAllowedSlot.getDate(),
+      )
+    : today;
+  const [activeMonth, setActiveMonth] = useState(() => startOfMonth(initialDate));
+  const [selectedDate, setSelectedDate] = useState(initialDate);
 
   const monthCells = useMemo(() => buildMonthGrid(activeMonth), [activeMonth]);
-  const slots = useMemo(() => generateTimeSlots(selectedDate), [selectedDate]);
+  const slots = useMemo(
+    () =>
+      allowedSlots
+        ? allowedSlots.filter((slot) => isSameDay(slot, selectedDate))
+        : generateTimeSlots(selectedDate),
+    [allowedSlots, selectedDate],
+  );
   const morningSlots = slots.filter((slot) => slot.getHours() < 12);
   const afternoonSlots = slots.filter((slot) => slot.getHours() >= 12);
   const isMaxed = value.length >= MAX_CANDIDATE_TIMES;
@@ -68,7 +91,7 @@ export function CandidateTimePicker({
 
   function renderSlotButton(slot: Date) {
     const selected = value.some((item) => isSameSlot(item, slot));
-    const disabled = !selected && (isPastSlot(slot, now) || isMaxed);
+    const disabled = !selected && (allowedSlots ? isMaxed : isPastSlot(slot, now) || isMaxed);
     return (
       <button
         key={slot.getTime()}
@@ -89,7 +112,7 @@ export function CandidateTimePicker({
 
   return (
     <div>
-      <h1 className="mb-10 text-3xl font-bold">임장 후보 시간 등록</h1>
+      <h1 className="mb-10 text-3xl font-bold">{title}</h1>
       <div className="grid gap-10 lg:grid-cols-[1fr_320px]">
         <div>
           <h2 className="mb-5 text-lg font-bold">가능한 날짜와 시간 선택</h2>
@@ -125,7 +148,9 @@ export function CandidateTimePicker({
             <div className="mt-2 grid grid-cols-7 gap-2">
               {monthCells.map((cell, index) => {
                 if (!cell) return <span key={`empty-${index}`} />;
-                const disabled = cell.getTime() < today.getTime();
+                const disabled = allowedSlots
+                  ? !allowedSlots.some((slot) => isSameDay(slot, cell))
+                  : cell.getTime() < today.getTime();
                 const selected = isSameDay(cell, selectedDate);
                 return (
                   <button
@@ -165,7 +190,7 @@ export function CandidateTimePicker({
               onClick={onBack}
               className="rounded-lg bg-[#f0f0ff] px-10 py-4 font-semibold text-slate-600"
             >
-              뒤로
+              {backLabel}
             </button>
             <button
               type="button"
@@ -173,7 +198,7 @@ export function CandidateTimePicker({
               disabled={value.length === 0 || isSubmitting}
               className="rounded-lg bg-[#3937b8] px-12 py-4 font-semibold text-white disabled:opacity-50"
             >
-              {isSubmitting ? "처리 중" : "완료"}
+              {isSubmitting ? "처리 중" : submitLabel}
             </button>
           </div>
         </div>

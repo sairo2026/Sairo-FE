@@ -16,6 +16,11 @@ const CANDIDATE_100_ISO = "2026-09-20T01:30:00Z";
 const CANDIDATE_101_ISO = "2026-09-20T02:30:00Z";
 const CANDIDATE_100_LABEL = formatCandidateLabelFromIso(CANDIDATE_100_ISO);
 
+function toSlotButtonLabel(iso: string): string {
+  const date = new Date(iso);
+  return `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
+}
+
 vi.mock("../api/coordination.api", () => ({
   getCoordinationDetail: vi.fn(),
   confirmCoordination: vi.fn(),
@@ -79,6 +84,14 @@ describe("CoordinationDetail", () => {
     expect(screen.queryByText("일정 최종 확정")).toBeNull();
   });
 
+  it("진행 중 상태에서도 임장 조율 목록으로 돌아가는 링크를 보여준다", async () => {
+    vi.mocked(getCoordinationDetail).mockResolvedValue(baseDetail());
+    render(<CoordinationDetail coordinationId={1} />);
+
+    const backLink = await screen.findByRole("link", { name: "← 임장 조율 목록으로" });
+    expect(backLink.getAttribute("href")).toBe("/coordinations");
+  });
+
   it("세입자 응답이 가능한 시간 없음이면 재시작 패널을 보여주고 새 링크를 발급한다", async () => {
     vi.mocked(getCoordinationDetail).mockResolvedValue(
       baseDetail({
@@ -99,11 +112,53 @@ describe("CoordinationDetail", () => {
     await screen.findByText(
       "세입자가 위 선택지 중 가능한 시간이 없다고 답변했습니다. 새로운 후보를 선택해 다시 요청해 주세요.",
     );
-    await user.click(screen.getByRole("button", { name: CANDIDATE_100_LABEL }));
+    await user.click(screen.getByRole("button", { name: "새 후보 시간 선택" }));
+    await user.click(
+      await screen.findByRole("button", { name: toSlotButtonLabel(CANDIDATE_100_ISO) }),
+    );
     await user.click(screen.getByRole("button", { name: "새 링크 발급" }));
 
     expect(restartResponse).toHaveBeenCalledWith(1, 10, [100]);
     await screen.findByText("https://app.sairo.agency/visit-responses/new-tenant-token");
+  });
+
+  it("구매희망자 재시작은 세입자가 선택했던 후보로만 제한한다", async () => {
+    vi.mocked(getCoordinationDetail).mockResolvedValue(
+      baseDetail({
+        status: "BUYER_CHECKING",
+        tenantResponse: {
+          ...baseDetail().tenantResponse,
+          result: "AVAILABLE_SUBMITTED",
+          selectedCandidateIds: [100],
+        },
+        buyerResponses: [
+          {
+            responseId: 20,
+            role: "BUYER",
+            name: null,
+            phone: null,
+            result: "NONE_AVAILABLE",
+            offeredCandidateIds: [100],
+            selectedCandidateIds: [],
+            submittedAt: "2026-09-05T00:00:00Z",
+            customerLinkUrl: null,
+            linkExpiresAt: null,
+          },
+        ],
+      }),
+    );
+    const user = userEvent.setup();
+    render(<CoordinationDetail coordinationId={1} />);
+
+    await screen.findByText(
+      "구매희망자가 위 선택지 중 가능한 시간이 없다고 답변했습니다. 새로운 후보를 선택해 다시 요청해 주세요.",
+    );
+    await user.click(screen.getByRole("button", { name: "새 후보 시간 선택" }));
+
+    expect(
+      await screen.findByRole("button", { name: toSlotButtonLabel(CANDIDATE_100_ISO) }),
+    ).not.toBeNull();
+    expect(screen.queryByRole("button", { name: toSlotButtonLabel(CANDIDATE_101_ISO) })).toBeNull();
   });
 
   it("최종 확정 필요 상태에서 구매희망자와 후보를 선택해 확정할 수 있다", async () => {
@@ -288,5 +343,23 @@ describe("CoordinationDetail", () => {
 
     await screen.findByText("구매희망자 1님");
     expect(screen.getByText("구매희망자 2님")).not.toBeNull();
+  });
+
+  it("화면이 열려 있는 동안 주기적으로 상세 조회를 다시 호출한다", async () => {
+    vi.useFakeTimers();
+    try {
+      vi.mocked(getCoordinationDetail).mockResolvedValue(baseDetail());
+      render(<CoordinationDetail coordinationId={1} />);
+
+      await vi.waitFor(() => expect(getCoordinationDetail).toHaveBeenCalledTimes(1));
+
+      await vi.advanceTimersByTimeAsync(8_000);
+      expect(getCoordinationDetail).toHaveBeenCalledTimes(2);
+
+      await vi.advanceTimersByTimeAsync(8_000);
+      expect(getCoordinationDetail).toHaveBeenCalledTimes(3);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
