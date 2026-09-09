@@ -4,7 +4,11 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ApiError } from "@/shared/api/client";
 import { getCoordinationList } from "../api/coordination.api";
-import { coordinationStatusLabels, formatShortSchedule } from "../model/coordination";
+import {
+  coordinationStatusBadgeClassNames,
+  coordinationStatusLabels,
+  formatShortSchedule,
+} from "../model/coordination";
 import type {
   CoordinationListItem,
   CoordinationStatus,
@@ -105,14 +109,18 @@ export function CoordinationList() {
       </div>
       {statusCounts ? (
         <div className="mb-9 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-          {STATUS_TILE_ORDER.map((key) => (
-            <div key={key} className="rounded-xl border border-[#dfe3ec] px-4 py-5 text-center">
-              <p className="mb-2 text-sm font-semibold">
-                {coordinationStatusLabels[STATUS_TILE_LABELS[key]]}
-              </p>
-              <p className="text-xl font-bold">{statusCounts[key]}건</p>
-            </div>
-          ))}
+          {STATUS_TILE_ORDER.map((key) => {
+            const status = STATUS_TILE_LABELS[key];
+            return (
+              <div
+                key={key}
+                className={`rounded-xl px-4 py-5 text-center ${coordinationStatusBadgeClassNames[status]}`}
+              >
+                <p className="mb-2 text-sm font-semibold">{coordinationStatusLabels[status]}</p>
+                <p className="text-xl font-bold">{statusCounts[key]}건</p>
+              </div>
+            );
+          })}
         </div>
       ) : null}
       <div className="overflow-hidden rounded-xl border border-[#dfe3ec] bg-[#f8f9fd]">

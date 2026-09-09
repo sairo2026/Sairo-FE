@@ -2,15 +2,20 @@
 
 import { useState } from "react";
 import { formatCandidateLabel, groupCandidatesByDate } from "../model/visit-response";
-import type { VisitResponseCandidateTime } from "../schemas/visit-response.schema";
+import type {
+  VisitResponseCandidateTime,
+  VisitResponseRole,
+} from "../schemas/visit-response.schema";
 
 type CandidateSelectionViewProps = {
+  role: VisitResponseRole;
   candidateTimes: VisitResponseCandidateTime[];
   onSubmitAvailable: (candidateTimeIds: number[]) => Promise<void>;
   onSubmitNoAvailability: () => Promise<void>;
 };
 
 export function CandidateSelectionView({
+  role,
   candidateTimes,
   onSubmitAvailable,
   onSubmitNoAvailability,
@@ -100,14 +105,16 @@ export function CandidateSelectionView({
         >
           제출
         </button>
-        <button
-          type="button"
-          onClick={() => void handleNoAvailability()}
-          disabled={isSubmitting}
-          className="w-full rounded-lg bg-[#f0f0ff] py-4 font-semibold text-[#3937b8] disabled:opacity-50"
-        >
-          가능한 시간이 없음
-        </button>
+        {role === "TENANT" ? (
+          <button
+            type="button"
+            onClick={() => void handleNoAvailability()}
+            disabled={isSubmitting}
+            className="w-full rounded-lg bg-[#f0f0ff] py-4 font-semibold text-[#3937b8] disabled:opacity-50"
+          >
+            가능한 시간이 없음
+          </button>
+        ) : null}
       </div>
     </div>
   );

@@ -91,6 +91,16 @@ describe("CoordinationList", () => {
     expect(screen.getAllByText("확정 완료").length).toBeGreaterThan(0);
   });
 
+  it("상태 요약 박스는 홈 화면과 동일한 상태별 색상을 적용한다", async () => {
+    render(<CoordinationList />);
+    await screen.findByText("김세입자 / 010-1234-5678");
+
+    const [tenantCheckingTileLabel] = screen.getAllByText("세입자 확인 중");
+    expect(tenantCheckingTileLabel?.closest("div")?.className).toContain("bg-[#ffdde3]");
+    const [scheduleConfirmedTileLabel] = screen.getAllByText("확정 완료");
+    expect(scheduleConfirmedTileLabel?.closest("div")?.className).toContain("bg-[#dbe4ff]");
+  });
+
   it("검색어로 고객 이름이나 주소를 필터링한다", async () => {
     const user = userEvent.setup();
     render(<CoordinationList />);
