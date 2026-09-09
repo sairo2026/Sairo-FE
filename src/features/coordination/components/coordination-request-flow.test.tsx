@@ -137,7 +137,7 @@ describe("CoordinationRequestFlow", () => {
 
     await user.click(screen.getByRole("button", { name: "완료" }));
 
-    await waitFor(() => expect(push).toHaveBeenCalledWith("/properties/1"));
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/coordinations/10"));
     expect(confirmSpy).not.toHaveBeenCalled();
   });
 });

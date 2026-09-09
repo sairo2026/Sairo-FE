@@ -157,7 +157,7 @@ export function CoordinationRequestFlow({ propertyId }: { propertyId: number }) 
           customerLinkUrl={linkResult.customerLinkUrl}
           candidateTimes={candidateTimes}
           onBackToCandidateTimes={() => setStep("candidate-times")}
-          onFinish={() => router.push(`/properties/${propertyId}`)}
+          onFinish={() => router.push(`/coordinations/${linkResult.coordinationId}`)}
         />
       ) : null}
     </div>

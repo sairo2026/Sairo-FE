@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { ApiError } from "@/shared/api/client";
+import { useFocusTrapDialog } from "@/shared/hooks/use-focus-trap-dialog";
 import { restartResponse } from "../api/coordination.api";
-import { formatCandidateLabelFromIso } from "../model/coordination";
+import { isSameSlot } from "../model/coordination";
 import type { CoordinationCandidateTimeItem } from "../schemas/coordination.schema";
+import { CandidateTimePicker } from "./candidate-time-picker";
 import { CustomerLinkDialog } from "./customer-link-dialog";
 
 type ResponseRestartPanelProps = {
@@ -22,25 +24,38 @@ export function ResponseRestartPanel({
   allowedCandidates,
   onRestarted,
 }: ResponseRestartPanelProps) {
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const [selectedTimes, setSelectedTimes] = useState<Date[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [issuedLink, setIssuedLink] = useState<{ url: string; expiresAt: string } | null>(null);
 
-  function toggleCandidate(candidateTimeId: number) {
-    setSelectedIds((current) =>
-      current.includes(candidateTimeId)
-        ? current.filter((id) => id !== candidateTimeId)
-        : [...current, candidateTimeId],
-    );
+  const allowedSlots = allowedCandidates.map((candidate) => new Date(candidate.startsAt));
+
+  function openPicker() {
+    setSelectedTimes([]);
+    setError("");
+    setIsPickerOpen(true);
   }
 
+  const dialogRef = useFocusTrapDialog(isPickerOpen, () => setIsPickerOpen(false));
+
   async function handleSubmit() {
-    if (selectedIds.length === 0) return;
+    if (selectedTimes.length === 0) return;
+    const candidateTimeIds = selectedTimes
+      .map(
+        (time) =>
+          allowedCandidates.find((candidate) => isSameSlot(new Date(candidate.startsAt), time))
+            ?.candidateTimeId,
+      )
+      .filter((id): id is number => id !== undefined);
+    if (candidateTimeIds.length === 0) return;
+
     setIsSubmitting(true);
     setError("");
     try {
-      const result = await restartResponse(coordinationId, responseId, selectedIds);
+      const result = await restartResponse(coordinationId, responseId, candidateTimeIds);
+      setIsPickerOpen(false);
       setIssuedLink({ url: result.customerLinkUrl, expiresAt: result.linkExpiresAt });
     } catch (caught) {
       setError(
@@ -54,40 +69,45 @@ export function ResponseRestartPanel({
   }
 
   return (
-    <div className="mt-4 rounded-xl border border-[#dfe3ec] bg-[#f8f9fd] p-5">
-      <p className="mb-4 text-sm font-semibold">새로 보낼 후보 시간을 선택해주세요.</p>
-      <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-        {allowedCandidates.map((candidate) => {
-          const selected = selectedIds.includes(candidate.candidateTimeId);
-          return (
-            <button
-              key={candidate.candidateTimeId}
-              type="button"
-              onClick={() => toggleCandidate(candidate.candidateTimeId)}
-              className={`rounded-lg border px-4 py-3 text-sm font-semibold ${
-                selected
-                  ? "border-[#3937b8] bg-[#3937b8] text-white"
-                  : "border-[#dfe3ec] bg-white text-[#182033]"
-              }`}
-            >
-              {formatCandidateLabelFromIso(candidate.startsAt)}
-            </button>
-          );
-        })}
-      </div>
-      {error ? (
-        <p role="alert" className="mb-4 text-sm text-red-600">
-          {error}
-        </p>
-      ) : null}
+    <div className="mt-4">
       <button
         type="button"
-        onClick={() => void handleSubmit()}
-        disabled={selectedIds.length === 0 || isSubmitting}
-        className="rounded-lg bg-[#3937b8] px-6 py-3 text-sm font-semibold text-white disabled:opacity-50"
+        onClick={openPicker}
+        className="rounded-lg border border-[#3937b8] px-5 py-3 text-sm font-semibold text-[#3937b8]"
       >
-        {isSubmitting ? "처리 중" : "새 링크 발급"}
+        재시작
       </button>
+
+      {isPickerOpen ? (
+        <div
+          ref={dialogRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label="새로 보낼 후보 시간 선택"
+          tabIndex={-1}
+          className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/55 px-4 py-10 outline-none"
+        >
+          <div className="mx-auto w-full max-w-[1010px] rounded-3xl bg-white p-10 shadow-xl">
+            <CandidateTimePicker
+              value={selectedTimes}
+              onChange={setSelectedTimes}
+              onBack={() => setIsPickerOpen(false)}
+              onSubmit={() => void handleSubmit()}
+              isSubmitting={isSubmitting}
+              allowedSlots={allowedSlots}
+              title="새로 보낼 후보 시간 선택"
+              backLabel="취소"
+              submitLabel="새 링크 발급"
+            />
+            {error ? (
+              <p role="alert" className="mt-4 text-sm text-red-600">
+                {error}
+              </p>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+
       {issuedLink ? (
         <CustomerLinkDialog
           title={dialogTitle}

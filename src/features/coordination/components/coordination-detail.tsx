@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ApiError } from "@/shared/api/client";
 import { EntityLoadError } from "@/shared/components/entity-load-error";
@@ -64,9 +65,16 @@ function DetailBody({
 
   const isFinalized = detail.status === "SCHEDULE_CONFIRMED" || detail.status === "VISIT_COMPLETED";
   const canManageBuyers = !isFinalized && detail.status !== "TENANT_CHECKING";
+  const isTenantNoneAvailable = !isFinalized && detail.tenantResponse.result === "NONE_AVAILABLE";
 
   return (
     <section className="max-w-[1010px]">
+      <Link
+        href="/coordinations"
+        className="mb-6 inline-flex items-center gap-1 text-sm font-semibold text-slate-500 hover:text-[#3937b8]"
+      >
+        ← 임장 조율 목록으로
+      </Link>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-3xl font-bold">임장 조율 상세</h1>
         <div className="flex flex-wrap gap-3">
@@ -184,9 +192,6 @@ function DetailBody({
                   coordinationId={coordinationId}
                   response={buyer}
                   candidateTimesById={candidateTimesById}
-                  allowedRestartCandidates={detail.tenantResponse.selectedCandidateIds
-                    .map((id) => candidateTimesById.get(id))
-                    .filter((item): item is CoordinationCandidateTimeItem => item !== undefined)}
                   restartDialogTitle="구매희망자와 임장 일정을 조율하는 링크입니다."
                   isFinalized={isFinalized}
                   onChanged={onChanged}
@@ -224,6 +229,7 @@ function DetailBody({
       <BottomActions
         coordinationId={coordinationId}
         status={detail.status}
+        isTenantNoneAvailable={isTenantNoneAvailable}
         onCompleted={onChanged}
       />
 
@@ -263,14 +269,16 @@ function ResponseBlock({
   coordinationId: number;
   response: CoordinationCustomerResponseItem;
   candidateTimesById: Map<number, CoordinationCandidateTimeItem>;
-  allowedRestartCandidates: CoordinationCandidateTimeItem[];
+  allowedRestartCandidates?: CoordinationCandidateTimeItem[];
   restartDialogTitle: string;
   isFinalized: boolean;
   onChanged: () => void;
   onOpenLink: (url: string, expiresAt: string) => void;
 }) {
   const canRestart =
-    !isFinalized && (response.result === "NONE_AVAILABLE" || response.result === "EXPIRED");
+    !isFinalized &&
+    response.role === "TENANT" &&
+    (response.result === "NONE_AVAILABLE" || response.result === "EXPIRED");
   const offeredCandidates = response.offeredCandidateIds
     .map((id) => candidateTimesById.get(id))
     .filter((item): item is CoordinationCandidateTimeItem => item !== undefined);
@@ -333,7 +341,7 @@ function ResponseBlock({
           coordinationId={coordinationId}
           responseId={response.responseId}
           dialogTitle={restartDialogTitle}
-          allowedCandidates={allowedRestartCandidates}
+          allowedCandidates={allowedRestartCandidates ?? []}
           onRestarted={onChanged}
         />
       ) : null}
@@ -459,12 +467,15 @@ function FinalConfirmationPanel({
 function BottomActions({
   coordinationId,
   status,
+  isTenantNoneAvailable,
   onCompleted,
 }: {
   coordinationId: number;
   status: CoordinationDetailResult["status"];
+  isTenantNoneAvailable: boolean;
   onCompleted: () => void;
 }) {
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -506,13 +517,23 @@ function BottomActions({
       ) : null}
       <div className="flex flex-wrap gap-4">
         {status !== "SCHEDULE_CONFIRMED" ? (
-          <button
-            type="button"
-            disabled
-            className="cursor-not-allowed rounded-lg bg-[#f0f0ff] px-8 py-4 font-semibold text-slate-400"
-          >
-            조율 취소
-          </button>
+          isTenantNoneAvailable ? (
+            <button
+              type="button"
+              onClick={() => router.push("/coordinations")}
+              className="rounded-lg bg-[#f0f0ff] px-8 py-4 font-semibold text-slate-600"
+            >
+              조율 취소
+            </button>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="cursor-not-allowed rounded-lg bg-[#f0f0ff] px-8 py-4 font-semibold text-slate-400"
+            >
+              조율 취소
+            </button>
+          )
         ) : null}
         {status === "SCHEDULE_CONFIRMED" ? (
           <button

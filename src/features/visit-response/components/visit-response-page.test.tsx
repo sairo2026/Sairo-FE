@@ -85,6 +85,15 @@ describe("VisitResponsePage", () => {
     await screen.findByText("가능한 시간이 없다고 응답하셨습니다.");
   });
 
+  it("구매희망자 응답에는 가능한 시간이 없음 버튼을 보여주지 않는다", async () => {
+    vi.mocked(getVisitResponse).mockResolvedValue(waitingResponse({ role: "BUYER" as const }));
+
+    render(<VisitResponsePage token="token123" />);
+
+    await screen.findByText("8월 20일 오전 10:30");
+    expect(screen.queryByRole("button", { name: "가능한 시간이 없음" })).toBeNull();
+  });
+
   it("확정된 응답은 최종 방문 일정을 보여준다", async () => {
     const scheduledAt = new Date(2026, 7, 20, 10, 30).toISOString();
     vi.mocked(getVisitResponse).mockResolvedValue(
