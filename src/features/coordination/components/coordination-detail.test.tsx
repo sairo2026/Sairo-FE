@@ -2,12 +2,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  completeVisit,
-  confirmCoordination,
-  getCoordinationDetail,
-  restartResponse,
-} from "../api/coordination.api";
+import { completeVisit, confirmCoordination, getCoordinationDetail } from "../api/coordination.api";
 import { formatCandidateLabelFromIso } from "../model/coordination";
 import type { CoordinationDetailResult } from "../schemas/coordination.schema";
 import { CoordinationDetail } from "./coordination-detail";
@@ -15,11 +10,6 @@ import { CoordinationDetail } from "./coordination-detail";
 const CANDIDATE_100_ISO = "2026-09-20T01:30:00Z";
 const CANDIDATE_101_ISO = "2026-09-20T02:30:00Z";
 const CANDIDATE_100_LABEL = formatCandidateLabelFromIso(CANDIDATE_100_ISO);
-
-function toSlotButtonLabel(iso: string): string {
-  const date = new Date(iso);
-  return `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
-}
 
 const push = vi.fn();
 
@@ -31,7 +21,6 @@ vi.mock("../api/coordination.api", () => ({
   getCoordinationDetail: vi.fn(),
   confirmCoordination: vi.fn(),
   completeVisit: vi.fn(),
-  restartResponse: vi.fn(),
 }));
 
 function baseDetail(overrides: Partial<CoordinationDetailResult> = {}): CoordinationDetailResult {
@@ -98,7 +87,7 @@ describe("CoordinationDetail", () => {
     expect(backLink.getAttribute("href")).toBe("/coordinations");
   });
 
-  it("세입자 응답이 가능한 시간 없음이면 재시작 패널을 보여주고 새 링크를 발급한다", async () => {
+  it("세입자가 가능한 시간이 없으면 경고 문구와 조율 취소 버튼만 보여준다", async () => {
     vi.mocked(getCoordinationDetail).mockResolvedValue(
       baseDetail({
         status: "TENANT_CHECKING",
@@ -108,25 +97,15 @@ describe("CoordinationDetail", () => {
         },
       }),
     );
-    vi.mocked(restartResponse).mockResolvedValue({
-      customerLinkUrl: "https://app.sairo.agency/visit-responses/new-tenant-token",
-      linkExpiresAt: "2026-10-01T00:00:00Z",
-    });
-    const user = userEvent.setup();
     render(<CoordinationDetail coordinationId={1} />);
 
     await screen.findByText(
       "세입자가 위 선택지 중 가능한 시간이 없다고 답변했습니다. 새로운 후보를 선택해 다시 요청해 주세요.",
     );
-    expect(screen.queryByRole("button", { name: toSlotButtonLabel(CANDIDATE_100_ISO) })).toBeNull();
-    await user.click(screen.getByRole("button", { name: "재시작" }));
-    await user.click(
-      await screen.findByRole("button", { name: toSlotButtonLabel(CANDIDATE_100_ISO) }),
-    );
-    await user.click(screen.getByRole("button", { name: "새 링크 발급" }));
-
-    expect(restartResponse).toHaveBeenCalledWith(1, 10, [100]);
-    await screen.findByText("https://app.sairo.agency/visit-responses/new-tenant-token");
+    expect(screen.queryByText("링크 다시 보기")).toBeNull();
+    expect(screen.queryByRole("button", { name: "재시작" })).toBeNull();
+    expect(screen.queryByText("구매희망자님의 선택")).toBeNull();
+    expect(screen.getAllByRole("button", { name: "조율 취소" }).length).toBe(1);
   });
 
   it("세입자가 가능한 시간이 없으면 조율 취소 버튼이 활성화되고 API 호출 없이 목록으로 이동한다", async () => {
@@ -150,7 +129,7 @@ describe("CoordinationDetail", () => {
     expect(completeVisit).not.toHaveBeenCalled();
   });
 
-  it("구매희망자는 가능한 시간 없음이어도 재시작 버튼을 보여주지 않는다", async () => {
+  it("구매희망자는 가능한 시간 없음이어도 재시작·조율 취소 버튼을 보여주지 않는다", async () => {
     vi.mocked(getCoordinationDetail).mockResolvedValue(
       baseDetail({
         status: "BUYER_CHECKING",
@@ -177,10 +156,10 @@ describe("CoordinationDetail", () => {
     );
     render(<CoordinationDetail coordinationId={1} />);
 
-    await screen.findByText(
-      "구매희망자가 위 선택지 중 가능한 시간이 없다고 답변했습니다. 새로운 후보를 선택해 다시 요청해 주세요.",
-    );
+    await screen.findByText("구매희망자가 위 선택지 중 가능한 시간이 없다고 답변했습니다.");
     expect(screen.queryByRole("button", { name: "재시작" })).toBeNull();
+    const cancelButton = screen.getByRole("button", { name: "조율 취소" });
+    expect(cancelButton.hasAttribute("disabled")).toBe(true);
   });
 
   it("최종 확정 필요 상태에서 구매희망자와 후보를 선택해 확정할 수 있다", async () => {
@@ -212,8 +191,7 @@ describe("CoordinationDetail", () => {
     const user = userEvent.setup();
     render(<CoordinationDetail coordinationId={1} />);
 
-    await user.click(await screen.findByRole("button", { name: "구매희망자 1" }));
-    await user.click(screen.getByRole("button", { name: CANDIDATE_100_LABEL }));
+    await user.click(await screen.findByRole("button", { name: CANDIDATE_100_LABEL }));
     await user.click(screen.getByRole("button", { name: "일정 최종 확정" }));
 
     expect(confirmCoordination).toHaveBeenCalledWith(1, {
@@ -329,7 +307,7 @@ describe("CoordinationDetail", () => {
     expect(screen.queryByText("링크 다시 보기")).toBeNull();
   });
 
-  it("여러 구매희망자가 있으면 각각 번호를 붙여 보여준다", async () => {
+  it("구매희망자 링크가 이미 있으면 추가 생성 진입점을 보여주지 않는다", async () => {
     vi.mocked(getCoordinationDetail).mockResolvedValue(
       baseDetail({
         status: "BUYER_CHECKING",
@@ -346,25 +324,14 @@ describe("CoordinationDetail", () => {
             customerLinkUrl: "https://app.sairo.agency/visit-responses/buyer-token-1",
             linkExpiresAt: "2026-09-27T00:00:00Z",
           },
-          {
-            responseId: 21,
-            role: "BUYER",
-            name: null,
-            phone: null,
-            result: "WAITING",
-            offeredCandidateIds: [100],
-            selectedCandidateIds: [],
-            submittedAt: null,
-            customerLinkUrl: "https://app.sairo.agency/visit-responses/buyer-token-2",
-            linkExpiresAt: "2026-09-27T00:00:00Z",
-          },
         ],
       }),
     );
     render(<CoordinationDetail coordinationId={1} />);
 
-    await screen.findByText("구매희망자 1님");
-    expect(screen.getByText("구매희망자 2님")).not.toBeNull();
+    await screen.findByText("구매희망자가 링크를 받고 날짜와 시간을 선택하는 중입니다.");
+    expect(screen.queryByText("🔗 구매희망자용 링크")).toBeNull();
+    expect(screen.queryByText("+ 구매희망자 링크 추가 생성")).toBeNull();
   });
 
   it("화면이 열려 있는 동안 주기적으로 상세 조회를 다시 호출한다", async () => {

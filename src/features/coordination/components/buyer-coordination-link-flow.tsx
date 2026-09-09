@@ -1,11 +1,14 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ApiError } from "@/shared/api/client";
 import { createBuyerLink } from "../api/coordination.api";
 import { BuyerLinkCreatedDialog } from "./buyer-link-created-dialog";
 
 export function BuyerCoordinationLinkFlow({ coordinationId }: { coordinationId: number }) {
+  const router = useRouter();
   const [customerLinkUrl, setCustomerLinkUrl] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -29,10 +32,16 @@ export function BuyerCoordinationLinkFlow({ coordinationId }: { coordinationId: 
 
   return (
     <div className="max-w-[720px]">
+      <Link
+        href={`/coordinations/${coordinationId}`}
+        className="mb-6 inline-flex items-center gap-1 text-sm font-semibold text-slate-500 hover:text-[#3937b8]"
+      >
+        ← 뒤로가기
+      </Link>
       <h1 className="mb-4 text-3xl font-bold">구매자 조율 추가</h1>
       <p className="mb-10 text-slate-500">
-        버튼을 누르면 구매희망자용 링크가 새로 생성됩니다. 이름·연락처 입력 없이 링크만 생성되며,
-        여러 구매희망자에게 각각 다른 링크를 보내려면 반복해서 생성할 수 있습니다.
+        버튼을 누르면 구매희망자용 링크가 새로 생성됩니다. 이름·연락처 입력 없이 링크만 생성되며, 한
+        임장 조율 건에는 구매희망자를 한 명만 둘 수 있습니다.
       </p>
       {error ? (
         <p role="alert" className="mb-6 text-sm text-red-600">
@@ -50,7 +59,7 @@ export function BuyerCoordinationLinkFlow({ coordinationId }: { coordinationId: 
       {customerLinkUrl ? (
         <BuyerLinkCreatedDialog
           customerLinkUrl={customerLinkUrl}
-          onClose={() => setCustomerLinkUrl(null)}
+          onClose={() => router.push(`/coordinations/${coordinationId}`)}
         />
       ) : null}
     </div>

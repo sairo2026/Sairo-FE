@@ -6,6 +6,12 @@ import { ApiError } from "@/shared/api/client";
 import { createBuyerLink } from "../api/coordination.api";
 import { BuyerCoordinationLinkFlow } from "./buyer-coordination-link-flow";
 
+const push = vi.fn();
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push }),
+}));
+
 vi.mock("../api/coordination.api", () => ({
   createBuyerLink: vi.fn(),
 }));
@@ -39,7 +45,7 @@ describe("BuyerCoordinationLinkFlow", () => {
     await screen.findByText("https://app.sairo.agency/visit-responses/buyer-token");
   });
 
-  it("반복 실행해 여러 구매자 링크를 추가로 생성할 수 있다", async () => {
+  it("링크 생성 완료 확인을 누르면 조율 상세 화면으로 이동한다", async () => {
     vi.mocked(createBuyerLink).mockResolvedValue({
       buyerResponseId: 1,
       customerLinkUrl: "https://app.sairo.agency/visit-responses/buyer-token-1",
@@ -54,16 +60,14 @@ describe("BuyerCoordinationLinkFlow", () => {
     await user.click(screen.getByRole("button", { name: "복사" }));
     await user.click(screen.getByRole("button", { name: "확인" }));
 
-    vi.mocked(createBuyerLink).mockResolvedValue({
-      buyerResponseId: 2,
-      customerLinkUrl: "https://app.sairo.agency/visit-responses/buyer-token-2",
-      linkExpiresAt: "2026-09-15T00:00:00Z",
-      coordinationStatus: "BUYER_CHECKING",
-    });
-    await user.click(screen.getByRole("button", { name: "구매희망자용 링크 생성" }));
+    expect(push).toHaveBeenCalledWith("/coordinations/7");
+  });
 
-    expect(createBuyerLink).toHaveBeenCalledTimes(2);
-    await screen.findByText("https://app.sairo.agency/visit-responses/buyer-token-2");
+  it("뒤로가기 링크는 조율 상세 화면으로 이동한다", () => {
+    render(<BuyerCoordinationLinkFlow coordinationId={7} />);
+
+    const backLink = screen.getByRole("link", { name: "← 뒤로가기" });
+    expect(backLink.getAttribute("href")).toBe("/coordinations/7");
   });
 
   it("세입자가 아직 제출하지 않아 409가 나면 안내 문구를 보여준다", async () => {

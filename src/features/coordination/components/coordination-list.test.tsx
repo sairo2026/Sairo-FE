@@ -6,6 +6,12 @@ import { ApiError } from "@/shared/api/client";
 import { getCoordinationList } from "../api/coordination.api";
 import { CoordinationList } from "./coordination-list";
 
+let searchParamsString = "";
+
+vi.mock("next/navigation", () => ({
+  useSearchParams: () => new URLSearchParams(searchParamsString),
+}));
+
 vi.mock("../api/coordination.api", () => ({
   getCoordinationList: vi.fn(),
 }));
@@ -40,6 +46,7 @@ const LIST_RESULT = {
 };
 
 beforeEach(() => {
+  searchParamsString = "";
   vi.mocked(getCoordinationList).mockResolvedValue(LIST_RESULT);
 });
 
@@ -96,9 +103,32 @@ describe("CoordinationList", () => {
     await screen.findByText("김세입자 / 010-1234-5678");
 
     const [tenantCheckingTileLabel] = screen.getAllByText("세입자 확인 중");
-    expect(tenantCheckingTileLabel?.closest("div")?.className).toContain("bg-[#ffdde3]");
+    expect(tenantCheckingTileLabel?.closest("button")?.className).toContain("bg-[#ffdde3]");
     const [scheduleConfirmedTileLabel] = screen.getAllByText("확정 완료");
-    expect(scheduleConfirmedTileLabel?.closest("div")?.className).toContain("bg-[#dbe4ff]");
+    expect(scheduleConfirmedTileLabel?.closest("button")?.className).toContain("bg-[#dbe4ff]");
+  });
+
+  it("상태 요약 박스를 클릭하면 그 상태로 목록을 필터링하고, 다시 누르면 해제한다", async () => {
+    const user = userEvent.setup();
+    render(<CoordinationList />);
+    await screen.findByText("김세입자 / 010-1234-5678");
+
+    const [tenantCheckingTile] = screen.getAllByRole("button", { name: /세입자 확인 중/ });
+    await user.click(tenantCheckingTile as HTMLElement);
+
+    expect(screen.queryByText("박세입자 / 010-9999-0000")).toBeNull();
+    expect(screen.getByText("김세입자 / 010-1234-5678")).not.toBeNull();
+
+    await user.click(tenantCheckingTile as HTMLElement);
+    expect(screen.getByText("박세입자 / 010-9999-0000")).not.toBeNull();
+  });
+
+  it("URL의 status 쿼리로 초기 필터를 적용한다", async () => {
+    searchParamsString = "status=SCHEDULE_CONFIRMED";
+    render(<CoordinationList />);
+
+    await screen.findByText("박세입자 / 010-9999-0000");
+    expect(screen.queryByText("김세입자 / 010-1234-5678")).toBeNull();
   });
 
   it("검색어로 고객 이름이나 주소를 필터링한다", async () => {
