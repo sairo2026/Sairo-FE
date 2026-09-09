@@ -2,6 +2,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { ApiError } from "@/shared/api/client";
 import { getCoordinationList } from "../api/coordination.api";
 import { CoordinationList } from "./coordination-list";
 
@@ -48,6 +49,39 @@ afterEach(() => {
 });
 
 describe("CoordinationList", () => {
+  it("목록이 비어 있으면 정상적인 빈 상태를 보여준다", async () => {
+    vi.mocked(getCoordinationList).mockResolvedValue({
+      statusCounts: {
+        tenantChecking: 0,
+        buyerDeliveryRequired: 0,
+        buyerChecking: 0,
+        finalConfirmationRequired: 0,
+        scheduleConfirmed: 0,
+        visitCompleted: 0,
+      },
+      coordinations: [],
+    });
+
+    render(<CoordinationList />);
+
+    await screen.findByText("진행 중인 임장 조율이 없습니다.");
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
+  it("인증되지 않은 응답이면 로그인 링크를 보여준다", async () => {
+    vi.mocked(getCoordinationList).mockRejectedValue(
+      new ApiError(401, { code: "UNAUTHORIZED", message: "인증 필요", traceId: "trace-1" }),
+    );
+
+    render(<CoordinationList />);
+
+    await screen.findByText("로그인이 필요합니다.");
+    expect(screen.getByRole("link", { name: "로그인하러 가기" }).getAttribute("href")).toBe(
+      "/login",
+    );
+    expect(screen.queryByRole("button", { name: "다시 시도" })).toBeNull();
+  });
+
   it("상태별 건수와 목록 행을 보여준다", async () => {
     render(<CoordinationList />);
 
