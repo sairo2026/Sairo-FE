@@ -21,10 +21,10 @@ afterEach(() => {
 });
 
 describe("SessionRoutingGuard", () => {
-  it("세션 확인 전에는 보호된 화면을 숨긴다", () => {
+  it("세션 확인 전에는 보호된 화면을 숨기고 카드·스피너 스타일로 안내한다", () => {
     vi.mocked(checkSession).mockReturnValue(new Promise(() => undefined));
 
-    render(
+    const { container } = render(
       <SessionRoutingGuard>
         <p>보호된 화면</p>
       </SessionRoutingGuard>,
@@ -32,6 +32,8 @@ describe("SessionRoutingGuard", () => {
 
     expect(screen.getByText("로그인 상태를 확인하는 중입니다.")).not.toBeNull();
     expect(screen.queryByText("보호된 화면")).toBeNull();
+    expect(container.querySelector(".rounded-3xl.bg-white")).not.toBeNull();
+    expect(container.querySelector(".animate-spin")).not.toBeNull();
   });
 
   it("HOME-01이 401을 반환하면 로그인 화면으로 대체 이동한다", async () => {

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { KakaoLoginButton } from "@/features/auth/components/kakao-login-button";
 
 export const metadata: Metadata = {
@@ -17,7 +18,15 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     <main className="flex flex-1 items-center justify-center bg-slate-50 px-4 py-16">
       <div className="w-full max-w-sm rounded-3xl bg-white p-10 shadow-sm">
         <div className="flex flex-col items-center gap-16">
-          <div aria-hidden className="h-16 w-16 rounded-2xl bg-neutral-200" />
+          <Image
+            src="/favicon.ico"
+            alt=""
+            aria-hidden
+            width={64}
+            height={64}
+            unoptimized
+            className="h-16 w-16 rounded-2xl bg-neutral-200 object-contain p-2"
+          />
           <div className="w-full">
             {hasAuthFailed ? (
               <p role="alert" className="mb-4 text-center text-sm text-red-600">
