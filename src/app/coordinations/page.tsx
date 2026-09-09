@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { CoordinationList } from "@/features/coordination";
-import { OfficeShell } from "@/shared/components/office-shell";
+import { AuthenticatedOfficeShell } from "@/features/auth/components/session-routing-guard";
 
 export const metadata: Metadata = { title: "임장 조율 | 사이로" };
 
 export default function CoordinationsPage() {
   return (
-    <OfficeShell active="coordinations">
+    <AuthenticatedOfficeShell active="coordinations">
       <CoordinationList />
-    </OfficeShell>
+    </AuthenticatedOfficeShell>
   );
 }

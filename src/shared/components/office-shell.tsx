@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-type OfficeShellProps = {
+export type OfficeShellProps = {
   children: ReactNode;
   active?: "home" | "properties" | "coordinations";
 };
