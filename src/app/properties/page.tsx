@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { PropertyList } from "@/features/property";
-import { OfficeShell } from "@/shared/components/office-shell";
+import { AuthenticatedOfficeShell } from "@/features/auth/components/session-routing-guard";
 
 export const metadata: Metadata = { title: "매물 관리 | 사이로" };
 export default function PropertiesPage() {
   return (
-    <OfficeShell active="properties">
+    <AuthenticatedOfficeShell active="properties">
       <PropertyList />
-    </OfficeShell>
+    </AuthenticatedOfficeShell>
   );
 }
