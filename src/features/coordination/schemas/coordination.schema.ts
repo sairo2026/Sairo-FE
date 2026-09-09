@@ -8,6 +8,7 @@ export const coordinationStatuses = [
   "FINAL_CONFIRMATION_REQUIRED",
   "SCHEDULE_CONFIRMED",
   "VISIT_COMPLETED",
+  "CANCELLED",
 ] as const;
 export type CoordinationStatus = (typeof coordinationStatuses)[number];
 
