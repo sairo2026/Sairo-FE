@@ -75,7 +75,7 @@ export function ResponseRestartPanel({
         onClick={openPicker}
         className="rounded-lg border border-[#3937b8] px-5 py-3 text-sm font-semibold text-[#3937b8]"
       >
-        새 후보 시간 선택
+        재시작
       </button>
 
       {isPickerOpen ? (

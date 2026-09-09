@@ -38,6 +38,7 @@ export function VisitResponsePage({ token }: { token: string }) {
   if (response.result === "WAITING") {
     return (
       <CandidateSelectionView
+        role={response.role}
         candidateTimes={response.candidateTimes}
         onSubmitAvailable={async (candidateTimeIds) => {
           setResponse(await submitAvailableTimes(token, candidateTimeIds));
