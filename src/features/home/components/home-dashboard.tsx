@@ -82,13 +82,14 @@ export function HomeDashboard() {
             {STATUS_WIDGET_ORDER.map((key) => {
               const status = STATUS_WIDGET_KEY_TO_STATUS[key];
               return (
-                <div
+                <Link
                   key={key}
-                  className={`rounded-lg px-4 py-3 text-center ${coordinationStatusBadgeClassNames[status]}`}
+                  href={`/coordinations?status=${status}`}
+                  className={`rounded-lg px-4 py-3 text-center transition-opacity hover:opacity-80 ${coordinationStatusBadgeClassNames[status]}`}
                 >
                   <p className="mb-1 text-xs font-semibold">{coordinationStatusLabels[status]}</p>
                   <p className="text-lg font-bold">{summary.coordinationStatusCounts[key]}건</p>
-                </div>
+                </Link>
               );
             })}
           </div>

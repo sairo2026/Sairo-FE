@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { ApiError } from "@/shared/api/client";
 import { getCoordinationList } from "../api/coordination.api";
@@ -9,10 +10,11 @@ import {
   coordinationStatusLabels,
   formatShortSchedule,
 } from "../model/coordination";
-import type {
-  CoordinationListItem,
-  CoordinationStatus,
-  CoordinationStatusCounts,
+import {
+  coordinationStatuses,
+  type CoordinationListItem,
+  type CoordinationStatus,
+  type CoordinationStatusCounts,
 } from "../schemas/coordination.schema";
 import { CoordinationStatusBadge } from "./coordination-status-badge";
 
@@ -34,10 +36,18 @@ const STATUS_TILE_LABELS: Record<keyof CoordinationStatusCounts, CoordinationSta
   visitCompleted: "VISIT_COMPLETED",
 };
 
+function toCoordinationStatus(value: string | null): CoordinationStatus | null {
+  return coordinationStatuses.find((status) => status === value) ?? null;
+}
+
 export function CoordinationList() {
+  const searchParams = useSearchParams();
   const [coordinations, setCoordinations] = useState<CoordinationListItem[]>([]);
   const [statusCounts, setStatusCounts] = useState<CoordinationStatusCounts | null>(null);
   const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<CoordinationStatus | null>(() =>
+    toCoordinationStatus(searchParams.get("status")),
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<"unauthenticated" | "unknown" | null>(null);
 
@@ -71,13 +81,14 @@ export function CoordinationList() {
 
   const visibleCoordinations = useMemo(() => {
     const keyword = query.trim().toLocaleLowerCase("ko");
-    if (!keyword) return coordinations;
-    return coordinations.filter((item) =>
-      [item.propertyAddress, item.tenantName, item.tenantPhone].some((value) =>
+    return coordinations.filter((item) => {
+      if (statusFilter && item.status !== statusFilter) return false;
+      if (!keyword) return true;
+      return [item.propertyAddress, item.tenantName, item.tenantPhone].some((value) =>
         value.toLocaleLowerCase("ko").includes(keyword),
-      ),
-    );
-  }, [coordinations, query]);
+      );
+    });
+  }, [coordinations, query, statusFilter]);
 
   return (
     <section>
@@ -111,17 +122,33 @@ export function CoordinationList() {
         <div className="mb-9 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
           {STATUS_TILE_ORDER.map((key) => {
             const status = STATUS_TILE_LABELS[key];
+            const isActive = statusFilter === status;
             return (
-              <div
+              <button
                 key={key}
-                className={`rounded-xl px-4 py-5 text-center ${coordinationStatusBadgeClassNames[status]}`}
+                type="button"
+                onClick={() => setStatusFilter(isActive ? null : status)}
+                aria-pressed={isActive}
+                className={`rounded-xl px-4 py-5 text-center transition-opacity hover:opacity-80 ${coordinationStatusBadgeClassNames[status]} ${isActive ? "ring-2 ring-[#3937b8] ring-offset-2" : ""}`}
               >
                 <p className="mb-2 text-sm font-semibold">{coordinationStatusLabels[status]}</p>
                 <p className="text-xl font-bold">{statusCounts[key]}건</p>
-              </div>
+              </button>
             );
           })}
         </div>
+      ) : null}
+      {statusFilter ? (
+        <p className="mb-6 -mt-5 text-sm text-slate-500">
+          {coordinationStatusLabels[statusFilter]} 상태만 보고 있습니다.{" "}
+          <button
+            type="button"
+            onClick={() => setStatusFilter(null)}
+            className="font-semibold text-[#3937b8]"
+          >
+            필터 해제
+          </button>
+        </p>
       ) : null}
       <div className="overflow-hidden rounded-xl border border-[#dfe3ec] bg-[#f8f9fd]">
         <div className="hidden grid-cols-[1.4fr_1.6fr_1fr_1fr] gap-5 border-b border-indigo-200 px-8 py-5 text-sm font-bold md:grid">

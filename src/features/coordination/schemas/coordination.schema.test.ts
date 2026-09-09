@@ -132,7 +132,7 @@ describe("coordination API schemas", () => {
             tenantName: "김세입자",
             tenantPhone: "010-1234-5678",
             visitScheduledAt: null,
-            status: "CANCELLED",
+            status: "UNKNOWN_STATUS",
           },
         ],
       }),

@@ -1,11 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ApiError } from "@/shared/api/client";
 import { EntityLoadError } from "@/shared/components/entity-load-error";
-import { completeVisit, confirmCoordination } from "../api/coordination.api";
+import { cancelCoordination, completeVisit, confirmCoordination } from "../api/coordination.api";
 import {
   customerResponseResultLabels,
   dealTypeLabels,
@@ -20,7 +19,6 @@ import type {
 import { CoordinationStatusBadge } from "./coordination-status-badge";
 import { CustomerLinkDialog } from "./customer-link-dialog";
 import { useCoordinationDetail } from "../hooks/use-coordination-detail";
-import { ResponseRestartPanel } from "./response-restart-panel";
 
 export function CoordinationDetail({ coordinationId }: { coordinationId: number }) {
   const { state, retry, refetch } = useCoordinationDetail(coordinationId);
@@ -64,8 +62,14 @@ function DetailBody({
   );
 
   const isFinalized = detail.status === "SCHEDULE_CONFIRMED" || detail.status === "VISIT_COMPLETED";
-  const canManageBuyers = !isFinalized && detail.status !== "TENANT_CHECKING";
+  const isCancelled = detail.status === "CANCELLED";
   const isTenantNoneAvailable = !isFinalized && detail.tenantResponse.result === "NONE_AVAILABLE";
+  const canCreateBuyerLink =
+    !isFinalized &&
+    !isCancelled &&
+    !isTenantNoneAvailable &&
+    detail.status !== "TENANT_CHECKING" &&
+    detail.buyerResponses.length === 0;
 
   return (
     <section className="max-w-[1010px]">
@@ -95,7 +99,7 @@ function DetailBody({
               🔗 세입자용 링크
             </button>
           ) : null}
-          {canManageBuyers ? (
+          {canCreateBuyerLink ? (
             <Link
               href={`/coordinations/${coordinationId}/buyer-link`}
               className="rounded-lg border border-[#3937b8] px-5 py-3 text-sm font-semibold text-[#3937b8]"
@@ -125,7 +129,11 @@ function DetailBody({
           <div>
             <p className="mb-2 text-xs font-semibold text-slate-500">임장 일정</p>
             <p className="flex h-11 items-center rounded-lg border border-[#dfe3ec] px-4 font-semibold">
-              {detail.scheduledAt ? formatShortSchedule(detail.scheduledAt) : "미정"}
+              {isCancelled
+                ? "조율 취소"
+                : detail.scheduledAt
+                  ? formatShortSchedule(detail.scheduledAt)
+                  : "미정"}
             </p>
           </div>
           <div>
@@ -158,10 +166,8 @@ function DetailBody({
           coordinationId={coordinationId}
           response={detail.tenantResponse}
           candidateTimesById={candidateTimesById}
-          allowedRestartCandidates={detail.candidateTimes}
-          restartDialogTitle="세입자와 임장 일정을 조율하는 링크입니다."
           isFinalized={isFinalized}
-          onChanged={onChanged}
+          isCancelled={isCancelled}
           onOpenLink={(url, expiresAt) =>
             setOpenLinkDialog({
               title: "세입자와 임장 일정을 조율하는 링크입니다.",
@@ -169,52 +175,39 @@ function DetailBody({
               expiresAt,
             })
           }
+          onCancelled={onChanged}
         />
 
-        <div className="mt-10">
-          <StepHeading
-            step={3}
-            label={
-              detail.buyerResponses.length > 1 ? "구매희망자님들의 선택" : "구매희망자님의 선택"
-            }
-          />
-          {detail.buyerResponses.length === 0 ? (
-            <p className="mb-4 text-sm text-slate-500">
-              상단에서 링크를 생성해 구매희망자에게 전달해 주십시오.
-            </p>
-          ) : (
-            detail.buyerResponses.map((buyer, index) => (
-              <div key={buyer.responseId} className="mb-8">
-                {detail.buyerResponses.length > 1 ? (
-                  <p className="mb-3 text-sm font-bold">구매희망자 {index + 1}님</p>
-                ) : null}
-                <ResponseBlock
-                  coordinationId={coordinationId}
-                  response={buyer}
-                  candidateTimesById={candidateTimesById}
-                  restartDialogTitle="구매희망자와 임장 일정을 조율하는 링크입니다."
-                  isFinalized={isFinalized}
-                  onChanged={onChanged}
-                  onOpenLink={(url, expiresAt) =>
-                    setOpenLinkDialog({
-                      title: "구매희망자와 임장 일정을 조율하는 링크입니다.",
-                      url,
-                      expiresAt,
-                    })
-                  }
-                />
-              </div>
-            ))
-          )}
-          {canManageBuyers ? (
-            <Link
-              href={`/coordinations/${coordinationId}/buyer-link`}
-              className="text-sm font-semibold text-[#3937b8]"
-            >
-              + 구매희망자 링크 추가 생성
-            </Link>
-          ) : null}
-        </div>
+        {!isTenantNoneAvailable ? (
+          <div className="mt-10">
+            <StepHeading step={3} label="구매희망자님의 선택" />
+            {detail.buyerResponses.length === 0 ? (
+              <p className="mb-4 text-sm text-slate-500">
+                상단에서 링크를 생성해 구매희망자에게 전달해 주십시오.
+              </p>
+            ) : (
+              detail.buyerResponses.map((buyer) => (
+                <div key={buyer.responseId} className="mb-8">
+                  <ResponseBlock
+                    coordinationId={coordinationId}
+                    response={buyer}
+                    candidateTimesById={candidateTimesById}
+                    isFinalized={isFinalized}
+                    isCancelled={isCancelled}
+                    onOpenLink={(url, expiresAt) =>
+                      setOpenLinkDialog({
+                        title: "구매희망자와 임장 일정을 조율하는 링크입니다.",
+                        url,
+                        expiresAt,
+                      })
+                    }
+                    onCancelled={onChanged}
+                  />
+                </div>
+              ))
+            )}
+          </div>
+        ) : null}
 
         {detail.status === "FINAL_CONFIRMATION_REQUIRED" ? (
           <FinalConfirmationPanel
@@ -229,7 +222,7 @@ function DetailBody({
       <BottomActions
         coordinationId={coordinationId}
         status={detail.status}
-        isTenantNoneAvailable={isTenantNoneAvailable}
+        hideCancel={isTenantNoneAvailable}
         onCompleted={onChanged}
       />
 
@@ -260,25 +253,64 @@ function ResponseBlock({
   coordinationId,
   response,
   candidateTimesById,
-  allowedRestartCandidates,
-  restartDialogTitle,
   isFinalized,
-  onChanged,
+  isCancelled,
   onOpenLink,
+  onCancelled,
 }: {
   coordinationId: number;
   response: CoordinationCustomerResponseItem;
   candidateTimesById: Map<number, CoordinationCandidateTimeItem>;
-  allowedRestartCandidates?: CoordinationCandidateTimeItem[];
-  restartDialogTitle: string;
   isFinalized: boolean;
-  onChanged: () => void;
+  isCancelled: boolean;
   onOpenLink: (url: string, expiresAt: string) => void;
+  onCancelled: () => void;
 }) {
-  const canRestart =
-    !isFinalized &&
-    response.role === "TENANT" &&
-    (response.result === "NONE_AVAILABLE" || response.result === "EXPIRED");
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState("");
+  const isTenantNoneAvailable = response.role === "TENANT" && response.result === "NONE_AVAILABLE";
+
+  async function handleCancel() {
+    setIsCancelling(true);
+    setCancelError("");
+    try {
+      await cancelCoordination(coordinationId);
+      onCancelled();
+    } catch {
+      setCancelError("조율 취소를 처리하지 못했습니다. 잠시 후 다시 시도해주세요.");
+    } finally {
+      setIsCancelling(false);
+    }
+  }
+
+  if (isTenantNoneAvailable) {
+    return (
+      <div className="mb-4">
+        <p className="mb-4 text-sm text-red-600">
+          세입자가 위 선택지 중 가능한 시간이 없다고 답변했습니다. 새로운 후보를 선택해 다시 요청해
+          주세요.
+        </p>
+        {isCancelled ? null : (
+          <>
+            <button
+              type="button"
+              onClick={() => void handleCancel()}
+              disabled={isCancelling}
+              className="rounded-lg bg-[#f0f0ff] px-8 py-4 font-semibold text-slate-600 disabled:opacity-50"
+            >
+              {isCancelling ? "처리 중" : "조율 취소"}
+            </button>
+            {cancelError ? (
+              <p role="alert" className="mt-4 text-sm text-red-600">
+                {cancelError}
+              </p>
+            ) : null}
+          </>
+        )}
+      </div>
+    );
+  }
+
   const offeredCandidates = response.offeredCandidateIds
     .map((id) => candidateTimesById.get(id))
     .filter((item): item is CoordinationCandidateTimeItem => item !== undefined);
@@ -293,14 +325,11 @@ function ResponseBlock({
       ) : null}
       {response.result === "NONE_AVAILABLE" ? (
         <p className="mb-4 text-sm text-red-600">
-          {response.role === "TENANT" ? "세입자" : "구매희망자"}가 위 선택지 중 가능한 시간이 없다고
-          답변했습니다. 새로운 후보를 선택해 다시 요청해 주세요.
+          구매희망자가 위 선택지 중 가능한 시간이 없다고 답변했습니다.
         </p>
       ) : null}
       {response.result === "EXPIRED" ? (
-        <p className="mb-4 text-sm text-red-600">
-          링크가 만료됐습니다. 새로운 후보를 선택해 다시 요청해 주세요.
-        </p>
+        <p className="mb-4 text-sm text-red-600">링크가 만료됐습니다.</p>
       ) : null}
       {response.result === "NOT_SELECTED" ? (
         <p className="mb-4 text-sm text-slate-500">최종 확정에서 선택되지 않았습니다.</p>
@@ -336,15 +365,6 @@ function ResponseBlock({
           </button>
         ) : null}
       </div>
-      {canRestart ? (
-        <ResponseRestartPanel
-          coordinationId={coordinationId}
-          responseId={response.responseId}
-          dialogTitle={restartDialogTitle}
-          allowedCandidates={allowedRestartCandidates ?? []}
-          onRestarted={onChanged}
-        />
-      ) : null}
     </div>
   );
 }
@@ -360,26 +380,18 @@ function FinalConfirmationPanel({
   candidateTimesById: Map<number, CoordinationCandidateTimeItem>;
   onConfirmed: () => void;
 }) {
-  const availableBuyers = buyerResponses.filter((buyer) => buyer.result === "AVAILABLE_SUBMITTED");
-  const [selectedBuyerId, setSelectedBuyerId] = useState<number | null>(null);
+  const availableBuyer = buyerResponses.find((buyer) => buyer.result === "AVAILABLE_SUBMITTED");
   const [selectedCandidateId, setSelectedCandidateId] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  const selectedBuyer = availableBuyers.find((buyer) => buyer.responseId === selectedBuyerId);
-
-  function handleSelectBuyer(buyerResponseId: number) {
-    setSelectedBuyerId(buyerResponseId);
-    setSelectedCandidateId(null);
-  }
-
   async function handleConfirm() {
-    if (selectedBuyerId === null || selectedCandidateId === null) return;
+    if (!availableBuyer || selectedCandidateId === null) return;
     setIsSubmitting(true);
     setError("");
     try {
       await confirmCoordination(coordinationId, {
-        buyerResponseId: selectedBuyerId,
+        buyerResponseId: availableBuyer.responseId,
         candidateTimeId: selectedCandidateId,
       });
       onConfirmed();
@@ -394,7 +406,7 @@ function FinalConfirmationPanel({
     }
   }
 
-  if (availableBuyers.length === 0) {
+  if (!availableBuyer) {
     return (
       <p className="mt-6 text-sm text-slate-500">
         가능 시간을 제출한 구매희망자가 아직 없어 최종 확정을 진행할 수 없습니다.
@@ -405,48 +417,27 @@ function FinalConfirmationPanel({
   return (
     <div className="mt-8 rounded-2xl border border-[#3937b8] p-6">
       <p className="mb-4 text-lg font-bold">일정 최종 확정</p>
-      <p className="mb-4 text-sm font-semibold">확정할 구매희망자를 선택해주세요.</p>
-      <div className="mb-6 flex flex-wrap gap-3">
-        {availableBuyers.map((buyer) => (
-          <button
-            key={buyer.responseId}
-            type="button"
-            onClick={() => handleSelectBuyer(buyer.responseId)}
-            className={`rounded-lg border px-4 py-3 text-sm font-semibold ${
-              selectedBuyerId === buyer.responseId
-                ? "border-[#3937b8] bg-[#3937b8] text-white"
-                : "border-[#dfe3ec] bg-white text-[#182033]"
-            }`}
-          >
-            구매희망자 {buyerResponses.indexOf(buyer) + 1}
-          </button>
-        ))}
+      <p className="mb-4 text-sm font-semibold">확정할 방문 일시를 선택해주세요.</p>
+      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
+        {availableBuyer.selectedCandidateIds.map((candidateId) => {
+          const candidate = candidateTimesById.get(candidateId);
+          if (!candidate) return null;
+          return (
+            <button
+              key={candidateId}
+              type="button"
+              onClick={() => setSelectedCandidateId(candidateId)}
+              className={`rounded-lg border px-4 py-3 text-sm font-semibold ${
+                selectedCandidateId === candidateId
+                  ? "border-[#3937b8] bg-[#3937b8] text-white"
+                  : "border-[#dfe3ec] bg-white text-[#182033]"
+              }`}
+            >
+              {formatCandidateLabelFromIso(candidate.startsAt)}
+            </button>
+          );
+        })}
       </div>
-      {selectedBuyer ? (
-        <>
-          <p className="mb-4 text-sm font-semibold">확정할 방문 일시를 선택해주세요.</p>
-          <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {selectedBuyer.selectedCandidateIds.map((candidateId) => {
-              const candidate = candidateTimesById.get(candidateId);
-              if (!candidate) return null;
-              return (
-                <button
-                  key={candidateId}
-                  type="button"
-                  onClick={() => setSelectedCandidateId(candidateId)}
-                  className={`rounded-lg border px-4 py-3 text-sm font-semibold ${
-                    selectedCandidateId === candidateId
-                      ? "border-[#3937b8] bg-[#3937b8] text-white"
-                      : "border-[#dfe3ec] bg-white text-[#182033]"
-                  }`}
-                >
-                  {formatCandidateLabelFromIso(candidate.startsAt)}
-                </button>
-              );
-            })}
-          </div>
-        </>
-      ) : null}
       {error ? (
         <p role="alert" className="mb-4 text-sm text-red-600">
           {error}
@@ -455,7 +446,7 @@ function FinalConfirmationPanel({
       <button
         type="button"
         onClick={() => void handleConfirm()}
-        disabled={selectedBuyerId === null || selectedCandidateId === null || isSubmitting}
+        disabled={selectedCandidateId === null || isSubmitting}
         className="rounded-lg bg-[#3937b8] px-8 py-4 font-semibold text-white disabled:opacity-50"
       >
         {isSubmitting ? "처리 중" : "일정 최종 확정"}
@@ -467,15 +458,14 @@ function FinalConfirmationPanel({
 function BottomActions({
   coordinationId,
   status,
-  isTenantNoneAvailable,
+  hideCancel,
   onCompleted,
 }: {
   coordinationId: number;
   status: CoordinationDetailResult["status"];
-  isTenantNoneAvailable: boolean;
+  hideCancel: boolean;
   onCompleted: () => void;
 }) {
-  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -516,24 +506,14 @@ function BottomActions({
         </p>
       ) : null}
       <div className="flex flex-wrap gap-4">
-        {status !== "SCHEDULE_CONFIRMED" ? (
-          isTenantNoneAvailable ? (
-            <button
-              type="button"
-              onClick={() => router.push("/coordinations")}
-              className="rounded-lg bg-[#f0f0ff] px-8 py-4 font-semibold text-slate-600"
-            >
-              조율 취소
-            </button>
-          ) : (
-            <button
-              type="button"
-              disabled
-              className="cursor-not-allowed rounded-lg bg-[#f0f0ff] px-8 py-4 font-semibold text-slate-400"
-            >
-              조율 취소
-            </button>
-          )
+        {status !== "SCHEDULE_CONFIRMED" && !hideCancel ? (
+          <button
+            type="button"
+            disabled
+            className="cursor-not-allowed rounded-lg bg-[#f0f0ff] px-8 py-4 font-semibold text-slate-400"
+          >
+            조율 취소
+          </button>
         ) : null}
         {status === "SCHEDULE_CONFIRMED" ? (
           <button

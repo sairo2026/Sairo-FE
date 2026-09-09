@@ -17,6 +17,7 @@ export const coordinationStatusLabels: Record<CoordinationStatus, string> = {
   FINAL_CONFIRMATION_REQUIRED: "최종 확정 필요",
   SCHEDULE_CONFIRMED: "확정 완료",
   VISIT_COMPLETED: "임장 완료",
+  CANCELLED: "조율 취소",
 };
 
 export const coordinationStatusBadgeClassNames: Record<CoordinationStatus, string> = {
@@ -26,6 +27,7 @@ export const coordinationStatusBadgeClassNames: Record<CoordinationStatus, strin
   FINAL_CONFIRMATION_REQUIRED: "bg-[#c9f7ee] text-[#0f7a68]",
   SCHEDULE_CONFIRMED: "bg-[#dbe4ff] text-[#3937b8]",
   VISIT_COMPLETED: "border border-[#dfe3ec] bg-white text-slate-500",
+  CANCELLED: "border border-[#dfe3ec] bg-white text-slate-400",
 };
 
 export const customerResponseResultLabels: Record<CustomerResponseResult, string> = {

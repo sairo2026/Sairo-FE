@@ -68,6 +68,12 @@ export async function completeVisit(coordinationId: number) {
   });
 }
 
+export async function cancelCoordination(coordinationId: number) {
+  await apiFetch<unknown>(`/api/coordinations/${coordinationId}/cancel`, {
+    method: "POST",
+  });
+}
+
 export async function restartResponse(
   coordinationId: number,
   responseId: number,
