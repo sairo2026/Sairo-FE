@@ -102,11 +102,11 @@ export function CoordinationList() {
       <div className="mb-9 flex flex-col gap-4 md:flex-row">
         <Link
           href="/properties"
-          className="inline-flex h-14 items-center justify-center rounded-lg bg-[#3937b8] px-6 font-semibold text-white"
+          className="inline-flex h-14 items-center justify-center rounded-lg bg-[#3937b8] px-6 font-semibold text-white transition-opacity hover:opacity-90"
         >
           ＋ 조율 생성
         </Link>
-        <label className="flex h-14 flex-1 items-center rounded-lg border border-[#dfe3ec] bg-[#f8f9fd] px-5">
+        <label className="flex h-14 flex-1 items-center rounded-lg border border-[#dfe3ec] bg-[#f8f9fd] px-5 transition-colors hover:border-[#3937b8]">
           <span className="sr-only">임장 조율 검색</span>
           <input
             value={query}
@@ -130,7 +130,7 @@ export function CoordinationList() {
                 type="button"
                 onClick={() => setStatusFilter(isActive ? null : status)}
                 aria-pressed={isActive}
-                className={`rounded-xl px-4 py-5 text-center transition-opacity hover:opacity-80 ${coordinationStatusBadgeClassNames[status]} ${isActive ? "ring-2 ring-[#3937b8] ring-offset-2" : ""}`}
+                className={`rounded-xl px-4 py-5 text-center transition hover:-translate-y-0.5 hover:opacity-80 hover:shadow-md ${coordinationStatusBadgeClassNames[status]} ${isActive ? "ring-2 ring-[#3937b8] ring-offset-2" : ""}`}
               >
                 <p className="mb-2 text-sm font-semibold">{coordinationStatusLabels[status]}</p>
                 <p className="text-xl font-bold">{statusCounts[key]}건</p>
@@ -145,7 +145,7 @@ export function CoordinationList() {
           <button
             type="button"
             onClick={() => setStatusFilter(null)}
-            className="font-semibold text-[#3937b8]"
+            className="font-semibold text-[#3937b8] hover:underline"
           >
             필터 해제
           </button>
@@ -171,14 +171,14 @@ export function CoordinationList() {
                 : "임장 조율 목록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요."}
             </p>
             {error === "unauthenticated" ? (
-              <Link href="/login" className="font-semibold text-[#3937b8]">
+              <Link href="/login" className="font-semibold text-[#3937b8] hover:underline">
                 로그인하러 가기
               </Link>
             ) : (
               <button
                 type="button"
                 onClick={() => void loadList()}
-                className="font-semibold text-[#3937b8]"
+                className="font-semibold text-[#3937b8] hover:underline"
               >
                 다시 시도
               </button>

@@ -16,7 +16,7 @@ export function InfoView({ title, description, children, onConfirm }: InfoViewPr
       <button
         type="button"
         onClick={onConfirm}
-        className="mt-auto w-full rounded-lg bg-[#3937b8] py-4 font-semibold text-white"
+        className="mt-auto w-full rounded-lg bg-[#3937b8] py-4 font-semibold text-white transition-opacity hover:opacity-90"
       >
         확인
       </button>

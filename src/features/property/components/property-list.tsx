@@ -55,11 +55,11 @@ export function PropertyList() {
       <div className="mb-9 flex flex-col gap-4 md:flex-row">
         <Link
           href="/properties/new"
-          className="inline-flex h-14 items-center justify-center rounded-lg bg-[#3937b8] px-6 font-semibold text-white"
+          className="inline-flex h-14 items-center justify-center rounded-lg bg-[#3937b8] px-6 font-semibold text-white transition-opacity hover:opacity-90"
         >
           ＋ 매물 등록
         </Link>
-        <label className="flex h-14 flex-1 items-center rounded-lg border border-[#dfe3ec] bg-[#f8f9fd] px-5">
+        <label className="flex h-14 flex-1 items-center rounded-lg border border-[#dfe3ec] bg-[#f8f9fd] px-5 transition-colors hover:border-[#3937b8]">
           <span className="sr-only">매물 검색</span>
           <input
             value={query}
@@ -90,14 +90,14 @@ export function PropertyList() {
                 : "매물 목록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요."}
             </p>
             {error === "unauthenticated" ? (
-              <Link href="/login" className="font-semibold text-[#3937b8]">
+              <Link href="/login" className="font-semibold text-[#3937b8] hover:underline">
                 로그인하러 가기
               </Link>
             ) : (
               <button
                 type="button"
                 onClick={() => void loadProperties()}
-                className="font-semibold text-[#3937b8]"
+                className="font-semibold text-[#3937b8] hover:underline"
               >
                 다시 시도
               </button>
@@ -128,7 +128,7 @@ export function PropertyList() {
                 <span className="text-sm">{dealTypeLabels[property.dealType]}</span>
                 <Link
                   href={`/coordinations/new?propertyId=${property.propertyId}`}
-                  className="rounded-md border border-[#3937b8] px-3 py-2 text-center text-sm font-semibold text-[#3937b8]"
+                  className="rounded-md border border-[#3937b8] px-3 py-2 text-center text-sm font-semibold text-[#3937b8] transition-colors hover:bg-[#3937b8] hover:text-white"
                 >
                   임장 조율 시작
                 </Link>

@@ -85,7 +85,7 @@ export function HomeDashboard() {
                 <Link
                   key={key}
                   href={`/coordinations?status=${status}`}
-                  className={`rounded-lg px-4 py-3 text-center transition-opacity hover:opacity-80 ${coordinationStatusBadgeClassNames[status]}`}
+                  className={`rounded-lg px-4 py-3 text-center transition hover:-translate-y-0.5 hover:opacity-80 hover:shadow-md ${coordinationStatusBadgeClassNames[status]}`}
                 >
                   <p className="mb-1 text-xs font-semibold">{coordinationStatusLabels[status]}</p>
                   <p className="text-lg font-bold">{summary.coordinationStatusCounts[key]}건</p>

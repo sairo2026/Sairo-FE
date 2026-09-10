@@ -68,7 +68,7 @@ export function CoordinationRequestFlow({ propertyId }: { propertyId: number }) 
           <h1 className="text-3xl font-bold">임장 조율 생성</h1>
           <Link
             href="/properties"
-            className="rounded-lg bg-[#f0f0ff] px-5 py-3 text-sm font-semibold text-slate-600"
+            className="rounded-lg bg-[#f0f0ff] px-5 py-3 text-sm font-semibold text-slate-600 transition-colors hover:bg-[#e4e4fb]"
           >
             매물 다시 선택
           </Link>
@@ -121,13 +121,13 @@ export function CoordinationRequestFlow({ propertyId }: { propertyId: number }) 
           <button
             type="button"
             onClick={() => router.back()}
-            className="rounded-lg bg-[#f0f0ff] px-10 py-4 font-semibold text-slate-600"
+            className="rounded-lg bg-[#f0f0ff] px-10 py-4 font-semibold text-slate-600 transition-colors hover:bg-[#e4e4fb]"
           >
             생성 취소
           </button>
           <button
             type="submit"
-            className="rounded-lg bg-[#3937b8] px-12 py-4 font-semibold text-white"
+            className="rounded-lg bg-[#3937b8] px-12 py-4 font-semibold text-white transition-opacity hover:opacity-90"
           >
             다음
           </button>

@@ -73,7 +73,7 @@ export function ResponseRestartPanel({
       <button
         type="button"
         onClick={openPicker}
-        className="rounded-lg border border-[#3937b8] px-5 py-3 text-sm font-semibold text-[#3937b8]"
+        className="rounded-lg border border-[#3937b8] px-5 py-3 text-sm font-semibold text-[#3937b8] transition-colors hover:bg-[#3937b8] hover:text-white"
       >
         재시작
       </button>

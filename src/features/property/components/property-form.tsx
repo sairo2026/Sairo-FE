@@ -192,7 +192,7 @@ export function PropertyForm({ mode, propertyId, initialValues }: PropertyFormPr
                   type="button"
                   disabled={mode === "edit"}
                   onClick={() => setDealType(value)}
-                  className={`rounded-lg border px-6 py-4 font-semibold ${dealType === value ? "border-[#3937b8] bg-white text-[#3937b8]" : "border-[#dfe3ec] bg-[#f8f9fd]"}`}
+                  className={`rounded-lg border px-6 py-4 font-semibold transition-colors ${dealType === value ? "border-[#3937b8] bg-white text-[#3937b8]" : "border-[#dfe3ec] bg-[#f8f9fd] enabled:hover:border-[#3937b8]"}`}
                 >
                   {dealTypeLabels[value]}
                 </button>
@@ -214,14 +214,14 @@ export function PropertyForm({ mode, propertyId, initialValues }: PropertyFormPr
           <button
             type="button"
             onClick={() => router.back()}
-            className="rounded-lg bg-[#f0f0ff] px-10 py-4 font-semibold text-slate-600"
+            className="rounded-lg bg-[#f0f0ff] px-10 py-4 font-semibold text-slate-600 transition-colors hover:bg-[#e4e4fb]"
           >
             {mode === "edit" ? "수정 취소" : "취소"}
           </button>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="rounded-lg bg-[#3937b8] px-12 py-4 font-semibold text-white disabled:opacity-50"
+            className="rounded-lg bg-[#3937b8] px-12 py-4 font-semibold text-white transition-opacity enabled:hover:opacity-90 disabled:opacity-50"
           >
             {isSubmitting ? "처리 중" : "등록"}
           </button>
@@ -244,7 +244,7 @@ export function PropertyForm({ mode, propertyId, initialValues }: PropertyFormPr
               <button
                 type="button"
                 onClick={() => duplicateId !== null && router.push(`/properties/${duplicateId}`)}
-                className="rounded-lg bg-[#f0f0ff] px-6 py-4 font-semibold text-slate-600"
+                className="rounded-lg bg-[#f0f0ff] px-6 py-4 font-semibold text-slate-600 transition-colors hover:bg-[#e4e4fb]"
               >
                 기존 매물 확인
               </button>
@@ -254,7 +254,7 @@ export function PropertyForm({ mode, propertyId, initialValues }: PropertyFormPr
                   setIsDuplicateOpen(false);
                   void save();
                 }}
-                className="rounded-lg bg-[#3937b8] px-6 py-4 font-semibold text-white"
+                className="rounded-lg bg-[#3937b8] px-6 py-4 font-semibold text-white transition-opacity hover:opacity-90"
               >
                 그래도 등록
               </button>
