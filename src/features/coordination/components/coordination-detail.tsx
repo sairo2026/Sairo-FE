@@ -10,6 +10,7 @@ import {
   customerResponseResultLabels,
   dealTypeLabels,
   formatCandidateLabelFromIso,
+  formatPhoneNumber,
   formatShortSchedule,
 } from "../model/coordination";
 import type {
@@ -144,7 +145,8 @@ function DetailBody({
           <div>
             <p className="mb-2 text-xs font-semibold text-slate-500">고객 / 연락처</p>
             <p className="font-bold">
-              {detail.tenantResponse.name ?? "-"} / {detail.tenantResponse.phone ?? "-"}
+              {detail.tenantResponse.name ?? "-"} /{" "}
+              {detail.tenantResponse.phone ? formatPhoneNumber(detail.tenantResponse.phone) : "-"}
             </p>
           </div>
           <div>

@@ -93,6 +93,24 @@ export function formatShortSchedule(isoString: string): string {
   return `${month}/${day} ${hours}:${minutes}`;
 }
 
+export function formatPhoneNumber(value: string): string {
+  const digits = value.replace(/\D/g, "");
+  const isSeoul = digits.startsWith("02");
+  const areaCodeLength = isSeoul ? 2 : 3;
+  const maxLength = isSeoul ? 10 : 11;
+  const trimmed = digits.slice(0, maxLength);
+
+  if (trimmed.length <= areaCodeLength) return trimmed;
+
+  const areaCode = trimmed.slice(0, areaCodeLength);
+  const rest = trimmed.slice(areaCodeLength);
+  if (rest.length <= 4) return `${areaCode}-${rest}`;
+
+  const suffix = rest.slice(-4);
+  const middle = rest.slice(0, rest.length - 4);
+  return `${areaCode}-${middle}-${suffix}`;
+}
+
 const MILLISECONDS_PER_MINUTE = 60_000;
 
 export function formatRemainingLinkTime(linkExpiresAtIso: string, now: Date): string {

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { createCoordination } from "../api/coordination.api";
 import { useCoordinationProperty } from "../hooks/use-coordination-property";
-import { dealTypeLabels } from "../model/coordination";
+import { dealTypeLabels, formatPhoneNumber } from "../model/coordination";
 import type { CoordinationCreateResult } from "../schemas/coordination.schema";
 import { CandidateTimePicker } from "./candidate-time-picker";
 import { CoordinationLoadError } from "./coordination-load-error";
@@ -106,7 +106,7 @@ export function CoordinationRequestFlow({ propertyId }: { propertyId: number }) 
             <input
               id="tenant-phone"
               value={tenantPhone}
-              onChange={(event) => setTenantPhone(event.target.value)}
+              onChange={(event) => setTenantPhone(formatPhoneNumber(event.target.value))}
               placeholder="임장을 희망하는 고객의 연락처를 입력해 주세요."
               className="h-14 w-full rounded-lg border border-[#dfe3ec] bg-[#f8f9fd] px-5"
             />
