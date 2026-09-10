@@ -359,8 +359,89 @@ describe("CoordinationDetail", () => {
     render(<CoordinationDetail coordinationId={1} />);
 
     await screen.findByText("구매희망자가 링크를 받고 날짜와 시간을 선택하는 중입니다.");
+    expect(screen.queryByRole("link", { name: /구매희망자용 링크/ })).toBeNull();
+  });
+
+  it("유효한 구매희망자 응답이 있으면 상단 버튼으로 링크를 다시 열 수 있다", async () => {
+    vi.mocked(getCoordinationDetail).mockResolvedValue(
+      baseDetail({
+        status: "BUYER_CHECKING",
+        buyerResponses: [
+          {
+            responseId: 20,
+            role: "BUYER",
+            name: null,
+            phone: null,
+            result: "WAITING",
+            offeredCandidateIds: [100],
+            selectedCandidateIds: [],
+            submittedAt: null,
+            customerLinkUrl: "https://app.sairo.agency/visit-responses/buyer-token-1",
+            linkExpiresAt: "2026-09-27T00:00:00Z",
+          },
+        ],
+      }),
+    );
+    const user = userEvent.setup();
+    render(<CoordinationDetail coordinationId={1} />);
+
+    const buyerLinkButton = await screen.findByRole("button", { name: "🔗 구매희망자용 링크" });
+    await user.click(buyerLinkButton);
+
+    await screen.findByText("https://app.sairo.agency/visit-responses/buyer-token-1");
+  });
+
+  it("구매희망자 응답의 링크가 만료됐으면 상단 버튼을 보여주지 않는다", async () => {
+    vi.mocked(getCoordinationDetail).mockResolvedValue(
+      baseDetail({
+        status: "BUYER_CHECKING",
+        buyerResponses: [
+          {
+            responseId: 20,
+            role: "BUYER",
+            name: null,
+            phone: null,
+            result: "EXPIRED",
+            offeredCandidateIds: [100],
+            selectedCandidateIds: [],
+            submittedAt: null,
+            customerLinkUrl: "https://app.sairo.agency/visit-responses/buyer-token-1",
+            linkExpiresAt: "2020-01-01T00:00:00Z",
+          },
+        ],
+      }),
+    );
+    render(<CoordinationDetail coordinationId={1} />);
+
+    await screen.findByText("링크가 만료됐습니다.");
     expect(screen.queryByText("🔗 구매희망자용 링크")).toBeNull();
-    expect(screen.queryByText("+ 구매희망자 링크 추가 생성")).toBeNull();
+  });
+
+  it("조율 취소 상태에서는 상단 링크 버튼을 모두 숨긴다", async () => {
+    vi.mocked(getCoordinationDetail).mockResolvedValue(
+      baseDetail({
+        status: "CANCELLED",
+        buyerResponses: [
+          {
+            responseId: 20,
+            role: "BUYER",
+            name: null,
+            phone: null,
+            result: "WAITING",
+            offeredCandidateIds: [100],
+            selectedCandidateIds: [],
+            submittedAt: null,
+            customerLinkUrl: "https://app.sairo.agency/visit-responses/buyer-token-1",
+            linkExpiresAt: "2026-09-27T00:00:00Z",
+          },
+        ],
+      }),
+    );
+    render(<CoordinationDetail coordinationId={1} />);
+
+    await screen.findByText("서울특별시 성북구 정릉로 123");
+    expect(screen.queryByText("🔗 세입자용 링크")).toBeNull();
+    expect(screen.queryByText("🔗 구매희망자용 링크")).toBeNull();
   });
 
   it("화면이 열려 있는 동안 주기적으로 상세 조회를 다시 호출한다", async () => {
