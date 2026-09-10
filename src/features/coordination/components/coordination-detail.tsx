@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ApiError } from "@/shared/api/client";
 import { EntityLoadError } from "@/shared/components/entity-load-error";
@@ -175,7 +176,6 @@ function DetailBody({
               expiresAt,
             })
           }
-          onCancelled={onChanged}
         />
 
         {!isTenantNoneAvailable ? (
@@ -201,7 +201,6 @@ function DetailBody({
                         expiresAt,
                       })
                     }
-                    onCancelled={onChanged}
                   />
                 </div>
               ))
@@ -256,7 +255,6 @@ function ResponseBlock({
   isFinalized,
   isCancelled,
   onOpenLink,
-  onCancelled,
 }: {
   coordinationId: number;
   response: CoordinationCustomerResponseItem;
@@ -264,8 +262,8 @@ function ResponseBlock({
   isFinalized: boolean;
   isCancelled: boolean;
   onOpenLink: (url: string, expiresAt: string) => void;
-  onCancelled: () => void;
 }) {
+  const router = useRouter();
   const [isCancelling, setIsCancelling] = useState(false);
   const [cancelError, setCancelError] = useState("");
   const isTenantNoneAvailable = response.role === "TENANT" && response.result === "NONE_AVAILABLE";
@@ -275,10 +273,9 @@ function ResponseBlock({
     setCancelError("");
     try {
       await cancelCoordination(coordinationId);
-      onCancelled();
+      router.push("/coordinations");
     } catch {
       setCancelError("조율 취소를 처리하지 못했습니다. 잠시 후 다시 시도해주세요.");
-    } finally {
       setIsCancelling(false);
     }
   }
