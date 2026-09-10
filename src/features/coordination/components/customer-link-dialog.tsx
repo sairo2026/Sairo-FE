@@ -52,7 +52,7 @@ export function CustomerLinkDialog({
           <button
             type="button"
             onClick={() => void handleCopy()}
-            className="shrink-0 rounded-lg bg-[#3937b8] px-5 py-2 text-sm font-semibold text-white"
+            className="shrink-0 rounded-lg bg-[#3937b8] px-5 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
           >
             복사
           </button>
@@ -65,7 +65,7 @@ export function CustomerLinkDialog({
         <button
           type="button"
           onClick={onClose}
-          className="rounded-lg bg-[#3937b8] px-10 py-4 font-semibold text-white"
+          className="rounded-lg bg-[#3937b8] px-10 py-4 font-semibold text-white transition-opacity hover:opacity-90"
         >
           확인
         </button>

@@ -98,10 +98,10 @@ export function CandidateTimePicker({
         type="button"
         disabled={disabled}
         onClick={() => toggleSlot(slot)}
-        className={`h-12 rounded-lg border font-semibold ${
+        className={`h-12 rounded-lg border font-semibold transition-colors ${
           selected
             ? "border-[#3937b8] bg-[#3937b8] text-white"
-            : "border-[#dfe3ec] bg-white text-[#182033] disabled:cursor-not-allowed disabled:opacity-40"
+            : "border-[#dfe3ec] bg-white text-[#182033] enabled:hover:border-[#3937b8] disabled:cursor-not-allowed disabled:opacity-40"
         }`}
       >
         {slot.getHours().toString().padStart(2, "0")}:
@@ -158,10 +158,10 @@ export function CandidateTimePicker({
                     type="button"
                     disabled={disabled}
                     onClick={() => setSelectedDate(cell)}
-                    className={`h-10 rounded-lg border font-semibold ${
+                    className={`h-10 rounded-lg border font-semibold transition-colors ${
                       selected
                         ? "border-[#3937b8] text-[#3937b8]"
-                        : "border-transparent text-[#182033] disabled:text-slate-300"
+                        : "border-transparent text-[#182033] enabled:hover:border-[#dfe3ec] enabled:hover:bg-[#f0f0ff] disabled:text-slate-300"
                     }`}
                   >
                     {cell.getDate()}
@@ -188,7 +188,7 @@ export function CandidateTimePicker({
             <button
               type="button"
               onClick={onBack}
-              className="rounded-lg bg-[#f0f0ff] px-10 py-4 font-semibold text-slate-600"
+              className="rounded-lg bg-[#f0f0ff] px-10 py-4 font-semibold text-slate-600 transition-colors hover:bg-[#e4e4fb]"
             >
               {backLabel}
             </button>
@@ -196,7 +196,7 @@ export function CandidateTimePicker({
               type="button"
               onClick={onSubmit}
               disabled={value.length === 0 || isSubmitting}
-              className="rounded-lg bg-[#3937b8] px-12 py-4 font-semibold text-white disabled:opacity-50"
+              className="rounded-lg bg-[#3937b8] px-12 py-4 font-semibold text-white transition-opacity enabled:hover:opacity-90 disabled:opacity-50"
             >
               {isSubmitting ? "처리 중" : submitLabel}
             </button>

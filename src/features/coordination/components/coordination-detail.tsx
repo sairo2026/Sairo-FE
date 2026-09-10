@@ -484,11 +484,14 @@ function BottomActions({
       <div className="flex flex-wrap gap-4">
         <Link
           href="/coordinations"
-          className="rounded-lg bg-[#f0f0ff] px-8 py-4 font-semibold text-slate-600"
+          className="rounded-lg bg-[#f0f0ff] px-8 py-4 font-semibold text-slate-600 transition-colors hover:bg-[#e4e4fb]"
         >
           임장 조율 목록으로
         </Link>
-        <Link href="/" className="rounded-lg bg-[#3937b8] px-8 py-4 font-semibold text-white">
+        <Link
+          href="/"
+          className="rounded-lg bg-[#3937b8] px-8 py-4 font-semibold text-white transition-opacity hover:opacity-90"
+        >
           홈으로
         </Link>
       </div>
@@ -517,7 +520,7 @@ function BottomActions({
             type="button"
             onClick={() => void handleComplete()}
             disabled={isSubmitting}
-            className="rounded-lg bg-[#3937b8] px-8 py-4 font-semibold text-white disabled:opacity-50"
+            className="rounded-lg bg-[#3937b8] px-8 py-4 font-semibold text-white transition-opacity enabled:hover:opacity-90 disabled:opacity-50"
           >
             {isSubmitting ? "처리 중" : "임장 완료"}
           </button>

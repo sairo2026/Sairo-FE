@@ -24,7 +24,7 @@ export function OfficeShell({ children, active }: OfficeShellProps) {
               className={`shrink-0 border-b-2 pb-3 text-lg font-semibold transition-colors lg:w-fit lg:text-2xl ${
                 active === item.key
                   ? "border-[#3937b8] text-[#3937b8]"
-                  : "border-transparent text-[#182033]"
+                  : "border-transparent text-[#182033] hover:text-[#3937b8]"
               }`}
             >
               {item.label}
