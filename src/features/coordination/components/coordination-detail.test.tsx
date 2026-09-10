@@ -16,6 +16,12 @@ const CANDIDATE_100_ISO = "2026-09-20T01:30:00Z";
 const CANDIDATE_101_ISO = "2026-09-20T02:30:00Z";
 const CANDIDATE_100_LABEL = formatCandidateLabelFromIso(CANDIDATE_100_ISO);
 
+const push = vi.fn();
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push }),
+}));
+
 vi.mock("../api/coordination.api", () => ({
   getCoordinationDetail: vi.fn(),
   confirmCoordination: vi.fn(),
@@ -108,17 +114,16 @@ describe("CoordinationDetail", () => {
     expect(screen.getAllByRole("button", { name: "조율 취소" }).length).toBe(1);
   });
 
-  it("세입자가 가능한 시간이 없으면 조율 취소 버튼을 눌러 실제 취소 API를 호출하고 배지·임장일정에 반영한다", async () => {
-    const activeDetail = baseDetail({
-      status: "TENANT_CHECKING",
-      tenantResponse: {
-        ...baseDetail().tenantResponse,
-        result: "NONE_AVAILABLE",
-      },
-    });
-    vi.mocked(getCoordinationDetail)
-      .mockResolvedValueOnce(activeDetail)
-      .mockResolvedValueOnce({ ...activeDetail, status: "CANCELLED" });
+  it("세입자가 가능한 시간이 없으면 조율 취소 버튼을 눌러 실제 취소 API를 호출하고 목록으로 이동한다", async () => {
+    vi.mocked(getCoordinationDetail).mockResolvedValue(
+      baseDetail({
+        status: "TENANT_CHECKING",
+        tenantResponse: {
+          ...baseDetail().tenantResponse,
+          result: "NONE_AVAILABLE",
+        },
+      }),
+    );
     vi.mocked(cancelCoordination).mockResolvedValue(undefined);
     const user = userEvent.setup();
     render(<CoordinationDetail coordinationId={1} />);
@@ -128,8 +133,7 @@ describe("CoordinationDetail", () => {
     await user.click(cancelButton);
 
     expect(cancelCoordination).toHaveBeenCalledWith(1);
-    await waitFor(() => expect(screen.queryByRole("button", { name: "조율 취소" })).toBeNull());
-    expect(screen.getAllByText("조율 취소").length).toBeGreaterThanOrEqual(2);
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/coordinations"));
     expect(completeVisit).not.toHaveBeenCalled();
   });
 
