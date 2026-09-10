@@ -98,6 +98,27 @@ describe("CoordinationList", () => {
     expect(screen.getAllByText("확정 완료").length).toBeGreaterThan(0);
   });
 
+  it("취소된 조율 건은 임장 일정 칸에도 조율 취소를 보여준다", async () => {
+    vi.mocked(getCoordinationList).mockResolvedValue({
+      ...LIST_RESULT,
+      coordinations: [
+        {
+          coordinationId: 3,
+          propertyAddress: "서울특별시 마포구 월드컵로 1",
+          tenantName: "이세입자",
+          tenantPhone: "010-1111-2222",
+          visitScheduledAt: null,
+          status: "CANCELLED" as const,
+        },
+      ],
+    });
+    render(<CoordinationList />);
+
+    await screen.findByText("이세입자 / 010-1111-2222");
+    expect(screen.getAllByText("조율 취소").length).toBeGreaterThan(0);
+    expect(screen.queryByText("진행 상황 보기")).toBeNull();
+  });
+
   it("상태 요약 박스는 홈 화면과 동일한 상태별 색상을 적용한다", async () => {
     render(<CoordinationList />);
     await screen.findByText("김세입자 / 010-1234-5678");
