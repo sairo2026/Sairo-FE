@@ -52,7 +52,7 @@ export function BuyerCoordinationLinkFlow({ coordinationId }: { coordinationId: 
         type="button"
         onClick={() => void handleCreateBuyerLink()}
         disabled={isSubmitting}
-        className="rounded-lg bg-[#3937b8] px-10 py-4 font-semibold text-white disabled:opacity-60"
+        className="rounded-lg bg-[#3937b8] px-10 py-4 font-semibold text-white transition-opacity enabled:hover:opacity-90 disabled:opacity-60"
       >
         구매희망자용 링크 생성
       </button>

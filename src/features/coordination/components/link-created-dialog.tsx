@@ -68,7 +68,7 @@ export function LinkCreatedDialog({
           <button
             type="button"
             onClick={() => void handleCopy()}
-            className="shrink-0 rounded-lg bg-[#3937b8] px-5 py-2 text-sm font-semibold text-white"
+            className="shrink-0 rounded-lg bg-[#3937b8] px-5 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
           >
             복사
           </button>
@@ -93,14 +93,14 @@ export function LinkCreatedDialog({
           <button
             type="button"
             onClick={handleBack}
-            className="rounded-lg bg-[#f0f0ff] px-6 py-4 font-semibold text-slate-600"
+            className="rounded-lg bg-[#f0f0ff] px-6 py-4 font-semibold text-slate-600 transition-colors hover:bg-[#e4e4fb]"
           >
             다시 선택
           </button>
           <button
             type="button"
             onClick={handleFinish}
-            className="rounded-lg bg-[#3937b8] px-6 py-4 font-semibold text-white"
+            className="rounded-lg bg-[#3937b8] px-6 py-4 font-semibold text-white transition-opacity hover:opacity-90"
           >
             완료
           </button>

@@ -77,10 +77,10 @@ export function CandidateSelectionView({
                     key={candidate.candidateTimeId}
                     type="button"
                     onClick={() => toggle(candidate.candidateTimeId)}
-                    className={`rounded-lg border px-4 py-3 text-sm font-semibold ${
+                    className={`rounded-lg border px-4 py-3 text-sm font-semibold transition-colors ${
                       selected
                         ? "border-[#3937b8] text-[#3937b8]"
-                        : "border-[#dfe3ec] text-[#182033]"
+                        : "border-[#dfe3ec] text-[#182033] hover:border-[#3937b8]"
                     }`}
                   >
                     {formatCandidateLabel(candidate.startsAt)}
@@ -101,7 +101,7 @@ export function CandidateSelectionView({
           type="button"
           onClick={() => void handleSubmit()}
           disabled={selectedIds.length === 0 || isSubmitting}
-          className="w-full rounded-lg bg-[#3937b8] py-4 font-semibold text-white disabled:bg-[#f0f0ff] disabled:text-slate-400"
+          className="w-full rounded-lg bg-[#3937b8] py-4 font-semibold text-white transition-opacity enabled:hover:opacity-90 disabled:bg-[#f0f0ff] disabled:text-slate-400"
         >
           제출
         </button>
@@ -110,7 +110,7 @@ export function CandidateSelectionView({
             type="button"
             onClick={() => void handleNoAvailability()}
             disabled={isSubmitting}
-            className="w-full rounded-lg bg-[#f0f0ff] py-4 font-semibold text-[#3937b8] disabled:opacity-50"
+            className="w-full rounded-lg bg-[#f0f0ff] py-4 font-semibold text-[#3937b8] transition-colors enabled:hover:bg-[#e4e4fb] disabled:opacity-50"
           >
             가능한 시간이 없음
           </button>

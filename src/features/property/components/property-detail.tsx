@@ -20,7 +20,7 @@ export function PropertyDetail({ propertyId }: { propertyId: number }) {
         <h1 className="text-3xl font-bold">매물 조회</h1>
         <Link
           href={`/coordinations/new?propertyId=${propertyId}`}
-          className="rounded-lg border border-[#3937b8] px-5 py-3 font-semibold text-[#3937b8]"
+          className="rounded-lg border border-[#3937b8] px-5 py-3 font-semibold text-[#3937b8] transition-colors hover:bg-[#3937b8] hover:text-white"
         >
           임장 조율 생성
         </Link>
@@ -39,13 +39,13 @@ export function PropertyDetail({ propertyId }: { propertyId: number }) {
       <div className="mt-28 flex gap-4">
         <Link
           href={`/properties/${propertyId}/edit`}
-          className="rounded-lg bg-[#f0f0ff] px-10 py-4 font-semibold text-slate-600"
+          className="rounded-lg bg-[#f0f0ff] px-10 py-4 font-semibold text-slate-600 transition-colors hover:bg-[#e4e4fb]"
         >
           수정
         </Link>
         <Link
           href="/properties"
-          className="rounded-lg bg-[#3937b8] px-12 py-4 font-semibold text-white"
+          className="rounded-lg bg-[#3937b8] px-12 py-4 font-semibold text-white transition-opacity hover:opacity-90"
         >
           확인
         </Link>
