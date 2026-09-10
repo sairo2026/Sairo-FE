@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ApiError } from "@/shared/api/client";
 import { EntityLoadError } from "@/shared/components/entity-load-error";
 import { cancelCoordination, completeVisit, confirmCoordination } from "../api/coordination.api";
@@ -71,6 +71,17 @@ function DetailBody({
     !isTenantNoneAvailable &&
     detail.status !== "TENANT_CHECKING" &&
     detail.buyerResponses.length === 0;
+  const validBuyerLinkResponse = useMemo(
+    () =>
+      detail.buyerResponses.find(
+        (buyer) =>
+          buyer.customerLinkUrl &&
+          buyer.linkExpiresAt &&
+          new Date(buyer.linkExpiresAt).getTime() > new Date().getTime(),
+      ),
+    [detail.buyerResponses],
+  );
+  const canShowBuyerLink = !isFinalized && !isCancelled && validBuyerLinkResponse !== undefined;
 
   return (
     <section className="max-w-[1010px]">
@@ -84,6 +95,7 @@ function DetailBody({
         <h1 className="text-3xl font-bold">임장 조율 상세</h1>
         <div className="flex flex-wrap gap-3">
           {!isFinalized &&
+          !isCancelled &&
           detail.tenantResponse.customerLinkUrl &&
           detail.tenantResponse.linkExpiresAt ? (
             <button
@@ -95,7 +107,7 @@ function DetailBody({
                   expiresAt: detail.tenantResponse.linkExpiresAt ?? "",
                 })
               }
-              className="rounded-lg border border-[#3937b8] px-5 py-3 text-sm font-semibold text-[#3937b8]"
+              className="rounded-lg border border-[#3937b8] px-5 py-3 text-sm font-semibold text-[#3937b8] transition-colors hover:bg-[#3937b8] hover:text-white"
             >
               🔗 세입자용 링크
             </button>
@@ -103,10 +115,25 @@ function DetailBody({
           {canCreateBuyerLink ? (
             <Link
               href={`/coordinations/${coordinationId}/buyer-link`}
-              className="rounded-lg border border-[#3937b8] px-5 py-3 text-sm font-semibold text-[#3937b8]"
+              className="rounded-lg border border-[#3937b8] px-5 py-3 text-sm font-semibold text-[#3937b8] transition-colors hover:bg-[#3937b8] hover:text-white"
             >
               🔗 구매희망자용 링크
             </Link>
+          ) : null}
+          {canShowBuyerLink && validBuyerLinkResponse ? (
+            <button
+              type="button"
+              onClick={() =>
+                setOpenLinkDialog({
+                  title: "구매희망자와 임장 일정을 조율하는 링크입니다.",
+                  url: validBuyerLinkResponse.customerLinkUrl ?? "",
+                  expiresAt: validBuyerLinkResponse.linkExpiresAt ?? "",
+                })
+              }
+              className="rounded-lg border border-[#3937b8] px-5 py-3 text-sm font-semibold text-[#3937b8] transition-colors hover:bg-[#3937b8] hover:text-white"
+            >
+              🔗 구매희망자용 링크
+            </button>
           ) : null}
         </div>
       </div>
@@ -167,15 +194,7 @@ function DetailBody({
           coordinationId={coordinationId}
           response={detail.tenantResponse}
           candidateTimesById={candidateTimesById}
-          isFinalized={isFinalized}
           isCancelled={isCancelled}
-          onOpenLink={(url, expiresAt) =>
-            setOpenLinkDialog({
-              title: "세입자와 임장 일정을 조율하는 링크입니다.",
-              url,
-              expiresAt,
-            })
-          }
         />
 
         {!isTenantNoneAvailable ? (
@@ -192,15 +211,7 @@ function DetailBody({
                     coordinationId={coordinationId}
                     response={buyer}
                     candidateTimesById={candidateTimesById}
-                    isFinalized={isFinalized}
                     isCancelled={isCancelled}
-                    onOpenLink={(url, expiresAt) =>
-                      setOpenLinkDialog({
-                        title: "구매희망자와 임장 일정을 조율하는 링크입니다.",
-                        url,
-                        expiresAt,
-                      })
-                    }
                   />
                 </div>
               ))
@@ -252,16 +263,12 @@ function ResponseBlock({
   coordinationId,
   response,
   candidateTimesById,
-  isFinalized,
   isCancelled,
-  onOpenLink,
 }: {
   coordinationId: number;
   response: CoordinationCustomerResponseItem;
   candidateTimesById: Map<number, CoordinationCandidateTimeItem>;
-  isFinalized: boolean;
   isCancelled: boolean;
-  onOpenLink: (url: string, expiresAt: string) => void;
 }) {
   const router = useRouter();
   const [isCancelling, setIsCancelling] = useState(false);
@@ -352,15 +359,6 @@ function ResponseBlock({
         <span className="text-sm font-semibold">
           {customerResponseResultLabels[response.result]}
         </span>
-        {!isFinalized && response.customerLinkUrl && response.linkExpiresAt ? (
-          <button
-            type="button"
-            onClick={() => onOpenLink(response.customerLinkUrl ?? "", response.linkExpiresAt ?? "")}
-            className="text-sm font-semibold text-[#3937b8]"
-          >
-            링크 다시 보기
-          </button>
-        ) : null}
       </div>
     </div>
   );
