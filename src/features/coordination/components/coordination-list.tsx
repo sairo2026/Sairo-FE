@@ -201,11 +201,13 @@ export function CoordinationList() {
                 </span>
                 <span className="text-sm">{item.propertyAddress}</span>
                 <span className="text-sm font-semibold">
-                  {item.status === "VISIT_COMPLETED"
-                    ? "임장 완료"
-                    : item.visitScheduledAt
-                      ? formatShortSchedule(item.visitScheduledAt)
-                      : "진행 상황 보기"}
+                  {item.status === "CANCELLED"
+                    ? "조율 취소"
+                    : item.status === "VISIT_COMPLETED"
+                      ? "임장 완료"
+                      : item.visitScheduledAt
+                        ? formatShortSchedule(item.visitScheduledAt)
+                        : "진행 상황 보기"}
                 </span>
                 <CoordinationStatusBadge status={item.status} />
               </Link>
