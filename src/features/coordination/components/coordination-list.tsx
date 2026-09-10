@@ -8,6 +8,7 @@ import { getCoordinationList } from "../api/coordination.api";
 import {
   coordinationStatusBadgeClassNames,
   coordinationStatusLabels,
+  formatPhoneNumber,
   formatShortSchedule,
 } from "../model/coordination";
 import {
@@ -197,7 +198,7 @@ export function CoordinationList() {
                 className="grid gap-3 border-b border-indigo-100 px-8 py-5 last:border-b-0 hover:bg-white md:grid-cols-[1.4fr_1.6fr_1fr_1fr] md:items-center md:gap-5"
               >
                 <span className="font-bold">
-                  {item.tenantName} / {item.tenantPhone}
+                  {item.tenantName} / {formatPhoneNumber(item.tenantPhone)}
                 </span>
                 <span className="text-sm">{item.propertyAddress}</span>
                 <span className="text-sm font-semibold">

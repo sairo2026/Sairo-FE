@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   formatCandidateLabel,
+  formatPhoneNumber,
   formatRemainingLinkTime,
   formatShortSchedule,
   generateTimeSlots,
@@ -65,6 +66,32 @@ describe("formatCandidateLabel", () => {
 describe("formatShortSchedule", () => {
   it("formats an ISO string as MM/DD HH:mm", () => {
     expect(formatShortSchedule(new Date(2026, 7, 22, 19, 30).toISOString())).toBe("08/22 19:30");
+  });
+});
+
+describe("formatPhoneNumber", () => {
+  it("formats a mobile number as 3-4-4", () => {
+    expect(formatPhoneNumber("01032672194")).toBe("010-3267-2194");
+  });
+
+  it("formats a Seoul landline as 2-3-4", () => {
+    expect(formatPhoneNumber("029101458")).toBe("02-910-1458");
+  });
+
+  it("formats a non-Seoul landline as 3-3-4", () => {
+    expect(formatPhoneNumber("0319466908")).toBe("031-946-6908");
+  });
+
+  it("reformats an already-hyphenated number the same way", () => {
+    expect(formatPhoneNumber("010-1234-5678")).toBe("010-1234-5678");
+  });
+
+  it("leaves a partially typed number without a trailing hyphen group", () => {
+    expect(formatPhoneNumber("0103")).toBe("010-3");
+  });
+
+  it("returns an empty string when there are no digits", () => {
+    expect(formatPhoneNumber("")).toBe("");
   });
 });
 
