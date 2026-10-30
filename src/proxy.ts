@@ -9,10 +9,16 @@ export function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
   if (pathname === "/api" || pathname.startsWith("/api/")) {
-    return NextResponse.json({ message: "서비스 준비 중입니다." }, { status: 503 });
+    return NextResponse.json(
+      { message: "서비스 준비 중입니다." },
+      { status: 503, headers: { "Cache-Control": "no-store" } },
+    );
   }
 
-  const response = NextResponse.rewrite(new URL(COMING_SOON_PATH, request.url));
+  const response =
+    pathname === COMING_SOON_PATH
+      ? NextResponse.next()
+      : NextResponse.rewrite(new URL(COMING_SOON_PATH, request.url));
   response.headers.set("Cache-Control", "no-store");
   return response;
 }
