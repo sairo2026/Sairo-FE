@@ -65,6 +65,8 @@ function baseDetail(overrides: Partial<CoordinationDetailResult> = {}): Coordina
 }
 
 beforeEach(() => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date("2026-09-20T00:00:00Z"));
   Object.defineProperty(navigator, "clipboard", {
     value: { writeText: vi.fn().mockResolvedValue(undefined) },
     configurable: true,
@@ -73,6 +75,7 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup();
+  vi.useRealTimers();
   vi.clearAllMocks();
 });
 
@@ -362,34 +365,62 @@ describe("CoordinationDetail", () => {
     expect(screen.queryByRole("link", { name: /구매희망자용 링크/ })).toBeNull();
   });
 
-  it("유효한 구매희망자 응답이 있으면 상단 버튼으로 링크를 다시 열 수 있다", async () => {
-    vi.mocked(getCoordinationDetail).mockResolvedValue(
-      baseDetail({
-        status: "BUYER_CHECKING",
-        buyerResponses: [
-          {
-            responseId: 20,
-            role: "BUYER",
-            name: null,
-            phone: null,
-            result: "WAITING",
-            offeredCandidateIds: [100],
-            selectedCandidateIds: [],
-            submittedAt: null,
-            customerLinkUrl: "https://app.sairo.agency/visit-responses/buyer-token-1",
-            linkExpiresAt: "2026-09-27T00:00:00Z",
-          },
-        ],
-      }),
-    );
-    const user = userEvent.setup();
-    render(<CoordinationDetail coordinationId={1} />);
+  it.each(["2026-09-20T00:00:00Z", "2026-09-26T23:59:59.999Z"])(
+    "현재 시각이 %s일 때 유효한 구매희망자 링크를 다시 열 수 있다",
+    async (now) => {
+      vi.setSystemTime(new Date(now));
+      vi.mocked(getCoordinationDetail).mockResolvedValue(
+        baseDetail({
+          status: "BUYER_CHECKING",
+          buyerResponses: [
+            {
+              responseId: 20,
+              role: "BUYER",
+              name: null,
+              phone: null,
+              result: "WAITING",
+              offeredCandidateIds: [100],
+              selectedCandidateIds: [],
+              submittedAt: null,
+              customerLinkUrl: "https://app.sairo.agency/visit-responses/buyer-token-1",
+              linkExpiresAt: "2026-09-27T00:00:00Z",
+            },
+          ],
+        }),
+      );
+      const user = userEvent.setup();
+      render(<CoordinationDetail coordinationId={1} />);
 
-    const buyerLinkButton = await screen.findByRole("button", { name: "🔗 구매희망자용 링크" });
-    await user.click(buyerLinkButton);
+      const buyerLinkButton = await screen.findByRole("button", { name: "🔗 구매희망자용 링크" });
+      await user.click(buyerLinkButton);
 
-    await screen.findByText("https://app.sairo.agency/visit-responses/buyer-token-1");
-  });
+      await screen.findByText("https://app.sairo.agency/visit-responses/buyer-token-1");
+    },
+  );
+
+  it.each(["2026-09-27T00:00:00Z", "2026-09-27T00:00:00.001Z"])(
+    "현재 시각이 %s일 때 대기 중 응답도 만료된 링크 버튼을 숨긴다",
+    async (now) => {
+      vi.setSystemTime(new Date(now));
+      vi.mocked(getCoordinationDetail).mockResolvedValue(
+        baseDetail({
+          status: "BUYER_CHECKING",
+          buyerResponses: [
+            {
+              ...baseDetail().tenantResponse,
+              responseId: 20,
+              role: "BUYER",
+              result: "WAITING",
+              customerLinkUrl: "https://app.sairo.agency/visit-responses/buyer-token-1",
+            },
+          ],
+        }),
+      );
+      render(<CoordinationDetail coordinationId={1} />);
+      await screen.findByText("구매희망자가 링크를 받고 날짜와 시간을 선택하는 중입니다.");
+      expect(screen.queryByRole("button", { name: "🔗 구매희망자용 링크" })).toBeNull();
+    },
+  );
 
   it("구매희망자 응답의 링크가 만료됐으면 상단 버튼을 보여주지 않는다", async () => {
     vi.mocked(getCoordinationDetail).mockResolvedValue(
@@ -445,6 +476,7 @@ describe("CoordinationDetail", () => {
   });
 
   it("화면이 열려 있는 동안 주기적으로 상세 조회를 다시 호출한다", async () => {
+    vi.useRealTimers();
     vi.useFakeTimers();
     try {
       vi.mocked(getCoordinationDetail).mockResolvedValue(baseDetail());
