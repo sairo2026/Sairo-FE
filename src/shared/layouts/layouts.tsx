@@ -35,16 +35,24 @@ export function ApproverLayout({ children }: LayoutProps) {
   );
 }
 
-export type OfficeLayoutProps = LayoutProps & { activeKey?: string; officeName?: string };
+export type OfficeNavItem = { key: string; label: string; href: string };
 
-/** 사무소 화면: 좌측 메뉴 6개와 상단 사무소 표시. */
-export function OfficeLayout({ children, activeKey, officeName }: OfficeLayoutProps) {
+export type OfficeLayoutProps = LayoutProps & {
+  activeKey?: string;
+  officeName?: string;
+  /** 역할별 메뉴. 생략하면 기본 6개 메뉴를 보여준다. */
+  navItems?: readonly OfficeNavItem[];
+};
+
+/** 사무소 화면: 좌측 메뉴와 상단 사무소 표시. */
+export function OfficeLayout({ children, activeKey, officeName, navItems }: OfficeLayoutProps) {
+  const items = navItems ?? OFFICE_NAV_ITEMS;
   return (
     <ToastProvider>
       <div className="min-h-screen bg-white text-ink lg:grid lg:grid-cols-[260px_1fr]">
         <aside className="border-b border-line bg-surface px-6 py-6 lg:min-h-screen lg:border-r lg:border-b-0 lg:px-8 lg:pt-32">
           <nav aria-label="주요 메뉴" className="flex gap-5 overflow-x-auto lg:flex-col lg:gap-8">
-            {OFFICE_NAV_ITEMS.map((item) => (
+            {items.map((item) => (
               <SideNavItem
                 key={item.key}
                 href={item.href}
