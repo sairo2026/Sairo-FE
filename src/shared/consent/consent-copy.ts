@@ -8,6 +8,8 @@ export const CONSENT_HISTORY_COPY = {
   withdraw: "철회",
   withdrawDone: "동의를 철회했습니다.",
   empty: "동의 내역이 없습니다.",
+  reconsentBanner:
+    "공지·혜택 안내 수신 동의 내용이 바뀌었습니다. 계속 받으시려면 바뀐 내용을 확인하고 다시 동의해 주세요. 동의하기 전까지 안내를 보내지 않습니다.",
   columns: ["항목", "버전", "상태", "처리 시각", "경로"],
   statuses: { agreed: "동의함", withdrawn: "철회함" },
   paths: [

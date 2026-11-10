@@ -1,4 +1,5 @@
 import { http, HttpResponse } from "msw";
+import { recordMockAgreement } from "./settings";
 import type { AuthContextResponse } from "@/lib/api/contracts/common.schema";
 import { mockErrors } from "../error-responses";
 
@@ -118,7 +119,9 @@ export const authHandlers = [
     });
   }),
 
-  http.post("/api/me/terms-agreements", () => {
+  http.post("/api/me/terms-agreements", async ({ request }) => {
+    const rejected = recordMockAgreement(await request.json());
+    if (rejected) return rejected;
     if (state.context) state.context = { ...state.context, reconsentRequired: false };
     return new HttpResponse(null, { status: 204 });
   }),

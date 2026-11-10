@@ -1,3 +1,5 @@
+import { CONSENT_HISTORY_COPY } from "@/shared/consent/consent-copy";
+
 export const SIGNUP_TERMS_COPY = {
   sectionTitle: "약관 동의",
   tosLabel: "만 14세 이상이며 사이로 이용약관에 동의합니다.",
@@ -67,8 +69,7 @@ export const RECONSENT_COPY = {
   footer:
     "동의하지 않으면 서비스를 계속 이용할 수 없습니다. 이용을 멈추려면 회원 탈퇴를 진행해 주세요. 로그아웃, 개인정보 권리 요청, 지원 문의는 동의하지 않아도 할 수 있습니다.",
   requiredError: "새 약관에 동의하셔야 계속 이용할 수 있습니다.",
-  marketingBanner:
-    "공지·혜택 안내 수신 동의 내용이 바뀌었습니다. 계속 받으시려면 바뀐 내용을 확인하고 다시 동의해 주세요. 동의하기 전까지 안내를 보내지 않습니다.",
+  marketingBanner: CONSENT_HISTORY_COPY.reconsentBanner,
 } as const;
 
-export { CONSENT_HISTORY_COPY } from "@/shared/consent/consent-copy";
+export { CONSENT_HISTORY_COPY };

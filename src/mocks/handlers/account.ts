@@ -173,6 +173,14 @@ export function setMockTermsVersion(version: string): void {
   state.termsVersion = version;
 }
 
+export function getMockMe(): MeResponse {
+  return state.me;
+}
+
+export function getMockTermsVersion(): string {
+  return state.termsVersion;
+}
+
 export function setMockMe(me: MeResponse): void {
   state.me = me;
 }
