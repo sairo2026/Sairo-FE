@@ -16,13 +16,15 @@ import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import { DateTimeField } from "@/shared/components/ui/date-time-field";
-import { Checkbox } from "@/shared/components/ui/select-field";
 import { Tabs } from "@/shared/components/ui/tabs";
 import { formatSeoulDateTime, formatTimeSlot } from "@/shared/lib/format";
 import { normalizeLinkToken } from "@/shared/lib/link-token";
 import { fetchCustomerConfirmed, fetchCustomerLink, submitCustomerTimes } from "../api/follow.api";
 import { LEGAL_ROLE_LABEL, PUBLIC_VISIT_STATE_LABEL, labelOf } from "../model/labels";
+import { LINK_COMMON_COPY, linkExpiredNotice } from "../model/legal-copy";
+import type { LinkNoticeContext } from "../model/legal-copy";
 import { describeVisitError, isApiCode } from "../model/messages";
+import { CustomerLinkPrivacyNotice, LinkCommonNotices } from "./link-legal-notices";
 import { kstParts } from "../model/time";
 import {
   MAX_CUSTOMER_SLOTS,
@@ -32,16 +34,20 @@ import {
 } from "../model/customer-times";
 import type { SlotDraft, SlotErrors } from "../model/customer-times";
 
-function LinkProblem({ expired }: { expired: boolean }) {
+const EMPTY_NOTICE_CONTEXT: LinkNoticeContext = {
+  officeName: null,
+  officeContactPhone: null,
+  operatorName: null,
+  privacyContact: null,
+  retentionDays: null,
+};
+
+function LinkProblem() {
   return (
     <ErrorScreen
       kind="not-found"
       title="링크를 열 수 없습니다"
-      description={
-        expired
-          ? "링크가 만료되었습니다. 방문을 조율하는 사무소에 새 링크를 요청해 주세요."
-          : "링크가 잘못되었거나 만료되었습니다. 받은 링크를 다시 확인해 주세요."
-      }
+      description={`${linkExpiredNotice(EMPTY_NOTICE_CONTEXT)} 입력하신 내용은 정해진 보관 기간이 지나면 삭제됩니다.`}
     />
   );
 }
@@ -62,23 +68,6 @@ function ManagerLine({ name, role }: { name: string; role: keyof typeof LEGAL_RO
   );
 }
 
-function PrivacyNotice({ notice }: { notice: PublicVisitLinkResponse["privacyNotice"] }) {
-  return (
-    <section
-      aria-label="개인정보 수집 안내"
-      className="flex flex-col gap-1 rounded-card-flat border border-line bg-white px-5 py-4 text-caption text-ink-2"
-    >
-      <h2 className="text-body font-semibold text-ink">개인정보 수집 안내</h2>
-      <p>수집 목적: {notice.purpose}</p>
-      <p>수집 항목: {notice.collectedItems.join(", ")}</p>
-      <p>
-        보유 안내: {notice.retentionPeriod} ({notice.retentionDays}일)
-      </p>
-      <p>열람, 정정, 삭제, 처리정지는 방문을 조율하는 사무소의 문의처로 요청할 수 있습니다.</p>
-    </section>
-  );
-}
-
 function TimeForm({ token, link }: { token: string; link: PublicVisitLinkResponse }) {
   const queryClient = useQueryClient();
   const initial = parseSubmittedSlots(link.submittedTimeSlots);
@@ -92,8 +81,6 @@ function TimeForm({ token, link }: { token: string; link: PublicVisitLinkRespons
   );
   const [errors, setErrors] = useState<SlotErrors>({});
   const [formError, setFormError] = useState<string>();
-  const [agreed, setAgreed] = useState(false);
-  const [agreeError, setAgreeError] = useState<string>();
   const mutation = useMutation({
     mutationFn: () =>
       submitCustomerTimes(token, {
@@ -101,6 +88,11 @@ function TimeForm({ token, link }: { token: string; link: PublicVisitLinkRespons
         acknowledgedNoticeVersion: link.privacyNotice.noticeVersion,
       }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["visit-public", token] }),
+    onError: (error) => {
+      if (isApiCode(error, "NOTICE_VERSION_CHANGED")) {
+        void queryClient.invalidateQueries({ queryKey: ["visit-public", token] });
+      }
+    },
   });
   const isClosed = link.coordinationStatus === "CANCELLED";
   const isResubmit = initial.length > 0;
@@ -116,9 +108,7 @@ function TimeForm({ token, link }: { token: string; link: PublicVisitLinkRespons
     const result = validateSlots(slots, link.candidateWindow);
     setErrors(result.errors);
     setFormError(result.formError);
-    if (!agreed) setAgreeError("개인정보 수집 안내를 확인해 주세요.");
-    else setAgreeError(undefined);
-    if (!result.formError && Object.keys(result.errors).length === 0 && agreed) mutation.mutate();
+    if (!result.formError && Object.keys(result.errors).length === 0) mutation.mutate();
   }
 
   return (
@@ -183,24 +173,12 @@ function TimeForm({ token, link }: { token: string; link: PublicVisitLinkRespons
           가능한 시간 추가
         </Button>
       </div>
-      <Checkbox
-        label="개인정보 수집 안내를 확인했습니다"
-        checked={agreed}
-        onCheckedChange={(value) => {
-          setAgreed(value);
-          setAgreeError(undefined);
-        }}
-      />
-      {agreeError ? (
-        <p role="alert" className="text-caption text-danger">
-          {agreeError}
-        </p>
-      ) : null}
+      <p className="text-caption text-ink-2">{LINK_COMMON_COPY.aboveSubmit}</p>
       {formError ? <FormAlert>{formError}</FormAlert> : null}
       {mutation.isError ? (
         <FormAlert>
           {isApiCode(mutation.error, "NOTICE_VERSION_CHANGED")
-            ? "개인정보 안내가 바뀌었습니다. 화면을 새로 고쳐 안내를 확인한 뒤 다시 제출해 주세요."
+            ? LINK_COMMON_COPY.noticeChanged
             : describeVisitError(mutation.error, "시간을 제출하지 못했습니다. 다시 시도해 주세요.")}
         </FormAlert>
       ) : null}
@@ -294,12 +272,12 @@ export function CustomerLinkScreen({ token }: { token: string | undefined }) {
     enabled: normalized !== null,
     retry: false,
   });
-  if (normalized === null) return <LinkProblem expired={false} />;
+  if (normalized === null) return <LinkProblem />;
   if (query.isPending) return <PageSkeleton />;
   if (query.isError) {
     const error = query.error;
-    if (isApiCode(error, "PUBLIC_LINK_EXPIRED")) return <LinkProblem expired />;
-    if (error instanceof ApiError && error.status === 404) return <LinkProblem expired={false} />;
+    if (isApiCode(error, "PUBLIC_LINK_EXPIRED")) return <LinkProblem />;
+    if (error instanceof ApiError && error.status === 404) return <LinkProblem />;
     return (
       <ErrorScreen
         kind={toErrorScreenKind(error)}
@@ -351,7 +329,17 @@ export function CustomerLinkScreen({ token }: { token: string | undefined }) {
           },
         ]}
       />
-      <PrivacyNotice notice={link.privacyNotice} />
+      <CustomerLinkPrivacyNotice
+        officeName={link.officeName}
+        officeContactPhone={link.officeContactPhone}
+        retentionDays={link.privacyNotice.retentionDays}
+      />
+      <LinkCommonNotices
+        audience="customer"
+        officeName={link.officeName}
+        officeContactPhone={link.officeContactPhone}
+        retentionDays={link.privacyNotice.retentionDays}
+      />
     </div>
   );
 }
