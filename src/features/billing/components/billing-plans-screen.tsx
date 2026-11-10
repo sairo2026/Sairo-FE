@@ -41,7 +41,10 @@ function PlansView({ data }: { data: BillingPlanListResponse }) {
             <div className="flex flex-col gap-2">
               <p className="text-body text-ink">별도 견적으로 안내합니다.</p>
               <MutedNote>{COPY.enterpriseNote}</MutedNote>
-              <Link href="/support" className="text-caption font-semibold text-primary underline">
+              <Link
+                href="/support/enterprise"
+                className="text-caption font-semibold text-primary underline"
+              >
                 도입 문의
               </Link>
             </div>
