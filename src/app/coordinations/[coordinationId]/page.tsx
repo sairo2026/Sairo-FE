@@ -1,24 +1,17 @@
 import type { Metadata } from "next";
-import { CoordinationDetail } from "@/features/coordination";
-import { AuthenticatedOfficeShell } from "@/features/auth/components/session-routing-guard";
+import { notFound } from "next/navigation";
+import { OfficeAccessShell } from "@/features/auth/components/office-access-gate";
+import { CoordinationDetailScreen } from "@/features/visit/components/coordination-detail-screen";
 
-export const metadata: Metadata = { title: "임장 조율 상세 | 사이로" };
+export const metadata: Metadata = { title: "방문 조율 상세 | 사이로" };
 
-export default async function CoordinationDetailPage({
-  params,
-}: {
-  params: Promise<{ coordinationId: string }>;
-}) {
+export default async function Page({ params }: { params: Promise<{ coordinationId: string }> }) {
   const { coordinationId } = await params;
   const id = Number(coordinationId);
-
+  if (!Number.isSafeInteger(id) || id < 1) notFound();
   return (
-    <AuthenticatedOfficeShell active="coordinations">
-      {Number.isSafeInteger(id) && id >= 1 ? (
-        <CoordinationDetail coordinationId={id} />
-      ) : (
-        <p className="text-slate-500">잘못된 임장 조율 건입니다.</p>
-      )}
-    </AuthenticatedOfficeShell>
+    <OfficeAccessShell activeKey="coordinations">
+      <CoordinationDetailScreen coordinationId={id} />
+    </OfficeAccessShell>
   );
 }
