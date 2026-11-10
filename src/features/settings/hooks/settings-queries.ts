@@ -5,6 +5,8 @@ import {
   fetchCurrentOffice,
   fetchCurrentTerms,
   fetchLoginHistory,
+  fetchOfficeMemberships,
+  fetchSubscriptionSummary,
   fetchTermsHistory,
 } from "../api/settings.api";
 
@@ -35,4 +37,18 @@ export function useCurrentTerms() {
 
 export function useCurrentOffice(enabled: boolean) {
   return useQuery({ queryKey: settingsKeys.office, queryFn: fetchCurrentOffice, enabled });
+}
+
+export function useOfficeMemberships() {
+  return useQuery({
+    queryKey: ["settings", "office-memberships"] as const,
+    queryFn: fetchOfficeMemberships,
+  });
+}
+
+export function useSubscriptionSummary() {
+  return useQuery({
+    queryKey: ["settings", "subscription-summary"] as const,
+    queryFn: fetchSubscriptionSummary,
+  });
 }

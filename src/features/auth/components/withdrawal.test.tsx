@@ -104,8 +104,28 @@ describe("회원 탈퇴 화면", () => {
       "대표님이 사무소의 유일한 대표라서 바로 탈퇴할 수 없습니다. 아래 중 하나를 먼저 진행해 주세요.",
     );
     expect(within(alert).getByRole("link", { name: "다른 구성원에게 대표 이전" })).not.toBeNull();
-    expect(within(alert).getByRole("link", { name: "사무소 종료" })).not.toBeNull();
+    expect(within(alert).getByRole("link", { name: "사무소 종료" }).getAttribute("href")).toBe(
+      "/office/close",
+    );
+    expect(
+      within(alert).getByRole("link", { name: "다른 구성원에게 대표 이전" }).getAttribute("href"),
+    ).toBe("/members/owner-transfer");
     expect(screen.queryByRole("button", { name: "탈퇴하기" })).toBeNull();
+  });
+
+  it("미리보기 뒤에 유일한 대표가 되어 서버가 거절하면 같은 안내로 바뀐다", async () => {
+    const user = userEvent.setup();
+    server.use(http.delete("/api/me", () => errorResponse(409, "LAST_OWNER", "유일한 대표")));
+    renderWithQuery(<WithdrawalScreen />);
+    await user.click(await screen.findByLabelText("위 내용을 확인했습니다."));
+    await user.click(screen.getByRole("button", { name: "탈퇴하기" }));
+    const alert = await screen.findByRole("alert");
+    expect(alert.textContent).toContain("유일한 대표라서 바로 탈퇴할 수 없습니다");
+    expect(within(alert).getByRole("link", { name: "사무소 종료" }).getAttribute("href")).toBe(
+      "/office/close",
+    );
+    expect(screen.queryByRole("button", { name: "탈퇴하기" })).toBeNull();
+    expect(navigation.replace).not.toHaveBeenCalled();
   });
 
   it("재인증이 필요하면 본인 확인 문구를, 그 밖의 실패면 변경 없음 문구를 보여준다", async () => {

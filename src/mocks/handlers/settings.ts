@@ -18,6 +18,7 @@ export type MockSettingsState = {
   isLastOwner: boolean;
   office: { name: string };
   leaveCount: number;
+  closeCount: number;
 };
 
 function initialState(): MockSettingsState {
@@ -71,6 +72,7 @@ function initialState(): MockSettingsState {
     isLastOwner: false,
     office: { name: "새봄공인중개사사무소" },
     leaveCount: 0,
+    closeCount: 0,
   };
 }
 
@@ -225,5 +227,20 @@ export const settingsHandlers = [
     if (settingsState.isLastOwner) return errorResponse(409, "LAST_OWNER", "유일한 대표");
     settingsState.leaveCount += 1;
     return new HttpResponse(null, { status: 204 });
+  }),
+
+  http.post("/api/offices/current/close", async ({ request }) => {
+    const body = (await request.json()) as { confirmed?: boolean; archiveChoice?: string };
+    if (body.confirmed !== true || !["REQUEST", "DECLINE"].includes(body.archiveChoice ?? "")) {
+      return mockErrors.validation([{ field: "archiveChoice", message: "선택이 필요합니다." }]);
+    }
+    settingsState.closeCount += 1;
+    return HttpResponse.json({
+      officeId: 12,
+      subscriptionStatus: "ENDED",
+      returnGrantId: 101,
+      returnExpiresAt: "2026-12-10T09:00:00+09:00",
+      archiveRequestStatus: body.archiveChoice === "REQUEST" ? "REQUESTED" : "NONE",
+    });
   }),
 ];
