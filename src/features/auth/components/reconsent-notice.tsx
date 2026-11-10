@@ -76,8 +76,8 @@ export function ReconsentNotice() {
       <Card>
         <h1 className="text-h1 font-bold text-ink">약관이 바뀌었습니다</h1>
         <p className="mt-3 text-body text-ink-2">
-          바뀐 약관에 동의해야 서비스를 계속 사용할 수 있습니다. 동의하지 않으면 계정 화면에서 탈퇴
-          안내를 확인할 수 있습니다.
+          바뀐 약관에 동의해야 서비스를 계속 사용할 수 있습니다. 동의하지 않아도 다른 불이익은
+          없으며 탈퇴 안내를 확인할 수 있습니다.
         </p>
         <ul className="mt-5 flex flex-col gap-4">
           {items.map((item) => (
@@ -86,23 +86,42 @@ export function ReconsentNotice() {
               className="rounded-control bg-surface p-4"
             >
               <p className="text-body font-semibold text-ink">
-                {item.termsCode} {item.version} {item.required ? "필수" : "선택"}
+                {item.termsCode} {item.required ? "필수" : "선택"}
               </p>
               <p className="mt-1 text-caption text-ink-2">
-                시행일 {formatSeoulDate(item.effectiveAt)}
+                이전 버전 {item.previousVersion ?? "없음"}, 새 버전 {item.version}
               </p>
+              <p className="text-caption text-ink-2">시행일 {formatSeoulDate(item.effectiveAt)}</p>
               {item.changeSummary ? (
                 <p className="mt-1 text-caption text-ink-2">{item.changeSummary}</p>
               ) : null}
-              <Link
-                href={item.documentUrl}
-                className="mt-2 inline-block text-caption font-semibold text-primary hover:underline"
-              >
-                전문 보기
-              </Link>
+              <div className="mt-2 flex gap-4">
+                <a
+                  href={item.documentUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-caption font-semibold text-primary hover:underline"
+                >
+                  바뀐 내용 보기
+                </a>
+                {item.previousDocumentUrl ? (
+                  <a
+                    href={item.previousDocumentUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-caption font-semibold text-ink-2 hover:underline"
+                  >
+                    이전 약관 보기
+                  </a>
+                ) : null}
+              </div>
             </li>
           ))}
         </ul>
+        <p className="mt-4 text-caption text-ink-2">
+          동의하기 전에는 업무 화면으로 이동할 수 없습니다. 로그아웃, 개인정보 권리 요청, 지원 문의,
+          탈퇴는 언제든 할 수 있습니다.
+        </p>
         {hasVersionChanged ? (
           <p role="alert" className="mt-4 text-caption text-danger">
             그 사이 약관이 다시 바뀌었습니다. 바뀐 내용을 확인한 뒤 동의해 주세요.
@@ -120,7 +139,7 @@ export function ReconsentNotice() {
             href={AUTH_ROUTES.account}
             className="inline-flex h-12 items-center rounded-control border border-line px-6 font-medium text-ink-2 hover:border-primary hover:text-primary"
           >
-            계정으로 이동
+            동의하지 않음
           </Link>
         </div>
       </Card>

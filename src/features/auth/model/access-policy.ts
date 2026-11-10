@@ -9,6 +9,7 @@ export type RouteArea = "account" | "verification" | "billing" | "business";
 
 const ROUTE_AREA_PREFIXES: ReadonlyArray<readonly [string, RouteArea]> = [
   [AUTH_ROUTES.account, "account"],
+  [AUTH_ROUTES.settings, "account"],
   [AUTH_ROUTES.support, "account"],
   [AUTH_ROUTES.privacyRequests, "account"],
   [AUTH_ROUTES.officeVerification, "verification"],
