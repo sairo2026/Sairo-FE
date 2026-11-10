@@ -33,6 +33,8 @@ describe("화면 영역 분류", () => {
     expect(routeAreaOf("/account/withdrawal")).toBe("account");
     expect(routeAreaOf("/support")).toBe("account");
     expect(routeAreaOf("/privacy-requests")).toBe("account");
+    expect(routeAreaOf("/settings/login-methods")).toBe("account");
+    expect(routeAreaOf("/settings/contact/verify-email")).toBe("account");
   });
 
   it("인증 신청과 결제는 각자의 영역이고 나머지는 업무 영역이다", () => {
