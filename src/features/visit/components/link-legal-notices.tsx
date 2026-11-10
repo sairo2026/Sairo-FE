@@ -12,6 +12,8 @@ import {
   linkRightsFooter,
 } from "../model/legal-copy";
 import type { LinkNoticeContext } from "../model/legal-copy";
+import type { GuestRightsTarget } from "../api/guest-privacy.api";
+import { GuestRightsRequestButton } from "./guest-rights-request";
 
 export type LinkNoticeInput = {
   officeName?: string | null;
@@ -68,8 +70,9 @@ export function CustomerLinkPrivacyNotice(props: LinkNoticeInput) {
 
 export function LinkCommonNotices({
   audience,
+  rightsTarget,
   ...input
-}: LinkNoticeInput & { audience: "approver" | "customer" }) {
+}: LinkNoticeInput & { audience: "approver" | "customer"; rightsTarget?: GuestRightsTarget }) {
   const context = useLinkNoticeContext(input);
   return (
     <section aria-label="링크 이용 안내" className="flex flex-col gap-2 text-caption text-ink-2">
@@ -78,7 +81,12 @@ export function LinkCommonNotices({
       {audience === "approver" ? <p>{LINK_COMMON_COPY.aboveSubmit}</p> : null}
       {audience === "approver" ? <p>{LINK_COMMON_COPY.approvalWithdrawal}</p> : null}
       <p>
-        {linkRightsFooter(context)} [{LINK_COMMON_COPY.rightsRequestLabel}]
+        {linkRightsFooter(context)}{" "}
+        {rightsTarget ? (
+          <GuestRightsRequestButton target={rightsTarget} context={context} />
+        ) : (
+          <>[{LINK_COMMON_COPY.rightsRequestLabel}]</>
+        )}
       </p>
       <p>{ACCESS_LOG_NOTICE}</p>
     </section>

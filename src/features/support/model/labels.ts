@@ -54,3 +54,34 @@ export const POLICY_LINKS: ReadonlyArray<{ label: string; href: string }> = [
   { label: "구독·결제 약관", href: "/legal/subscription-terms" },
   { label: "환불정책", href: "/legal/refund-policy" },
 ];
+
+export const PRIVACY_REQUEST_TYPES: ReadonlyArray<{ value: string; label: string }> = [
+  { value: "ACCESS", label: "열람" },
+  { value: "CORRECTION", label: "정정" },
+  { value: "DELETION", label: "삭제" },
+  { value: "SUSPENSION", label: "처리정지" },
+  { value: "WITHDRAWAL", label: "동의 철회" },
+  { value: "PORTABILITY", label: "이전" },
+];
+
+export function privacyTypeLabel(value: string): string {
+  return PRIVACY_REQUEST_TYPES.find((item) => item.value === value)?.label ?? value;
+}
+
+export const PRIVACY_STATUS: Record<string, Labeled> = {
+  RECEIVED: { label: "접수", tone: "blue" },
+  FORWARDED: { label: "사무소 전달", tone: "blue" },
+  WAITING_FOR_INFO: { label: "보완 대기", tone: "amber" },
+  REVIEWING: { label: "검토 중", tone: "blue" },
+  APPROVED: { label: "승인", tone: "teal" },
+  PARTIALLY_RESTRICTED: { label: "일부 제한", tone: "amber" },
+  EXECUTING: { label: "처리 중", tone: "blue" },
+  COMPLETED: { label: "완료", tone: "green" },
+  REJECTED: { label: "거절", tone: "red" },
+};
+
+export const IDENTITY_STATUS: Record<string, Labeled> = {
+  PENDING: { label: "본인 확인 중", tone: "amber" },
+  VERIFIED: { label: "본인 확인됨", tone: "green" },
+  FAILED: { label: "본인 확인 실패", tone: "red" },
+};

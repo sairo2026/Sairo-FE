@@ -2,6 +2,7 @@ import { http, HttpResponse } from "msw";
 import type {
   EnterpriseLeadStatusResponse,
   PolicyDocumentListResponse,
+  PrivacyRequestResponse,
   SupportInquiryListResponse,
   SupportInquiryResponse,
 } from "@/lib/api/contracts/support.schema";
@@ -19,7 +20,30 @@ export type MockSupportInquiryState = {
   policyBody: string | null;
   leads: Array<EnterpriseLeadStatusResponse & { trackingKey: string }>;
   nextLeadId: number;
+  privacyRequests: PrivacyRequestResponse[];
+  nextPrivacyRequestId: number;
+  guestIntakeCount: number;
+  guestNoticeVersion: string;
 };
+
+export function buildMockPrivacyRequest(
+  overrides: Partial<PrivacyRequestResponse> = {},
+): PrivacyRequestResponse {
+  return {
+    requestId: 31,
+    requestType: "ACCESS",
+    status: "RECEIVED",
+    identityStatus: "PENDING",
+    receivedAt: NOW,
+    legalDueAt: "2026-11-20T09:00:00+09:00",
+    internalDueAt: "2026-11-17T09:00:00+09:00",
+    completedAt: null,
+    decisionReason: null,
+    responsibleOfficeName: null,
+    handlerType: "SAIRO",
+    ...overrides,
+  };
+}
 
 export function buildMockInquiry(overrides: Partial<MockInquiry> = {}): MockInquiry {
   return {
@@ -87,6 +111,10 @@ function initialState(): MockSupportInquiryState {
       "### 위탁 업체 목록\n\n| 수탁사 | 위탁 업무 |\n| --- | --- |\n| 아마존웹서비스 | 서버 운영 |\n",
     leads: [],
     nextLeadId: 70,
+    privacyRequests: [buildMockPrivacyRequest()],
+    nextPrivacyRequestId: 200,
+    guestIntakeCount: 0,
+    guestNoticeVersion: "2026-11-20",
   };
 }
 
@@ -339,4 +367,113 @@ export const supportHandlers = [
       version: 2,
     });
   }),
+
+  http.get("/api/privacy-requests/me", ({ request }) => {
+    const url = new URL(request.url);
+    const page = Number(url.searchParams.get("page") ?? 0);
+    const size = Number(url.searchParams.get("size") ?? 25);
+    const status = url.searchParams.get("status");
+    const filtered = supportInquiryState.privacyRequests.filter(
+      (item) => !status || item.status === status,
+    );
+    return HttpResponse.json({
+      items: filtered.slice(page * size, page * size + size).map((item) => ({
+        requestId: item.requestId,
+        requestType: item.requestType,
+        status: item.status,
+        identityStatus: item.identityStatus,
+        receivedAt: item.receivedAt,
+        legalDueAt: item.legalDueAt,
+        completedAt: item.completedAt ?? null,
+        decisionReason: item.decisionReason ?? null,
+        responsibleOfficeName: item.responsibleOfficeName ?? null,
+      })),
+      page,
+      size,
+      totalElements: filtered.length,
+    });
+  }),
+
+  http.post("/api/privacy-requests", async ({ request }) => {
+    const body = (await request.json()) as { requestType: string; content: string };
+    if (/\d{6}-\d{7}/.test(body.content)) {
+      return errorResponse(400, "SENSITIVE_DATA_DETECTED", "민감 정보");
+    }
+    const created = buildMockPrivacyRequest({
+      requestId: supportInquiryState.nextPrivacyRequestId,
+      requestType: body.requestType as PrivacyRequestResponse["requestType"],
+    });
+    supportInquiryState.nextPrivacyRequestId += 1;
+    supportInquiryState.privacyRequests.unshift(created);
+    return HttpResponse.json(
+      {
+        requestId: created.requestId,
+        supportInquiryId: null,
+        requestType: created.requestType,
+        identityStatus: "PENDING",
+        status: "RECEIVED",
+        receivedAt: NOW,
+        legalDueAt: created.legalDueAt,
+        internalDueAt: created.internalDueAt,
+      },
+      { status: 201 },
+    );
+  }),
+
+  http.get("/api/privacy-requests/:requestId", ({ params }) => {
+    const item = supportInquiryState.privacyRequests.find(
+      (entry) => String(entry.requestId) === String(params.requestId),
+    );
+    return item ? HttpResponse.json(item) : mockErrors.notFound();
+  }),
+
+  http.post("/api/public/privacy-intakes", async ({ request }) => {
+    const body = (await request.json()) as GuestIntakeBody;
+    return guestIntakeResponse(body, body.token === "expired-token");
+  }),
+
+  http.post("/api/approver-portal/privacy-intakes", async ({ request }) => {
+    const body = (await request.json()) as GuestIntakeBody;
+    return guestIntakeResponse(body, false);
+  }),
 ];
+
+type GuestIntakeBody = {
+  token?: string;
+  approvalId?: number;
+  requestType: string;
+  contactChannel: string;
+  contact: string;
+  requestNote?: string | null;
+  acknowledgedNoticeVersion: string;
+};
+
+function guestIntakeResponse(body: GuestIntakeBody, isLinkMissing: boolean) {
+  if (isLinkMissing) return errorResponse(404, "PUBLIC_LINK_NOT_FOUND", "링크 없음");
+  if (body.acknowledgedNoticeVersion !== supportInquiryState.guestNoticeVersion) {
+    return errorResponse(409, "NOTICE_VERSION_CHANGED", "안내 버전 변경");
+  }
+  if (/\d{6}-\d{7}/.test(body.requestNote ?? "")) {
+    return errorResponse(400, "SENSITIVE_DATA_DETECTED", "민감 정보");
+  }
+  if (
+    body.contactChannel === "EMAIL"
+      ? !body.contact.includes("@")
+      : /\D/.test(body.contact.replace(/[-\s+]/g, ""))
+  ) {
+    return errorResponse(422, "GUEST_CONTACT_INVALID", "연락처 오류");
+  }
+  if (supportInquiryState.guestIntakeCount >= 3) {
+    return errorResponse(429, "RATE_LIMITED", "요청 제한", {}, { "Retry-After": "60" });
+  }
+  supportInquiryState.guestIntakeCount += 1;
+  return HttpResponse.json(
+    {
+      receivedAt: NOW,
+      resultDueAt: "2026-11-20T09:00:00+09:00",
+      contactChannel: body.contactChannel,
+      maskedContact: body.contactChannel === "EMAIL" ? "re***@example.com" : "010-****-5678",
+    },
+    { status: 201 },
+  );
+}
