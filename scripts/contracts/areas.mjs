@@ -24,6 +24,19 @@ const PROPERTY_EXCLUDED_SEGMENTS = [
   "/coordinations",
 ];
 
+const BILLING_PATH_PREFIXES = [
+  "/api/billing/",
+  "/api/subscriptions",
+  "/api/refund-requests",
+  "/api/public/pricing",
+  "/api/offices/current/auth-status",
+  "/api/grant-auth/",
+  "/api/return-grants",
+  "/api/archive-grants",
+];
+
+const PUBLIC_SITE_DTO_NAMES = ["PublicCompanyInfoResponse"];
+
 const CUSTOMER_PATH_PREFIXES = [
   "/api/customers",
   "/api/owner-occupants",
@@ -53,6 +66,7 @@ function isOfficeDto(dto) {
     dto.apis.every(
       (api) =>
         startsWithAny(api.path, OFFICE_PATH_PREFIXES) &&
+        !api.path.startsWith("/api/offices/current/auth-status") &&
         !api.path.startsWith("/api/offices/current/close") &&
         !api.path.startsWith("/api/offices/current/export-policy"),
     )
@@ -72,6 +86,17 @@ function isPropertyApi(path) {
 
 function isPropertyDto(dto) {
   return dto.apis.length > 0 && dto.apis.every((api) => isPropertyApi(api.path));
+}
+
+function isBillingDto(dto) {
+  return (
+    dto.apis.length > 0 &&
+    dto.apis.every(
+      (api) =>
+        startsWithAny(api.path, BILLING_PATH_PREFIXES) &&
+        !api.path.includes("/visit-coordinations"),
+    )
+  );
 }
 
 function isCustomerDto(dto) {
@@ -98,6 +123,14 @@ export const AREAS = {
   customer: {
     description: "고객·소유점유·관심 매물·희망조건·상담·병합 도메인",
     select: (dto) => !COMMON_DTO_NAMES.includes(dto.name) && isCustomerDto(dto),
+  },
+  billing: {
+    description: "요금·구독·결제·환불·인증 중단·반환·보관 권한 도메인",
+    select: (dto) => !COMMON_DTO_NAMES.includes(dto.name) && isBillingDto(dto),
+  },
+  "public-site": {
+    description: "공개 사이트 하단 사업자 정보",
+    select: (dto) => PUBLIC_SITE_DTO_NAMES.includes(dto.name),
   },
   auth: {
     description: "인증·계정 도메인",

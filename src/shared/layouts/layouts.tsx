@@ -23,6 +23,29 @@ export function CustomerSiteLayout({ children, footer }: LayoutProps & { footer?
   );
 }
 
+/** 공개 안내 화면(요금·약관): 로그인 없이 열리며 넓은 본문과 사업자 정보 하단을 쓴다. */
+export function PublicSiteLayout({ children, footer }: LayoutProps & { footer?: ReactNode }) {
+  return (
+    <ToastProvider>
+      <div className="flex min-h-screen flex-col bg-white text-ink">
+        <header className="flex items-center justify-between border-b border-line px-4 py-4 sm:px-8">
+          <Link href="/" aria-label="사이로 홈">
+            <BrandLogo className="w-28" />
+          </Link>
+          <nav aria-label="공개 메뉴" className="flex gap-5 text-caption font-semibold text-ink-2">
+            <Link href="/pricing">요금 안내</Link>
+            <Link href="/login">로그인</Link>
+          </nav>
+        </header>
+        <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-10 sm:px-6">{children}</main>
+        {footer ? (
+          <footer className="border-t border-line bg-surface px-4 py-8 sm:px-8">{footer}</footer>
+        ) : null}
+      </div>
+    </ToastProvider>
+  );
+}
+
 /** 승인자 비회원 화면: 메뉴 없이 한 가지 업무만 하도록 좁은 한 단 구성이다. */
 export function ApproverLayout({ children }: LayoutProps) {
   return (

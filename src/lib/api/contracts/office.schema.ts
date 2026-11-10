@@ -523,14 +523,6 @@ export const OwnerTransferWithdrawResponseSchema = z.object({
 });
 export type OwnerTransferWithdrawResponse = z.infer<typeof OwnerTransferWithdrawResponseSchema>;
 
-export const AuthStatusResponseSchema = z.object({
-  authSuspended: z.boolean(),
-  suspendedAt: z.iso.datetime({ offset: true }).nullable().optional(),
-  reauthDeadlineAt: z.iso.datetime({ offset: true }).nullable().optional(),
-  trialRemainingSeconds: z.number().nullable().optional(),
-});
-export type AuthStatusResponse = z.infer<typeof AuthStatusResponseSchema>;
-
 export const OfficeChangeRequestListRequestSchema = z.object({
   status: z.enum(["PENDING_REVIEW", "APPROVED", "REJECTED"]).optional(),
   page: z.number().optional(),

@@ -1,0 +1,178 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { ApiError } from "@/shared/api/client";
+import { PageSkeleton } from "@/shared/components/feedback/skeleton";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import { Card } from "@/shared/components/ui/card";
+import { PageHeader } from "@/shared/components/ui/page-header";
+import { formatSeoulDate, formatKrw } from "@/shared/lib/format";
+import { describeBillingError, COPY } from "../model/messages";
+import { usePublicPricing } from "../hooks/billing-queries";
+import type { PublicPricing } from "../api/wire";
+
+type Tier = PublicPricing["plans"][number];
+
+function tierRange(tier: Tier): string {
+  if (tier.maxMembers === null) return `${tier.minMembers}인 이상`;
+  if (tier.minMembers === tier.maxMembers) return `${tier.minMembers}인`;
+  return `${tier.minMembers}~${tier.maxMembers}인`;
+}
+
+function tierFormula(tier: Tier): string {
+  if (tier.perSeatAmount === null || tier.perSeatAmount === undefined) {
+    return `월 ${formatKrw(tier.baseAmount)}`;
+  }
+  return `월 ${formatKrw(tier.baseAmount)} + (인원 - ${tier.includedMembers}) × ${formatKrw(tier.perSeatAmount)}`;
+}
+
+function describeTrial(trial: NonNullable<PublicPricing["generalTrial"]>): string | null {
+  if (trial.freeEndMode === "DURATION" && trial.durationDays) {
+    return `가입 후 ${trial.durationDays}일 동안 무료로 이용할 수 있습니다.`;
+  }
+  if (trial.freeEndMode === "FIXED_END" && trial.fixedFreeEndsAt) {
+    return `${formatSeoulDate(trial.fixedFreeEndsAt)}까지 무료로 이용할 수 있습니다.`;
+  }
+  return null;
+}
+
+export function PublicPricingScreen() {
+  const query = usePublicPricing();
+
+  if (query.isPending) return <PageSkeleton label="요금표를 불러오는 중입니다." />;
+  if (query.isError) {
+    const detail = describeBillingError(query.error, COPY.pricingLoadError);
+    return (
+      <section
+        role="alert"
+        className="mx-auto flex max-w-md flex-col items-center gap-4 py-16 text-center"
+      >
+        <h1 className="text-h1 font-bold text-ink">요금 안내</h1>
+        <p className="text-body text-ink-2">
+          {query.error instanceof ApiError && query.error.status === 429
+            ? detail
+            : COPY.pricingLoadError}
+        </p>
+        <Button onClick={() => void query.refetch()}>다시 시도</Button>
+      </section>
+    );
+  }
+
+  const pricing = query.data;
+  const trialText = pricing.generalTrial ? describeTrial(pricing.generalTrial) : null;
+  const imageUrl = pricing.plans.find((plan) => plan.imageUrl)?.imageUrl ?? null;
+
+  return (
+    <div className="flex flex-col gap-8">
+      <PageHeader title={COPY.pricingTitle} description={COPY.pricingVatNotice} />
+      {pricing.provisionalPrice ? (
+        <p>
+          <Badge tone="amber">{COPY.pricingReviewBadge}</Badge>
+        </p>
+      ) : null}
+
+      <Card title="구간별 요금">
+        <ul className="flex flex-col divide-y divide-line">
+          {pricing.plans.map((tier) => (
+            <li
+              key={`${tier.planCode}-${tier.minMembers}`}
+              className="flex flex-col gap-1 py-4 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <span className="text-body font-semibold text-ink">{tierRange(tier)}</span>
+              <span className="text-body text-ink-2">{tierFormula(tier)} (VAT 포함)</span>
+            </li>
+          ))}
+          <li className="flex flex-col gap-1 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <span className="text-body font-semibold text-ink">기업</span>
+            <span className="text-body text-ink-2">별도 견적</span>
+          </li>
+        </ul>
+        <p className="mt-3 text-caption text-ink-2">
+          VAT 포함 월 금액 · 월 선불 자동결제 · 자동갱신 · 사무소 1곳 기준
+        </p>
+      </Card>
+
+      <Card title="인원별 월 금액 예시">
+        <table className="w-full text-left text-body">
+          <caption className="sr-only">1명부터 10명까지 인원별 월 금액 예시</caption>
+          <thead>
+            <tr className="text-caption text-ink-2">
+              <th scope="col" className="py-2">
+                이용 인원
+              </th>
+              <th scope="col" className="py-2">
+                월 금액 (VAT 포함)
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {pricing.examples.map((example) => (
+              <tr key={example.members} className="border-t border-line">
+                <th scope="row" className="py-2 font-medium">
+                  {example.members}명
+                </th>
+                <td className="py-2">{formatKrw(example.monthlyAmount)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </Card>
+
+      <Card title="결제와 해지">
+        <p className="text-body text-ink">{COPY.pricingRefundSummary}</p>
+        {trialText ? (
+          <p className="mt-3 text-body font-semibold text-primary">{trialText}</p>
+        ) : null}
+        <p className="mt-3 text-caption text-ink-2">
+          {COPY.enterpriseNote}{" "}
+          <Link href="/support" className="font-semibold text-primary underline">
+            도입 문의
+          </Link>
+        </p>
+        <p className="mt-3 text-caption text-ink-2">
+          <Link href={pricing.links.termsUrl} className="underline">
+            이용약관
+          </Link>
+          {" · "}
+          <Link href={pricing.links.refundUrl} className="underline">
+            환불정책
+          </Link>
+          {" · "}
+          <Link href={pricing.links.privacyUrl} className="underline">
+            개인정보처리방침
+          </Link>
+        </p>
+      </Card>
+
+      <div
+        className="flex min-h-24 items-center justify-center rounded-card-flat border border-dashed border-line bg-surface px-4 py-6 text-caption text-ink-2"
+        data-testid="pricing-image"
+      >
+        {imageUrl ? (
+          <Image
+            src={imageUrl}
+            alt="요금제에서 사용하는 사이로 업무 화면 예시"
+            width={960}
+            height={540}
+            unoptimized
+            className="h-auto max-h-64 w-auto"
+          />
+        ) : (
+          "화면 예시를 불러오지 못했습니다."
+        )}
+      </div>
+
+      <div className="flex flex-col items-start gap-2">
+        <Link
+          href="/signup"
+          className="inline-flex h-12 items-center rounded-control bg-primary px-6 font-bold text-white hover:bg-primary-hover"
+        >
+          {COPY.pricingEntry}
+        </Link>
+        <p className="text-caption text-ink-2">{COPY.pricingEntryNote}</p>
+      </div>
+    </div>
+  );
+}

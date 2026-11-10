@@ -263,3 +263,40 @@ describe("매물·고객 영역 선택", () => {
     expect(property).not.toContain("ContractCreateRequest");
   });
 });
+
+describe("구독·결제 영역 선택", () => {
+  const SPEC = `### 27.1 DTO 색인
+
+| DTO | 종류 | 연결 API | 필드 표 위치 |
+| --- | --- | --- | --- |
+| \`BillingPlanListResponse\` | 응답 | \`GET /api/billing/plans\` | 19장 절 |
+| \`PublicPricingResponse\` | 응답 | \`GET /api/public/pricing\` | 19장 절 |
+| \`AuthStatusResponse\` | 응답 | \`GET /api/offices/current/auth-status\` | 19장 절 |
+| \`RefundRequestCreateRequest\` | 요청 | \`POST /api/refund-requests\` | 19장 절 |
+| \`ReturnVisitResultRequest\` | 요청 | \`POST /api/return-grants/{grantId}/visit-coordinations/{coordinationId}/result\` | 12장 절 |
+| \`OpsRefundReviewRequest\` | 요청 | \`POST /api/ops/refund-requests/{refundId}/review\` | 25장 절 |
+| \`PublicCompanyInfoResponse\` | 응답 | \`GET /api/public/company-info\` | 27.15 절 |
+`;
+
+  it("결제 경로만 구독·결제 영역에 넣고 방문 예외와 운영 콘솔 경로는 뺀다", () => {
+    const dtos = parseSpec(SPEC);
+    const billing = selectAreaDtos(dtos, "billing").map((dto) => dto.name);
+    expect(billing).toEqual([
+      "BillingPlanListResponse",
+      "PublicPricingResponse",
+      "AuthStatusResponse",
+      "RefundRequestCreateRequest",
+    ]);
+  });
+
+  it("인증 상태 응답은 사무소 영역이 아니라 구독·결제 영역에 둔다", () => {
+    const dtos = parseSpec(SPEC);
+    const office = selectAreaDtos(dtos, "office").map((dto) => dto.name);
+    expect(office).not.toContain("AuthStatusResponse");
+  });
+
+  it("공개 사업자 정보 응답은 공개 사이트 영역으로 생성한다", () => {
+    const names = selectAreaDtos(parseSpec(SPEC), "public-site").map((dto) => dto.name);
+    expect(names).toEqual(["PublicCompanyInfoResponse"]);
+  });
+});
