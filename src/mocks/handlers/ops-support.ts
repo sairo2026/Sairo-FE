@@ -521,7 +521,13 @@ const inquiryHandlers: RequestHandler[] = [
     if (!item) return mockErrors.notFound();
     const form = await request.formData().catch(() => null);
     const file = form?.get("file");
-    const fileName = file && typeof file !== "string" ? file.name : "첨부.pdf";
+    const headerName = request.headers.get("x-mock-file-name");
+    const fileName =
+      file && typeof file !== "string"
+        ? file.name
+        : headerName
+          ? decodeURIComponent(headerName)
+          : "첨부.pdf";
     const size = file && typeof file !== "string" ? file.size : 1024;
     if (!ALLOWED_EXTENSIONS.some((extension) => fileName.toLowerCase().endsWith(extension))) {
       return mockErrors.validation([{ field: "file", message: "허용되지 않는 형식입니다." }]);

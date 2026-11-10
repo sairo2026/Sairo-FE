@@ -18,8 +18,26 @@ vi.mock("next/navigation", () => ({
 }));
 
 let stopServer: () => void;
+let originalFetch: typeof fetch;
+
 beforeAll(() => {
   stopServer = startMockServer();
+  originalFetch = globalThis.fetch;
+  globalThis.fetch = (input, init) => {
+    if (init?.body instanceof FormData) {
+      const file = init.body.get("file");
+      const name = file instanceof File ? file.name : "";
+      return originalFetch(input, {
+        ...init,
+        body: undefined,
+        headers: {
+          ...(init.headers as Record<string, string>),
+          "x-mock-file-name": encodeURIComponent(name),
+        },
+      });
+    }
+    return originalFetch(input, init);
+  };
 });
 afterEach(() => {
   cleanup();
@@ -28,7 +46,10 @@ afterEach(() => {
   resetMockOpsSupport();
   vi.restoreAllMocks();
 });
-afterAll(() => stopServer());
+afterAll(() => {
+  globalThis.fetch = originalFetch;
+  stopServer();
+});
 
 function renderDetail(id: number, roles: OpsRole[] = ["SUPPORT"]) {
   setMockOperatorRoles(roles);
