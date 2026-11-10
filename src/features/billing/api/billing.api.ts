@@ -24,6 +24,7 @@ import type {
 } from "@/lib/api/contracts/billing.schema";
 import { PublicCompanyInfoResponseSchema } from "@/lib/api/contracts/public-site.schema";
 import { TermsCatalogResponseSchema } from "@/lib/api/contracts/auth.schema";
+import { z } from "zod";
 import { apiFetch, withQuery } from "@/shared/api/client";
 import {
   ArchiveGrantStatusWireSchema,
@@ -51,6 +52,12 @@ export function fetchPublicCompanyInfo() {
     retry: false,
     ...PUBLIC_REQUEST,
   });
+}
+
+const OfficeNameSchema = z.object({ name: z.string() });
+
+export function fetchOfficeName() {
+  return apiFetch("/api/offices/current", { schema: OfficeNameSchema });
 }
 
 export function fetchBillingPlans() {

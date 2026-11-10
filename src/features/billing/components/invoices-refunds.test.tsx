@@ -87,8 +87,13 @@ describe("청구서 상세와 환불 신청", () => {
     expect(screen.getByText("54,455원")).not.toBeNull();
     expect(screen.getByText("5,445원")).not.toBeNull();
     expect(screen.getByText(/주문 order-501-1 · 성공/)).not.toBeNull();
-    expect(screen.getByText(/발급 대상 아님/)).not.toBeNull();
+    expect(
+      screen.getByText(/세금계산서 발급 대상이 아니거나 아직 발급되지 않았습니다/),
+    ).not.toBeNull();
     expect(screen.getByText(/공급자 사이로\(SAIRO\)/)).not.toBeNull();
+    expect(
+      screen.getByText(/청구 금액 59,900원\(부가세 5,445원 포함\)\. 공급가액 54,455원\./),
+    ).not.toBeNull();
   });
 
   it("없는 청구서는 찾을 수 없음 화면을 보여준다", async () => {

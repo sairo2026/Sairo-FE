@@ -7,6 +7,7 @@ import {
   fetchCardNotice,
   fetchConsentPreview,
   fetchInvoice,
+  fetchOfficeName,
   fetchPublicCompanyInfo,
   fetchPublicPricing,
   fetchRefundRequest,
@@ -113,4 +114,14 @@ export function useTaxRecipient() {
 
 export function useAuthStatus() {
   return useQuery({ queryKey: billingKeys.authStatus, queryFn: fetchAuthStatus });
+}
+
+export function useOfficeName() {
+  return useQuery({
+    queryKey: ["billing", "office-name"] as const,
+    queryFn: fetchOfficeName,
+    retry: false,
+    staleTime: 5 * 60_000,
+    select: (office) => office.name,
+  });
 }

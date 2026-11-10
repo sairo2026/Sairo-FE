@@ -12,13 +12,11 @@ export const COPY = {
   pricingLoadError:
     "현재 적용 중인 요금표를 불러오지 못했습니다. 결제는 진행되지 않았습니다. 잠시 후 다시 시도해 주세요.",
   pricingReviewBadge: "확정 요금, 결제 심사 후 청구 시작",
-  enterpriseNote: "기업은 문의와 견적으로 진행하며, 가격 승인 전에는 자동 과금이 없습니다.",
+  enterpriseNote: "기업 구간은 별도 견적이며 견적을 수락하기 전에는 자동으로 결제되지 않습니다.",
   regTop:
     "결제수단을 등록해도 지금 결제되지 않습니다. 결제가 시작되기 전에 금액과 결제일을 안내하고 동의를 받습니다.",
   regTopWithDate: (date: string) =>
     `결제수단을 등록해도 지금 결제되지 않습니다. 첫 결제 예정일은 ${date}이며, 결제 전에 금액과 조건을 다시 안내하고 동의를 받습니다.`,
-  regDone: (issuer: string, last4: string, date: string | null) =>
-    `결제수단이 등록됐습니다. 등록 카드: ${issuer} 끝자리 ${last4}. 이번 등록으로 결제된 금액은 없습니다.${date ? ` 첫 결제 예정일은 ${date}입니다.` : ""}`,
   regCanceled: "카드 등록이 완료되지 않았습니다. 다시 시도하려면 '카드 등록'을 눌러 주세요.",
   regPreparing:
     "카드 등록 기능을 준비하고 있습니다. 무료 기간 중에는 카드 등록 없이 사용할 수 있고, 등록이 가능해지면 알려 드립니다.",
@@ -26,10 +24,6 @@ export const COPY = {
     `무료 이용 중 · 무료 종료 예정 ${date} 23:59 · 무료 기간 중에는 결제되지 않습니다.`,
   consentTop:
     "카드 등록과 별도로 구독 조건 확인이 필요합니다. 요금, 결제 주기, 첫 결제 예정일, 해지·환불 기준을 확인해 주세요.",
-  consentAutoCharge:
-    "[필수] 위 금액이 해지할 때까지 매월 결제일에 등록된 결제수단으로 자동 결제되는 것에 동의합니다.",
-  consentCancelRefund:
-    "[필수] 해지는 구독 설정에서 언제든 예약할 수 있고 현재 이용 기간이 끝나면 다음 결제가 되지 않는다는 점, 환불 조건을 확인했습니다.",
   consentLimitNote:
     "이용 인원이 늘어 결제 금액이 동의하신 금액보다 커지면 자동으로 결제하지 않고 다시 동의를 요청합니다.",
   consentChecksMissing: "두 필수 항목에 모두 동의해야 구독 조건 확인을 마칠 수 있습니다.",
@@ -73,16 +67,16 @@ export const ERROR_BY_CODE: Record<string, string> = {
   CANCELLATION_ALREADY_EFFECTIVE:
     "구독이 이미 종료돼 해지 예약을 취소할 수 없습니다. 다시 이용하시려면 새로 구독해 주세요.",
   CONSENT_TERMS_MISMATCH:
-    "화면을 연 뒤 이용 인원 또는 금액이 바뀌었습니다. 바뀐 내용을 확인하고 다시 동의해 주세요. 결제된 금액은 없습니다.",
+    "인원이 늘어 결제 금액이 동의한 금액보다 커졌습니다. 새 금액으로 다시 동의해 주세요.",
   TERMS_VERSION_CHANGED:
     "결제 조건 안내가 새로 바뀌었습니다. 새 조건을 확인하고 다시 동의해 주세요.",
   PRICE_CHANGE_NOTICE_CLOSED: "응답 기한이 지났거나 이미 처리된 가격 변경 안내입니다.",
   TAX_RECIPIENT_INVALID: "세금계산서 수신 정보 형식을 확인해 주세요.",
   PRICE_SCHEDULE_NOT_PUBLISHED: "현재 적용 중인 요금표가 없습니다. 결제는 진행되지 않았습니다.",
-  RETURN_GRANT_INVALID: "반환권한이 만료됐거나 회수됐습니다. 고객지원으로 문의해 주세요.",
+  RETURN_GRANT_INVALID: "반환 권한이 만료되었습니다. 고객지원으로 문의해 주세요.",
   ARCHIVE_GRANT_INVALID: "보관권한이 만료됐거나 종료됐습니다. 고객지원으로 문의해 주세요.",
   STEP_UP_ACCOUNT_MISMATCH:
-    "권한 대상자와 다른 카카오 계정입니다. 권한을 받은 계정으로 인증해 주세요.",
+    "인증한 카카오 계정이 권한자와 다릅니다. 처음 인증한 계정으로 다시 확인해 주세요.",
   INVALID_CREDENTIALS: "이메일 또는 비밀번호가 맞지 않습니다.",
   EXPORT_EXPIRED: "내보내기 파일이 만료됐습니다. 다시 내보내기를 요청해 주세요.",
   RESOURCE_NOT_FOUND: "대상을 찾을 수 없습니다. 목록에서 다시 선택해 주세요.",

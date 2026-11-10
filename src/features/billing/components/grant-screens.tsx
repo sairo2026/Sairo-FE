@@ -24,6 +24,7 @@ import {
   fetchReturnGrant,
 } from "../api/billing.api";
 import type { ExportResult } from "../api/wire";
+import { RETURN_COPY } from "../model/legal-copy";
 import { describeBillingError } from "../model/messages";
 
 export type GrantKind = "return" | "archive";
@@ -77,7 +78,7 @@ function destination(kind: GrantKind) {
 
 function describeGrantError(error: unknown): string {
   if (error instanceof ApiError && error.status === 403 && error.code === "FORBIDDEN") {
-    return "권한이 만료됐거나 맞지 않습니다. 고객지원으로 문의해 주세요.";
+    return RETURN_COPY.errors.expired;
   }
   return describeBillingError(error, "본인 확인을 완료하지 못했습니다. 다시 시도해 주세요.");
 }
@@ -128,7 +129,7 @@ export function GrantAuthScreen({ kind, grantId }: { kind: GrantKind; grantId: n
   return (
     <FlowFrame
       title={title}
-      description="탈퇴하거나 종료된 뒤에도 자료를 돌려받거나 보관 문서를 보려면 별도로 다시 인증해야 합니다."
+      description={kind === "return" ? RETURN_COPY.reauth : RETURN_COPY.archive}
       width="md"
     >
       <form
@@ -310,7 +311,7 @@ export function ReturnGrantScreen() {
         </div>
       ) : query.data.revoked ? (
         <div className="flex flex-col gap-2">
-          <FormAlert>회수된 반환권한입니다.</FormAlert>
+          <FormAlert>{RETURN_COPY.errors.revoked}</FormAlert>
           <SupportLine />
         </div>
       ) : (
