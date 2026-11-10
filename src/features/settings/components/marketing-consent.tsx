@@ -12,7 +12,7 @@ import { LegalDocumentModal } from "@/shared/legal/legal-document-view";
 import { findLegalDocumentByTermsCode } from "@/shared/legal/registry";
 import { formatSeoulDateTime } from "@/shared/lib/format";
 import { updateNotificationChannels } from "../api/settings.api";
-import { useCurrentTerms } from "../hooks/settings-queries";
+import { settingsKeys, useCurrentTerms } from "../hooks/settings-queries";
 import { SETTINGS_COPY as COPY, describeSettingsError } from "../model/copy";
 
 const MARKETING = "MARKETING";
@@ -41,7 +41,7 @@ export function MarketingConsent({ me, isReadOnly }: { me: MeResponse; isReadOnl
 
   async function refresh() {
     await queryClient.invalidateQueries({ queryKey: accountQueryKey });
-    await queryClient.invalidateQueries({ queryKey: ["auth", "terms-history"] });
+    await queryClient.invalidateQueries({ queryKey: settingsKeys.termsHistoryAll });
   }
 
   const offMutation = useMutation({
@@ -71,7 +71,7 @@ export function MarketingConsent({ me, isReadOnly }: { me: MeResponse; isReadOnl
     onError: async (caught) => {
       setMessage(undefined);
       setError(describeSettingsError(caught, "동의를 기록하지 못했습니다. 다시 시도해 주세요."));
-      await queryClient.invalidateQueries({ queryKey: ["settings", "current-terms"] });
+      await queryClient.invalidateQueries({ queryKey: settingsKeys.currentTerms });
     },
   });
 

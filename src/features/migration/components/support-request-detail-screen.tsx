@@ -17,7 +17,7 @@ import { ConfirmDialog } from "@/shared/components/ui/modal";
 import { PageHeader } from "@/shared/components/ui/page-header";
 import { DataMigrationSupportNotice } from "@/shared/legal/data-rights-notices";
 import { cn } from "@/shared/lib/cn";
-import { formatKrw, formatSeoulDateTime } from "@/shared/lib/format";
+import { formatCount, formatKrw, formatSeoulDateTime } from "@/shared/lib/format";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import {
   acceptImportSupportQuote,
@@ -390,7 +390,7 @@ function Body({ detail, launcher }: Props) {
     <div className="flex flex-col gap-6">
       <PageHeader
         title={`${detail.sourceSystem} 이전 지원`}
-        description={`예상 레코드 ${detail.estimatedRowCount.toLocaleString("ko-KR")}건`}
+        description={`예상 레코드 ${formatCount(detail.estimatedRowCount)}건`}
         actions={
           <>
             <StatusBadge tone={status?.tone ?? "gray"} label={status?.label ?? detail.status} />

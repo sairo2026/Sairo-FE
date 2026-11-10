@@ -16,6 +16,9 @@ import {
 import type { MembershipListParams } from "../api/office.api";
 
 export const officeKeys = {
+  all: ["office"] as const,
+  search: (query: unknown, page: number) => ["office", "search", query, page] as const,
+  changeRequestsAll: ["office", "change-requests"] as const,
   registration: ["office", "registration"] as const,
   current: ["office", "current"] as const,
   changeRequests: (page: number, size: number) =>
@@ -88,7 +91,7 @@ export function useRefreshOfficeState() {
   return async () => {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: authContextQueryKey }),
-      queryClient.invalidateQueries({ queryKey: ["office"] }),
+      queryClient.invalidateQueries({ queryKey: officeKeys.all }),
     ]);
   };
 }

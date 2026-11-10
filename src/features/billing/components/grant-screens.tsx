@@ -24,6 +24,7 @@ import {
   fetchReturnGrant,
 } from "../api/billing.api";
 import type { ExportResult } from "../api/wire";
+import { billingKeys } from "../hooks/billing-queries";
 import { RETURN_COPY } from "../model/legal-copy";
 import { describeBillingError } from "../model/messages";
 
@@ -241,7 +242,7 @@ function ExportPanel({ grantId }: { grantId: number }) {
     onError: (caught) => setError(describeGrantError(caught)),
   });
   const status = useQuery({
-    queryKey: ["billing", "return-export", grantId, exportId],
+    queryKey: billingKeys.returnExport(grantId, exportId),
     queryFn: () => fetchReturnExport(grantId, exportId ?? 0),
     enabled: exportId !== null,
     refetchInterval: (query) => {
@@ -285,7 +286,7 @@ function ExportPanel({ grantId }: { grantId: number }) {
 
 export function ReturnGrantScreen() {
   const query = useQuery({
-    queryKey: ["billing", "return-grant"],
+    queryKey: billingKeys.returnGrant,
     queryFn: fetchReturnGrant,
     retry: false,
   });
@@ -329,7 +330,7 @@ export function ReturnGrantScreen() {
 
 export function ArchiveGrantScreen() {
   const query = useQuery({
-    queryKey: ["billing", "archive-grant"],
+    queryKey: billingKeys.archiveGrant,
     queryFn: fetchArchiveGrant,
     retry: false,
   });

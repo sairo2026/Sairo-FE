@@ -42,8 +42,8 @@ function SheetSelector({ batch, isLocked }: { batch: ImportBatchDetail; isLocked
       setError(undefined);
       queryClient.setQueryData(migrationKeys.sheets(batch.batchId), result);
       await queryClient.invalidateQueries({ queryKey: migrationKeys.batch(batch.batchId) });
-      await queryClient.invalidateQueries({ queryKey: ["migration", "suggestion", batch.batchId] });
-      await queryClient.invalidateQueries({ queryKey: ["migration", "preview", batch.batchId] });
+      await queryClient.invalidateQueries({ queryKey: migrationKeys.suggestion(batch.batchId) });
+      await queryClient.invalidateQueries({ queryKey: migrationKeys.previewAll(batch.batchId) });
     },
     onError: (caught) => setError(describeMigrationError(caught, "시트를 바꾸지 못했습니다.")),
   });

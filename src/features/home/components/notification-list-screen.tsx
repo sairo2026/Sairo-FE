@@ -17,7 +17,7 @@ import { formatSeoulDateTime } from "@/shared/lib/format";
 import { PAGE_SIZE_OPTIONS } from "@/shared/components/ui/data-table";
 import type { PageSize } from "@/shared/components/ui/data-table";
 import { markNotificationRead } from "../api/home.api";
-import { useNotifications } from "../hooks/home-queries";
+import { homeKeys, useNotifications } from "../hooks/home-queries";
 import { notificationHref, notificationTypeLabel } from "../model/labels";
 import { describeWorkError } from "../model/messages";
 
@@ -31,7 +31,7 @@ function GeneralNotifications() {
 
   const read = useMutation({
     mutationFn: (notificationId: number) => markNotificationRead(notificationId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["home"] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: homeKeys.all }),
     onError: (error) => setActionError(describeWorkError(error, "읽음 처리하지 못했습니다.")),
   });
 

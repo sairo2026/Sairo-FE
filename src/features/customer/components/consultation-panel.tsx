@@ -11,7 +11,12 @@ import { DateTimeField } from "@/shared/components/ui/date-time-field";
 import { Modal } from "@/shared/components/ui/modal";
 import { SelectField } from "@/shared/components/ui/select-field";
 import { TextField } from "@/shared/components/ui/text-field";
-import { countCodePoints, formatSeoulDateTime, TEXT_LIMITS } from "@/shared/lib/format";
+import {
+  countCodePoints,
+  formatCount,
+  formatSeoulDateTime,
+  TEXT_LIMITS,
+} from "@/shared/lib/format";
 import { createConsultation, updateConsultation } from "../api/customer.api";
 import {
   customerKeys,
@@ -79,7 +84,7 @@ function validateForm(input: {
   if (input.time === "") errors.time = "상담 시각을 입력해 주세요.";
   if (input.content.trim() === "") errors.content = "상담 내용을 입력해 주세요.";
   else if (countCodePoints(input.content) > TEXT_LIMITS.bodyMemo) {
-    errors.content = `상담 내용은 ${TEXT_LIMITS.bodyMemo.toLocaleString("ko-KR")}자 이하로 입력해 주세요.`;
+    errors.content = `상담 내용은 ${formatCount(TEXT_LIMITS.bodyMemo)}자 이하로 입력해 주세요.`;
   }
   if (input.reason !== undefined) {
     if (input.reason.trim() === "") errors.reason = "정정 사유를 입력해 주세요.";

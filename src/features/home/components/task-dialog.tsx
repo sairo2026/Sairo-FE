@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useId, useState } from "react";
 import type { TaskListResponse } from "@/lib/api/contracts/work.schema";
 import { listCustomers } from "@/features/customer/api/customer.api";
 import { listProperties } from "@/features/property/api/property.api";
@@ -15,7 +15,7 @@ import { fieldErrorMap } from "@/shared/lib/api-messages";
 import { useAssignableMembers } from "@/shared/session/assignable-members";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { createTask, deleteTask, updateTask } from "../api/home.api";
-import { useMyMembership } from "../hooks/home-queries";
+import { homeKeys, useMyMembership } from "../hooks/home-queries";
 import { TASK_SOURCE_LABEL, TASK_STATUS_LABEL, isAutoTask } from "../model/labels";
 import { describeWorkError } from "../model/messages";
 import {
@@ -52,18 +52,19 @@ export function TaskDialog(props: TaskDialogProps) {
 }
 
 function TaskDialogBody({ task, onClose }: TaskDialogProps) {
+  const deleteMessageId = useId();
   const queryClient = useQueryClient();
   const { role, isReadOnly } = useOfficeAccess();
   const isDeputy = role === "DEPUTY";
   const members = useAssignableMembers();
   const me = useMyMembership();
   const customers = useQuery({
-    queryKey: ["home", "task-customers"],
+    queryKey: homeKeys.taskCustomers,
     queryFn: () => listCustomers({ page: 0, size: 100 }),
     enabled: !isDeputy,
   });
   const properties = useQuery({
-    queryKey: ["home", "task-properties"],
+    queryKey: homeKeys.taskProperties,
     queryFn: () => listProperties({ page: 0, size: 100 }),
     enabled: !isDeputy,
   });
@@ -85,7 +86,7 @@ function TaskDialogBody({ task, onClose }: TaskDialogProps) {
   }
 
   async function done() {
-    await queryClient.invalidateQueries({ queryKey: ["home"] });
+    await queryClient.invalidateQueries({ queryKey: homeKeys.all });
     onClose();
   }
 
@@ -282,9 +283,12 @@ function TaskDialogBody({ task, onClose }: TaskDialogProps) {
           <div
             role="alertdialog"
             aria-label="업무 삭제 확인"
+            aria-describedby={deleteMessageId}
             className="rounded-control border border-line p-4"
           >
-            <p className="text-body text-ink">이 업무를 삭제할까요? 삭제하면 되돌릴 수 없습니다.</p>
+            <p id={deleteMessageId} className="text-body text-ink">
+              이 업무를 삭제할까요? 삭제하면 되돌릴 수 없습니다.
+            </p>
             <div className="mt-3 flex gap-2">
               <Button variant="cancel" size="sm" onClick={() => setConfirmDelete(false)}>
                 취소

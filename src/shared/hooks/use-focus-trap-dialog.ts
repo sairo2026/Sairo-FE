@@ -19,7 +19,7 @@ export function useFocusTrapDialog(isOpen: boolean, onEscape: () => void) {
       const dialog = dialogRef.current;
       if (event.key !== "Tab" || !dialog) return;
       const focusable = dialog.querySelectorAll<HTMLElement>(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        'button:not([disabled]), [href], input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
       );
       const first = focusable[0];
       const last = focusable[focusable.length - 1];

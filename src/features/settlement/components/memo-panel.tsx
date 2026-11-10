@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useId, useState } from "react";
 import type { MonthlyMemoResponse } from "@/lib/api/contracts/work.schema";
 import { describeWorkError } from "@/features/home/model/messages";
 import { ApiError } from "@/shared/api/client";
@@ -24,6 +24,7 @@ function editorName(memo: MonthlyMemoResponse): string {
 }
 
 function MemoEditor({ yearMonth, memo }: { yearMonth: string; memo: MonthlyMemoResponse }) {
+  const conflictMessageId = useId();
   const queryClient = useQueryClient();
   const { isReadOnly } = useOfficeAccess();
   const [text, setText] = useState(memo.content ?? "");
@@ -104,9 +105,10 @@ function MemoEditor({ yearMonth, memo }: { yearMonth: string; memo: MonthlyMemoR
         <div
           role="alertdialog"
           aria-label="메모 충돌"
+          aria-describedby={conflictMessageId}
           className="rounded-card-flat border border-primary p-4"
         >
-          <p className="mb-3 font-semibold text-ink">
+          <p id={conflictMessageId} className="mb-3 font-semibold text-ink">
             저장하는 동안 다른 사람이 먼저 메모를 고쳤습니다. 내 입력과 최신 메모를 비교해 고르세요.
           </p>
           <div className="grid gap-3 sm:grid-cols-2">

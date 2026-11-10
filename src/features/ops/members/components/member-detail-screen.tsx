@@ -132,9 +132,15 @@ function SessionsCard({ detail }: { detail: Detail }) {
           <caption className="sr-only">활성 세션 목록</caption>
           <thead>
             <tr className="border-b border-line text-caption text-ink-2">
-              <th className="py-2">시작</th>
-              <th className="py-2">마지막 요청</th>
-              <th className="py-2">기기</th>
+              <th scope="col" className="py-2">
+                시작
+              </th>
+              <th scope="col" className="py-2">
+                마지막 요청
+              </th>
+              <th scope="col" className="py-2">
+                기기
+              </th>
             </tr>
           </thead>
           <tbody>

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   countCodePoints,
   formatArea,
+  formatCount,
   formatKrw,
   formatPhone,
   formatSeoulDate,
@@ -25,6 +26,7 @@ describe("format", () => {
   it("금액은 원 단위 정수에 쉼표를 붙이고 미확인은 0으로 표시하지 않는다", () => {
     expect(formatKrw(1234567)).toBe("1,234,567원");
     expect(formatKrw(0)).toBe("0원");
+    expect(formatCount(1234567)).toBe("1,234,567");
     expect(formatKrw(-5000)).toBe("-5,000원");
     expect(formatKrw(null)).toBe("미확인");
   });

@@ -10,7 +10,7 @@ import { Button } from "@/shared/components/ui/button";
 import { DateTimeField } from "@/shared/components/ui/date-time-field";
 import { SelectField } from "@/shared/components/ui/select-field";
 import { TextField } from "@/shared/components/ui/text-field";
-import { formatSeoulDate } from "@/shared/lib/format";
+import { formatCount, formatSeoulDate } from "@/shared/lib/format";
 import { createDemandCondition, updateDemandCondition } from "../api/customer.api";
 import {
   customerKeys,
@@ -148,7 +148,7 @@ function toRequest(values: DemandValues) {
 function formatRange(low: number | null, high: number | null, unit: "원" | "㎡"): string {
   if (low === null && high === null) return "-";
   const format = (value: number) =>
-    unit === "원" ? `${(value / MAN_WON).toLocaleString("ko-KR")}만원` : `${value}㎡`;
+    unit === "원" ? `${formatCount(value / MAN_WON)}만원` : `${value}㎡`;
   return `${low === null ? "하한 없음" : format(low)} ~ ${high === null ? "상한 없음" : format(high)}`;
 }
 

@@ -14,7 +14,7 @@ import { Card } from "@/shared/components/ui/card";
 import { DataTable } from "@/shared/components/ui/data-table";
 import type { PageSize } from "@/shared/components/ui/data-table";
 import { PageHeader } from "@/shared/components/ui/page-header";
-import { formatKrw, formatSeoulDateTime } from "@/shared/lib/format";
+import { formatCount, formatKrw, formatSeoulDateTime } from "@/shared/lib/format";
 import type { RefundStatus } from "../api/wire";
 import { useRefund, useRefunds } from "../hooks/billing-queries";
 import { REFUND_REASONS, REFUND_STATUS, labelOf, isMissing } from "../model/labels";
@@ -173,13 +173,13 @@ function RefundView({ refund }: { refund: RefundStatus }) {
                 label: "전체 기간",
                 value: isMissing(calc.totalPeriodSeconds)
                   ? "-"
-                  : `${calc.totalPeriodSeconds.toLocaleString("ko-KR")}초`,
+                  : `${formatCount(calc.totalPeriodSeconds)}초`,
               },
               {
                 label: "남은 기간",
                 value: isMissing(calc.remainingPeriodSeconds)
                   ? "-"
-                  : `${calc.remainingPeriodSeconds.toLocaleString("ko-KR")}초`,
+                  : `${formatCount(calc.remainingPeriodSeconds)}초`,
               },
               { label: "쿠폰 제외분", value: formatKrw(calc.couponExcludedAmount) },
               { label: "기보상액", value: formatKrw(calc.priorCompensationAmount) },

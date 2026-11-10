@@ -19,7 +19,7 @@ import { PrivacyRightsNotice } from "@/shared/legal/data-rights-notices";
 import { countCodePoints, formatSeoulDateTime } from "@/shared/lib/format";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { createPrivacyRequest } from "../api/support.api";
-import { useMyPrivacyRequests } from "../hooks/support-queries";
+import { supportKeys, useMyPrivacyRequests } from "../hooks/support-queries";
 import {
   IDENTITY_STATUS,
   INQUIRY_CONTENT_MAX,
@@ -43,7 +43,7 @@ function RequestForm() {
   const mutation = useMutation({
     mutationFn: createPrivacyRequest,
     onSuccess: async (created) => {
-      await queryClient.invalidateQueries({ queryKey: ["support", "privacy-requests"] });
+      await queryClient.invalidateQueries({ queryKey: supportKeys.privacyRequestsAll });
       router.push(`/privacy-requests/${created.requestId}?received=1`);
     },
     onError: (caught) => setError(describeSupportError(caught, "요청을 접수하지 못했습니다.")),

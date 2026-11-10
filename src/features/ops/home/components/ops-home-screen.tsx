@@ -7,7 +7,7 @@ import type { OpsHomeResponse } from "@/lib/api/contracts/ops.schema";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
-import { formatKrw, formatSeoulDateTime } from "@/shared/lib/format";
+import { formatCount, formatKrw, formatSeoulDateTime } from "@/shared/lib/format";
 import { useNow } from "../../auth/model/use-now";
 import { OpsScreen } from "../../components/common/ops-screen";
 import { useHasOpsRole, useOpsSession } from "../../model/ops-session";
@@ -34,7 +34,7 @@ function QueueCard({ card, home }: { card: HomeQueueCard; home: OpsHomeResponse 
   const body = (
     <>
       <p className="text-caption font-semibold text-ink-2">{card.label}</p>
-      <p className={`mt-2 text-h1 font-bold ${tone}`}>{count.toLocaleString("ko-KR")}건</p>
+      <p className={`mt-2 text-h1 font-bold ${tone}`}>{formatCount(count)}건</p>
       {note ? <p className="mt-1 text-caption text-ink-2">{note}</p> : null}
       {isLinked ? (
         <p className="mt-3 text-caption font-semibold text-primary">처리 화면으로 이동</p>
@@ -72,7 +72,7 @@ function ExecSummaryCard({ summary }: { summary: NonNullable<OpsHomeResponse["ex
         {counts.map(([label, value]) => (
           <div key={label}>
             <dt className="text-caption font-semibold text-ink-2">{label}</dt>
-            <dd className="mt-1 text-h2 font-bold text-ink">{value.toLocaleString("ko-KR")}곳</dd>
+            <dd className="mt-1 text-h2 font-bold text-ink">{formatCount(value)}곳</dd>
           </div>
         ))}
         <div>
