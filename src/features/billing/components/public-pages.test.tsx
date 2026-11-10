@@ -167,6 +167,28 @@ describe("공개 사업자 정보 하단", () => {
     expect(screen.getByRole("link", { name: "고객문의" }).getAttribute("href")).toBe("/support");
   });
 
+  it("서버가 값이 없는 항목을 생략해도 있는 항목은 보여준다", async () => {
+    server.use(
+      http.get("/api/public/company-info", () =>
+        HttpResponse.json({
+          businessName: "사이로(SAIRO)",
+          representativeName: "김태환",
+          businessNumber: "704-16-02872",
+          address: "경기도 고양시 덕양구 백양로 51, 902호 A-5(화정동, 네이버타운)",
+        }),
+      ),
+    );
+    renderPublic(<PublicBusinessFooter />);
+    const info = await screen.findByTestId("business-info");
+    expect(within(info).getByText("704-16-02872")).not.toBeNull();
+    expect(within(info).queryByText("전화")).toBeNull();
+    expect(within(info).queryByText("이메일")).toBeNull();
+    expect(within(info).queryByText("통신판매업 신고번호")).toBeNull();
+    expect(screen.getByRole("link", { name: "이용약관" }).getAttribute("href")).toBe(
+      "/legal/terms",
+    );
+  });
+
   it("통신판매업 신고번호가 있으면 줄을 보여준다", async () => {
     server.use(
       http.get("/api/public/company-info", () =>
