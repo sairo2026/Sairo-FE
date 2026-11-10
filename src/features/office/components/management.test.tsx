@@ -221,6 +221,11 @@ describe("사무소 정보", () => {
 describe("구성원 목록", () => {
   it("대표는 자격과 확인 여부와 과금 대상을 본다", async () => {
     renderOffice(<MembersScreen />, { role: "OWNER" });
+    expect(
+      await screen.findByText(
+        /구성원의 자격, 고용 신고, 교육 이수 확인의 책임은 사무소에 있습니다/,
+      ),
+    ).not.toBeNull();
     expect(await screen.findByText("이중개")).not.toBeNull();
     expect(screen.getByText("자격-2")).not.toBeNull();
     expect(screen.getByRole("columnheader", { name: "과금 대상" })).not.toBeNull();
@@ -625,6 +630,19 @@ describe("참여 요청과 초대 관리", () => {
 });
 
 describe("대표 이전", () => {
+  it("이전 절차 안내와 본인 확인 시한을 보여준다", async () => {
+    renderOffice(<OwnerTransferScreen />, { role: "OWNER" });
+    expect(
+      await screen.findByText(
+        /대상자는 신청 후 7일 안에 수락해야 하며 기한이 지나면 신청이 만료됩니다/,
+      ),
+    ).not.toBeNull();
+    expect(
+      screen.getByText(/최근 10분 안에 비밀번호 또는 카카오 계정으로 다시 확인해야 합니다/),
+    ).not.toBeNull();
+    expect(screen.getByText(/이미 납부한 이용 기간은 유지됩니다/)).not.toBeNull();
+  });
+
   it("진행 중인 이전이 없으면 후보 선택으로 시작한다", async () => {
     const user = userEvent.setup();
     renderOffice(<OwnerTransferScreen />, { role: "OWNER" });
@@ -693,7 +711,7 @@ describe("대표 이전", () => {
     await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "철회" }));
     expect(await screen.findByText("대표 이전을 철회했습니다.")).not.toBeNull();
     expect(await screen.findByText("최근 대표 이전")).not.toBeNull();
-    expect(screen.getAllByText("철회").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("철회됨").length).toBeGreaterThan(0);
   });
 
   it("후보는 수락할 수 있고 수락하면 심사 단계로 바뀐다", async () => {

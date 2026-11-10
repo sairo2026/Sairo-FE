@@ -7,9 +7,11 @@ import type { EvidenceType } from "./labels";
 
 export type FieldErrors<K extends string> = Partial<Record<K, string>>;
 
+import { EVIDENCE_NOTICE_COPY } from "./legal-copy";
+
 export const EVIDENCE_MAX_BYTES = 10 * 1024 * 1024;
-const EVIDENCE_MIME_PATTERN = /^(image\/(png|jpe?g|gif|webp|heic|heif)|application\/pdf)$/i;
-const EVIDENCE_EXTENSION_PATTERN = /\.(png|jpe?g|gif|webp|heic|heif|pdf)$/i;
+const EVIDENCE_MIME_PATTERN = /^(image\/(png|jpe?g)|application\/pdf)$/i;
+const EVIDENCE_EXTENSION_PATTERN = /\.(png|jpe?g|pdf)$/i;
 const PHONE_PATTERN = /^0\d{1,2}-\d{3,4}-\d{4}$/;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -86,7 +88,7 @@ export function validateLookup(values: Record<LookupField, string>): FieldErrors
 export function validateEvidenceFile(file: File): string | null {
   const typeOk =
     EVIDENCE_MIME_PATTERN.test(file.type) || EVIDENCE_EXTENSION_PATTERN.test(file.name);
-  if (!typeOk) return "이미지 또는 PDF 파일만 올릴 수 있습니다.";
+  if (!typeOk) return EVIDENCE_NOTICE_COPY.errors.format;
   if (file.size > EVIDENCE_MAX_BYTES) return "파일은 한 장당 10MB 이하여야 합니다.";
   if (file.size === 0) return "비어 있는 파일입니다.";
   return null;

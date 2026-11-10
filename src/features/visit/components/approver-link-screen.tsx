@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ApiError } from "@/shared/api/client";
 import { toErrorScreenKind } from "@/shared/api/error-kind";
+import { APPROVER_ACCOUNT_NOTICE, COAPPROVER_NOTICE } from "../model/legal-copy";
 import { ErrorScreen } from "@/shared/components/feedback/error-screen";
 import { FormNotice } from "@/shared/components/feedback/form-frame";
 import { PageSkeleton } from "@/shared/components/feedback/skeleton";
@@ -27,8 +28,8 @@ import { ApproverRequestList } from "./approver-requests";
 import { ConditionEditor } from "./condition-editor";
 import { portalApprovalBase } from "../api/review.api";
 import { ApproverPreferredPanel } from "./approver-preferred";
-import { ApproverPrivacyNotice } from "./approver-privacy-notice";
 import { ApproverReviewPanel } from "./approver-reviews";
+import { ApproverLinkPrivacyNotice, LinkCommonNotices } from "./link-legal-notices";
 
 function LinkProblem({ error }: { error: unknown }) {
   const expired = isApiCode(error, "PUBLIC_LINK_EXPIRED");
@@ -164,8 +165,7 @@ export function ApproverWorkspace({
       />
       {mode === "link" ? (
         <FormNotice>
-          여러 매물을 한 화면에서 관리하려면 번호 인증으로 계정을 만들 수 있습니다. 선택 사항이며 이
-          링크만으로도 계속 사용할 수 있습니다.{" "}
+          {APPROVER_ACCOUNT_NOTICE}{" "}
           <Link
             href={
               linkToken
@@ -213,9 +213,7 @@ export function ApproverWorkspace({
                     />
                   </div>
                 ) : (
-                  <FormNotice>
-                    공동 승인자는 신청을 비교하거나 선택할 수 없고 확정 일정만 읽을 수 있습니다.
-                  </FormNotice>
+                  <FormNotice>{COAPPROVER_NOTICE}</FormNotice>
                 ),
             },
             {
@@ -244,7 +242,17 @@ export function ApproverWorkspace({
           ]}
         />
       </Card>
-      <ApproverPrivacyNotice retentionDays={retentionDays} />
+      <ApproverLinkPrivacyNotice
+        officeName={confirmed.data?.officeName}
+        officeContactPhone={confirmed.data?.officeContactPhone}
+        retentionDays={retentionDays}
+      />
+      <LinkCommonNotices
+        audience="approver"
+        officeName={confirmed.data?.officeName}
+        officeContactPhone={confirmed.data?.officeContactPhone}
+        retentionDays={retentionDays}
+      />
     </div>
   );
 }
