@@ -22,6 +22,7 @@ import {
   TAX_DOCUMENT_STATUS,
   isMissing,
 } from "../model/labels";
+import { TAX_COPY } from "../model/legal-copy";
 import { COPY, describeBillingError } from "../model/messages";
 import { InvoiceStatusBadge } from "./invoices-screen";
 
@@ -175,24 +176,38 @@ function InvoiceView({ invoice }: { invoice: InvoiceDetail }) {
       </Card>
       <Card title="증빙 발급 상태">
         {invoice.taxDocuments.length === 0 ? (
-          <p className="text-body text-ink-2">
-            발급 대상 아님. 카드 결제 영수증은 카드사 명세서에서 확인할 수 있습니다.
-          </p>
+          <div className="flex flex-col gap-2 text-body text-ink-2">
+            <p>{TAX_COPY.states.unavailable}</p>
+            <p>{TAX_COPY.receipt}</p>
+          </div>
         ) : (
           <ul className="flex flex-col divide-y divide-line">
             {invoice.taxDocuments.map((doc, index) => (
               <li key={`${doc.documentKind}-${index}`} className="py-3 text-body">
-                {TAX_DOCUMENT_STATUS[doc.status] ?? doc.status}
-                {doc.issuedOn ? ` · ${formatSeoulDate(doc.issuedOn)}` : ""} · 수신{" "}
-                {maskEmailNote(doc.maskedReceiverEmail)}
+                {doc.status === "PENDING"
+                  ? TAX_COPY.states.pending
+                  : doc.status === "ISSUED" && doc.issuedOn
+                    ? TAX_COPY.states.issued(
+                        formatSeoulDate(doc.issuedOn),
+                        maskEmailNote(doc.maskedReceiverEmail),
+                      )
+                    : `${TAX_DOCUMENT_STATUS[doc.status] ?? doc.status} · 수신 ${maskEmailNote(doc.maskedReceiverEmail)}`}
               </li>
             ))}
           </ul>
         )}
         {invoice.supplier?.businessName ? (
           <p className="mt-3 text-caption text-ink-2">
+            {isMissing(invoice.vatAmount) || isMissing(invoice.supplyAmount)
+              ? ""
+              : `${TAX_COPY.invoiceLine(formatKrw(invoice.amount), formatKrw(invoice.vatAmount), formatKrw(invoice.supplyAmount))} `}
             공급자 {invoice.supplier.businessName}
-            {invoice.supplier.businessNumber ? ` (${invoice.supplier.businessNumber})` : ""}
+            {invoice.supplier.representativeName
+              ? ` 대표 ${invoice.supplier.representativeName}`
+              : ""}
+            {invoice.supplier.businessNumber
+              ? ` 사업자등록번호 ${invoice.supplier.businessNumber}`
+              : ""}
           </p>
         ) : null}
         <div className="mt-3">
