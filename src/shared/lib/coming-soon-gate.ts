@@ -19,7 +19,36 @@ const OPEN_PUBLIC_API_PATHS: readonly string[] = [
   "/api/public/company-info",
 ];
 
-export function isGateOpenPath(pathname: string, method: string): boolean {
+export function isReviewMode(env: GateEnv): boolean {
+  return env.REVIEW_MODE === "true";
+}
+
+const REVIEW_PAGE_ROOTS: readonly string[] = [
+  "/login",
+  "/signup",
+  "/password",
+  "/reconsent",
+  "/office",
+  "/billing",
+  "/account",
+  "/support",
+  "/settings",
+  "/access",
+  "/removed",
+  "/members",
+];
+
+function isReviewPagePath(pathname: string): boolean {
+  if (pathname === "/") return true;
+  return REVIEW_PAGE_ROOTS.some((root) => pathname === root || pathname.startsWith(`${root}/`));
+}
+
+function isApiPath(pathname: string): boolean {
+  return pathname === "/api" || pathname.startsWith("/api/");
+}
+
+export function isGateOpenPath(pathname: string, method: string, env: GateEnv = {}): boolean {
+  if (isReviewMode(env) && (isReviewPagePath(pathname) || isApiPath(pathname))) return true;
   if (OPEN_PAGE_PATHS.includes(pathname)) return true;
   if (OPEN_PAGE_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return true;
   return method === "GET" && OPEN_PUBLIC_API_PATHS.includes(pathname);
