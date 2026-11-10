@@ -12,6 +12,8 @@ import { PageHeader } from "@/shared/components/ui/page-header";
 import { Checkbox } from "@/shared/components/ui/select-field";
 import { TextAreaField } from "@/shared/components/ui/textarea-field";
 import { TextField } from "@/shared/components/ui/text-field";
+import { ENTERPRISE_PRIVACY_COPY } from "@/shared/legal/notice-copy";
+import { useLegalCompanyInfo } from "@/shared/legal/use-legal-values";
 import { formatKrw, formatSeoulDateTime } from "@/shared/lib/format";
 import {
   acceptEnterpriseQuote,
@@ -47,6 +49,25 @@ const EMPTY_FORM: FormState = {
   content: "",
   acknowledged: false,
 };
+
+function EnterprisePrivacyNotice() {
+  const company = useLegalCompanyInfo();
+  const operator = company.data?.businessName;
+  const contact = company.data?.privacyContact;
+  return (
+    <div className="flex flex-col gap-1 text-caption text-ink-2">
+      <p className="font-semibold">{ENTERPRISE_PRIVACY_COPY.title}</p>
+      <ul className="flex flex-col gap-1">
+        {ENTERPRISE_PRIVACY_COPY.items.map((line) => (
+          <li key={line}>{line}</li>
+        ))}
+        {operator ? <li>관리 주체: {operator}</li> : null}
+        {contact ? <li>문의: {contact}</li> : null}
+      </ul>
+      <p>{ENTERPRISE_PRIVACY_COPY.caution}</p>
+    </div>
+  );
+}
 
 function LeadForm({
   onCreated,
@@ -160,7 +181,7 @@ function LeadForm({
           onValueChange={(value) => update("content", value)}
           error={errors.content || undefined}
         />
-        <p className="text-caption text-ink-2">{COPY.privacyNotice}</p>
+        <EnterprisePrivacyNotice />
         <div className="flex flex-col gap-1">
           <Checkbox
             label={COPY.privacyNoticeLabel}
@@ -342,6 +363,7 @@ export function EnterpriseScreen() {
         <FormNotice>
           <span className="flex flex-col gap-1">
             <span>{COPY.keyNotice}</span>
+            <span>{ENTERPRISE_PRIVACY_COPY.keyWarning}</span>
             <span>
               {COPY.leadId} <strong>{created.leadId}</strong>
             </span>

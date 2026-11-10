@@ -4,6 +4,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { ApiError, ApiNetworkError } from "@/shared/api/client";
 import { Button } from "@/shared/components/ui/button";
+import { RAW_ACCESS_PLEDGE_COPY } from "@/shared/legal/notice-copy";
 import { PageSkeleton } from "@/shared/components/feedback/skeleton";
 import { formatWait } from "@/shared/lib/api-messages";
 import { formatSeoulDateTime } from "@/shared/lib/format";
@@ -169,6 +170,7 @@ export function InvitationAcceptScreen({
         카카오 인증 뒤 15분 안에 인증 앱 등록을 마쳐야 합니다. 시간이 지나면 초대 링크부터 다시
         시작해 주세요.
       </OpsNotice>
+      <OpsNotice>{RAW_ACCESS_PLEDGE_COPY.inviteDuty}</OpsNotice>
       {startMessage ? (
         <OpsNotice tone="error">
           {startMessage.title}. {startMessage.description}

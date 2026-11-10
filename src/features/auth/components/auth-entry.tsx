@@ -2,6 +2,7 @@ import Link from "next/link";
 import { BrandLogo } from "@/shared/components/ui/brand-logo";
 import { Card } from "@/shared/components/ui/card";
 import { FormAlert } from "@/shared/components/feedback/form-frame";
+import { CookieNotice } from "@/shared/legal/cookie-notice";
 import { KAKAO_LINK_NOTICE } from "../model/legal-copy";
 
 const ENTRY_ERRORS: Record<string, string> = {
@@ -60,6 +61,7 @@ export function AuthEntry({
               </>
             )}
           </p>
+          <CookieNotice />
         </div>
       </Card>
     </div>

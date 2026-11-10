@@ -52,6 +52,7 @@ async function fillRequired(user: ReturnType<typeof userEvent.setup>, linked = "
   await user.type(screen.getByLabelText("범위"), "대표 연락처");
   await user.type(screen.getByLabelText("근거 내용"), "대표가 전화로 요청했습니다");
   if (linked) await user.type(screen.getByLabelText(/^연결 문의 ID/), linked);
+  for (const checkbox of screen.getAllByRole("checkbox")) await user.click(checkbox);
 }
 
 describe("원문 접근 요청 화면", () => {
@@ -87,6 +88,18 @@ describe("원문 접근 요청 화면", () => {
     expect(screen.getByText("열람 사유를 입력해 주세요.")).toBeTruthy();
     expect(screen.getByText("범위를 입력해 주세요.")).toBeTruthy();
     expect(screen.getByText("근거 내용을 입력해 주세요.")).toBeTruthy();
+    expect(spy).not.toHaveBeenCalled();
+  });
+
+  it("보안 서약을 모두 확인하지 않으면 요청을 보내지 않는다", async () => {
+    const user = userEvent.setup();
+    const spy = vi.fn();
+    server.use(http.post("/api/ops/raw-access-requests", () => spy()));
+    renderForm();
+    await fillRequired(user);
+    await user.click(screen.getAllByRole("checkbox")[0] as HTMLElement);
+    await user.click(screen.getByRole("button", { name: "승인 요청" }));
+    expect(await screen.findByText("보안 서약을 확인해 주세요.")).toBeTruthy();
     expect(spy).not.toHaveBeenCalled();
   });
 

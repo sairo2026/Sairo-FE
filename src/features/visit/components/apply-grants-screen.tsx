@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { searchOffices } from "@/features/office/api/office.api";
 import { EmptyState } from "@/shared/components/feedback/empty-state";
+import { GRANT_NOTICE_COPY } from "@/shared/legal/notice-copy";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
 import { ReasonDialog } from "@/shared/components/feedback/page-parts";
@@ -285,6 +286,7 @@ export function ApplyGrantsScreen({
             않습니다. 허용으로 주는 권한은 방문 신청뿐이며 승인자 연락처, 조건 값, 링크 발급,
             재허용, 매물 수정은 포함되지 않습니다.
           </FormNotice>
+          <FormNotice>{GRANT_NOTICE_COPY.scope}</FormNotice>
           {!isPrimary ? (
             <FormAlert>공동 승인자 출입승인에는 신청을 허용할 수 없습니다.</FormAlert>
           ) : null}

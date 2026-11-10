@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Chip } from "@/shared/components/ui/chip";
 import { DateTimeField } from "@/shared/components/ui/date-time-field";
+import { GRANT_NOTICE_COPY } from "@/shared/legal/notice-copy";
 import { TextField } from "@/shared/components/ui/text-field";
 import { formatSeoulDateTime } from "@/shared/lib/format";
 import { NOTE_MAX_LENGTH, validateRequestForm } from "../model/request-form";
@@ -157,6 +158,7 @@ export function RequestForm({
         onValueChange={(value) => set("note", value)}
         error={errors.note}
       />
+      <p className="text-caption text-ink-2">{GRANT_NOTICE_COPY.applicant}</p>
       {feedback}
       <div className="flex gap-2">
         <Button type="submit" size="sm" isLoading={isPending}>
