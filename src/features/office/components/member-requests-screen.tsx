@@ -25,7 +25,7 @@ import { officeKeys, useMemberships } from "../hooks/office-queries";
 import { REQUEST_SOURCE_LABEL, ROLE_LABEL, labelOf } from "../model/labels";
 import { describeOfficeError, fieldErrorMap } from "../model/messages";
 import { validateInvite, validateReason } from "../model/validation";
-import { MutedNote, ReasonDialog } from "./office-ui";
+import { MutedNote, ReasonDialog } from "@/shared/components/feedback/page-parts";
 
 type PendingRow = OfficeMembershipListResponse["items"][number];
 

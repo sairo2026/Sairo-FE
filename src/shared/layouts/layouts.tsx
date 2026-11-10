@@ -1,4 +1,6 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
+import { BrandLogo } from "@/shared/components/ui/brand-logo";
 import { OFFICE_NAV_ITEMS, SideNavItem } from "@/shared/components/ui/side-nav-item";
 import { ToastProvider } from "@/shared/components/ui/toast";
 
@@ -10,7 +12,7 @@ export function CustomerSiteLayout({ children, footer }: LayoutProps & { footer?
     <ToastProvider>
       <div className="flex min-h-screen flex-col bg-white text-ink">
         <header className="border-b border-line px-4 py-4 sm:px-8">
-          <span className="text-h2 font-bold text-primary">사이로</span>
+          <BrandLogo className="w-28" />
         </header>
         <main className="mx-auto w-full max-w-xl flex-1 px-4 py-8 sm:px-6">{children}</main>
         {footer ? (
@@ -27,7 +29,7 @@ export function ApproverLayout({ children }: LayoutProps) {
     <ToastProvider>
       <div className="min-h-screen bg-surface text-ink">
         <main className="mx-auto w-full max-w-lg px-4 py-10 sm:px-6">
-          <p className="mb-6 text-h2 font-bold text-primary">사이로</p>
+          <BrandLogo className="mb-6 w-28" />
           {children}
         </main>
       </div>
@@ -50,7 +52,10 @@ export function OfficeLayout({ children, activeKey, officeName, navItems }: Offi
   return (
     <ToastProvider>
       <div className="min-h-screen bg-white text-ink lg:grid lg:grid-cols-[260px_1fr]">
-        <aside className="border-b border-line bg-surface px-6 py-6 lg:min-h-screen lg:border-r lg:border-b-0 lg:px-8 lg:pt-32">
+        <aside className="border-b border-line bg-surface px-6 py-6 lg:min-h-screen lg:border-r lg:border-b-0 lg:px-8 lg:pt-8">
+          <Link href="/" aria-label="사이로 홈" className="mb-6 block lg:mb-16">
+            <BrandLogo className="w-32" />
+          </Link>
           <nav aria-label="주요 메뉴" className="flex gap-5 overflow-x-auto lg:flex-col lg:gap-8">
             {items.map((item) => (
               <SideNavItem

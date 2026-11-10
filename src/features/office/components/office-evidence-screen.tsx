@@ -14,7 +14,7 @@ import type { EvidenceType } from "../model/labels";
 import { describeOfficeError, fieldErrorMap, isApiCode } from "../model/messages";
 import { missingEvidence, requiredEvidenceTypes, validateEvidenceFile } from "../model/validation";
 import type { EntityType } from "../model/validation";
-import { ButtonRow, FlowFrame, MutedNote, TextLink } from "./office-ui";
+import { ButtonRow, FlowFrame, MutedNote, TextLink } from "@/shared/components/feedback/page-parts";
 
 function formatSize(bytes: number): string {
   if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;

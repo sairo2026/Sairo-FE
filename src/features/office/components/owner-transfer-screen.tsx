@@ -26,7 +26,7 @@ import {
 } from "../hooks/office-queries";
 import { TRANSFER_STATUS_LABEL, labelOf } from "../model/labels";
 import { describeOfficeError } from "../model/messages";
-import { MutedNote, ReasonDialog, StatusBadge } from "./office-ui";
+import { MutedNote, ReasonDialog, StatusBadge } from "@/shared/components/feedback/page-parts";
 
 type TransferView = {
   transferId: number;

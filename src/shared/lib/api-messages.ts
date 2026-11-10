@@ -42,3 +42,16 @@ export function describeAuthError(error: unknown, fallback: string): string {
 export function isApiCode(error: unknown, code: string): error is ApiError {
   return error instanceof ApiError && error.code === code;
 }
+
+export function fieldErrorMap(error: unknown): Record<string, string> {
+  if (!(error instanceof ApiError) || !error.fieldErrors) return {};
+  const result: Record<string, string> = {};
+  for (const item of error.fieldErrors) {
+    if (item.field && !(item.field in result)) result[item.field] = item.message;
+  }
+  return result;
+}
+
+export function isApiStatus(error: unknown, status: number): boolean {
+  return error instanceof ApiError && error.status === status;
+}

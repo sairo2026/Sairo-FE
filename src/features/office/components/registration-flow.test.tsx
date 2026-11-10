@@ -10,7 +10,7 @@ import { OfficeEvidenceScreen } from "./office-evidence-screen";
 import { OfficeRegistrationForm } from "./office-registration-form";
 import { OfficeReviewScreen } from "./office-review-screen";
 import { OfficeStartScreen } from "./office-start-screen";
-import { renderOffice } from "./test-utils";
+import { renderOffice } from "@/shared/testing/office-render";
 
 const navigation = vi.hoisted(() => ({ push: vi.fn(), replace: vi.fn() }));
 

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandLogo } from "@/shared/components/ui/brand-logo";
 import { Card } from "@/shared/components/ui/card";
 import { FormAlert } from "@/shared/components/feedback/form-frame";
 
@@ -24,7 +25,7 @@ export function AuthEntry({
     <div className="flex flex-1 items-center justify-center bg-surface px-4 py-16">
       <Card className="w-full max-w-sm">
         <div className="flex flex-col items-center gap-10">
-          <p className="text-h1 font-bold text-primary">사이로</p>
+          <BrandLogo variant="vertical" className="w-48" />
           <div className="flex w-full flex-col gap-3">
             {errorMessage ? <FormAlert>{errorMessage}</FormAlert> : null}
             <a
