@@ -224,10 +224,9 @@ describe("카드 등록 결과", () => {
   });
 
   it("고객 키가 맞지 않으면 처음부터 다시 시도하라고 안내한다", async () => {
-    renderOffice(
-      <CardResultScreen authKey="auth-ok" customerKey="other-key" version="1.0" />,
-      { role: "OWNER" },
-    );
+    renderOffice(<CardResultScreen authKey="auth-ok" customerKey="other-key" version="1.0" />, {
+      role: "OWNER",
+    });
     expect((await screen.findByRole("alert")).textContent).toContain("처음부터 다시 시도해 주세요");
   });
 
