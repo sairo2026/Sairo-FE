@@ -38,7 +38,10 @@ import { describeVisitError, isApiCode } from "../model/messages";
 import { minutesBetween } from "../model/time";
 import { IssuedLinkDialog } from "./issued-link-dialog";
 import type { IssuedLink } from "./issued-link-dialog";
+import { ConfirmationSection } from "./confirmation-section";
+import { LifecycleSection } from "./lifecycle-section";
 import { CandidatePicker } from "./pickers";
+import { ResultSection } from "./result-section";
 import { ChangeSection, RequestsSection } from "./request-section";
 import type { CandidateChoice } from "./pickers";
 
@@ -613,6 +616,9 @@ function DetailBody({ detail }: { detail: Detail }) {
           />
           <RequestsSection detail={detail} />
           <ChangeSection detail={detail} />
+          <ResultSection detail={detail} />
+          <ConfirmationSection detail={detail} />
+          <LifecycleSection detail={detail} />
           {isDeputy ? null : <ManagerPanel detail={detail} isReadOnly={isReadOnly} />}
         </div>
       </Card>
