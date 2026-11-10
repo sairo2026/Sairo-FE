@@ -75,7 +75,7 @@ export function LinkCommonNotices({
     <section aria-label="링크 이용 안내" className="flex flex-col gap-2 text-caption text-ink-2">
       <p>{LINK_COMMON_COPY.inputScope}</p>
       <p>{LINK_COMMON_COPY.sharing}</p>
-      <p>{LINK_COMMON_COPY.aboveSubmit}</p>
+      {audience === "approver" ? <p>{LINK_COMMON_COPY.aboveSubmit}</p> : null}
       {audience === "approver" ? <p>{LINK_COMMON_COPY.approvalWithdrawal}</p> : null}
       <p>
         {linkRightsFooter(context)} [{LINK_COMMON_COPY.rightsRequestLabel}]

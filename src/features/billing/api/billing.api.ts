@@ -22,7 +22,7 @@ import type {
   SubscriptionPurchaseConsentRequest,
   TaxRecipientUpsertRequest,
 } from "@/lib/api/contracts/billing.schema";
-import { PublicCompanyInfoResponseSchema } from "@/lib/api/contracts/public-site.schema";
+import { fetchLegalCompanyInfo } from "@/shared/legal/use-legal-values";
 import { TermsCatalogResponseSchema } from "@/lib/api/contracts/auth.schema";
 import { z } from "zod";
 import { apiFetch, withQuery } from "@/shared/api/client";
@@ -46,13 +46,7 @@ export function fetchPublicPricing() {
   return apiFetch("/api/public/pricing", { schema: PublicPricingWireSchema, ...PUBLIC_REQUEST });
 }
 
-export function fetchPublicCompanyInfo() {
-  return apiFetch("/api/public/company-info", {
-    schema: PublicCompanyInfoResponseSchema,
-    retry: false,
-    ...PUBLIC_REQUEST,
-  });
-}
+export const fetchPublicCompanyInfo = fetchLegalCompanyInfo;
 
 const OfficeNameSchema = z.object({ name: z.string() });
 

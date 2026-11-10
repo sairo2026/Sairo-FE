@@ -75,6 +75,9 @@ describe("고객 공개 링크 화면", () => {
     expect(screen.getByText(/담당 이중개 \(소속공인중개사\)/)).not.toBeNull();
     expect(screen.getByText(/국민대 앞 아파트/)).not.toBeNull();
     expect(screen.getByText("개인정보 수집 안내")).not.toBeNull();
+    expect(screen.getByText("받는 항목: 방문 가능한 시간")).not.toBeNull();
+    expect(screen.getByText("제출하면 위 안내를 확인한 것으로 처리됩니다.")).not.toBeNull();
+    expect(screen.queryByLabelText("개인정보 수집 안내를 확인했습니다")).toBeNull();
     expect(screen.getByText(/방문 가능 기간은 2026-11-11 ~ 2026-11-20/)).not.toBeNull();
   });
 
@@ -99,9 +102,6 @@ describe("고객 공개 링크 화면", () => {
     ).not.toBeNull();
     fireEvent.change(screen.getByLabelText("1번째 날짜"), { target: { value: "2026-11-19" } });
     await user.click(screen.getByRole("button", { name: "가능한 시간 제출" }));
-    expect(await screen.findByText("개인정보 수집 안내를 확인해 주세요.")).not.toBeNull();
-    await user.click(screen.getByLabelText("개인정보 수집 안내를 확인했습니다"));
-    await user.click(screen.getByRole("button", { name: "가능한 시간 제출" }));
     expect(await screen.findByText("가능한 시간을 제출했습니다.")).not.toBeNull();
     expect(getMockVisitFollowState().customerSubmitted).toHaveLength(1);
   });
@@ -109,7 +109,7 @@ describe("고객 공개 링크 화면", () => {
   it("시간이 없으면 제출하지 않고 안내한다", async () => {
     const user = userEvent.setup();
     renderLink();
-    await user.click(await screen.findByLabelText("개인정보 수집 안내를 확인했습니다"));
+    await screen.findByRole("button", { name: "가능한 시간 제출" });
     await user.click(screen.getByRole("button", { name: "가능한 시간 제출" }));
     expect(await screen.findByText("가능한 시간을 한 개 이상 추가해 주세요.")).not.toBeNull();
     expect(getMockVisitFollowState().customerSubmitted).toHaveLength(0);
@@ -124,7 +124,6 @@ describe("고객 공개 링크 화면", () => {
     const user = userEvent.setup();
     renderLink();
     expect(await screen.findByDisplayValue("2026-11-19")).not.toBeNull();
-    await user.click(screen.getByLabelText("개인정보 수집 안내를 확인했습니다"));
     await user.click(screen.getByRole("button", { name: "가능한 시간 수정 제출" }));
     expect(await screen.findByText("가능한 시간을 제출했습니다.")).not.toBeNull();
   });
@@ -151,9 +150,10 @@ describe("고객 공개 링크 화면", () => {
     const user = userEvent.setup();
     renderLink();
     await screen.findByDisplayValue("2026-11-19");
-    await user.click(screen.getByLabelText("개인정보 수집 안내를 확인했습니다"));
     await user.click(screen.getByRole("button", { name: "가능한 시간 수정 제출" }));
-    expect(await screen.findByText(/개인정보 안내가 바뀌었습니다/)).not.toBeNull();
+    expect(
+      await screen.findByText(/개인정보 안내가 바뀌었습니다. 내용을 확인한 뒤 다시 제출해 주세요/),
+    ).not.toBeNull();
   });
 
   it("제출 속도 제한에 걸리면 대기 시간을 안내한다", async () => {
@@ -170,20 +170,21 @@ describe("고객 공개 링크 화면", () => {
     const user = userEvent.setup();
     renderLink();
     await screen.findByDisplayValue("2026-11-19");
-    await user.click(screen.getByLabelText("개인정보 수집 안내를 확인했습니다"));
     await user.click(screen.getByRole("button", { name: "가능한 시간 수정 제출" }));
     expect(await screen.findByText(/20초/)).not.toBeNull();
   });
 
-  it("만료된 링크와 잘못된 링크는 구분해 안내한다", async () => {
+  it("만료된 링크와 잘못된 링크는 같은 문구로 안내한다", async () => {
+    const expected =
+      /이 링크는 사용할 수 없습니다. 만료되었거나 새 링크로 바뀌었을 수 있습니다. 새 링크가 필요하면 방문을 조율하는 사무소로 문의해 주세요. 입력하신 내용은 정해진 보관 기간이 지나면 삭제됩니다./;
     renderLink(MOCK_CUSTOMER_EXPIRED_TOKEN);
-    expect(await screen.findByText(/링크가 만료되었습니다/)).not.toBeNull();
+    expect(await screen.findByText(expected)).not.toBeNull();
     cleanup();
     renderLink("unknown-token-0000001");
-    expect(await screen.findByText(/링크가 잘못되었거나 만료되었습니다/)).not.toBeNull();
+    expect(await screen.findByText(expected)).not.toBeNull();
     cleanup();
     renderLink("짧음");
-    expect(await screen.findByText(/링크가 잘못되었거나 만료되었습니다/)).not.toBeNull();
+    expect(await screen.findByText(expected)).not.toBeNull();
   });
 
   it("서버 오류가 나면 다시 시도 안내를 보여준다", async () => {

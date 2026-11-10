@@ -1,16 +1,28 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { z } from "zod";
 import { PublicCompanyInfoResponseSchema } from "@/lib/api/contracts/public-site.schema";
-import type { PublicCompanyInfoResponse } from "@/lib/api/contracts/public-site.schema";
 import { apiFetch } from "@/shared/api/client";
 import type { LegalValues } from "./placeholders";
 
 const COMPANY_INFO_QUERY_KEY = ["billing", "company-info"] as const;
 
+export const LegalCompanyInfoSchema = PublicCompanyInfoResponseSchema.partial({
+  versionNo: true,
+  publishedAt: true,
+  contactPhone: true,
+  supportEmail: true,
+  privacyContact: true,
+  privacyRequestPath: true,
+  links: true,
+  ecommerceNotice: true,
+}).extend({ ecommerceNotice: z.string().nullable().optional() });
+export type LegalCompanyInfo = z.infer<typeof LegalCompanyInfoSchema>;
+
 export function fetchLegalCompanyInfo() {
   return apiFetch("/api/public/company-info", {
-    schema: PublicCompanyInfoResponseSchema,
+    schema: LegalCompanyInfoSchema,
     retry: false,
     skipAuthEvents: true,
   });
@@ -27,7 +39,7 @@ export function useLegalCompanyInfo() {
 
 export function buildLegalValues(
   version: string,
-  info: PublicCompanyInfoResponse | undefined,
+  info: LegalCompanyInfo | undefined,
   effectiveDate?: string,
 ): LegalValues {
   return {

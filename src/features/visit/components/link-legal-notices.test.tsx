@@ -11,6 +11,7 @@ import {
   LinkCommonNotices,
   LinkIssueGuidance,
 } from "./link-legal-notices";
+import { LinkNoticePage } from "./link-notice-page";
 import {
   GUEST_RIGHTS_REQUEST_COPY,
   linkExpiredNotice,
@@ -131,5 +132,17 @@ describe("링크 발급 안내", () => {
     renderWithQuery(<LinkIssueGuidance />);
     expect(screen.getAllByRole("listitem")).toHaveLength(4);
     expect(screen.getByText(/링크를 문자나 알림톡으로 발송하지 않습니다/)).not.toBeNull();
+  });
+});
+
+describe("링크 개인정보 안내 공개 페이지", () => {
+  it("승인자와 고객 안내를 각각 보여준다", () => {
+    const { unmount } = renderWithQuery(<LinkNoticePage audience="approver" />);
+    expect(screen.getByRole("heading", { name: "승인자 링크 개인정보 안내" })).not.toBeNull();
+    expect(screen.getByText("받는 항목: 방문 가능한 시간과 방문 조건")).not.toBeNull();
+    unmount();
+    renderWithQuery(<LinkNoticePage audience="customer" />);
+    expect(screen.getByRole("heading", { name: "고객 링크 개인정보 안내" })).not.toBeNull();
+    expect(screen.getByText("받는 항목: 방문 가능한 시간")).not.toBeNull();
   });
 });
