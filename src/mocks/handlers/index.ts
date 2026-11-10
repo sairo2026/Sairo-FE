@@ -6,6 +6,7 @@ import { migrationHandlers } from "./migration";
 import { migrationSupportHandlers } from "./migration-support";
 import { officeHandlers } from "./office";
 import { propertyHandlers } from "./property";
+import { supportHandlers } from "./support";
 import { visitHandlers } from "./visit";
 import { visitFollowHandlers } from "./visit-follow";
 import { visitRequestHandlers } from "./visit-request";
@@ -20,6 +21,7 @@ export const handlers = [
   ...officeHandlers,
   ...migrationHandlers,
   ...migrationSupportHandlers,
+  ...supportHandlers,
   ...propertyHandlers,
   ...customerHandlers,
   ...visitHandlers,

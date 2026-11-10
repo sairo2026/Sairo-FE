@@ -134,7 +134,7 @@ export function PublicPricingScreen() {
         <p className="mt-3 text-body text-ink">{COPY.pricingRefundSummary}</p>
         <p className="mt-3 text-caption text-ink-2">
           {COPY.enterpriseNote}{" "}
-          <Link href="/support" className="font-semibold text-primary underline">
+          <Link href="/support/enterprise" className="font-semibold text-primary underline">
             도입 문의
           </Link>
         </p>
