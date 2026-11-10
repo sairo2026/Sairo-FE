@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { COMING_SOON_PATH, isComingSoonMode } from "@/shared/lib/coming-soon-gate";
+import { COMING_SOON_PATH, isComingSoonMode, isGateOpenPath } from "@/shared/lib/coming-soon-gate";
 
 export function proxy(request: NextRequest) {
   if (!isComingSoonMode(process.env)) {
@@ -8,6 +8,9 @@ export function proxy(request: NextRequest) {
   }
 
   const { pathname } = request.nextUrl;
+  if (isGateOpenPath(pathname, request.method)) {
+    return NextResponse.next();
+  }
   if (pathname === "/api" || pathname.startsWith("/api/")) {
     return NextResponse.json(
       { message: "서비스 준비 중입니다." },

@@ -373,8 +373,23 @@ describe("약관 개정 재동의", () => {
     expect(screen.getByText("자동결제 안내 문구가 추가되었습니다")).not.toBeNull();
     expect(screen.getByRole("link", { name: "바뀐 내용 보기" })).not.toBeNull();
     expect(screen.getByRole("link", { name: "이전 약관 보기" })).not.toBeNull();
-    expect(screen.getByText(/로그아웃, 개인정보 권리 요청, 지원 문의, 탈퇴/)).not.toBeNull();
-    expect(screen.getByRole("link", { name: "동의하지 않음" })).not.toBeNull();
+    expect(
+      screen.getByText(/로그아웃, 개인정보 권리 요청, 지원 문의는 동의하지 않아도 할 수 있습니다/),
+    ).not.toBeNull();
+    expect(screen.getByRole("link", { name: "회원 탈퇴" }).getAttribute("href")).toBe(
+      "/account/withdrawal",
+    );
+    expect(screen.getByRole("button", { name: "동의하지 않음" })).not.toBeNull();
+  });
+
+  it("동의하지 않음을 누르면 계속 이용할 수 없다는 오류를 보여준다", async () => {
+    setMockAuthContext(reconsentContext);
+    const user = userEvent.setup();
+    renderWithQuery(<ReconsentNotice />);
+    await user.click(await screen.findByRole("button", { name: "동의하지 않음" }));
+    expect((await screen.findByRole("alert")).textContent).toBe(
+      "새 약관에 동의하셔야 계속 이용할 수 있습니다.",
+    );
   });
 
   it("동의하면 기록하고 홈으로 이동한다", async () => {

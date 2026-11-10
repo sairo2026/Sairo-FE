@@ -81,7 +81,7 @@ describe("카드 등록", () => {
     await waitFor(() => expect(launcher.requestBillingAuth).toHaveBeenCalledTimes(1));
     const request = (launcher.requestBillingAuth as ReturnType<typeof vi.fn>).mock.calls[0]?.[0];
     expect(request.customerKey).toBe("customer-key-0001");
-    expect(request.successUrl).toContain("/billing/card/result?v=2026-11-01");
+    expect(request.successUrl).toContain("/billing/card/result?v=1.0");
     expect(request.failUrl).toContain("/billing/card/result");
     expect(billingState.sessionIssued).toBe(true);
   });
@@ -201,7 +201,7 @@ describe("카드 등록", () => {
 describe("카드 등록 결과", () => {
   it("성공하면 결제된 금액이 없고 첫 결제 예정일이 있다고 알린다", async () => {
     renderOffice(
-      <CardResultScreen authKey="auth-ok" customerKey="customer-key-0001" version="2026-11-01" />,
+      <CardResultScreen authKey="auth-ok" customerKey="customer-key-0001" version="1.0" />,
       { role: "OWNER" },
     );
     expect(document.querySelector('[aria-busy="true"]')).not.toBeNull();
@@ -215,7 +215,7 @@ describe("카드 등록 결과", () => {
 
   it("카드사가 승인하지 않으면 결제된 금액이 없다고 안내한다", async () => {
     renderOffice(
-      <CardResultScreen authKey="bad-auth" customerKey="customer-key-0001" version="2026-11-01" />,
+      <CardResultScreen authKey="bad-auth" customerKey="customer-key-0001" version="1.0" />,
       { role: "OWNER" },
     );
     expect((await screen.findByRole("alert")).textContent).toContain(
@@ -225,7 +225,7 @@ describe("카드 등록 결과", () => {
 
   it("고객 키가 맞지 않으면 처음부터 다시 시도하라고 안내한다", async () => {
     renderOffice(
-      <CardResultScreen authKey="auth-ok" customerKey="other-key" version="2026-11-01" />,
+      <CardResultScreen authKey="auth-ok" customerKey="other-key" version="1.0" />,
       { role: "OWNER" },
     );
     expect((await screen.findByRole("alert")).textContent).toContain("처음부터 다시 시도해 주세요");
@@ -259,7 +259,7 @@ describe("카드 등록 결과", () => {
   it("요청 제한(429)이면 대기 시간을 안내한다", async () => {
     server.use(http.post("/api/subscriptions/billing-key", () => mockErrors.rateLimited(60)));
     renderOffice(
-      <CardResultScreen authKey="auth-ok" customerKey="customer-key-0001" version="2026-11-01" />,
+      <CardResultScreen authKey="auth-ok" customerKey="customer-key-0001" version="1.0" />,
       { role: "OWNER" },
     );
     expect((await screen.findByRole("alert")).textContent).toContain("1분 뒤에 다시 시도해 주세요");
@@ -398,7 +398,7 @@ describe("구독 구매 동의", () => {
       http.post("/api/subscriptions/purchase-consent", async ({ request }) => {
         sent = (await request.json()) as Record<string, unknown>;
         return Response.json({
-          termsVersion: "2026-11-01",
+          termsVersion: "1.0",
           totalAmountInclVat: 64900,
           vatAmount: 5900,
           amountLimit: 64900,

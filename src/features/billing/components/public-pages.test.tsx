@@ -131,6 +131,7 @@ describe("공개 사업자 정보 하단", () => {
     expect(within(info).getByText("사이로(SAIRO)")).not.toBeNull();
     expect(within(info).getByText("김태환")).not.toBeNull();
     expect(within(info).getByText("사업자등록번호")).not.toBeNull();
+    expect(within(info).getByText("전화")).not.toBeNull();
     expect(within(info).queryByText("통신판매업 신고번호")).toBeNull();
     expect(screen.getByRole("link", { name: "환불정책" }).getAttribute("href")).toBe(
       "/legal/refund-policy",
@@ -159,26 +160,40 @@ describe("공개 사업자 정보 하단", () => {
 });
 
 describe("약관과 환불정책 페이지", () => {
-  it("이용약관 조항을 보여준다", () => {
-    render(<LegalDocumentScreen kind="terms" />);
-    expect(screen.getByRole("heading", { name: "이용약관" })).not.toBeNull();
-    expect(screen.getByRole("heading", { name: /제1조 \(목적과 계약 당사자\)/ })).not.toBeNull();
-    expect(screen.getByRole("heading", { name: /제22조 \(약관의 변경\)/ })).not.toBeNull();
+  it("이용약관 조항과 목차를 보여준다", () => {
+    render(
+      <QueryClientProvider client={createQueryClient()}>
+        <LegalDocumentScreen slug="terms" />
+      </QueryClientProvider>,
+    );
+    expect(screen.getByRole("heading", { level: 1, name: "이용약관" })).not.toBeNull();
+    expect(screen.getByRole("heading", { name: "제1조 (목적)" })).not.toBeNull();
+    expect(screen.getByRole("heading", { name: "제23조 (준거법과 관할)" })).not.toBeNull();
+    const toc = screen.getByRole("navigation", { name: "이용약관 목차" });
+    expect(within(toc).getAllByRole("link").length).toBeGreaterThanOrEqual(23);
+    expect(screen.getByText("시행 버전 1.0")).not.toBeNull();
   });
 
-  it("환불정책은 해지와 환불 기준을 보여주고 초안 표기를 노출하지 않는다", () => {
-    const { container } = render(<LegalDocumentScreen kind="refund" />);
-    expect(screen.getByRole("heading", { name: "환불정책" })).not.toBeNull();
-    expect(
-      screen.getByText(/같은 기간이 두 번 결제되었거나 잘못 결제된 금액은 전액 환불합니다/),
-    ).not.toBeNull();
-    expect(screen.getByText(/3영업일 안에 검토 결과를 알려 드립니다/)).not.toBeNull();
+  it("환불정책은 환불 기준을 보여주고 초안 표기를 노출하지 않는다", () => {
+    const { container } = render(
+      <QueryClientProvider client={createQueryClient()}>
+        <LegalDocumentScreen slug="refund-policy" />
+      </QueryClientProvider>,
+    );
+    expect(screen.getByRole("heading", { level: 1, name: "환불정책" })).not.toBeNull();
+    expect(screen.getByRole("heading", { name: "2. 환불 대상과 금액" })).not.toBeNull();
     expect(container.textContent).not.toMatch(/변호사|초안|내부 기준안/);
   });
 
   it("개인정보처리방침 조항을 보여준다", () => {
-    render(<LegalDocumentScreen kind="privacy" />);
-    expect(screen.getByRole("heading", { name: "개인정보처리방침" })).not.toBeNull();
-    expect(screen.getByRole("heading", { name: /제3조/ })).not.toBeNull();
+    render(
+      <QueryClientProvider client={createQueryClient()}>
+        <LegalDocumentScreen slug="privacy" />
+      </QueryClientProvider>,
+    );
+    expect(screen.getByRole("heading", { level: 1, name: "개인정보처리방침" })).not.toBeNull();
+    expect(
+      screen.getByRole("heading", { name: /제7조 \(개인정보 처리업무의 위탁\)/ }),
+    ).not.toBeNull();
   });
 });

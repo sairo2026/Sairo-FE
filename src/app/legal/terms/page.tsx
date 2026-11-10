@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: "이용약관 | 사이로" };
 export default function Page() {
   return (
     <PublicSiteLayout footer={<PublicBusinessFooter />}>
-      <LegalDocumentScreen kind="terms" />
+      <LegalDocumentScreen slug="terms" />
     </PublicSiteLayout>
   );
 }

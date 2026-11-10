@@ -216,10 +216,20 @@ export type TermsItemProps = {
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
   href?: string;
+  onViewFull?: () => void;
+  viewFullLabel?: string;
 };
 
 /** 항목별 체크, 필수·선택 표시, 전문 보기 링크를 한 행에 둔다. */
-export function TermsItem({ label, isRequired, checked, onCheckedChange, href }: TermsItemProps) {
+export function TermsItem({
+  label,
+  isRequired,
+  checked,
+  onCheckedChange,
+  href,
+  onViewFull,
+  viewFullLabel,
+}: TermsItemProps) {
   return (
     <div className="flex items-center justify-between gap-3">
       <Checkbox
@@ -232,7 +242,16 @@ export function TermsItem({ label, isRequired, checked, onCheckedChange, href }:
           </span>
         }
       />
-      {href ? (
+      {onViewFull ? (
+        <button
+          type="button"
+          onClick={onViewFull}
+          aria-label={viewFullLabel}
+          className="shrink-0 text-caption text-ink-2 underline"
+        >
+          전문 보기
+        </button>
+      ) : href ? (
         <a
           href={href}
           className="text-caption text-ink-2 underline"

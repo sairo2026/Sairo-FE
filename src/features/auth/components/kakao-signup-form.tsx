@@ -20,11 +20,18 @@ import { AuthFrame, FormAlert, FormNotice } from "@/shared/components/feedback/f
 import { ExistingAccountNotice } from "./existing-account-notice";
 import { PhoneVerificationField } from "./phone-verification-field";
 import {
+  CollectionNoticeTable,
   TermsAgreementSection,
   areRequiredTermsAgreed,
   visibleTerms,
 } from "./terms-agreement-section";
 import type { TermsSelection } from "./terms-agreement-section";
+import {
+  KAKAO_EXTRA_INFO_NOTICE,
+  KAKAO_LINK_NOTICE,
+  PHONE_VERIFICATION_NOTICE,
+  SIGNUP_TERMS_COPY,
+} from "../model/legal-copy";
 import { TermsVersionChangedDialog } from "./terms-version-changed-dialog";
 import type { ChangedTerm } from "./terms-version-changed-dialog";
 
@@ -53,6 +60,7 @@ export function KakaoSignupForm() {
   const [phoneError, setPhoneError] = useState<string>();
   const [submitError, setSubmitError] = useState<string>();
   const [changedTerms, setChangedTerms] = useState<ChangedTerm[] | null>(null);
+  const [changedCodes, setChangedCodes] = useState<string[]>([]);
   const [isConflict, setIsConflict] = useState(false);
   const [isBusy, setIsBusy] = useState(false);
 
@@ -127,7 +135,7 @@ export function KakaoSignupForm() {
       isValid = false;
     }
     if (!areRequiredTermsAgreed(terms, selection)) {
-      setTermsError("필수 약관에 모두 동의해 주세요.");
+      setTermsError(SIGNUP_TERMS_COPY.requiredError);
       isValid = false;
     }
     if (!isValid || !phoneTicket) return;
@@ -169,6 +177,7 @@ export function KakaoSignupForm() {
           Object.fromEntries(Object.entries(current).filter(([code]) => !changedCodes.has(code))),
         );
         setChangedTerms(changed);
+        setChangedCodes(changed.map((item) => item.termsCode));
         await termsQuery.refetch();
         return;
       }
@@ -187,7 +196,7 @@ export function KakaoSignupForm() {
 
   return (
     <>
-      <AuthFrame title="카카오로 가입" description="가입을 마치려면 아래 정보를 확인해 주세요.">
+      <AuthFrame title="카카오로 가입" description={KAKAO_EXTRA_INFO_NOTICE}>
         <form
           noValidate
           className="flex flex-col gap-6"
@@ -227,6 +236,7 @@ export function KakaoSignupForm() {
                 {phoneError}
               </p>
             ) : null}
+            <p className="text-caption text-ink-2">{PHONE_VERIFICATION_NOTICE}</p>
           </div>
           <TextField
             label="참고 이메일 (선택)"
@@ -249,12 +259,15 @@ export function KakaoSignupForm() {
               setTermsError(undefined);
             }}
             error={termsError}
-            notice="이메일 로그인을 연결하기 전에는 마케팅 수신 항목을 선택할 수 없습니다. 이메일을 연결한 뒤 내 정보에서 선택할 수 있습니다."
+            changedCodes={changedCodes}
+            hasLoginEmail={false}
           />
+          <CollectionNoticeTable />
           {submitError ? <FormAlert>{submitError}</FormAlert> : null}
           <FormNotice>
             카카오 계정과 같은 이메일이 있어도 기존 이메일 계정과 합쳐지지 않습니다.
           </FormNotice>
+          <p className="text-caption text-ink-2">{KAKAO_LINK_NOTICE}</p>
           <div className="flex justify-center gap-3">
             <Link
               href="/login"

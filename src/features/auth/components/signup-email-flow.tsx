@@ -32,11 +32,13 @@ import { AuthFrame, FormAlert, FormNotice } from "@/shared/components/feedback/f
 import { ExistingAccountNotice } from "./existing-account-notice";
 import { PhoneVerificationField } from "./phone-verification-field";
 import {
+  CollectionNoticeTable,
   TermsAgreementSection,
   areRequiredTermsAgreed,
   visibleTerms,
 } from "./terms-agreement-section";
 import type { TermsSelection } from "./terms-agreement-section";
+import { PHONE_VERIFICATION_NOTICE, SIGNUP_TERMS_COPY } from "../model/legal-copy";
 import { TermsVersionChangedDialog } from "./terms-version-changed-dialog";
 import type { ChangedTerm } from "./terms-version-changed-dialog";
 
@@ -94,6 +96,7 @@ export function SignupEmailFlow({ token }: { token?: string }) {
   const [confirmError, setConfirmError] = useState<string>();
   const [submitError, setSubmitError] = useState<string>();
   const [changedTerms, setChangedTerms] = useState<ChangedTerm[] | null>(null);
+  const [changedCodes, setChangedCodes] = useState<string[]>([]);
   const [isConflict, setIsConflict] = useState(false);
   const [isBusy, setIsBusy] = useState(false);
   const resend = useCountdown();
@@ -200,7 +203,7 @@ export function SignupEmailFlow({ token }: { token?: string }) {
     }
     if (!phoneTicket) isValid = false;
     if (!areRequiredTermsAgreed(terms, selection)) {
-      setTermsError("필수 약관에 모두 동의해 주세요.");
+      setTermsError(SIGNUP_TERMS_COPY.requiredError);
       isValid = false;
     } else {
       setTermsError(undefined);
@@ -252,6 +255,7 @@ export function SignupEmailFlow({ token }: { token?: string }) {
           Object.fromEntries(Object.entries(current).filter(([code]) => !changedCodes.has(code))),
         );
         setChangedTerms(changed);
+        setChangedCodes(changed.map((item) => item.termsCode));
         setStep("info");
         await termsQuery.refetch();
         return;
@@ -367,6 +371,7 @@ export function SignupEmailFlow({ token }: { token?: string }) {
               onVerified={setPhoneTicket}
               onReset={() => setPhoneTicket(null)}
             />
+            <p className="text-caption text-ink-2">{PHONE_VERIFICATION_NOTICE}</p>
             <TermsAgreementSection
               items={terms}
               selection={selection}
@@ -375,8 +380,9 @@ export function SignupEmailFlow({ token }: { token?: string }) {
                 setTermsError(undefined);
               }}
               error={termsError}
-              notice="개인정보처리방침은 열람 고지로 제공하며, 선택 항목은 동의하지 않아도 가입할 수 있습니다."
+              changedCodes={changedCodes}
             />
+            <CollectionNoticeTable />
             {submitError ? <FormAlert>{submitError}</FormAlert> : null}
             <div className="flex justify-center gap-3">
               <Link

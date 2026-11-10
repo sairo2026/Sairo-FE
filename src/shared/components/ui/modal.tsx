@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useId, useRef } from "react";
 import type { ReactNode } from "react";
 import { useFocusTrapDialog } from "@/shared/hooks/use-focus-trap-dialog";
+import { cn } from "@/shared/lib/cn";
 import { Button } from "./button";
 
 export type ModalProps = {
@@ -11,10 +12,11 @@ export type ModalProps = {
   onClose: () => void;
   children: ReactNode;
   footer?: ReactNode;
+  size?: "default" | "wide";
 };
 
 /** 포커스를 가두고 ESC로 닫으며 닫을 때 열기 전 요소로 포커스를 돌려주는 대화상자. */
-export function Modal({ isOpen, title, onClose, children, footer }: ModalProps) {
+export function Modal({ isOpen, title, onClose, children, footer, size = "default" }: ModalProps) {
   const titleId = useId();
   const closeRef = useRef(onClose);
   useEffect(() => {
@@ -32,12 +34,22 @@ export function Modal({ isOpen, title, onClose, children, footer }: ModalProps) 
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className="w-full max-w-md rounded-card bg-white px-8 py-7 shadow-popup outline-none"
+        className={cn(
+          "w-full rounded-card bg-white px-8 py-7 shadow-popup outline-none",
+          size === "wide" ? "flex max-h-[85vh] max-w-3xl flex-col" : "max-w-md",
+        )}
       >
         <h2 id={titleId} className="text-h2 font-semibold text-ink">
           {title}
         </h2>
-        <div className="mt-4 text-body text-ink-2">{children}</div>
+        <div
+          className={cn(
+            "mt-4 text-body text-ink-2",
+            size === "wide" && "min-h-0 flex-1 overflow-y-auto",
+          )}
+        >
+          {children}
+        </div>
         {footer ? <div className="mt-6 flex justify-end gap-2">{footer}</div> : null}
       </div>
     </div>
