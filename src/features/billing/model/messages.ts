@@ -101,6 +101,8 @@ export function describeBillingError(error: unknown, fallback: string): string {
         ? `요청이 너무 많습니다. ${formatWait(error.retryAfterSeconds)} 뒤에 다시 시도해 주세요.`
         : "요청이 너무 많습니다. 잠시 뒤에 다시 시도해 주세요.";
     }
+    const mapped = ERROR_BY_CODE[error.code];
+    if (mapped && error.status < 500) return mapped;
     if (error.status === 403) return "이 작업을 할 권한이 없습니다.";
     if (error.status >= 500) return "일시적인 오류가 발생했습니다. 잠시 뒤에 다시 시도해 주세요.";
     return ERROR_BY_CODE[error.code] ?? fallback;

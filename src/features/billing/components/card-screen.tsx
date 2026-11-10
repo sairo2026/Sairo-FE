@@ -14,7 +14,7 @@ import { Checkbox } from "@/shared/components/ui/select-field";
 import { ConfirmDialog } from "@/shared/components/ui/modal";
 import { PageHeader } from "@/shared/components/ui/page-header";
 import { formatSeoulDate } from "@/shared/lib/format";
-import type { SubscriptionCurrentResponse } from "@/lib/api/contracts/billing.schema";
+import type { SubscriptionCurrent } from "../api/wire";
 import { deleteBillingKey, openBillingKeySession, registerBillingKey } from "../api/billing.api";
 import { billingKeys, useCardNotice, useSubscription } from "../hooks/billing-queries";
 import { PaymentWidgetUnavailableError, tossBillingAuthLauncher } from "../lib/payment-widget";
@@ -23,7 +23,7 @@ import { COPY, describeBillingError } from "../model/messages";
 
 export const CARD_RESULT_PATH = "/billing/card/result";
 
-function firstBillingText(subscription: SubscriptionCurrentResponse) {
+function firstBillingText(subscription: SubscriptionCurrent) {
   return subscription.firstBillingScheduledAt
     ? formatSeoulDate(subscription.firstBillingScheduledAt)
     : null;
@@ -33,7 +33,7 @@ function CardView({
   subscription,
   launcher,
 }: {
-  subscription: SubscriptionCurrentResponse;
+  subscription: SubscriptionCurrent;
   launcher: BillingAuthLauncher;
 }) {
   const queryClient = useQueryClient();

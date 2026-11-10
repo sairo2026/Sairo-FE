@@ -13,7 +13,6 @@ import {
   StartCustomerAgreementResponseSchema,
   SubscriptionCancelResponseSchema,
   SubscriptionCancelWithdrawResponseSchema,
-  SubscriptionCurrentResponseSchema,
   SubscriptionPurchaseConsentResponseSchema,
 } from "@/lib/api/contracts/billing.schema";
 import type {
@@ -32,9 +31,12 @@ import {
   InvoiceDetailWireSchema,
   PublicPricingWireSchema,
   RefundStatusWireSchema,
+  SubscriptionWireSchema,
   ReturnGrantStatusWireSchema,
   TaxRecipientWireSchema,
 } from "./wire";
+
+export const KAKAO_GRANT_START_PATH = "/api/auth/kakao/start?purpose=GRANT";
 
 const PUBLIC_REQUEST = { skipAuthEvents: true } as const;
 const GRANT_REQUEST = { skipAuthEvents: true, skipStepUp: true } as const;
@@ -56,7 +58,7 @@ export function fetchBillingPlans() {
 }
 
 export function fetchSubscription() {
-  return apiFetch("/api/subscriptions/current", { schema: SubscriptionCurrentResponseSchema });
+  return apiFetch("/api/subscriptions/current", { schema: SubscriptionWireSchema });
 }
 
 export function fetchCardNotice() {

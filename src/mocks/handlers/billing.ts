@@ -6,7 +6,6 @@ import type {
   PurchaseConsentPreviewResponse,
   RefundRequestListResponse,
   StartCustomerAgreementResponse,
-  SubscriptionCurrentResponse,
 } from "@/lib/api/contracts/billing.schema";
 import type { PublicCompanyInfoResponse } from "@/lib/api/contracts/public-site.schema";
 import type {
@@ -14,6 +13,7 @@ import type {
   PublicPricing,
   RefundStatus,
   TaxRecipient,
+  SubscriptionCurrent,
 } from "@/features/billing/api/wire";
 import { errorResponse, mockErrors } from "../error-responses";
 
@@ -90,9 +90,7 @@ export const MOCK_COMPANY_INFO: PublicCompanyInfoResponse = {
   ],
 };
 
-export function buildSubscription(
-  partial: Partial<SubscriptionCurrentResponse> = {},
-): SubscriptionCurrentResponse {
+export function buildSubscription(partial: Partial<SubscriptionCurrent> = {}): SubscriptionCurrent {
   return {
     status: "TRIAL",
     plan: "TEAM",
@@ -139,7 +137,7 @@ export function buildInvoiceItem(
 }
 
 export type BillingMockState = {
-  subscription: SubscriptionCurrentResponse;
+  subscription: SubscriptionCurrent;
   invoices: BillingInvoiceListResponse["items"];
   refunds: RefundRequestListResponse["items"];
   notices: PriceChangeNoticeListResponse["items"];
@@ -147,6 +145,13 @@ export type BillingMockState = {
   taxRecipient: TaxRecipient;
   nextRefundId: number;
   sessionIssued: boolean;
+  authSuspension: {
+    authSuspended: boolean;
+    suspendedAt: string | null;
+    reauthDeadlineAt: string | null;
+    trialRemainingSeconds: number | null;
+  };
+  grant: { signedIn: boolean; revoked: boolean; exportPolls: number };
 };
 
 export function createBillingState(): BillingMockState {
@@ -169,6 +174,13 @@ export function createBillingState(): BillingMockState {
     },
     nextRefundId: 900,
     sessionIssued: false,
+    authSuspension: {
+      authSuspended: false,
+      suspendedAt: null,
+      reauthDeadlineAt: null,
+      trialRemainingSeconds: null,
+    },
+    grant: { signedIn: false, revoked: false, exportPolls: 0 },
   };
 }
 
@@ -557,11 +569,69 @@ export const billingHandlers = [
     return HttpResponse.json(billingState.taxRecipient);
   }),
   http.get("/api/offices/current/auth-status", () =>
-    HttpResponse.json({
-      authSuspended: false,
-      suspendedAt: null,
-      reauthDeadlineAt: null,
-      trialRemainingSeconds: null,
-    }),
+    HttpResponse.json(billingState.authSuspension),
   ),
+  http.post("/api/grant-auth/:kind", async ({ request, params }) => {
+    const body = (await request.json()) as {
+      grantId: number;
+      authMethod: string;
+      credential: string;
+    };
+    if (body.grantId === 404) {
+      const code = params.kind === "return" ? "RETURN_GRANT_INVALID" : "ARCHIVE_GRANT_INVALID";
+      return errorResponse(403, code, "권한이 유효하지 않습니다.");
+    }
+    if (body.authMethod === "KAKAO" && body.credential === "other-account") {
+      return errorResponse(403, "STEP_UP_ACCOUNT_MISMATCH", "다른 계정입니다.");
+    }
+    if (body.authMethod === "EMAIL" && body.credential !== "correct-pw")
+      return mockErrors.invalidCredentials();
+    billingState.grant.signedIn = true;
+    return HttpResponse.json({
+      grantId: body.grantId,
+      grantType: String(params.kind).toUpperCase(),
+      expiresAt: "2027-12-31T00:00:00+09:00",
+    });
+  }),
+  http.get("/api/return-grants/current", () => {
+    if (!billingState.grant.signedIn) return mockErrors.unauthenticated();
+    return HttpResponse.json({
+      grantId: 12,
+      expiresAt: "2027-12-31T00:00:00+09:00",
+      revoked: billingState.grant.revoked,
+    });
+  }),
+  http.post("/api/return-grants/:grantId/export", () => {
+    billingState.grant.exportPolls = 0;
+    return HttpResponse.json({
+      exportId: 77,
+      status: "PROCESSING",
+      downloadUrl: null,
+      expiresAt: null,
+      fileExpiresAt: null,
+    });
+  }),
+  http.get("/api/return-grants/:grantId/exports/:exportId", () => {
+    billingState.grant.exportPolls += 1;
+    if (billingState.grant.exportPolls < 2) {
+      return HttpResponse.json({
+        exportId: 77,
+        status: "PROCESSING",
+        downloadUrl: null,
+        expiresAt: null,
+        fileExpiresAt: null,
+      });
+    }
+    return HttpResponse.json({
+      exportId: 77,
+      status: "COMPLETED",
+      downloadUrl: "https://files.example.com/export-77.zip",
+      expiresAt: "2026-11-10T09:10:00+09:00",
+      fileExpiresAt: "2026-11-11T09:00:00+09:00",
+    });
+  }),
+  http.get("/api/archive-grants/current", () => {
+    if (!billingState.grant.signedIn) return mockErrors.unauthenticated();
+    return HttpResponse.json({ grantId: 13, expiresAt: null, revoked: billingState.grant.revoked });
+  }),
 ];
