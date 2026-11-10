@@ -325,3 +325,44 @@ describe("방문 조율 영역 선택", () => {
     ]);
   });
 });
+
+describe("홈·월말결산과 계약 영역 선택", () => {
+  const SPEC = `### 27.1 DTO 색인
+
+| DTO | 종류 | 연결 API | 필드 표 위치 |
+| --- | --- | --- | --- |
+| \`HomeSummaryResponse\` | 응답 | \`GET /api/home\` | 17장 절 |
+| \`TaskCreateRequest\` | 요청 | \`POST /api/tasks\` | 17장 절 |
+| \`NotificationListResponse\` | 응답 | \`GET /api/notifications\` | 17장 절 |
+| \`MonthlySettlementResponse\` | 응답 | \`GET /api/settlements/{yearMonth}\` | 17장 절 |
+| \`ContractDetailResponse\` | 응답 | \`GET /api/contracts/{contractId}\` | 15장 절 |
+| \`ContractDraftCreateRequest\` | 요청 | \`POST /api/properties/{propertyId}/contracts/drafts\` | 15장 절 |
+| \`ContractFeeTransactionCreateRequest\` | 요청 | \`POST /api/contract-fees/{feeId}/transactions\` | 15장 절 |
+| \`ContractPaymentScheduleListResponse\` | 응답 | \`GET /api/payment-schedules/{scheduleId}\` | 15장 절 |
+| \`PropertyListResponse\` | 응답 | \`GET /api/properties\` | 7장 절 |
+| \`CustomerListResponse\` | 응답 | \`GET /api/customers\` | 10장 절 |
+`;
+
+  it("홈·업무·알림·월말결산 경로만 업무 영역에 넣는다", () => {
+    const names = selectAreaDtos(parseSpec(SPEC), "work").map((dto) => dto.name);
+    expect(names).toEqual([
+      "HomeSummaryResponse",
+      "TaskCreateRequest",
+      "NotificationListResponse",
+      "MonthlySettlementResponse",
+    ]);
+  });
+
+  it("계약·중개보수·대금·후속업무 경로만 계약 영역에 넣고 매물 영역에서는 뺀다", () => {
+    const dtos = parseSpec(SPEC);
+    expect(selectAreaDtos(dtos, "contract").map((dto) => dto.name)).toEqual([
+      "ContractDetailResponse",
+      "ContractDraftCreateRequest",
+      "ContractFeeTransactionCreateRequest",
+      "ContractPaymentScheduleListResponse",
+    ]);
+    expect(selectAreaDtos(dtos, "property").map((dto) => dto.name)).not.toContain(
+      "ContractDraftCreateRequest",
+    );
+  });
+});
