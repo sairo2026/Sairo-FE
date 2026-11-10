@@ -26,6 +26,13 @@ describe("접근 상태별 이동 화면", () => {
   ])("%s는 %s로 보낸다", (accessCondition, path) => {
     expect(landingPathFor({ accessCondition })).toBe(path);
   });
+
+  it("활성 상태의 대표는 카드 등록 안내를 거쳐 가고 직원은 홈으로 간다", () => {
+    expect(landingPathFor({ accessCondition: "ACTIVE", role: "OWNER" })).toBe(
+      "/billing/card-guide",
+    );
+    expect(landingPathFor({ accessCondition: "ACTIVE", role: "AGENT" })).toBe("/");
+  });
 });
 
 describe("돌아갈 주소", () => {
