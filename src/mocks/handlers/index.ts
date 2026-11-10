@@ -25,6 +25,8 @@ import { opsSupportHandlers } from "./ops-support";
 import { opsBillingHandlers } from "./ops-billing";
 import { opsMigrationHandlers } from "./ops-migration";
 import { opsPrivacyHandlers } from "./ops-privacy";
+import { opsContentHandlers } from "./ops-content";
+import { opsSystemHandlers } from "./ops-system";
 
 export const handlers = [
   ...billingHandlers,
@@ -54,4 +56,6 @@ export const handlers = [
   ...opsBillingHandlers,
   ...opsMigrationHandlers,
   ...opsPrivacyHandlers,
+  ...opsContentHandlers,
+  ...opsSystemHandlers,
 ];
