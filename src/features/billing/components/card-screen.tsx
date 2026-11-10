@@ -19,7 +19,9 @@ import { deleteBillingKey, openBillingKeySession, registerBillingKey } from "../
 import { billingKeys, useCardNotice, useSubscription } from "../hooks/billing-queries";
 import { PaymentWidgetUnavailableError, tossBillingAuthLauncher } from "../lib/payment-widget";
 import type { BillingAuthLauncher } from "../lib/payment-widget";
+import { CARD_NOTICE_COPY } from "../model/legal-copy";
 import { COPY, describeBillingError } from "../model/messages";
+import { CommerceNotice, SellerNotice } from "./commerce-notice";
 
 export const CARD_RESULT_PATH = "/billing/card/result";
 
@@ -119,20 +121,30 @@ function CardView({
         {notice.isError ? (
           <FormAlert>카드 등록 안내를 불러오지 못했습니다. 잠시 뒤에 다시 시도해 주세요.</FormAlert>
         ) : null}
+        <div className="mb-4 rounded-control bg-surface px-4 py-4">
+          <p className="text-caption text-ink-2">{CARD_NOTICE_COPY.body}</p>
+        </div>
         <Checkbox
           checked={confirmed}
-          onCheckedChange={setConfirmed}
-          label="카드 등록 안내를 확인했습니다"
+          onCheckedChange={(checked) => {
+            setConfirmed(checked);
+            setError(undefined);
+          }}
+          label={CARD_NOTICE_COPY.checkLabel}
         />
         {error ? <FormAlert>{error}</FormAlert> : null}
         {info ? <FormNotice>{info}</FormNotice> : null}
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <Button
             isLoading={open.isPending}
-            disabled={!confirmed || !noticeItem}
+            disabled={!noticeItem}
             onClick={() => {
-              setError(undefined);
               setInfo(undefined);
+              if (!confirmed) {
+                setError(CARD_NOTICE_COPY.uncheckedError);
+                return;
+              }
+              setError(undefined);
               open.mutate();
             }}
           >
@@ -141,6 +153,8 @@ function CardView({
           <TextLink href="/billing">구독 현황으로</TextLink>
         </div>
       </Card>
+      <CommerceNotice />
+      <SellerNotice />
       <ConfirmDialog
         isOpen={removing}
         title="카드 해제"
@@ -193,6 +207,8 @@ export function CardResultScreen({ authKey, customerKey, version, failCode }: Ca
     onSuccess: () => queryClient.invalidateQueries({ queryKey: billingKeys.subscription }),
   });
   const hasParams = Boolean(authKey && customerKey) && !failCode;
+  const subscription = useSubscription();
+  const card = subscription.data?.paymentMethod;
 
   useEffect(() => {
     if (!hasParams || started.current) return;
@@ -217,12 +233,14 @@ export function CardResultScreen({ authKey, customerKey, version, failCode }: Ca
   if (register.isError) {
     const code = register.error instanceof ApiError ? register.error.code : "";
     const text =
-      code === "INVALID_REQUEST"
-        ? "결제수단 등록 정보가 확인되지 않아 등록을 중단했습니다. 결제된 금액은 없습니다. 처음부터 다시 시도해 주세요."
-        : describeBillingError(
-            register.error,
-            "카드를 등록하지 못했습니다. 카드 정보를 확인하거나 다른 카드로 다시 시도해 주세요. 결제된 금액은 없습니다.",
-          );
+      code === "TERMS_VERSION_CHANGED"
+        ? CARD_NOTICE_COPY.changedError
+        : code === "INVALID_REQUEST"
+          ? "결제수단 등록 정보가 확인되지 않아 등록을 중단했습니다. 결제된 금액은 없습니다. 처음부터 다시 시도해 주세요."
+          : describeBillingError(
+              register.error,
+              "카드를 등록하지 못했습니다. 카드 정보를 확인하거나 다른 카드로 다시 시도해 주세요. 결제된 금액은 없습니다.",
+            );
     return (
       <Result title="카드 등록 결과">
         <FormAlert>{text}</FormAlert>
@@ -235,7 +253,9 @@ export function CardResultScreen({ authKey, customerKey, version, failCode }: Ca
     : null;
   return (
     <Result title="카드 등록 결과">
-      <FormNotice>{`결제수단이 등록됐습니다. 이번 등록으로 결제된 금액은 없습니다.${date ? ` 첫 결제 예정일은 ${date}입니다.` : ""}`}</FormNotice>
+      <FormNotice>
+        {CARD_NOTICE_COPY.done(card?.cardIssuer ?? null, card?.cardLast4 ?? null, date)}
+      </FormNotice>
       <TextLink href="/billing">구독 현황으로</TextLink>
     </Result>
   );

@@ -54,8 +54,17 @@ describe("공개 요금 페이지", () => {
 
   it("결제 심사 전 표지와 일반 체험 방식, 가입 진입 버튼을 보여준다", async () => {
     renderPublic(<PublicPricingScreen />);
-    expect(await screen.findByText("확정 요금, 결제 심사 후 청구 시작")).not.toBeNull();
-    expect(screen.getByText("가입 후 60일 동안 무료로 이용할 수 있습니다.")).not.toBeNull();
+    expect(await screen.findByText(/확정 요금이며 결제 심사 후 청구를 시작합니다/)).not.toBeNull();
+    expect(
+      screen.getByText(/사무소 인증을 마친 날부터 60일 동안 무료로 사용합니다/),
+    ).not.toBeNull();
+    expect(screen.getByText("요금 구간 안내")).not.toBeNull();
+    expect(screen.getByText(/모든 구간의 기능은 같습니다/)).not.toBeNull();
+    expect(screen.getByText("청약철회와 환불")).not.toBeNull();
+    expect(screen.getByText("신용카드와 체크카드 자동결제만 지원합니다.")).not.toBeNull();
+    expect(screen.getByRole("link", { name: "구독·결제 약관" }).getAttribute("href")).toBe(
+      "/legal/subscription-terms",
+    );
     expect(screen.getByRole("link", { name: "가입하고 카드 등록하기" }).getAttribute("href")).toBe(
       "/signup",
     );
@@ -78,14 +87,33 @@ describe("공개 요금 페이지", () => {
             freeEndMode: "FIXED_END",
             durationDays: null,
             fixedFreeEndsAt: "2027-04-01T00:00:00+09:00",
-            applicantWindowEndsAt: null,
+            applicantWindowEndsAt: "2027-03-01T00:00:00+09:00",
           },
         }),
       ),
     );
     renderPublic(<PublicPricingScreen />);
-    expect(await screen.findByText("2027-04-01까지 무료로 이용할 수 있습니다.")).not.toBeNull();
-    expect(screen.queryByText("확정 요금, 결제 심사 후 청구 시작")).toBeNull();
+    expect(
+      await screen.findByText(
+        "2027-03-01까지 가입한 사무소는 2027-04-01까지 무료로 사용합니다. 유료 전환 전에 안내를 드리고 결제는 2027-04-02부터 시작됩니다. 결제 전에 금액과 결제일을 다시 안내하고 동의를 받습니다.",
+      ),
+    ).not.toBeNull();
+    expect(screen.queryByText(/확정 요금이며 결제 심사 후 청구를 시작합니다/)).toBeNull();
+  });
+
+  it("활성 체험 이벤트가 없으면 무료 기간을 약속하지 않고 문의를 안내한다", async () => {
+    server.use(
+      http.get("/api/public/pricing", () =>
+        HttpResponse.json({ ...MOCK_PUBLIC_PRICING, generalTrial: null }),
+      ),
+    );
+    renderPublic(<PublicPricingScreen />);
+    expect(
+      await screen.findByText(
+        "현재 가입 조건을 준비하고 있습니다. 이용 조건은 고객지원으로 문의해 주세요.",
+      ),
+    ).not.toBeNull();
+    expect(screen.queryByText(/무료로 사용합니다/)).toBeNull();
   });
 
   it("요금표를 불러오지 못하면 결제가 진행되지 않았다고 알리고 다시 시도할 수 있다", async () => {

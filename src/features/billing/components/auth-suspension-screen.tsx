@@ -1,13 +1,14 @@
 "use client";
 
 import { EmptyState } from "@/shared/components/feedback/empty-state";
-import { MutedNote, TextLink } from "@/shared/components/feedback/page-parts";
+import { TextLink } from "@/shared/components/feedback/page-parts";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
 import { Card } from "@/shared/components/ui/card";
 import { PageHeader } from "@/shared/components/ui/page-header";
 import { formatSeoulDateTime } from "@/shared/lib/format";
 import { useAuthStatus } from "../hooks/billing-queries";
 import { isMissing } from "../model/labels";
+import { RETURN_COPY, SUSPENSION_COPY } from "../model/legal-copy";
 
 export function formatRemaining(totalSeconds: number): string {
   const seconds = Math.max(0, Math.floor(totalSeconds));
@@ -31,11 +32,8 @@ export function AuthSuspensionScreen() {
         {(status) =>
           status.authSuspended ? (
             <div className="flex flex-col gap-6">
-              <Card title="중단 상태">
-                <p className="text-body text-ink">
-                  사무소 인증이 중단되어 자동결제가 바로 멈췄습니다. 남은 유료 기간은 환불받을 수
-                  있습니다.
-                </p>
+              <Card title={SUSPENSION_COPY.title}>
+                <p className="text-body text-ink">{SUSPENSION_COPY.body}</p>
                 <dl className="mt-4 grid gap-2 text-body sm:grid-cols-[160px_1fr]">
                   {status.suspendedAt ? (
                     <>
@@ -56,11 +54,6 @@ export function AuthSuspensionScreen() {
                     </>
                   )}
                 </dl>
-                <p role="alert" className="mt-4 text-body font-semibold text-danger">
-                  중단 후 30일 안에 재인증과 재구매 또는 남은 무료 기간 재개까지 완료해야 합니다.
-                  인증만 승인받고 재개하지 않아도 30일 시점에 종료되며, 이후 자료 반환 기간 30일이
-                  따로 있습니다.
-                </p>
               </Card>
               <Card title="재개 방법">
                 <ol className="flex list-decimal flex-col gap-2 pl-5 text-body text-ink">
@@ -102,15 +95,14 @@ export function ReturnGuideScreen() {
         description="구독이 끝난 뒤 자료를 돌려받는 절차입니다."
         actions={<TextLink href="/billing">구독 현황으로</TextLink>}
       />
-      <Card title="종료 후 30일">
-        <p className="text-body text-ink">
-          구독이 종료된 뒤 30일 동안 자료를 조회하고 내보낼 수 있습니다. 탈퇴하거나 종료된 뒤에는
-          권한 안내에 담긴 링크로 별도 재인증을 거쳐 반환 전용 화면에서 내보내기를 진행합니다.
-        </p>
-        <MutedNote>
-          계약서처럼 법령상 보존이 필요한 서류는 보관 계약을 맺지 않으면 이 기간 안에 직접 내려받아
-          보관하셔야 합니다.
-        </MutedNote>
+      <Card title={RETURN_COPY.title}>
+        <p className="text-body text-ink">{RETURN_COPY.body}</p>
+      </Card>
+      <Card title={RETURN_COPY.reauthTitle}>
+        <p className="text-body text-ink">{RETURN_COPY.reauth}</p>
+      </Card>
+      <Card title={RETURN_COPY.archiveTitle}>
+        <p className="text-body text-ink">{RETURN_COPY.archive}</p>
       </Card>
       <Card title="장기 보관">
         <p className="text-body text-ink">

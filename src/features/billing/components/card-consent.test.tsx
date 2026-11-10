@@ -54,24 +54,31 @@ describe("카드 등록", () => {
     expect(document.querySelector('[aria-busy="true"]')).not.toBeNull();
   });
 
-  it("등록 전에는 결제되지 않는다는 안내와 첫 결제 예정일을 보여주고 안내 확인 전에는 등록할 수 없다", async () => {
+  it("등록 전에는 결제되지 않는다는 안내와 첫 결제 예정일을 보여주고 안내 확인 전에는 등록하지 않고 오류를 보여준다", async () => {
     renderOffice(<CardScreen launcher={fakeLauncher()} />, { role: "OWNER" });
     expect(
       await screen.findByText(
         /결제수단을 등록해도 지금 결제되지 않습니다. 첫 결제 예정일은 2027-01-09이며/,
       ),
     ).not.toBeNull();
-    const button = screen.getByRole("button", { name: "카드 등록" });
-    expect(button.getAttribute("aria-disabled")).toBe("true");
+    expect(screen.getByText(/카드 정보는 결제대행사 결제창에서 직접 입력되며/)).not.toBeNull();
+    const user = userEvent.setup();
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "카드 등록" }).getAttribute("aria-disabled"),
+      ).toBeNull(),
+    );
+    await user.click(screen.getByRole("button", { name: "카드 등록" }));
+    expect((await screen.findByRole("alert")).textContent).toBe(
+      "카드 등록 안내를 확인해야 카드를 등록할 수 있습니다.",
+    );
   });
 
   it("안내를 확인하면 세션을 발급받아 등록창을 연다", async () => {
     const launcher = fakeLauncher();
     const user = userEvent.setup();
     renderOffice(<CardScreen launcher={launcher} />, { role: "OWNER" });
-    await user.click(
-      await screen.findByRole("checkbox", { name: "카드 등록 안내를 확인했습니다" }),
-    );
+    await user.click(await screen.findByRole("checkbox", { name: "위 안내를 확인했습니다." }));
     await waitFor(() =>
       expect(
         screen.getByRole("button", { name: "카드 등록" }).getAttribute("aria-disabled"),
@@ -241,7 +248,7 @@ describe("카드 등록 결과", () => {
       { role: "OWNER" },
     );
     expect((await screen.findByRole("alert")).textContent).toContain(
-      "결제 조건 안내가 새로 바뀌었습니다",
+      "카드 등록 안내가 바뀌었습니다",
     );
   });
 
@@ -324,7 +331,7 @@ describe("구독 구매 동의", () => {
     expect(screen.getByText("3명")).not.toBeNull();
     expect(screen.getByText("2027-01-09 ~ 2027-02-09")).not.toBeNull();
     expect(screen.getByText("2027-01-09 00:00")).not.toBeNull();
-    expect(screen.getByText(/동의만으로는 결제되지 않습니다/)).not.toBeNull();
+    expect(screen.getByText(/동의를 저장해도 결제되지 않습니다/)).not.toBeNull();
     expect(screen.getByText(/자동으로 결제하지 않고 다시 동의를 요청합니다/)).not.toBeNull();
   });
 
@@ -346,7 +353,7 @@ describe("구독 구매 동의", () => {
     for (const box of boxes) await user.click(box);
     await user.click(screen.getByRole("button", { name: "동의하고 확인 완료" }));
     expect(
-      await screen.findByText(/구독 조건 확인이 기록됐습니다. 동의만으로는 결제되지 않습니다/),
+      await screen.findByText(/구독 조건 확인이 기록됐습니다. 동의를 저장해도 결제되지 않습니다/),
     ).not.toBeNull();
     expect(billingState.subscription.readiness.hasValidConsent).toBe(true);
   });
@@ -364,7 +371,7 @@ describe("구독 구매 동의", () => {
     for (const box of await screen.findAllByRole("checkbox")) await user.click(box);
     await user.click(screen.getByRole("button", { name: "동의하고 확인 완료" }));
     expect((await screen.findByRole("alert")).textContent).toContain(
-      "이용 인원 또는 금액이 바뀌었습니다",
+      "인원이 늘어 결제 금액이 동의한 금액보다 커졌습니다",
     );
     await waitFor(() => {
       const boxes = screen.getAllByRole("checkbox") as HTMLInputElement[];
@@ -429,7 +436,7 @@ describe("구독 구매 동의", () => {
     for (const box of await screen.findAllByRole("checkbox")) await user.click(box);
     await user.click(screen.getByRole("button", { name: "동의하고 확인 완료" }));
     expect((await screen.findByRole("alert")).textContent).toContain(
-      "응답 기한이 지났거나 이미 처리된",
+      "가격 변경 안내가 이미 닫혔습니다",
     );
   });
 

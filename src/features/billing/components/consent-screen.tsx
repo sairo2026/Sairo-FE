@@ -13,11 +13,27 @@ import { PageHeader } from "@/shared/components/ui/page-header";
 import { Checkbox } from "@/shared/components/ui/select-field";
 import { formatKrw, formatSeoulDate, formatSeoulDateTime } from "@/shared/lib/format";
 import { submitPurchaseConsent } from "../api/billing.api";
-import { billingKeys, useConsentPreview, useSubscription } from "../hooks/billing-queries";
+import {
+  billingKeys,
+  useConsentPreview,
+  useOfficeName,
+  useSubscription,
+} from "../hooks/billing-queries";
 import { PLAN_LABEL } from "../model/labels";
+import { CONSENT_COPY, consentSummaryLine } from "../model/legal-copy";
 import { COPY, describeBillingError } from "../model/messages";
+import { CommerceNotice } from "./commerce-notice";
 
 const REFETCH_CODES = ["CONSENT_TERMS_MISMATCH", "TERMS_VERSION_CHANGED"];
+
+function consentErrorMessage(caught: unknown): string {
+  if (caught instanceof ApiError) {
+    if (caught.code === "CONSENT_TERMS_MISMATCH") return CONSENT_COPY.errors.amountIncreased;
+    if (caught.code === "TERMS_VERSION_CHANGED") return CONSENT_COPY.errors.termsChanged;
+    if (caught.code === "PRICE_CHANGE_NOTICE_CLOSED") return CONSENT_COPY.errors.noticeClosed;
+  }
+  return describeBillingError(caught, "동의를 기록하지 못했습니다. 잠시 뒤에 다시 시도해 주세요.");
+}
 
 function ConsentForm({
   preview,
@@ -28,6 +44,7 @@ function ConsentForm({
 }) {
   const queryClient = useQueryClient();
   const subscription = useSubscription();
+  const officeName = useOfficeName();
   const [autoCharge, setAutoCharge] = useState(false);
   const [cancelRefund, setCancelRefund] = useState(false);
   const [checkError, setCheckError] = useState<string>();
@@ -55,10 +72,7 @@ function ConsentForm({
       await queryClient.invalidateQueries({ queryKey: billingKeys.subscription });
     },
     onError: (caught) => {
-      const message = describeBillingError(
-        caught,
-        "동의를 기록하지 못했습니다. 잠시 뒤에 다시 시도해 주세요.",
-      );
+      const message = consentErrorMessage(caught);
       if (caught instanceof ApiError && REFETCH_CODES.includes(caught.code)) {
         setAutoCharge(false);
         setCancelRefund(false);
@@ -83,10 +97,12 @@ function ConsentForm({
     return (
       <div className="flex flex-col gap-4">
         <FormNotice>
-          구독 조건 확인이 기록됐습니다. {COPY.consentNoCharge}
-          {preview.firstBillingScheduledAt
-            ? ` 실제 청구는 첫 청구 예정 시각 ${formatSeoulDateTime(preview.firstBillingScheduledAt)}에 시작합니다.`
-            : ""}
+          구독 조건 확인이 기록됐습니다.{" "}
+          {CONSENT_COPY.saved(
+            preview.firstBillingScheduledAt
+              ? formatSeoulDate(preview.firstBillingScheduledAt)
+              : null,
+          )}
         </FormNotice>
         <TextLink href="/billing">구독 현황으로</TextLink>
       </div>
@@ -98,6 +114,20 @@ function ConsentForm({
     <div className="flex flex-col gap-6">
       <p className="text-body text-ink">{COPY.consentTop}</p>
       <Card title="구독 조건 요약">
+        <p
+          data-testid="consent-summary"
+          className="mb-5 rounded-control bg-primary-soft px-4 py-3 text-body font-semibold text-ink"
+        >
+          {consentSummaryLine({
+            officeName: officeName.data ?? null,
+            memberCount: preview.memberCount,
+            monthlyAmount: preview.totalAmountInclVat,
+            firstBillingAt: preview.firstBillingScheduledAt,
+            nextChargeAt: preview.nextChargeAt,
+            cardIssuer: card?.cardIssuer ?? null,
+            cardLast4: card?.cardLast4 ?? null,
+          })}
+        </p>
         <DetailList
           items={[
             {
@@ -145,14 +175,27 @@ function ConsentForm({
           <Checkbox
             checked={autoCharge}
             onCheckedChange={setAutoCharge}
-            label={COPY.consentAutoCharge}
+            label={
+              <span>
+                <span className="font-semibold text-primary">[필수]</span>{" "}
+                {CONSENT_COPY.autoCharge(formatKrw(preview.totalAmountInclVat))}
+              </span>
+            }
           />
           <Checkbox
             checked={cancelRefund}
             onCheckedChange={setCancelRefund}
-            label={COPY.consentCancelRefund}
+            label={
+              <span>
+                <span className="font-semibold text-primary">[필수]</span>{" "}
+                {CONSENT_COPY.cancelRefund}
+              </span>
+            }
           />
-          <TextLink href="/legal/refund-policy">환불 조건 전문 보기</TextLink>
+          <div className="flex flex-wrap gap-4">
+            <TextLink href="/legal/refund-policy">{CONSENT_COPY.refundLink}</TextLink>
+            <TextLink href="/legal/subscription-terms">{CONSENT_COPY.termsLink}</TextLink>
+          </div>
         </div>
         {checkError ? <FormAlert>{checkError}</FormAlert> : null}
         {error ? <FormAlert>{error}</FormAlert> : null}
@@ -161,8 +204,15 @@ function ConsentForm({
             동의하고 확인 완료
           </Button>
         </div>
-        <MutedNote>{COPY.consentNoCharge}</MutedNote>
+        <MutedNote>
+          {CONSENT_COPY.saved(
+            preview.firstBillingScheduledAt
+              ? formatSeoulDate(preview.firstBillingScheduledAt)
+              : null,
+          )}
+        </MutedNote>
       </Card>
+      <CommerceNotice />
     </div>
   );
 }
