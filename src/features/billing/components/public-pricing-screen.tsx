@@ -131,7 +131,12 @@ export function PublicPricingScreen() {
 
       <Card title={PRICING_COPY.paymentTitle}>
         <p className="text-body text-ink">{PRICING_COPY.payment}</p>
-        <p className="mt-3 text-body text-ink">{COPY.pricingRefundSummary}</p>
+        <p className="mt-3 text-body text-ink">
+          {COPY.pricingRefundSummary}{" "}
+          <Link href="/legal/refund-policy" className="font-semibold text-primary underline">
+            {COPY.pricingRefundLink}
+          </Link>
+        </p>
         <p className="mt-3 text-caption text-ink-2">
           {COPY.enterpriseNote}{" "}
           <Link href="/support/enterprise" className="font-semibold text-primary underline">
