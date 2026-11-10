@@ -19,6 +19,7 @@ import {
   SignupEmailResponseSchema,
   SignupKakaoResponseSchema,
   TermsCatalogResponseSchema,
+  WithdrawalPreviewResponseSchema,
 } from "@/lib/api/contracts/auth.schema";
 import type {
   ContactChangeRequest,
@@ -219,4 +220,12 @@ export async function ensureStepUp(): Promise<boolean> {
   if (session.stepUpValid) return true;
   const handler = getStepUpHandler();
   return handler ? handler() : false;
+}
+
+export function fetchWithdrawalPreview() {
+  return apiFetch("/api/me/withdrawal-preview", { schema: WithdrawalPreviewResponseSchema });
+}
+
+export function withdrawAccount() {
+  return apiFetch<void>("/api/me", { method: "DELETE", schema: z.void() });
 }

@@ -21,6 +21,7 @@ import {
   verifyLoginMethodEmail,
 } from "../api/account.api";
 import { useCountdown } from "../hooks/use-countdown";
+import { WITHDRAWAL_COPY } from "../model/withdrawal-copy";
 import { describeAuthError } from "@/shared/lib/api-messages";
 import {
   PASSWORD_STRENGTH_LABEL,
@@ -204,12 +205,13 @@ export function LoginMethodsScreen() {
           </p>
         ) : null}
       </div>
+      <p className="mt-4 text-caption text-ink-2">{WITHDRAWAL_COPY.kakaoUnlinkNotice}</p>
       <ConfirmDialog
         isOpen={pendingUnlink !== null}
         title="로그인 방식을 해제할까요"
         message={
           pendingUnlink === "kakao"
-            ? "카카오로는 더 이상 로그인할 수 없습니다. 카카오 쪽 연결도 끊깁니다."
+            ? WITHDRAWAL_COPY.kakaoUnlinkConfirm
             : "이메일과 비밀번호로는 더 이상 로그인할 수 없습니다."
         }
         confirmLabel="해제"

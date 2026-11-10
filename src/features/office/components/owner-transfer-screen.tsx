@@ -20,11 +20,13 @@ import {
 } from "../api/office.api";
 import {
   officeKeys,
+  useCurrentOffice,
   useCurrentTransfer,
   useMemberships,
   useTransferStatus,
 } from "../hooks/office-queries";
 import { TRANSFER_STATUS_LABEL, labelOf } from "../model/labels";
+import { OWNER_TRANSFER_COPY } from "../model/legal-copy";
 import { describeOfficeError } from "../model/messages";
 import { MutedNote, ReasonDialog, StatusBadge } from "@/shared/components/feedback/page-parts";
 
@@ -42,7 +44,7 @@ type TransferView = {
   rejectionReason?: string | null;
 };
 
-const STEPS = ["대기", "수락", "심사", "완료"] as const;
+const STEPS = ["대기", "수락됨", "심사 중", "완료"] as const;
 
 function activeStep(status: string): number {
   switch (status) {
@@ -206,6 +208,7 @@ export function OwnerTransferScreen() {
   const { role, isReadOnly } = useOfficeAccess();
   const queryClient = useQueryClient();
   const currentQuery = useCurrentTransfer();
+  const office = useCurrentOffice();
   const [trackedId, setTrackedId] = useState<number | null>(null);
   const trackedQuery = useTransferStatus(
     currentQuery.data === null && trackedId !== null ? trackedId : null,
@@ -275,6 +278,11 @@ export function OwnerTransferScreen() {
       />
       {notice ? <FormNotice>{notice}</FormNotice> : null}
       {error ? <FormAlert>{error}</FormAlert> : null}
+      <ul className="flex list-disc flex-col gap-1 pl-5 text-caption text-ink-2">
+        {OWNER_TRANSFER_COPY.guide.map((line) => (
+          <li key={line}>{line}</li>
+        ))}
+      </ul>
 
       <QueryGate query={currentQuery} loadingLabel="대표 이전 상태를 불러오는 중입니다.">
         {(current) => {
@@ -297,6 +305,12 @@ export function OwnerTransferScreen() {
                       </Button>
                     ) : current.status === "PENDING" ? (
                       <>
+                        <p className="w-full text-body text-ink">
+                          {OWNER_TRANSFER_COPY.targetAccept(
+                            office.data?.name ?? "사무소",
+                            formatSeoulDateTime(current.acceptDeadlineAt),
+                          )}
+                        </p>
                         <Button
                           isLoading={accept.isPending}
                           disabled={isReadOnly}
