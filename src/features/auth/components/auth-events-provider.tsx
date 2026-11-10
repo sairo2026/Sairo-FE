@@ -5,10 +5,15 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { setStepUpHandler, subscribeApiAuthEvents } from "@/shared/api/auth-events";
-import { authContextQueryKey } from "../hooks/use-auth-context";
+import { OpsStepUpDialog } from "@/features/ops/components/common/ops-step-up-dialog";
+import { authContextQueryKey, operatorQueryKey } from "../hooks/use-auth-context";
 import { AUTH_ROUTES } from "../model/routes";
 import { SessionExpiredDialog } from "./session-expired-dialog";
 import { StepUpDialog } from "./step-up-dialog";
+
+function isOpsPath(pathname: string): boolean {
+  return pathname === "/ops" || pathname.startsWith("/ops/");
+}
 
 type StepUpRequest = { resolve: (isSuccess: boolean) => void };
 
@@ -31,12 +36,15 @@ export function AuthEventsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     return subscribeApiAuthEvents((event) => {
+      const isOps = isOpsPath(pathnameRef.current);
       if (event.type === "session-expired") {
-        const wasSignedIn = queryClient.getQueryData(authContextQueryKey) !== undefined;
+        const wasSignedIn =
+          queryClient.getQueryData(isOps ? operatorQueryKey : authContextQueryKey) !== undefined;
         if (wasSignedIn) setIsSessionExpired(true);
-        else router.replace(AUTH_ROUTES.login);
+        else router.replace(isOps ? AUTH_ROUTES.opsLogin : AUTH_ROUTES.login);
         return;
       }
+      if (isOps) return;
       void queryClient.invalidateQueries({ queryKey: authContextQueryKey });
       if (pathnameRef.current !== AUTH_ROUTES.reconsent) router.replace(AUTH_ROUTES.reconsent);
     });
@@ -67,14 +75,20 @@ export function AuthEventsProvider({ children }: { children: ReactNode }) {
   const confirmSessionExpired = useCallback(() => {
     setIsSessionExpired(false);
     queryClient.clear();
-    router.replace(AUTH_ROUTES.login);
+    router.replace(isOpsPath(pathnameRef.current) ? AUTH_ROUTES.opsLogin : AUTH_ROUTES.login);
   }, [queryClient, router]);
 
   return (
     <>
       {children}
       {isSessionExpired ? <SessionExpiredDialog onConfirm={confirmSessionExpired} /> : null}
-      {stepUp ? (
+      {stepUp && isOpsPath(pathname) ? (
+        <OpsStepUpDialog
+          onSuccess={() => finishStepUp(true)}
+          onCancel={() => finishStepUp(false)}
+        />
+      ) : null}
+      {stepUp && !isOpsPath(pathname) ? (
         <StepUpDialog onSuccess={() => finishStepUp(true)} onCancel={() => finishStepUp(false)} />
       ) : null}
     </>

@@ -16,6 +16,11 @@ import { visitReviewHandlers } from "./visit-review";
 import { workHandlers } from "./work";
 import { contractHandlers } from "./contract";
 import { contractExtraHandlers } from "./contract-extra";
+import { opsSessionHandlers } from "./ops-session";
+import { opsHomeHandlers } from "./ops-home";
+import { opsRegistrationHandlers } from "./ops-registrations";
+import { opsRawAccessHandlers } from "./ops-raw-access";
+import { opsOperatorHandlers } from "./ops-operators";
 
 export const handlers = [
   ...billingHandlers,
@@ -36,4 +41,9 @@ export const handlers = [
   ...workHandlers,
   ...contractHandlers,
   ...contractExtraHandlers,
+  ...opsSessionHandlers,
+  ...opsHomeHandlers,
+  ...opsRegistrationHandlers,
+  ...opsRawAccessHandlers,
+  ...opsOperatorHandlers,
 ];

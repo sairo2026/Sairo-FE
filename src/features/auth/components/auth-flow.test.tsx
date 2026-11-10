@@ -8,6 +8,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 import type { AuthContextResponse } from "@/lib/api/contracts/common.schema";
 import { MOCK_ACTIVE_CONTEXT, resetMockAuthState, setMockAuthContext } from "@/mocks/handlers/auth";
 import { mockErrors } from "@/mocks/error-responses";
+import { resetMockOpsSession, setMockOperator } from "@/mocks/handlers/ops-session";
 import { server, startMockServer } from "@/mocks/server";
 import { apiFetch } from "@/shared/api/client";
 import { createQueryClient } from "@/shared/api/query-client";
@@ -42,6 +43,7 @@ afterEach(() => {
   cleanup();
   server.resetHandlers();
   resetMockAuthState();
+  resetMockOpsSession();
   navigation.replace.mockClear();
 });
 
@@ -225,6 +227,7 @@ describe("OfficeAccessShell", () => {
 
 describe("OpsAccessGate", () => {
   it("운영자 확인 전에는 콘솔을 숨기고 로그인하지 않았으면 운영자 로그인으로 보낸다", async () => {
+    setMockOperator(null);
     renderWithQuery(
       <OpsAccessGate>
         <p>운영 콘솔</p>
