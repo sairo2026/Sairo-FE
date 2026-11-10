@@ -4,6 +4,9 @@ import {
   EnterpriseQuoteAcceptResponseSchema,
   EnterpriseQuoteRejectResponseSchema,
   PolicyDocumentListResponseSchema,
+  PrivacyRequestCreateResponseSchema,
+  PrivacyRequestListResponseSchema,
+  PrivacyRequestResponseSchema,
   SupportInquiryAttachmentResponseSchema,
   SupportInquiryCreateResponseSchema,
   SupportInquiryListResponseSchema,
@@ -12,6 +15,7 @@ import {
 } from "@/lib/api/contracts/support.schema";
 import type {
   EnterpriseLeadCreateRequest,
+  PrivacyRequestCreateRequest,
   SupportInquiryCreateRequest,
 } from "@/lib/api/contracts/support.schema";
 import { apiFetch, withQuery } from "@/shared/api/client";
@@ -112,5 +116,30 @@ export function rejectEnterpriseQuote(request: {
     headers: { "X-Tracking-Key": request.trackingKey },
     schema: EnterpriseQuoteRejectResponseSchema,
     ...PUBLIC_REQUEST,
+  });
+}
+
+export function listMyPrivacyRequests(params: { page: number; size: number; status?: string }) {
+  return apiFetch(
+    withQuery("/api/privacy-requests/me", {
+      page: params.page,
+      size: params.size,
+      status: params.status || undefined,
+    }),
+    { schema: PrivacyRequestListResponseSchema },
+  );
+}
+
+export function createPrivacyRequest(request: PrivacyRequestCreateRequest) {
+  return apiFetch("/api/privacy-requests", {
+    method: "POST",
+    body: request,
+    schema: PrivacyRequestCreateResponseSchema,
+  });
+}
+
+export function fetchPrivacyRequest(requestId: number) {
+  return apiFetch(`/api/privacy-requests/${requestId}`, {
+    schema: PrivacyRequestResponseSchema,
   });
 }

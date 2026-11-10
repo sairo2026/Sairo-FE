@@ -29,6 +29,7 @@ import { ConditionEditor } from "./condition-editor";
 import { portalApprovalBase } from "../api/review.api";
 import { ApproverPreferredPanel } from "./approver-preferred";
 import { ApproverReviewPanel } from "./approver-reviews";
+import type { GuestRightsTarget } from "../api/guest-privacy.api";
 import { ApproverLinkPrivacyNotice, LinkCommonNotices } from "./link-legal-notices";
 
 function LinkProblem({ error }: { error: unknown }) {
@@ -88,11 +89,13 @@ export function ApproverWorkspace({
   mode,
   enabled,
   linkToken,
+  approvalId,
 }: {
   base: string;
   mode: "link" | "portal";
   enabled: boolean;
   linkToken?: string;
+  approvalId?: number;
 }) {
   const conditions = useApproverConditions(base, enabled);
   const requests = useApproverRequests(base, enabled);
@@ -137,6 +140,15 @@ export function ApproverWorkspace({
 
   const retentionDays =
     conditions.data?.privacyNotice.retentionDays ?? requests.data?.privacyNotice.retentionDays;
+
+  const rightsTarget: GuestRightsTarget | undefined =
+    noticeVersion === undefined
+      ? undefined
+      : mode === "portal" && approvalId !== undefined
+        ? { kind: "APPROVER_PORTAL", approvalId, noticeVersion }
+        : mode === "link" && linkToken
+          ? { kind: "APPROVER_PROPERTY", token: linkToken, noticeVersion }
+          : undefined;
 
   const conditionPanel =
     readOnly && !conditions.data ? (
@@ -249,6 +261,7 @@ export function ApproverWorkspace({
       />
       <LinkCommonNotices
         audience="approver"
+        rightsTarget={rightsTarget}
         officeName={confirmed.data?.officeName}
         officeContactPhone={confirmed.data?.officeContactPhone}
         retentionDays={retentionDays}
@@ -258,5 +271,12 @@ export function ApproverWorkspace({
 }
 
 export function ApproverPortalApprovalScreen({ approvalId }: { approvalId: number }) {
-  return <ApproverWorkspace base={portalApprovalBase(approvalId)} mode="portal" enabled />;
+  return (
+    <ApproverWorkspace
+      base={portalApprovalBase(approvalId)}
+      mode="portal"
+      enabled
+      approvalId={approvalId}
+    />
+  );
 }

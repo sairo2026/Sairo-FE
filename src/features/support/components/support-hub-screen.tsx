@@ -18,6 +18,7 @@ import { formatSeoulDateTime } from "@/shared/lib/format";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { useAccountAgreements, useMyInquiries, usePolicyDocuments } from "../hooks/support-queries";
 import { INQUIRY_STATUS, POLICY_LINKS, categoryLabel } from "../model/labels";
+import { PrivacyHistory } from "./privacy-requests-screen";
 import { SUPPORT_COPY as COPY, describeSupportError } from "../model/messages";
 
 type Row = SupportInquiryListResponse["items"][number];
@@ -163,11 +164,8 @@ export function SupportHubScreen() {
       <Consents />
       <Subprocessors isOwner={isOwner} />
       <Inquiries />
-      <Card title={COPY.privacyTitle}>
-        <div className="flex flex-col gap-2">
-          <TextLink href="/privacy-requests">{COPY.privacyLink}</TextLink>
-        </div>
-      </Card>
+      <PrivacyHistory isCompact />
+      <TextLink href="/privacy-requests">{COPY.privacyLink}</TextLink>
       <Card title={COPY.enterpriseTitle}>
         <div className="flex flex-col gap-2">
           <p className="text-caption text-ink-2">{COPY.enterpriseDescription}</p>

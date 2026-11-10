@@ -336,6 +336,11 @@ export function CustomerLinkScreen({ token }: { token: string | undefined }) {
       />
       <LinkCommonNotices
         audience="customer"
+        rightsTarget={{
+          kind: "CUSTOMER",
+          token: normalized,
+          noticeVersion: link.privacyNotice.noticeVersion,
+        }}
         officeName={link.officeName}
         officeContactPhone={link.officeContactPhone}
         retentionDays={link.privacyNotice.retentionDays}
