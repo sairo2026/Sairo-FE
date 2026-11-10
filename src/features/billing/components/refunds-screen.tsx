@@ -19,6 +19,7 @@ import type { RefundStatus } from "../api/wire";
 import { useRefund, useRefunds } from "../hooks/billing-queries";
 import { REFUND_REASONS, REFUND_STATUS, labelOf, isMissing } from "../model/labels";
 import { COPY, describeBillingError } from "../model/messages";
+import { RefundGuide } from "./refund-guide";
 
 type Row = RefundRequestListResponse["items"][number];
 
@@ -43,6 +44,7 @@ export function RefundsScreen({ invoiceId }: { invoiceId?: number }) {
         description="접수한 환불의 진행 상태를 확인합니다."
         actions={<TextLink href="/billing/invoices">결제 내역</TextLink>}
       />
+      <RefundGuide />
       <DataTable<Row>
         caption="환불 신청 내역"
         rows={query.data?.items ?? []}

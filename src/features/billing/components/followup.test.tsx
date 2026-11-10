@@ -201,18 +201,25 @@ describe("세금계산서 수신 정보", () => {
     renderOffice(<TaxRecipientScreen />, { role: "OWNER" });
     expect(await screen.findByText(/사무소 정보로 채운 초기값입니다/)).not.toBeNull();
     expect(
-      screen.getByText("청구가 시작되기 전에는 세금계산서가 발급되지 않습니다."),
+      screen.getByText(
+        /세금계산서를 받으시려면 사업자등록번호와 수신 이메일을 입력해 주세요. 청구가 시작되기 전에는 세금계산서가 발급되지 않습니다./,
+      ),
     ).not.toBeNull();
+    expect(screen.getByText(/현금영수증 발급 대상 결제 수단이 없습니다/)).not.toBeNull();
   });
 
   it("빈 값과 형식 오류를 필드별로 알린다", async () => {
     const user = userEvent.setup();
     renderOffice(<TaxRecipientScreen />, { role: "OWNER" });
     await user.click(await screen.findByRole("button", { name: "저장" }));
-    expect(await screen.findByText("사업자등록번호 10자리를 숫자로 입력해 주세요.")).not.toBeNull();
+    expect(
+      await screen.findByText(
+        "사업자등록번호 형식이 올바르지 않습니다. 숫자 10자리를 입력해 주세요.",
+      ),
+    ).not.toBeNull();
     expect(screen.getByText("상호를 입력해 주세요.")).not.toBeNull();
     expect(screen.getByText("대표자 이름을 입력해 주세요.")).not.toBeNull();
-    expect(screen.getByText("수신 이메일 형식을 확인해 주세요.")).not.toBeNull();
+    expect(screen.getByText("이메일 주소 형식이 올바르지 않습니다.")).not.toBeNull();
     expect(billingState.taxRecipient.registered).toBe(false);
   });
 
@@ -299,12 +306,11 @@ describe("인증 중단과 반환 안내", () => {
       trialRemainingSeconds: 90_000,
     };
     renderOffice(<AuthSuspensionScreen />, { role: "OWNER" });
-    expect(await screen.findByText(/자동결제가 바로 멈췄습니다/)).not.toBeNull();
+    expect(await screen.findByText(/자동 청구는 정지되었고/)).not.toBeNull();
+    expect(screen.getByText("사무소 인증이 중단되었습니다")).not.toBeNull();
+    expect(screen.getByText(/중단 후 30일 안에 재인증과 구매 재개를 마치지 않으면/)).not.toBeNull();
     expect(screen.getByText("2026-12-31 09:00")).not.toBeNull();
     expect(screen.getByText("1일 1시간")).not.toBeNull();
-    expect(screen.getByRole("alert").textContent).toContain(
-      "30일 안에 재인증과 재구매 또는 남은 무료 기간 재개",
-    );
     expect(screen.getByRole("link", { name: "환불 신청 내역" })).not.toBeNull();
   });
 
@@ -316,7 +322,7 @@ describe("인증 중단과 반환 안내", () => {
       trialRemainingSeconds: null,
     };
     renderOffice(<AuthSuspensionScreen />, { role: "OWNER" });
-    await screen.findByText(/자동결제가 바로 멈췄습니다/);
+    await screen.findByText(/자동 청구는 정지되었고/);
     expect(screen.queryByText("보존된 무료 기간")).toBeNull();
     cleanup();
     server.use(http.get("/api/offices/current/auth-status", () => mockErrors.forbidden()));
@@ -335,8 +341,11 @@ describe("인증 중단과 반환 안내", () => {
 
   it("자료 반환 안내는 종료 후 30일과 별도 보관계약을 알린다", () => {
     renderOffice(<ReturnGuideScreen />, { role: "OWNER" });
+    expect(screen.getByText(/종료된 때부터 30일 동안 일반 업무 자료를 조회하고/)).not.toBeNull();
+    expect(screen.getByText("반환 권한 재인증 안내")).not.toBeNull();
+    expect(screen.getByText(/새로 가입해도 반환 권한은 자동으로 연결되지 않습니다/)).not.toBeNull();
     expect(
-      screen.getByText(/종료된 뒤 30일 동안 자료를 조회하고 내보낼 수 있습니다/),
+      screen.getByText(/보관 계약을 맺은 권한자만 보관된 문서를 조회할 수 있습니다/),
     ).not.toBeNull();
     expect(screen.getByText(/별도 보관계약이 필요합니다/)).not.toBeNull();
   });
@@ -390,7 +399,7 @@ describe("반환·보관 별도 재인증", () => {
     await user.type(screen.getByLabelText("비밀번호"), "correct-pw");
     await user.click(screen.getByRole("button", { name: "이메일 비밀번호로 확인" }));
     expect((await screen.findByRole("alert")).textContent).toContain(
-      "반환권한이 만료됐거나 회수됐습니다",
+      "반환 권한이 만료되었습니다. 고객지원으로 문의해 주세요.",
     );
     expect(screen.getByRole("link", { name: "고객지원" })).not.toBeNull();
   });
@@ -433,7 +442,7 @@ describe("반환·보관 별도 재인증", () => {
     );
     renderOffice(<GrantVerifyScreen credential="other-account" />);
     expect((await screen.findByRole("alert")).textContent).toContain(
-      "권한 대상자와 다른 카카오 계정입니다",
+      "인증한 카카오 계정이 권한자와 다릅니다",
     );
     expect(screen.getByRole("link", { name: "고객지원" })).not.toBeNull();
   });
@@ -471,7 +480,7 @@ describe("반환권한 화면", () => {
     billingState.grant.signedIn = true;
     billingState.grant.revoked = true;
     renderOffice(<ReturnGrantScreen />);
-    expect(await screen.findByText("회수된 반환권한입니다.")).not.toBeNull();
+    expect(await screen.findByText("반환 권한이 회수되었습니다.")).not.toBeNull();
   });
 
   it("내보내기 요청이 만료 오류를 돌려주면 안내한다", async () => {
@@ -485,7 +494,7 @@ describe("반환권한 화면", () => {
     renderOffice(<ReturnGrantScreen />);
     await user.click(await screen.findByRole("button", { name: "자료 내보내기" }));
     expect((await screen.findByRole("alert")).textContent).toContain(
-      "반환권한이 만료됐거나 회수됐습니다",
+      "반환 권한이 만료되었습니다. 고객지원으로 문의해 주세요.",
     );
   });
 

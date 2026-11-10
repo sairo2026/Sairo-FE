@@ -8,8 +8,10 @@ import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import { PageHeader } from "@/shared/components/ui/page-header";
-import { formatSeoulDate, formatKrw } from "@/shared/lib/format";
+import { formatKrw } from "@/shared/lib/format";
+import { PRICING_COPY, trialNoticeText } from "../model/legal-copy";
 import { describeBillingError, COPY } from "../model/messages";
+import { CommerceNotice } from "./commerce-notice";
 import { usePublicPricing } from "../hooks/billing-queries";
 import type { PublicPricing } from "../api/wire";
 
@@ -26,16 +28,6 @@ function tierFormula(tier: Tier): string {
     return `월 ${formatKrw(tier.baseAmount)}`;
   }
   return `월 ${formatKrw(tier.baseAmount)} + (인원 - ${tier.includedMembers}) × ${formatKrw(tier.perSeatAmount)}`;
-}
-
-function describeTrial(trial: NonNullable<PublicPricing["generalTrial"]>): string | null {
-  if (trial.freeEndMode === "DURATION" && trial.durationDays) {
-    return `가입 후 ${trial.durationDays}일 동안 무료로 이용할 수 있습니다.`;
-  }
-  if (trial.freeEndMode === "FIXED_END" && trial.fixedFreeEndsAt) {
-    return `${formatSeoulDate(trial.fixedFreeEndsAt)}까지 무료로 이용할 수 있습니다.`;
-  }
-  return null;
 }
 
 export function PublicPricingScreen() {
@@ -61,15 +53,16 @@ export function PublicPricingScreen() {
   }
 
   const pricing = query.data;
-  const trialText = pricing.generalTrial ? describeTrial(pricing.generalTrial) : null;
+  const trialText = trialNoticeText(pricing.generalTrial);
   const imageUrl = pricing.plans.find((plan) => plan.imageUrl)?.imageUrl ?? null;
 
   return (
     <div className="flex flex-col gap-8">
       <PageHeader title={COPY.pricingTitle} description={COPY.pricingVatNotice} />
       {pricing.provisionalPrice ? (
-        <p>
-          <Badge tone="amber">{COPY.pricingReviewBadge}</Badge>
+        <p className="flex flex-wrap items-center gap-2 text-body text-ink">
+          <Badge tone="amber">확정 요금</Badge>
+          {PRICING_COPY.provisional}
         </p>
       ) : null}
 
@@ -81,7 +74,12 @@ export function PublicPricingScreen() {
               className="flex flex-col gap-1 py-4 sm:flex-row sm:items-center sm:justify-between"
             >
               <span className="text-body font-semibold text-ink">{tierRange(tier)}</span>
-              <span className="text-body text-ink-2">{tierFormula(tier)} (VAT 포함)</span>
+              <span className="flex flex-col text-body text-ink-2 sm:items-end">
+                <span>{tierFormula(tier)} (VAT 포함)</span>
+                <span className="text-caption">
+                  {PRICING_COPY.planFooter(formatKrw(tier.baseAmount))}
+                </span>
+              </span>
             </li>
           ))}
           <li className="flex flex-col gap-1 py-4 sm:flex-row sm:items-center sm:justify-between">
@@ -89,9 +87,14 @@ export function PublicPricingScreen() {
             <span className="text-body text-ink-2">별도 견적</span>
           </li>
         </ul>
-        <p className="mt-3 text-caption text-ink-2">
-          VAT 포함 월 금액 · 월 선불 자동결제 · 자동갱신 · 사무소 1곳 기준
-        </p>
+      </Card>
+
+      <Card title={PRICING_COPY.tierGuideTitle}>
+        <ul className="flex list-disc flex-col gap-1 pl-5 text-body text-ink">
+          {PRICING_COPY.tierGuide.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ul>
       </Card>
 
       <Card title="인원별 월 금액 예시">
@@ -120,29 +123,30 @@ export function PublicPricingScreen() {
         </table>
       </Card>
 
-      <Card title="결제와 해지">
-        <p className="text-body text-ink">{COPY.pricingRefundSummary}</p>
-        {trialText ? (
-          <p className="mt-3 text-body font-semibold text-primary">{trialText}</p>
-        ) : null}
+      <Card title="무료 이용 기간">
+        <p className={trialText ? "text-body font-semibold text-primary" : "text-body text-ink"}>
+          {trialText ?? PRICING_COPY.noTrial}
+        </p>
+      </Card>
+
+      <Card title={PRICING_COPY.paymentTitle}>
+        <p className="text-body text-ink">{PRICING_COPY.payment}</p>
+        <p className="mt-3 text-body text-ink">{COPY.pricingRefundSummary}</p>
         <p className="mt-3 text-caption text-ink-2">
           {COPY.enterpriseNote}{" "}
           <Link href="/support" className="font-semibold text-primary underline">
             도입 문의
           </Link>
         </p>
-        <p className="mt-3 text-caption text-ink-2">
-          <Link href={pricing.links.termsUrl} className="underline">
-            이용약관
-          </Link>
-          {" · "}
-          <Link href={pricing.links.refundUrl} className="underline">
-            환불정책
-          </Link>
-          {" · "}
-          <Link href={pricing.links.privacyUrl} className="underline">
-            개인정보처리방침
-          </Link>
+        <p className="mt-3 flex flex-wrap gap-x-2 text-caption text-ink-2">
+          {PRICING_COPY.links.map((item, index) => (
+            <span key={item.href}>
+              {index > 0 ? <span aria-hidden>· </span> : null}
+              <Link href={item.href} className="underline">
+                {item.label}
+              </Link>
+            </span>
+          ))}
         </p>
       </Card>
 
@@ -163,6 +167,8 @@ export function PublicPricingScreen() {
           "화면 예시를 불러오지 못했습니다."
         )}
       </div>
+
+      <CommerceNotice />
 
       <div className="flex flex-col items-start gap-2">
         <Link

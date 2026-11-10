@@ -15,6 +15,7 @@ import { saveTaxRecipient } from "../api/billing.api";
 import type { TaxRecipient } from "../api/wire";
 import { billingKeys, useTaxRecipient } from "../hooks/billing-queries";
 import { TAX_TYPES } from "../model/labels";
+import { TAX_COPY } from "../model/legal-copy";
 import { describeBillingError } from "../model/messages";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -31,13 +32,13 @@ export type TaxForm = {
 export function validateTaxForm(form: TaxForm): Record<string, string> {
   const errors: Record<string, string> = {};
   if (!/^\d{10}$/.test(form.businessNumber)) {
-    errors.businessNumber = "사업자등록번호 10자리를 숫자로 입력해 주세요.";
+    errors.businessNumber = TAX_COPY.businessNumberError;
   }
   if (form.companyName.trim() === "") errors.companyName = "상호를 입력해 주세요.";
   if (form.representativeName.trim() === "")
     errors.representativeName = "대표자 이름을 입력해 주세요.";
   if (!EMAIL_PATTERN.test(form.receiverEmail.trim())) {
-    errors.receiverEmail = "수신 이메일 형식을 확인해 주세요.";
+    errors.receiverEmail = TAX_COPY.emailError;
   }
   if (form.taxType === "") errors.taxType = "과세유형을 선택해 주세요.";
   return errors;
@@ -148,8 +149,9 @@ function TaxForm({ initial }: { initial: TaxRecipient }) {
           onCheckedChange={(next) => update("issueRequested", next)}
           label="세금계산서 발급을 요청합니다"
         />
-        <MutedNote>청구가 시작되기 전에는 세금계산서가 발급되지 않습니다.</MutedNote>
-        {saved ? <FormNotice>세금계산서 수신 정보를 저장했습니다.</FormNotice> : null}
+        <MutedNote>{TAX_COPY.paymentMethod}</MutedNote>
+        <MutedNote>{TAX_COPY.receipt}</MutedNote>
+        {saved ? <FormNotice>{TAX_COPY.saved}</FormNotice> : null}
         {formError ? <FormAlert>{formError}</FormAlert> : null}
         <div>
           <Button type="submit" isLoading={mutation.isPending}>
@@ -167,7 +169,7 @@ export function TaxRecipientScreen() {
     <div className="flex flex-col gap-6">
       <PageHeader
         title="세금계산서 수신 정보"
-        description="세금계산서를 받을 사업자 정보를 입력합니다."
+        description={TAX_COPY.intro}
         actions={<TextLink href="/billing">구독 현황으로</TextLink>}
       />
       <QueryGate query={query} loadingLabel="수신 정보를 불러오는 중입니다.">
