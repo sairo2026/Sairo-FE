@@ -52,6 +52,21 @@ const VISIT_PATH_SEGMENTS = [
   "/approver-conditions",
 ];
 
+const WORK_PATH_PREFIXES = [
+  "/api/home",
+  "/api/tasks",
+  "/api/notifications",
+  "/api/settlements",
+  "/api/entity-lifecycle-events",
+];
+
+const CONTRACT_PATH_PREFIXES = [
+  "/api/contracts",
+  "/api/contract-fees",
+  "/api/contract-followup-tasks",
+  "/api/payment-schedules",
+];
+
 const PUBLIC_SITE_DTO_NAMES = ["PublicCompanyInfoResponse"];
 
 const CUSTOMER_PATH_PREFIXES = [
@@ -116,6 +131,25 @@ function isBillingDto(dto) {
   );
 }
 
+function isWorkApi(path) {
+  return startsWithAny(path, WORK_PATH_PREFIXES);
+}
+
+function isContractApi(path) {
+  return (
+    startsWithAny(path, CONTRACT_PATH_PREFIXES) ||
+    (path.startsWith("/api/properties/") && path.includes("/contracts"))
+  );
+}
+
+function isWorkDto(dto) {
+  return dto.apis.length > 0 && dto.apis.every((api) => isWorkApi(api.path));
+}
+
+function isContractDto(dto) {
+  return dto.apis.length > 0 && dto.apis.every((api) => isContractApi(api.path));
+}
+
 function isCustomerDto(dto) {
   return dto.apis.length > 0 && dto.apis.every((api) => isCustomerApi(api.path));
 }
@@ -160,6 +194,14 @@ export const AREAS = {
   visit: {
     description: "방문 조율·출입승인·승인자 조건·방문 신청·평가·신청 허용·승인자 계정 도메인",
     select: (dto) => !COMMON_DTO_NAMES.includes(dto.name) && isVisitDto(dto),
+  },
+  work: {
+    description: "홈·업무·알림·월말결산 도메인",
+    select: (dto) => !COMMON_DTO_NAMES.includes(dto.name) && isWorkDto(dto),
+  },
+  contract: {
+    description: "계약·정정 버전·서류·중개보수·계약 대금·후속업무 도메인",
+    select: (dto) => !COMMON_DTO_NAMES.includes(dto.name) && isContractDto(dto),
   },
   "public-site": {
     description: "공개 사이트 하단 사업자 정보",
