@@ -3,6 +3,7 @@ import { cn } from "@/shared/lib/cn";
 
 const LOGOS = {
   horizontal: { src: "/brand/sairo-logo-horizontal.png", width: 960, height: 181 },
+  "horizontal-white": { src: "/brand/sairo-logo-horizontal-white.png", width: 960, height: 180 },
   vertical: { src: "/brand/sairo-logo-vertical.png", width: 439, height: 262 },
   symbol: { src: "/brand/sairo-symbol.png", width: 160, height: 160 },
 } as const;

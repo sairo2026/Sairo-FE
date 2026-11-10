@@ -125,6 +125,4 @@ export const authHandlers = [
     if (state.context) state.context = { ...state.context, reconsentRequired: false };
     return new HttpResponse(null, { status: 204 });
   }),
-
-  http.get("/api/ops/me", () => mockErrors.unauthenticated()),
 ];

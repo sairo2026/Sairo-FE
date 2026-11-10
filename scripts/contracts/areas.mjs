@@ -92,6 +92,8 @@ const CUSTOMER_PATH_PREFIXES = [
 
 const OPS_SESSION_DTO_NAMES = ["OpsMeResponse", "OpsMfaVerifyRequest", "OpsStepUpRequest"];
 
+const OPS_PATH_PREFIXES = ["/api/ops/"];
+
 const COMMON_DTO_NAMES = ["AuthContextResponse", "CurrentSessionResponse"];
 
 function startsWithAny(path, prefixes) {
@@ -186,6 +188,14 @@ function isMigrationDto(dto) {
   );
 }
 
+function isOpsDto(dto) {
+  return (
+    dto.apis.length > 0 &&
+    !OPS_SESSION_DTO_NAMES.includes(dto.name) &&
+    dto.apis.every((api) => startsWithAny(api.path, OPS_PATH_PREFIXES))
+  );
+}
+
 function isSupportDto(dto) {
   return (
     dto.apis.length > 0 && dto.apis.every((api) => startsWithAny(api.path, SUPPORT_PATH_PREFIXES))
@@ -200,6 +210,10 @@ export const AREAS = {
   "ops-session": {
     description: "운영 콘솔 세션 확인과 재인증",
     select: (dto) => OPS_SESSION_DTO_NAMES.includes(dto.name),
+  },
+  ops: {
+    description: "사측 운영 콘솔 도메인",
+    select: (dto) => !COMMON_DTO_NAMES.includes(dto.name) && isOpsDto(dto),
   },
   office: {
     description: "사무소 등록·심사·소속·초대·고용명부·대표 이전 도메인",

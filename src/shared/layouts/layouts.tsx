@@ -109,12 +109,19 @@ export function OpsLayout({
   children,
   navItems,
   activeKey,
-}: LayoutProps & { navItems: OpsNavItem[]; activeKey?: string }) {
+  headerRight,
+}: LayoutProps & { navItems: OpsNavItem[]; activeKey?: string; headerRight?: ReactNode }) {
   return (
     <ToastProvider>
       <div className="min-h-screen bg-surface text-ink">
-        <header className="flex h-14 items-center bg-primary-pressed px-6 text-body font-bold text-white">
-          사이로 운영 콘솔
+        <header className="flex h-14 items-center justify-between gap-4 bg-primary-pressed px-6 text-body font-bold text-white">
+          <span className="flex items-center gap-3">
+            <BrandLogo variant="horizontal-white" className="w-24" />
+            <span>운영 콘솔</span>
+          </span>
+          {headerRight ? (
+            <div className="flex items-center gap-3 text-caption">{headerRight}</div>
+          ) : null}
         </header>
         <div className="lg:grid lg:grid-cols-[220px_1fr]">
           <nav

@@ -7,6 +7,8 @@ import { ApiError } from "@/shared/api/client";
 import { toErrorScreenKind } from "@/shared/api/error-kind";
 import { ErrorScreen } from "@/shared/components/feedback/error-screen";
 import { PageSkeleton } from "@/shared/components/feedback/skeleton";
+import { OpsSessionProvider } from "@/features/ops/model/ops-session";
+import { toOpsRoles } from "@/features/ops/model/roles";
 import { useOperatorMe } from "../hooks/use-auth-context";
 import { decideOpsAccess } from "../model/access-policy";
 
@@ -35,5 +37,15 @@ export function OpsAccessGate({ children }: { children: ReactNode }) {
       />
     );
   }
-  return children;
+  return (
+    <OpsSessionProvider
+      value={{
+        operatorId: query.data.operatorId,
+        name: query.data.name,
+        roles: toOpsRoles(query.data.roles),
+      }}
+    >
+      {children}
+    </OpsSessionProvider>
+  );
 }

@@ -51,6 +51,7 @@ describe("레이아웃", () => {
     );
     expect(screen.getByRole("navigation", { name: "운영 메뉴" })).toBeTruthy();
     expect(screen.queryByRole("navigation", { name: "주요 메뉴" })).toBeNull();
-    expect(screen.getByText("사이로 운영 콘솔")).toBeTruthy();
+    expect(screen.getByText("운영 콘솔")).toBeTruthy();
+    expect(screen.getByAltText("사이로")).toBeTruthy();
   });
 });
