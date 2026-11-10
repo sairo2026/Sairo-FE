@@ -89,6 +89,38 @@ describe("매물 사진 관리", () => {
     );
   });
 
+  it("설명과 정렬 순서를 저장할 때 현재 매물 버전을 If-Match로 보낸다", async () => {
+    withPhoto();
+    const sent: Array<string | null> = [];
+    server.use(
+      http.patch("/api/properties/501/photos/9001", ({ request }) => {
+        sent.push(request.headers.get("If-Match"));
+        return undefined;
+      }),
+    );
+    const version = getMockPropertyState().properties[0]?.version ?? 0;
+    const user = userEvent.setup();
+    renderOffice(<PropertyEditScreen propertyId={501} />, { role: "OWNER" });
+    const description = await screen.findByDisplayValue("거실");
+    await user.clear(description);
+    await user.type(description, "밝은 거실");
+    await user.click(screen.getByRole("button", { name: "설명·순서 저장" }));
+    await waitFor(() => expect(sent).toEqual([String(version)]));
+    await waitFor(() => expect(getMockPropertyState().properties[0]?.version).toBe(version + 1));
+  });
+
+  it("다른 사용자가 먼저 매물을 바꿨으면 버전 충돌 안내를 보여준다", async () => {
+    withPhoto();
+    server.use(http.patch("/api/properties/501/photos/9001", () => mockErrors.versionConflict(9)));
+    const user = userEvent.setup();
+    renderOffice(<PropertyEditScreen propertyId={501} />, { role: "OWNER" });
+    const description = await screen.findByDisplayValue("거실");
+    await user.clear(description);
+    await user.type(description, "밝은 거실");
+    await user.click(screen.getByRole("button", { name: "설명·순서 저장" }));
+    expect(await screen.findByText(/다른 사용자가 먼저 수정했습니다/)).not.toBeNull();
+  });
+
   it("정렬 순서가 숫자가 아니면 저장 버튼이 막힌다", async () => {
     withPhoto();
     const user = userEvent.setup();

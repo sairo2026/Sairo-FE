@@ -22,6 +22,7 @@ import {
   checkDuplicateProperty,
   createProperty,
   deletePhoto,
+  fetchProperty,
   putFieldValue,
   updatePhoto,
   updateProperty,
@@ -294,28 +295,34 @@ export function PropertyForm(props: FormProps) {
       const writes = changedFieldWrites();
       const submitValues = { ...values, duplicateOverrideReason: input.overrideReason };
       if (detail) {
-        await updateProperty(
+        const updated = await updateProperty(
           detail.propertyId,
           toUpdateRequest(submitValues, input.activate),
           current?.version ?? detail.version,
         );
+        let version = updated.version;
         for (const write of writes) {
-          await putFieldValue(
+          const written = await putFieldValue(
             detail.propertyId,
             write.definition.fieldDefinitionId,
             toFieldPayload(write.definition, write.raw),
+            version,
           );
+          version = written.version;
         }
         return { propertyId: detail.propertyId, partial: false };
       }
       const created = await createProperty(toCreateRequest(submitValues));
       try {
+        let version = created.version;
         for (const write of writes) {
-          await putFieldValue(
+          const written = await putFieldValue(
             created.propertyId,
             write.definition.fieldDefinitionId,
             toFieldPayload(write.definition, write.raw),
+            version,
           );
+          version = written.version;
         }
         for (const photo of queued) {
           const form = new FormData();
@@ -324,11 +331,8 @@ export function PropertyForm(props: FormProps) {
           await uploadPhoto(created.propertyId, form);
         }
         if (input.activate) {
-          await updateProperty(
-            created.propertyId,
-            { registrationStage: "ACTIVE" },
-            created.version,
-          );
+          const latest = await fetchProperty(created.propertyId);
+          await updateProperty(created.propertyId, { registrationStage: "ACTIVE" }, latest.version);
         }
       } catch (caught) {
         throw Object.assign(new Error("partial"), {
@@ -690,10 +694,15 @@ export function PropertyForm(props: FormProps) {
             onAdd={uploadSaved}
             onSave={(photoId, description, sortOrder) =>
               photoMutation.mutate(() =>
-                updatePhoto(detail.propertyId, photoId, {
-                  description: description.trim() === "" ? null : description.trim(),
-                  sortOrder,
-                }),
+                updatePhoto(
+                  detail.propertyId,
+                  photoId,
+                  {
+                    description: description.trim() === "" ? null : description.trim(),
+                    sortOrder,
+                  },
+                  current?.version ?? detail.version,
+                ),
               )
             }
             onDelete={(photoId) =>

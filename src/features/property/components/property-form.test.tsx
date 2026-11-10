@@ -149,6 +149,26 @@ describe("매물 등록", () => {
     ]);
   });
 
+  it("전용 항목 값을 여러 개 저장할 때 직전 응답의 매물 버전을 If-Match로 잇는다", async () => {
+    const versions: Array<string | null> = [];
+    server.use(
+      http.put("/api/properties/:id/fields/:fieldId", ({ request }) => {
+        versions.push(request.headers.get("If-Match"));
+        return undefined;
+      }),
+    );
+    const user = userEvent.setup();
+    renderOffice(<PropertyCreateScreen />, { role: "OWNER" });
+    await fillBasics(user);
+    await user.type(await screen.findByLabelText("해당층 (층)"), "12");
+    await user.type(screen.getByLabelText("동·호"), "101동 1203호");
+    await user.click(screen.getByRole("button", { name: "임시저장" }));
+    await waitFor(() => expect(navigation.push).toHaveBeenCalledTimes(1));
+    expect(versions).toHaveLength(2);
+    expect(versions.every((value) => value !== null)).toBe(true);
+    expect(new Set(versions).size).toBe(versions.length);
+  });
+
   it("사진은 형식과 용량을 검사하고 허용된 사진만 목록에 담는다", async () => {
     const user = userEvent.setup({ applyAccept: false });
     renderOffice(<PropertyCreateScreen />, { role: "OWNER" });
