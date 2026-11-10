@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Card } from "@/shared/components/ui/card";
-import { FormAlert } from "./auth-frame";
+import { FormAlert } from "@/shared/components/feedback/form-frame";
 
 const ENTRY_ERRORS: Record<string, string> = {
   auth_failed: "카카오 로그인에 실패했습니다. 다시 시도해주세요.",

@@ -286,3 +286,53 @@ describe("접근 안내 문구", () => {
     );
   });
 });
+
+describe("사무소 신청과 소속 화면 접근", () => {
+  const verificationPaths = [
+    "/office/start",
+    "/office/register",
+    "/office/register/evidence",
+    "/office/review",
+    "/office/join",
+    "/office/join/5",
+    "/office/membership",
+    "/office/verification",
+  ];
+
+  it("신청과 참여 화면은 인증 신청 영역이다", () => {
+    for (const path of verificationPaths) expect(routeAreaOf(path)).toBe("verification");
+    expect(routeAreaOf("/removed")).toBe("account");
+    expect(routeAreaOf("/members")).toBe("business");
+    expect(routeAreaOf("/office")).toBe("business");
+  });
+
+  it("인증 전과 심사 중에는 신청과 참여 화면이 열리고 정상 이용 중에는 안내로 보낸다", () => {
+    for (const path of verificationPaths) {
+      expect(decideAccess(context("PRE_VERIFICATION", { role: null }), path).kind).toBe("allow");
+      expect(decideAccess(context("OFFICE_UNDER_REVIEW"), path).kind).toBe("allow");
+      expect(decideAccess(context("ACTIVE"), path)).toEqual(NOTICE);
+    }
+  });
+
+  it("소속 해제 안내는 소속 해제 상태에서도 열린다", () => {
+    expect(decideAccess(context("REMOVED", { role: null }), "/removed").kind).toBe("allow");
+  });
+
+  it("구성원 화면은 모든 역할이 열고 사무소 관리는 대표만 연다", () => {
+    for (const role of ["OWNER", "AGENT", "DEPUTY"] as const) {
+      expect(decideAccess(context("ACTIVE", { role }), "/members").kind).toBe("allow");
+      expect(decideAccess(context("ACTIVE", { role }), "/members/owner-transfer").kind).toBe(
+        "allow",
+      );
+    }
+    expect(decideAccess(context("ACTIVE", { role: "AGENT" }), "/office").kind).toBe("forbidden");
+    expect(decideAccess(context("ACTIVE", { role: "OWNER" }), "/office").kind).toBe("allow");
+  });
+
+  it("재동의가 필요하면 구성원 화면은 재동의로 보낸다", () => {
+    expect(decideAccess(context("ACTIVE", { reconsentRequired: true }), "/members")).toEqual({
+      kind: "redirect",
+      to: "/reconsent",
+    });
+  });
+});

@@ -17,9 +17,9 @@ import {
   verifyContactEmail,
 } from "../api/account.api";
 import { useCountdown } from "../hooks/use-countdown";
-import { describeAuthError } from "../model/auth-messages";
+import { describeAuthError } from "@/shared/lib/api-messages";
 import { savePendingContactEmail, usePendingContactEmail } from "../model/signup-draft";
-import { AuthFrame, FormAlert, FormNotice } from "./auth-frame";
+import { AuthFrame, FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { PhoneVerificationField } from "./phone-verification-field";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

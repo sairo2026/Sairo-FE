@@ -1,9 +1,10 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { authContextQueryKey } from "@/shared/session/auth-context-key";
 import { fetchAuthContext, fetchOperatorMe } from "../api/auth-context.api";
 
-export const authContextQueryKey = ["auth", "context"] as const;
+export { authContextQueryKey };
 export const operatorQueryKey = ["ops", "me"] as const;
 
 /** 로그인한 사용자의 접근 상태 8조건 판정 결과. */

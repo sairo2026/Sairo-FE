@@ -2,7 +2,8 @@
 
 import { createContext, useContext } from "react";
 import type { AuthContextResponse } from "@/lib/api/contracts/common.schema";
-import type { OfficeRole } from "../model/access-policy";
+
+export type OfficeRole = "OWNER" | "AGENT" | "DEPUTY";
 
 export type OfficeAccess = {
   context: AuthContextResponse;

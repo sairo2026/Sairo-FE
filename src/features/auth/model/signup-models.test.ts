@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from "vitest";
 import { ApiError, ApiNetworkError } from "@/shared/api/client";
-import { describeAuthError, formatWait } from "./auth-messages";
+import { describeAuthError, formatWait } from "@/shared/lib/api-messages";
 import { landingPathFor, safeNextPath } from "./landing";
 import { passwordStrength, validatePasswordInput } from "./password-policy";
 import {

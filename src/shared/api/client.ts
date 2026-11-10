@@ -153,6 +153,7 @@ async function sendOnce<T>(
   const isMutating = method !== undefined && !SAFE_METHODS.has(method.toUpperCase());
   const csrfToken = isMutating ? readCsrfToken() : null;
 
+  const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
   let response: Response;
   try {
     response = await fetch(path, {
@@ -161,13 +162,13 @@ async function sendOnce<T>(
       credentials: "include",
       signal: combineSignals(timeoutMs ?? DEFAULT_TIMEOUT_MS, signal),
       headers: {
-        ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
+        ...(body !== undefined && !isFormData ? { "Content-Type": "application/json" } : {}),
         ...(csrfToken !== null ? { [CSRF_HEADER_NAME]: csrfToken } : {}),
         ...(isMutating && idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {}),
         [REQUEST_ID_HEADER]: requestId,
         ...headers,
       },
-      body: body !== undefined ? JSON.stringify(body) : undefined,
+      body: body === undefined ? undefined : isFormData ? body : JSON.stringify(body),
     });
   } catch (error) {
     throw toNetworkError(error, requestId, signal);

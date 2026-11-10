@@ -196,3 +196,37 @@ describe("영역 선택", () => {
     expect(Object.keys(AREAS)).toEqual(expect.arrayContaining(["common", "auth"]));
   });
 });
+
+describe("사무소 영역 선택", () => {
+  const OFFICE_SPEC = `### 27.1 DTO 색인
+
+| DTO | 종류 | 연결 API | 필드 표 위치 |
+| --- | --- | --- | --- |
+| \`MembershipStatusResponse\` | 응답 | \`GET /api/memberships/me\` | 27.5 절 |
+| \`MeResponse\` | 응답 | \`GET /api/me\` | 27.2 절 |
+| \`OfficeLookupResponse\` | 응답 | \`GET /api/offices/lookup\` | 6장 절 |
+| \`OfficeCloseRequest\` | 요청 | \`POST /api/offices/current/close\` | 27.5 절 |
+| \`ExportPolicyUpdateRequest\` | 요청 | \`PUT /api/offices/current/export-policy\` | 27.14 절 |
+| \`OfficeChangeRequestResponse\` | 응답 | \`POST /api/office-change-requests\` | 6장 절 |
+| \`OwnerTransferStatusResponse\` | 응답 | \`GET /api/owner-transfers/{transferId}\` | 6장 절 |
+`;
+
+  it("memberships 경로를 계정 경로로 오인하지 않고 사무소 영역에 넣는다", () => {
+    const dtos = parseSpec(OFFICE_SPEC);
+    const office = selectAreaDtos(dtos, "office").map((dto) => dto.name);
+    const auth = selectAreaDtos(dtos, "auth").map((dto) => dto.name);
+    expect(office).toContain("MembershipStatusResponse");
+    expect(office).toContain("OfficeLookupResponse");
+    expect(office).toContain("OfficeChangeRequestResponse");
+    expect(office).toContain("OwnerTransferStatusResponse");
+    expect(auth).not.toContain("MembershipStatusResponse");
+    expect(auth).toContain("MeResponse");
+  });
+
+  it("사무소 종료와 내보내기 정책은 사무소 영역에서 뺀다", () => {
+    const names = selectAreaDtos(parseSpec(OFFICE_SPEC), "office").map((dto) => dto.name);
+    expect(names).not.toContain("OfficeCloseRequest");
+    expect(names).not.toContain("ExportPolicyUpdateRequest");
+    expect(Object.keys(AREAS)).toContain("office");
+  });
+});

@@ -69,6 +69,40 @@ describe("apiFetch 성공 응답", () => {
   });
 });
 
+describe("FormData 본문", () => {
+  function captureFetch() {
+    const sent: { body: unknown; headers: Record<string, string> | undefined }[] = [];
+    const baseFetch = globalThis.fetch;
+    vi.stubGlobal("fetch", (input: RequestInfo | URL, init?: RequestInit) => {
+      sent.push({ body: init?.body, headers: init?.headers as Record<string, string> });
+      return baseFetch(input, init);
+    });
+    return sent;
+  }
+
+  it("FormData는 JSON으로 바꾸지 않고 Content-Type을 지정하지 않는다", async () => {
+    const sent = captureFetch();
+    server.use(http.post("/api/upload", () => HttpResponse.json({ ok: true })));
+    const form = new FormData();
+    form.append("evidenceType", "BROKERAGE_LICENSE");
+    await expect(apiFetch("/api/upload", { method: "POST", body: form })).resolves.toEqual({
+      ok: true,
+    });
+    vi.unstubAllGlobals();
+    expect(sent[0]?.body).toBe(form);
+    expect(sent[0]?.headers && "Content-Type" in sent[0].headers).toBe(false);
+  });
+
+  it("객체 본문은 계속 JSON으로 보낸다", async () => {
+    const sent = captureFetch();
+    server.use(http.post("/api/json", () => HttpResponse.json({ ok: true })));
+    await apiFetch("/api/json", { method: "POST", body: { a: 1 } });
+    vi.unstubAllGlobals();
+    expect(sent[0]?.body).toBe('{"a":1}');
+    expect(sent[0]?.headers?.["Content-Type"]).toBe("application/json");
+  });
+});
+
 describe("CSRF와 변경 요청 헤더", () => {
   it("변경 요청에는 쿠키의 토큰을 X-XSRF-TOKEN으로 보낸다", async () => {
     document.cookie = "XSRF-TOKEN=token%2F1; path=/";
