@@ -25,6 +25,16 @@ const MESSAGE_BY_CODE: Record<string, string> = {
     "출입승인이 없거나 허용된 시간 범위를 벗어난 구성입니다. 승인과 시간을 확인해 주세요.",
   PRIMARY_APPROVER_EXISTS:
     "같은 기간에 유효한 대표 승인자 출입승인이 이미 있습니다. 공동 승인자로 등록하거나 기간을 바꿔 주세요.",
+  IMPACT_NOT_ACKNOWLEDGED:
+    "이미 확정된 방문에 영향이 있습니다. 영향을 확인한 뒤 다시 저장해 주세요.",
+  APPROVER_READ_ONLY:
+    "공동 승인자는 조건을 입력하거나 신청을 선택할 수 없고 읽기만 할 수 있습니다.",
+  NOTICE_VERSION_CHANGED:
+    "개인정보 안내가 바뀌었습니다. 화면을 새로 고쳐 안내를 확인한 뒤 다시 시도해 주세요.",
+  VISIT_REQUEST_INVALID_STATE:
+    "이미 처리되었거나 희망 시작 시각이 지난 신청입니다. 목록을 새로 불러와 다른 신청을 선택해 주세요.",
+  PUBLIC_LINK_EXPIRED: "링크가 만료되었습니다. 방문을 조율하는 사무소에 새 링크를 요청해 주세요.",
+  PUBLIC_LINK_NOT_FOUND: "링크가 잘못되었거나 만료되었습니다. 받은 링크를 다시 확인해 주세요.",
   VERSION_CONFLICT: "다른 사용자가 먼저 수정했습니다. 최신 내용을 불러온 뒤 다시 시도해 주세요.",
   FORBIDDEN: "이 작업을 할 권한이 없습니다.",
   RESOURCE_NOT_FOUND: "대상을 찾을 수 없습니다.",
