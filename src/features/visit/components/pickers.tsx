@@ -161,7 +161,7 @@ export function CandidatePicker({
         onValueChange={setDraft}
         onSearch={() => setKeyword(draft)}
       />
-      <h3 className="text-caption font-semibold text-ink-2">우리 사무소 매물</h3>
+      <h2 className="text-caption font-semibold text-ink-2">우리 사무소 매물</h2>
       <ListState
         isPending={own.isPending}
         isError={own.isError}
@@ -174,7 +174,7 @@ export function CandidatePicker({
           row({ propertyId: item.propertyId, name: item.name }, item.address ?? ""),
         )}
       </ul>
-      <h3 className="text-caption font-semibold text-ink-2">허용받은 매물</h3>
+      <h2 className="text-caption font-semibold text-ink-2">허용받은 매물</h2>
       <ListState
         isPending={grants.isPending}
         isError={grants.isError}

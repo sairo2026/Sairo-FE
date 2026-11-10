@@ -159,7 +159,7 @@ export function DataTable<Row>({
               ))}
             </select>
           </label>
-          <nav aria-label="페이지 이동" className="flex items-center gap-2">
+          <nav aria-label={`${caption} 페이지 이동`} className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="sm"

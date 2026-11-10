@@ -45,7 +45,13 @@ describe("홈 대시보드", () => {
     expect(screen.getByText("전세 계약 D-90 후속업무")).not.toBeNull();
     const status = screen.getByRole("region", { name: "방문 조율 현황" });
     expect(within(status).getAllByRole("listitem")).toHaveLength(9);
-    expect(screen.getByRole("grid", { name: "이번 달 일정" })).not.toBeNull();
+    const calendar = screen.getByRole("grid", { name: "이번 달 일정" });
+    const rows = within(calendar).getAllByRole("row");
+    expect(rows.length).toBeGreaterThanOrEqual(5);
+    expect(within(rows[0] as HTMLElement).getAllByRole("columnheader")).toHaveLength(7);
+    for (const row of rows.slice(1)) {
+      expect(within(row as HTMLElement).getAllByRole("gridcell")).toHaveLength(7);
+    }
   });
 
   it("읽지 않은 알림 수 배지가 알림함으로 이어진다", async () => {

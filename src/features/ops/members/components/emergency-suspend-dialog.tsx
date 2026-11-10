@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { OperatorMemberDetailResponse } from "@/lib/api/contracts/ops.schema";
 import { ApiError } from "@/shared/api/client";
+import { fieldErrorSummary } from "@/shared/lib/api-messages";
 import { DateTimeField } from "@/shared/components/ui/date-time-field";
 import { RadioGroup, SelectField } from "@/shared/components/ui/select-field";
 import { formatSeoulDateTime } from "@/shared/lib/format";
@@ -21,8 +22,8 @@ type Props = {
 };
 
 function toFieldMessageError(error: unknown): unknown {
-  if (error instanceof ApiError && error.status === 400 && error.fieldErrors?.length) {
-    const message = error.fieldErrors.map((item) => item.message).join(" ");
+  const message = fieldErrorSummary(error);
+  if (error instanceof ApiError && message) {
     return new ApiError(400, { ...error.details, message }, error.requestId);
   }
   return error;

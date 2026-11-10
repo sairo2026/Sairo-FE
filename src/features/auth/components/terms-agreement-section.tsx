@@ -170,10 +170,11 @@ function FullTextLink({
 export function CollectionNoticeTable() {
   return (
     <section aria-label={COLLECTION_TABLE_COPY.title} className="flex flex-col gap-3">
-      <h3 className="text-body font-semibold text-ink">{COLLECTION_TABLE_COPY.title}</h3>
+      <h2 className="text-body font-semibold text-ink">{COLLECTION_TABLE_COPY.title}</h2>
       <p className="text-caption text-ink-2">{COLLECTION_TABLE_COPY.intro}</p>
       <div className="overflow-x-auto rounded-control border border-line">
         <table className="w-full min-w-[28rem] border-collapse text-left text-caption">
+          <caption className="sr-only">{COLLECTION_TABLE_COPY.title}</caption>
           <thead className="bg-surface">
             <tr>
               {COLLECTION_TABLE_COPY.columns.map((column) => (

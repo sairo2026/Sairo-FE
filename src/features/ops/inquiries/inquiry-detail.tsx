@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { ApiError } from "@/shared/api/client";
+import { fieldErrorMap } from "@/shared/lib/api-messages";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
@@ -318,10 +319,7 @@ function AttachmentUpload({
       setInputKey((key) => key + 1);
       setNotice({ tone: "ok", text: "첨부를 올렸습니다. 검사가 끝나면 내려받을 수 있습니다." });
     } catch (error) {
-      const fieldMessage =
-        error instanceof ApiError
-          ? error.fieldErrors?.find((item) => item.field === "file")?.message
-          : undefined;
+      const fieldMessage = fieldErrorMap(error).file;
       if (fieldMessage) setFileError(fieldMessage);
       else setNotice({ tone: "error", text: describeOpsError(error, "첨부를 올리지 못했습니다.") });
     } finally {

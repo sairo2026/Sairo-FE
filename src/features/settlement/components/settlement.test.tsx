@@ -181,6 +181,30 @@ describe("월간 메모", () => {
     expect(getMockWorkState().memos[THIS_MONTH]?.version).toBe(4);
   });
 
+  it("충돌 안내는 포커스를 받고 ESC로 닫히며 내 입력은 남는다", async () => {
+    const user = userEvent.setup();
+    const { box } = await renderMemo();
+    setMockWorkState({
+      memos: {
+        [THIS_MONTH]: {
+          content: "동료가 쓴 메모",
+          version: 1,
+          updatedByMemberName: "김대표",
+          updatedAt: "2026-11-10T08:00:00+09:00",
+        },
+      },
+    });
+    await user.type(box, "내 메모");
+    const saveButton = screen.getByRole("button", { name: "메모 저장" });
+    await user.click(saveButton);
+    const conflict = await screen.findByRole("alertdialog", { name: "메모 충돌" });
+    expect(document.activeElement).toBe(conflict);
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
+    expect((box as HTMLTextAreaElement).value).toBe("내 메모");
+    expect(document.activeElement).toBe(saveButton);
+  });
+
   it("충돌에서 최신 내용을 고르면 입력창이 최신 메모로 바뀐다", async () => {
     const user = userEvent.setup();
     const { box } = await renderMemo();

@@ -38,6 +38,7 @@ function RetainedItemsTable({ items }: { items: WithdrawalPreviewResponse["retai
       <p className="text-caption text-ink-2">{WITHDRAWAL_COPY.retainedIntro}</p>
       <div className="overflow-x-auto rounded-control border border-line">
         <table className="w-full min-w-[34rem] border-collapse text-left text-caption">
+          <caption className="sr-only">{WITHDRAWAL_COPY.retainedTitle}</caption>
           <thead className="bg-surface">
             <tr>
               {WITHDRAWAL_COPY.retainedColumns.map((column) => (

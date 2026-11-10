@@ -1,4 +1,5 @@
 import { ApiError } from "@/shared/api/client";
+import { fieldErrorSummary } from "@/shared/lib/api-messages";
 import { describeOpsError } from "../model/ops-errors";
 
 const SYSTEM_MESSAGE_BY_CODE: Record<string, string> = {
@@ -12,10 +13,8 @@ export function describeSystemError(error: unknown, fallback = "처리하지 못
   if (error instanceof ApiError) {
     const mapped = SYSTEM_MESSAGE_BY_CODE[error.code];
     if (mapped) {
-      const field = error.fieldErrors?.[0];
-      return error.code === "INVALID_REQUEST" && field?.message
-        ? `${mapped} ${field.message}`
-        : mapped;
+      const summary = fieldErrorSummary(error);
+      return error.code === "INVALID_REQUEST" && summary ? `${mapped} ${summary}` : mapped;
     }
   }
   return describeOpsError(error, fallback);

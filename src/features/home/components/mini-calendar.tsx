@@ -22,6 +22,16 @@ export function buildMonthCells(year: number, month: number): Array<number | nul
   return cells;
 }
 
+export function chunkWeeks(cells: Array<number | null>): Array<Array<number | null>> {
+  const weeks: Array<Array<number | null>> = [];
+  for (let start = 0; start < cells.length; start += 7) {
+    const week = cells.slice(start, start + 7);
+    while (week.length < 7) week.push(null);
+    weeks.push(week);
+  }
+  return weeks;
+}
+
 export function MiniCalendar({ days }: { days: Day[] }) {
   const today = seoulToday();
   const cells = buildMonthCells(today.year, today.month);
@@ -33,37 +43,43 @@ export function MiniCalendar({ days }: { days: Day[] }) {
         {today.year}년 {today.month}월
       </p>
       <div role="grid" aria-label="이번 달 일정" className="grid grid-cols-7 gap-1 text-center">
-        {WEEKDAYS.map((weekday) => (
-          <span key={weekday} role="columnheader" className="text-caption text-ink-3">
-            {weekday}
-          </span>
-        ))}
-        {cells.map((day, index) => {
-          if (day === null) return <span key={`blank-${index}`} role="gridcell" />;
-          const info = byDay.get(`${prefix}${String(day).padStart(2, "0")}`);
-          const label = info
-            ? `${today.month}월 ${day}일 방문 ${info.visitCount}건 업무 ${info.taskCount}건`
-            : `${today.month}월 ${day}일 일정 없음`;
-          return (
-            <span
-              key={day}
-              role="gridcell"
-              aria-label={label}
-              className={cn(
-                "flex min-h-12 flex-col items-center rounded-control py-1 text-caption",
-                day === today.date ? "bg-primary-soft font-bold text-primary" : "text-ink",
-              )}
-            >
-              {day}
-              {info ? (
-                <span className="text-[11px] leading-tight text-ink-2">
-                  {info.visitCount > 0 ? `방${info.visitCount}` : ""}
-                  {info.taskCount > 0 ? ` 업${info.taskCount}` : ""}
-                </span>
-              ) : null}
+        <div role="row" className="contents">
+          {WEEKDAYS.map((weekday) => (
+            <span key={weekday} role="columnheader" className="text-caption text-ink-3">
+              {weekday}
             </span>
-          );
-        })}
+          ))}
+        </div>
+        {chunkWeeks(cells).map((week, weekIndex) => (
+          <div key={weekIndex} role="row" className="contents">
+            {week.map((day, index) => {
+              if (day === null) return <span key={`blank-${index}`} role="gridcell" />;
+              const info = byDay.get(`${prefix}${String(day).padStart(2, "0")}`);
+              const label = info
+                ? `${today.month}월 ${day}일 방문 ${info.visitCount}건 업무 ${info.taskCount}건`
+                : `${today.month}월 ${day}일 일정 없음`;
+              return (
+                <span
+                  key={day}
+                  role="gridcell"
+                  aria-label={label}
+                  className={cn(
+                    "flex min-h-12 flex-col items-center rounded-control py-1 text-caption",
+                    day === today.date ? "bg-primary-soft font-bold text-primary" : "text-ink",
+                  )}
+                >
+                  {day}
+                  {info ? (
+                    <span className="text-[11px] leading-tight text-ink-2">
+                      {info.visitCount > 0 ? `방${info.visitCount}` : ""}
+                      {info.taskCount > 0 ? ` 업${info.taskCount}` : ""}
+                    </span>
+                  ) : null}
+                </span>
+              );
+            })}
+          </div>
+        ))}
       </div>
     </div>
   );
