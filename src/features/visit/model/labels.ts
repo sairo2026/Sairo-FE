@@ -129,3 +129,44 @@ export const REVALIDATION_FAILURE_LABEL: Record<string, string> = {
   SCHEDULE_CONFLICT: "같은 시간대에 다른 일정이 있습니다.",
   TRAVEL_INFEASIBLE: "앞뒤 방문과의 이동시간이 부족합니다.",
 };
+
+export const CANCEL_REASON_CODES = [
+  "USER_CANCEL",
+  "APPROVER_REASON",
+  "CUSTOMER_REASON",
+  "OTHER",
+] as const;
+
+export const CANCEL_REASON_LABEL = {
+  USER_CANCEL: "직원 취소",
+  APPROVER_REASON: "승인자 사유",
+  CUSTOMER_REASON: "고객 사유",
+  OTHER: "기타",
+} as const;
+
+export const NOTICE_METHOD_LABEL = {
+  KAKAO: "카카오톡",
+  SMS: "문자",
+  PHONE: "전화",
+  IN_PERSON: "직접 전달",
+  EMAIL: "이메일",
+} as const;
+
+export const NOTICE_RECIPIENT_LABEL = {
+  CUSTOMER: "고객",
+  APPROVER: "출입 승인자",
+  OTHER: "현장에서 만난 상대",
+} as const;
+
+export const LEGAL_ROLE_LABEL = {
+  REPRESENTATIVE_AGENT: "대표 공인중개사",
+  AFFILIATED_AGENT: "소속공인중개사",
+  ASSISTANT: "중개보조원",
+} as const;
+
+export const PUBLIC_VISIT_STATE_LABEL = {
+  VALID: "확정",
+  CANCELLED: "취소",
+  RESCHEDULE_REQUIRED: "재조율 필요",
+  SUPERSEDED: "대체됨",
+} as const;

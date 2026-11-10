@@ -80,6 +80,14 @@ export function CoordinationListScreen() {
           >
             허용받은 매물
           </Link>
+          {role === "OWNER" ? (
+            <Link
+              href="/coordinations/supervision"
+              className="inline-flex h-14 items-center justify-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 hover:border-primary hover:text-primary"
+            >
+              보조원 고지 감독
+            </Link>
+          ) : null}
         </div>
       )}
       <ul aria-label="상태별 건수" className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
