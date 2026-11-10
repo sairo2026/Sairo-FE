@@ -77,6 +77,25 @@ describe("공개 요금 페이지", () => {
     );
   });
 
+  it("환불 요약은 환불정책의 기준을 그대로 담고 전문 링크로 연결한다", async () => {
+    renderPublic(<PublicPricingScreen />);
+    const summary = (await screen.findByText(/무료 체험 기간에는 결제가 발생하지 않습니다/))
+      .textContent;
+    expect(summary).toContain("월 선불 자동결제 구독 서비스");
+    expect(summary).toContain(
+      "해지를 예약하면 이미 결제한 이용기간이 끝날 때까지 이용할 수 있고 다음 결제부터 청구되지 않으며",
+    );
+    expect(summary).toContain("이미 결제한 기간은 환불하지 않습니다");
+    expect(summary).toContain(
+      "바로 종료를 선택하거나 사무소 인증이 중단된 경우, 사이로의 서비스 장애가 있는 경우에는 남은 이용기간을 일할 계산하여 환불합니다",
+    );
+    expect(summary).toContain("결제 오류나 중복 결제는 전액 환불합니다");
+    expect(summary).not.toContain("해지를 신청하면 다음 결제일부터");
+    expect(screen.getByRole("link", { name: "환불정책 전문 보기" }).getAttribute("href")).toBe(
+      "/legal/refund-policy",
+    );
+  });
+
   it("결제 심사 후에는 표지를 내리고 고정 종료 방식 문구를 보여준다", async () => {
     server.use(
       http.get("/api/public/pricing", () =>
