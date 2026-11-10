@@ -195,6 +195,9 @@ function InvoiceView({ invoice }: { invoice: InvoiceDetail }) {
             {invoice.supplier.businessNumber ? ` (${invoice.supplier.businessNumber})` : ""}
           </p>
         ) : null}
+        <div className="mt-3">
+          <TextLink href="/billing/tax-recipient">세금계산서 수신 정보 입력</TextLink>
+        </div>
       </Card>
       {refunding ? <RefundDialog invoice={invoice} onClose={() => setRefunding(false)} /> : null}
     </div>

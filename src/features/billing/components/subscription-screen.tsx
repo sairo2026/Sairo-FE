@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
-import type { SubscriptionCurrentResponse } from "@/lib/api/contracts/billing.schema";
+import type { SubscriptionCurrent } from "../api/wire";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import {
   DetailList,
@@ -43,7 +43,7 @@ export function trialReminder(trialEndsAt: string | null | undefined, now = Date
   return threshold === undefined ? null : days;
 }
 
-function ReadinessList({ subscription }: { subscription: SubscriptionCurrentResponse }) {
+function ReadinessList({ subscription }: { subscription: SubscriptionCurrent }) {
   const items = [
     { ok: subscription.readiness.hasBillingKey, label: "카드 등록", href: "/billing/card" },
     {
@@ -69,7 +69,7 @@ function ReadinessList({ subscription }: { subscription: SubscriptionCurrentResp
   );
 }
 
-function StatusBody({ subscription }: { subscription: SubscriptionCurrentResponse }) {
+function StatusBody({ subscription }: { subscription: SubscriptionCurrent }) {
   const { status } = subscription;
   const reminder = trialReminder(subscription.trialEndsAt);
   const isReady = subscription.readiness.hasBillingKey && subscription.readiness.hasValidConsent;
@@ -206,7 +206,7 @@ function StatusBody({ subscription }: { subscription: SubscriptionCurrentRespons
   );
 }
 
-function SubscriptionActions({ subscription }: { subscription: SubscriptionCurrentResponse }) {
+function SubscriptionActions({ subscription }: { subscription: SubscriptionCurrent }) {
   const queryClient = useQueryClient();
   const [dialog, setDialog] = useState<"cancel" | "withdraw" | null>(null);
   const [error, setError] = useState<string>();
@@ -329,7 +329,7 @@ function SubscriptionActions({ subscription }: { subscription: SubscriptionCurre
   );
 }
 
-function SubscriptionView({ subscription }: { subscription: SubscriptionCurrentResponse }) {
+function SubscriptionView({ subscription }: { subscription: SubscriptionCurrent }) {
   const status = labelOf(SUBSCRIPTION_STATUS, subscription.status);
   return (
     <div className="flex flex-col gap-6">
@@ -380,8 +380,37 @@ function SubscriptionView({ subscription }: { subscription: SubscriptionCurrentR
           <li>
             <TextLink href="/billing/refunds">환불 신청 내역</TextLink>
           </li>
+          <li>
+            <TextLink href="/billing/tax-recipient">세금계산서 수신 정보</TextLink>
+          </li>
+          <li>
+            <TextLink href="/billing/return-guide">자료 반환과 보관 안내</TextLink>
+          </li>
         </ul>
       </Card>
+      {subscription.startCustomer ? (
+        <Card title="시작 고객 합의">
+          <p className="text-body text-ink">
+            적용 가격 버전 {subscription.startCustomer.priceVersion}
+            {subscription.startCustomer.priceEndsAt
+              ? ` · 가격 보장 종료 ${formatSeoulDate(subscription.startCustomer.priceEndsAt)}`
+              : ""}
+          </p>
+          <div className="mt-3">
+            <TextLink href="/billing/start-agreement">합의 내용 확인</TextLink>
+          </div>
+        </Card>
+      ) : null}
+      {subscription.pendingPriceChangeNoticeCount > 0 ? (
+        <Card title="가격 변경 안내">
+          <p className="text-body text-ink">
+            처리할 가격 변경 안내가 {subscription.pendingPriceChangeNoticeCount}건 있습니다.
+          </p>
+          <div className="mt-3">
+            <TextLink href="/billing/price-changes">안내 확인하고 응답</TextLink>
+          </div>
+        </Card>
+      ) : null}
     </div>
   );
 }

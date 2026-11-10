@@ -4,6 +4,7 @@ import {
   BillingInvoiceDetailResponseSchema,
   PublicPricingResponseSchema,
   RefundRequestStatusResponseSchema,
+  SubscriptionCurrentResponseSchema,
   ReturnGrantExportResponseSchema,
   ReturnGrantStatusResponseSchema,
   TaxRecipientResponseSchema,
@@ -74,3 +75,14 @@ export const TaxRecipientWireSchema = TaxRecipientResponseSchema.extend({
   taxType: z.string().nullable().optional(),
 });
 export type TaxRecipient = z.infer<typeof TaxRecipientWireSchema>;
+
+export const SubscriptionWireSchema = SubscriptionCurrentResponseSchema.extend({
+  startCustomer: z
+    .object({
+      agreementId: z.number(),
+      priceVersion: z.string(),
+      priceEndsAt: z.string(),
+    })
+    .nullable(),
+});
+export type SubscriptionCurrent = z.infer<typeof SubscriptionWireSchema>;
