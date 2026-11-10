@@ -32,6 +32,7 @@ import {
   StatusDialog,
   canRenew,
 } from "./contract-dialogs";
+import { ContractSubNav } from "./contract-sub-screen";
 import { RevisionSection, StatusHistorySection, revisionNumberMap } from "./contract-history";
 
 type Dialog = "status" | "settlement" | "correction" | "duplicate" | null;
@@ -133,6 +134,7 @@ function DetailBody({ detail }: { detail: ContractDetailResponse }) {
           </>
         }
       />
+      <ContractSubNav contractId={detail.contractId} />
       {detail.duplicateExcluded ? (
         <FormNotice>
           중복 제외된 계약입니다. 제외 시각{" "}

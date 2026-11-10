@@ -95,3 +95,41 @@ export function partyText(name: string | null | undefined, count: number): strin
   if (!name) return "-";
   return count > 1 ? `${name} 외 ${count - 1}명` : name;
 }
+
+export const FOLLOWUP_TYPE_LABEL: Record<string, string> = {
+  D90_FOLLOWUP: "임대 만기 90일 전 후속업무",
+};
+
+export const PAYER_TYPE_LABEL: Record<string, string> = {
+  SELLER_LANDLORD: "매도·임대인",
+  BUYER_TENANT: "매수·임차인",
+};
+
+export const FEE_REVISION_TYPE_LABEL: Record<string, string> = {
+  INITIAL: "최초 청구",
+  ADJUSTED: "정상 조정",
+  CORRECTED: "오입력 정정",
+};
+
+export const FEE_TRANSACTION_LABEL: Record<string, string> = {
+  RECEIPT: "수납",
+  REFUND: "환급",
+  ADJUSTMENT: "조정",
+};
+
+export const INSTALLMENT_LABEL: Record<string, string> = {
+  DEPOSIT: "계약금",
+  INTERIM: "중도금",
+  BALANCE: "잔금",
+};
+
+export const PAYMENT_STATUS_LABEL: Record<string, string> = {
+  UNPAID: "미지급",
+  PARTIAL: "일부 지급",
+  PAID: "지급 완료",
+};
+
+export const RETENTION_NOTE: Record<string, string> = {
+  SALES_CONTRACT: "보존기간 5년",
+  DISCLOSURE_STATEMENT: "보존기간 3년",
+};
