@@ -33,6 +33,17 @@ const MESSAGE_BY_CODE: Record<string, string> = {
     "개인정보 안내가 바뀌었습니다. 화면을 새로 고쳐 안내를 확인한 뒤 다시 시도해 주세요.",
   VISIT_REQUEST_INVALID_STATE:
     "이미 처리되었거나 희망 시작 시각이 지난 신청입니다. 목록을 새로 불러와 다른 신청을 선택해 주세요.",
+  APPLY_GRANT_INACTIVE:
+    "이 매물의 신청 허용이 회수되었거나 만료되어 신청할 수 없습니다. 허용한 사무소에 문의해 주세요.",
+  APPLY_GRANT_DUPLICATE_ACTIVE: "같은 대상에게 적용 중인 허용이 이미 있습니다.",
+  APPLY_GRANT_TARGET_INVALID:
+    "허용할 수 없는 대상입니다. 자기 사무소이거나 인증이 끝나지 않은 사무소, 승인된 대표·소속공인중개사가 아닌 중개사는 고를 수 없습니다.",
+  VISIT_REQUEST_DUPLICATE_ACTIVE:
+    "이 후보 매물에는 신청 대기 중인 신청이 이미 있습니다. 철회한 뒤 다시 신청해 주세요.",
+  APPROVER_CONDITION_EXPIRED:
+    "승인자 조건의 적용 기간이 끝났습니다. 승인자가 조건을 다시 등록한 뒤 신청해 주세요.",
+  APPROVER_CONDITION_MISSING:
+    "승인자 조건이 아직 등록되지 않았습니다. 승인자가 조건을 등록한 뒤 신청해 주세요.",
   PUBLIC_LINK_EXPIRED: "링크가 만료되었습니다. 방문을 조율하는 사무소에 새 링크를 요청해 주세요.",
   PUBLIC_LINK_NOT_FOUND: "링크가 잘못되었거나 만료되었습니다. 받은 링크를 다시 확인해 주세요.",
   VERSION_CONFLICT: "다른 사용자가 먼저 수정했습니다. 최신 내용을 불러온 뒤 다시 시도해 주세요.",
@@ -46,4 +57,21 @@ export function describeVisitError(error: unknown, fallback: string): string {
     if (known) return known;
   }
   return describeAuthError(error, fallback);
+}
+
+export function describeRequestQuota(error: unknown): string | undefined {
+  if (!(error instanceof ApiError) || error.code !== "VISIT_REQUEST_QUOTA_EXCEEDED") {
+    return undefined;
+  }
+  if (error.details.quotaScope === "APPROVAL") {
+    return "이 매물의 신청 대기 한도에 도달했습니다. 신청을 철회하거나 다른 신청이 종결되기를 기다려 주세요.";
+  }
+  const current = error.details.current;
+  const suffix = typeof current === "number" ? ` (현재 ${current}건)` : "";
+  return `동시에 진행할 수 있는 신청 한도에 도달했습니다${suffix}. 진행 중인 신청을 철회하거나 종결되기를 기다려 주세요.`;
+}
+
+export function violatedRuleCodes(error: unknown): string[] {
+  if (!(error instanceof ApiError) || error.code !== "APPROVER_CONDITION_VIOLATED") return [];
+  return error.details.violatedRules ?? [];
 }

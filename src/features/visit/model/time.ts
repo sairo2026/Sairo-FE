@@ -31,3 +31,8 @@ export function validatePeriod(start: string, end: string, today: string): Perio
 export function minutesBetween(startIso: string, endIso: string): number {
   return Math.round((Date.parse(endIso) - Date.parse(startIso)) / 60_000);
 }
+
+export function kstParts(iso: string): { date: string; time: string } {
+  const shifted = new Date(Date.parse(iso) + KST_OFFSET_MS).toISOString();
+  return { date: shifted.slice(0, 10), time: shifted.slice(11, 16) };
+}
