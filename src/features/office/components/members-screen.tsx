@@ -19,6 +19,7 @@ import { SelectField } from "@/shared/components/ui/select-field";
 import { Tabs } from "@/shared/components/ui/tabs";
 import { TextField } from "@/shared/components/ui/text-field";
 import { formatSeoulDate } from "@/shared/lib/format";
+import { MEMBERSHIP_NOTICE_COPY } from "../model/legal-copy";
 import { createRosterItem, updateRosterItem } from "../api/office.api";
 import { officeKeys, useMemberships, useRoster } from "../hooks/office-queries";
 import {
@@ -499,6 +500,8 @@ export function MembersScreen() {
       />
       {isOwner ? (
         <>
+          <MutedNote>{MEMBERSHIP_NOTICE_COPY.ownerResponsibility}</MutedNote>
+          <MutedNote>{MEMBERSHIP_NOTICE_COPY.withdrawnMember}</MutedNote>
           <QuotaBanner />
           <Tabs
             label="구성원 보기"

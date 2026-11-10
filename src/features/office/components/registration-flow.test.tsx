@@ -136,6 +136,10 @@ describe("사무소 등록 신청", () => {
     await fillLookup(user);
     expect(await screen.findByLabelText("사무소명")).not.toBeNull();
     expect(screen.getByText(/자격증 사본으로 확인/)).not.toBeNull();
+    expect(screen.getByText(/관할 등록관청의 기록과 일치함을 보증하지 않습니다/)).not.toBeNull();
+    expect(
+      screen.getByText(/제출한 서류는 사이로가 사무소를 확인하는 데만 사용합니다/),
+    ).not.toBeNull();
   });
 
   it("조회가 실패하면 오류를 안내한다", async () => {
@@ -249,6 +253,16 @@ describe("증빙 업로드", () => {
     expect(screen.getByText("신청 정보를 찾을 수 없습니다")).not.toBeNull();
   });
 
+  it("가림 안내와 보관 안내를 문서 문구대로 보여준다", () => {
+    renderOffice(<OfficeEvidenceScreen registrationId={31} entity="INDIVIDUAL" />);
+    expect(
+      screen.getByText(/가리지 않은 파일은 자동으로 가려지거나 거절될 수 있습니다/),
+    ).not.toBeNull();
+    expect(
+      screen.getByText(/확인 결과가 나온 뒤 최대 30일 동안 보관하고 삭제합니다/),
+    ).not.toBeNull();
+  });
+
   it("개인 신청은 세 종류를 받고 선택하지 않으면 칸마다 사유를 보여준다", async () => {
     const user = userEvent.setup();
     renderOffice(<OfficeEvidenceScreen registrationId={31} entity="INDIVIDUAL" />);
@@ -270,7 +284,7 @@ describe("증빙 업로드", () => {
       screen.getByLabelText("중개사무소 개설등록증"),
       new File(["x"], "a.exe", { type: "application/x-msdownload" }),
     );
-    expect(screen.getByText("이미지 또는 PDF 파일만 올릴 수 있습니다.")).not.toBeNull();
+    expect(screen.getByText("파일 형식은 PDF, JPG, PNG만 올릴 수 있습니다.")).not.toBeNull();
   });
 
   it("10MB를 넘는 파일은 사유를 표시한다", async () => {
@@ -373,7 +387,7 @@ describe("심사 상태", () => {
       registration: { registrationId: 31, status: "PENDING_REVIEW", currentRevisionNo: 1 },
     });
     await user.click(screen.getByRole("button", { name: /다시 시도/ }));
-    expect(await screen.findByText("신규 사무소 등록 심사 진행 중입니다.")).not.toBeNull();
+    expect(await screen.findByText("서류를 확인하고 있습니다.")).not.toBeNull();
   });
 
   it("작성 중이면 증빙 이어가기와 철회를 보여준다", async () => {
@@ -392,7 +406,9 @@ describe("심사 상태", () => {
       registration: { registrationId: 31, status: "PENDING_REVIEW", currentRevisionNo: 1 },
     });
     renderOffice(<OfficeReviewScreen />);
-    expect(await screen.findByText(/2영업일 이내 처리를 목표/)).not.toBeNull();
+    expect(
+      await screen.findByText(/접수 후 2영업일 안에 결과를 안내하는 것을 목표로 합니다/),
+    ).not.toBeNull();
     expect(screen.getByText(/재심사하거나 인증이 회수될 수 있습니다/)).not.toBeNull();
   });
 
@@ -472,7 +488,7 @@ describe("심사 상태", () => {
     renderOffice(<OfficeReviewScreen />);
     expect(await screen.findByText("허위 서류")).not.toBeNull();
     expect(screen.getByText("2026-11-09 10:00")).not.toBeNull();
-    expect(screen.getByText(/별도의 소명 경로는 없습니다/)).not.toBeNull();
+    expect(screen.getByText(/새로 인증을 신청해 다시 확인받을 수 있습니다/)).not.toBeNull();
     await user.click(screen.getByRole("button", { name: "새 신청 시작" }));
     expect(navigation.push).toHaveBeenCalledWith("/office/start");
   });

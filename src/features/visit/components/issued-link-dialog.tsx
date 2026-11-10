@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { ReactNode } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Modal } from "@/shared/components/ui/modal";
 import { formatSeoulDateTime } from "@/shared/lib/format";
@@ -11,11 +12,13 @@ export function IssuedLinkDialog({
   title,
   link,
   notice,
+  guidance,
   onClose,
 }: {
   title: string;
   link: IssuedLink | null;
   notice: string;
+  guidance?: ReactNode;
   onClose: () => void;
 }) {
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle");
@@ -44,6 +47,7 @@ export function IssuedLinkDialog({
       {link ? (
         <div className="flex flex-col gap-3">
           <p className="text-caption text-ink-2">{notice}</p>
+          {guidance}
           <input
             readOnly
             aria-label="발급된 링크"

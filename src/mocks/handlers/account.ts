@@ -1,5 +1,9 @@
 import { http, HttpResponse } from "msw";
-import type { MeResponse, TermsCatalogResponse } from "@/lib/api/contracts/auth.schema";
+import type {
+  MeResponse,
+  TermsCatalogResponse,
+  WithdrawalPreviewResponse,
+} from "@/lib/api/contracts/auth.schema";
 import { errorResponse, mockErrors } from "../error-responses";
 
 export const MOCK_TERMS_VERSION = "1.0";
@@ -55,7 +59,101 @@ export const MOCK_ME: MeResponse = {
   termsAgreements: [],
 };
 
+export const MOCK_WITHDRAWAL_PREVIEW: WithdrawalPreviewResponse = {
+  isOwner: false,
+  isLastOwner: false,
+  kakaoLinked: false,
+  destroyedItems: ["이메일", "휴대폰 번호", "표시 이름", "카카오 연결 정보", "알림 설정"],
+  retainedItems: [
+    {
+      itemCode: "ACCESS_LOG",
+      itemName: "로그인과 접속 기록",
+      reason: "계정 보안 사고와 부정 이용의 확인",
+      reviewTargetLaws: ["개인정보 보호법", "통신비밀보호법"],
+      retentionDays: 365,
+      anchorEvent: "RECORDED_AT",
+      ruleStatus: "CONFIRMED",
+    },
+    {
+      itemCode: "TERMS_AGREEMENT",
+      itemName: "약관 동의와 철회 이력",
+      reason: "동의 사실의 확인과 분쟁 대응",
+      reviewTargetLaws: ["개인정보 보호법", "전자상거래법"],
+      retentionDays: 1095,
+      anchorEvent: "WITHDRAWN_AT",
+      ruleStatus: "CONFIRMED",
+    },
+    {
+      itemCode: "MARKETING_NOTICE_DELIVERY",
+      itemName: "수신 설정 처리 결과 통지와 재확인 발송 이력",
+      reason: "광고성 정보 수신 설정의 처리 사실 확인",
+      reviewTargetLaws: ["정보통신망법"],
+      retentionDays: 1095,
+      anchorEvent: "RECORDED_AT",
+      ruleStatus: "CONFIRMED",
+    },
+    {
+      itemCode: "BILLING_RECORD",
+      itemName: "구독, 결제, 청구 기록",
+      reason: "대금 결제와 재화 공급에 관한 기록 보존",
+      reviewTargetLaws: ["전자상거래법", "국세기본법"],
+      retentionDays: 1825,
+      anchorEvent: "RECORDED_AT",
+      ruleStatus: "CONFIRMED",
+    },
+    {
+      itemCode: "TAX_DOCUMENT",
+      itemName: "세금계산서와 현금영수증 발급 기록",
+      reason: "세금 증빙의 보존",
+      reviewTargetLaws: ["부가가치세법", "국세기본법"],
+      retentionDays: 1825,
+      anchorEvent: "ISSUED_AT",
+      ruleStatus: "CONFIRMED",
+    },
+    {
+      itemCode: "PRIVACY_REQUEST_RECORD",
+      itemName: "개인정보 권리 요청과 처리 이력",
+      reason: "요청 처리 사실의 증명",
+      reviewTargetLaws: ["개인정보 보호법"],
+      retentionDays: 1095,
+      anchorEvent: "COMPLETED_AT",
+      ruleStatus: "CONFIRMED",
+    },
+    {
+      itemCode: "SUPPORT_INQUIRY",
+      itemName: "지원 문의",
+      reason: "분쟁과 불만 처리 기록",
+      reviewTargetLaws: ["전자상거래법"],
+      retentionDays: 1095,
+      anchorEvent: "CLOSED_AT",
+      ruleStatus: "CONFIRMED",
+    },
+    {
+      itemCode: "OFFICE_CONTRACT_DOCUMENT",
+      itemName: "사무소가 수탁 보관하는 거래계약서",
+      reason: "사무소의 법정 서류 보존 의무 이행 지원",
+      reviewTargetLaws: ["공인중개사법"],
+      retentionDays: 1825,
+      anchorEvent: "RECORDED_AT",
+      ruleStatus: "CONFIRMED",
+    },
+    {
+      itemCode: "OFFICE_EXPLANATION_DOCUMENT",
+      itemName: "사무소가 수탁 보관하는 중개대상물 확인설명서",
+      reason: "사무소의 법정 서류 보존 의무 이행 지원",
+      reviewTargetLaws: ["공인중개사법"],
+      retentionDays: 1095,
+      anchorEvent: "RECORDED_AT",
+      ruleStatus: "CONFIRMED",
+    },
+  ],
+  displayRuleNotice:
+    "담당 업무는 대표님에게 넘어가고 과거 담당 기록에는 탈퇴한 구성원으로 표시됩니다.",
+};
+
 type AccountState = {
+  withdrawalPreview: WithdrawalPreviewResponse;
+  withdrawn: boolean;
   termsVersion: string;
   me: MeResponse;
   unsubscribed: boolean;
@@ -63,6 +161,8 @@ type AccountState = {
 };
 
 const state: AccountState = {
+  withdrawalPreview: MOCK_WITHDRAWAL_PREVIEW,
+  withdrawn: false,
   termsVersion: MOCK_TERMS_VERSION,
   me: MOCK_ME,
   unsubscribed: false,
@@ -77,7 +177,17 @@ export function setMockMe(me: MeResponse): void {
   state.me = me;
 }
 
+export function setMockWithdrawalPreview(preview: WithdrawalPreviewResponse): void {
+  state.withdrawalPreview = preview;
+}
+
+export function isMockWithdrawn(): boolean {
+  return state.withdrawn;
+}
+
 export function resetMockAccountState(): void {
+  state.withdrawalPreview = MOCK_WITHDRAWAL_PREVIEW;
+  state.withdrawn = false;
   state.termsVersion = MOCK_TERMS_VERSION;
   state.me = MOCK_ME;
   state.unsubscribed = false;
@@ -124,6 +234,16 @@ function unprocessable(code: string, message: string) {
 
 export const accountHandlers = [
   http.get("/api/terms", () => HttpResponse.json({ items: currentTerms() })),
+
+  http.get("/api/me/withdrawal-preview", () => HttpResponse.json(state.withdrawalPreview)),
+
+  http.delete("/api/me", () => {
+    if (state.withdrawalPreview.isLastOwner) {
+      return errorResponse(409, "LAST_OWNER", "유일한 대표는 탈퇴할 수 없습니다.");
+    }
+    state.withdrawn = true;
+    return new HttpResponse(null, { status: 204 });
+  }),
 
   http.post("/api/auth/signup/email/verification", async ({ request }) => {
     const body = (await request.json()) as { email?: string };

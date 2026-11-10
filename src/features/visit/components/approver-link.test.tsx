@@ -56,7 +56,21 @@ describe("승인자 링크 화면 조건 등록", () => {
     expect(screen.getByRole("status")).not.toBeNull();
     expect(await screen.findByDisplayValue("30")).not.toBeNull();
     expect(screen.getByText("개인정보 수집 안내")).not.toBeNull();
-    expect(screen.getByText(/번호 인증으로 계정을 만들 수 있습니다/)).not.toBeNull();
+    expect(screen.getByText(/휴대폰 번호 인증으로 계정을 만들 수 있습니다/)).not.toBeNull();
+    expect(screen.getByText(/링크를 폐기해도 계정 접근은 유지되며/)).not.toBeNull();
+    expect(screen.getByText(/받는 항목: 방문 가능한 시간과 방문 조건/)).not.toBeNull();
+    expect(
+      screen.getByText(/출입승인 기간이 끝난 뒤 \d+일 동안 보관하고 삭제합니다/),
+    ).not.toBeNull();
+    expect(screen.getByText(/고객의 이름과 연락처는 보이지 않습니다/)).not.toBeNull();
+    expect(
+      screen.getByText("이 링크는 받으신 분만 사용해 주세요. 다른 사람에게 전달하지 마세요."),
+    ).not.toBeNull();
+    expect(
+      screen.getByText(
+        /링크 접속 일시와 접속 환경 정보는 원문이 아닌 변환값으로만 1년 동안 보관합니다/,
+      ),
+    ).not.toBeNull();
     expect(screen.getAllByDisplayValue("10:00").length).toBeGreaterThan(0);
   });
 
@@ -184,7 +198,11 @@ describe("승인자 링크 화면 조건 등록", () => {
     expect(await screen.findByText(/공동 승인자는 조건을 입력할 수 없고/)).not.toBeNull();
     expect(screen.queryByRole("button", { name: "조건 저장" })).toBeNull();
     await openTab(user, "신청 비교·선택");
-    expect(screen.getByText(/공동 승인자는 신청을 비교하거나 선택할 수 없고/)).not.toBeNull();
+    expect(
+      screen.getByText(
+        /이 링크는 읽기 전용입니다. 조건 입력과 신청 선택은 대표 승인자만 할 수 있습니다/,
+      ),
+    ).not.toBeNull();
   });
 
   it("저장 요청이 읽기 전용으로 거절되면 입력을 잠근다", async () => {
