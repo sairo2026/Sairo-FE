@@ -44,6 +44,24 @@ const MESSAGE_BY_CODE: Record<string, string> = {
     "승인자 조건의 적용 기간이 끝났습니다. 승인자가 조건을 다시 등록한 뒤 신청해 주세요.",
   APPROVER_CONDITION_MISSING:
     "승인자 조건이 아직 등록되지 않았습니다. 승인자가 조건을 등록한 뒤 신청해 주세요.",
+  VISIT_REVIEW_WINDOW_CLOSED:
+    "평가 입력 기한이 지났거나 완료된 방문이 아니어서 평가를 입력할 수 없습니다.",
+  VISIT_REVIEW_LOCKED:
+    "이의가 접수되었거나 수정 횟수를 모두 사용해 더 이상 바꿀 수 없는 평가입니다.",
+  VISIT_REVIEW_DISPUTE_EXISTS: "이 평가에는 이미 이의가 접수되었습니다. 지원 문의로 연락해 주세요.",
+  VISIT_REVIEW_DISPUTE_WINDOW_CLOSED: "마지막 입력 시각부터 30일이 지나 이의를 낼 수 없습니다.",
+  SENSITIVE_DATA_DETECTED:
+    "주민등록번호나 전체 계좌번호는 입력할 수 없습니다. 해당 내용을 지워 주세요.",
+  PREFERRED_BROKER_LIMIT_EXCEEDED:
+    "선호 중개사는 최대 5명까지 지정할 수 있습니다. 한 명을 해제한 뒤 다시 지정해 주세요.",
+  PREFERRED_BROKER_DUPLICATE: "이미 선호 중개사로 지정한 중개사입니다.",
+  APPROVER_CLAIM_NOT_ALLOWED:
+    "인증을 진행할 수 없는 번호입니다. 번호를 확인하거나 링크를 다시 열어 주세요.",
+  VERIFICATION_CODE_INVALID: "인증번호가 맞지 않습니다. 다시 확인해 주세요.",
+  TOKEN_EXPIRED: "인증번호 유효 시간이 지났습니다. 인증번호를 다시 받아 주세요.",
+  TOKEN_INVALID: "사용할 수 없는 인증번호입니다. 인증번호를 다시 받아 주세요.",
+  APPROVER_APPROVAL_ALREADY_LINKED: "이미 다른 계정에 연결된 출입승인입니다.",
+  BULK_LIMIT_EXCEEDED: "한 번에 최대 20개 출입승인까지 적용할 수 있습니다.",
   PUBLIC_LINK_EXPIRED: "링크가 만료되었습니다. 방문을 조율하는 사무소에 새 링크를 요청해 주세요.",
   PUBLIC_LINK_NOT_FOUND: "링크가 잘못되었거나 만료되었습니다. 받은 링크를 다시 확인해 주세요.",
   VERSION_CONFLICT: "다른 사용자가 먼저 수정했습니다. 최신 내용을 불러온 뒤 다시 시도해 주세요.",

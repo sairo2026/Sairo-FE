@@ -170,3 +170,62 @@ export const PUBLIC_VISIT_STATE_LABEL = {
   RESCHEDULE_REQUIRED: "재조율 필요",
   SUPERSEDED: "대체됨",
 } as const;
+
+export const REVIEW_ANSWER_LABEL = {
+  YES: "예",
+  NO: "아니오",
+  SKIP: "답하지 않음",
+} as const;
+
+export const REVIEW_QUESTIONS = [
+  {
+    key: "punctuality",
+    label: "약속한 방문 시각에 맞춰 방문을 시작했나요",
+  },
+  {
+    key: "advanceContact",
+    label: "방문 전에 방문 확인이나 변경·지연에 대한 연락이 있었나요",
+  },
+  {
+    key: "asRequested",
+    label: "신청한 인원·소요시간·요청사항에 맞게 진행됐나요",
+  },
+] as const;
+
+export const APPROVER_REVIEW_STATUS_LABEL = {
+  NONE: "미입력",
+  SUBMITTED: "입력됨",
+  WITHDRAWN: "철회됨",
+  LOCKED: "잠김",
+} as const;
+
+export const RECEIVED_REVIEW_STATUS_LABEL = {
+  ACTIVE: "유지",
+  DISPUTED: "이의 처리 중",
+  REMOVED: "삭제됨",
+} as const;
+
+export const DISPUTE_STATUS_LABEL = {
+  OPEN: "처리 중",
+  UPHELD: "평가 유지",
+  REMOVED: "평가 삭제",
+} as const;
+
+export const DISPUTE_REASON_LABEL = {
+  FACT_INCORRECT: "사실과 다름",
+  WRONG_TARGET: "다른 방문이나 다른 중개사에 대한 평가",
+  OTHER: "기타",
+} as const;
+
+export const LINK_STATE_LABEL = {
+  LINKED: "연결됨",
+  PENDING_CONFIRM: "연결 제안",
+} as const;
+
+export const BULK_FAILURE_LABEL: Record<string, string> = {
+  NOT_LINKED: "연결된 출입승인이 아닙니다.",
+  NOT_PRIMARY: "대표 승인자 출입승인이 아닙니다.",
+  APPROVAL_INACTIVE: "유효하지 않은 출입승인입니다.",
+  OFFICE_RESTRICTED: "사무소 상태 때문에 적용할 수 없습니다.",
+  INVALID_CONDITION: "조건 값이 올바르지 않습니다.",
+};

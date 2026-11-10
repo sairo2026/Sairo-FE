@@ -8,6 +8,7 @@ import { visitHandlers } from "./visit";
 import { visitFollowHandlers } from "./visit-follow";
 import { visitRequestHandlers } from "./visit-request";
 import { visitApproverHandlers } from "./visit-approver";
+import { visitReviewHandlers } from "./visit-review";
 
 export const handlers = [
   ...billingHandlers,
@@ -20,4 +21,5 @@ export const handlers = [
   ...visitApproverHandlers,
   ...visitRequestHandlers,
   ...visitFollowHandlers,
+  ...visitReviewHandlers,
 ];

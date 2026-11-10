@@ -4,6 +4,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import type { ApproverSelectionResponse } from "@/lib/api/contracts/visit.schema";
 import { selectApproverRequest } from "../api/approver.api";
+import { designatePreferredBroker } from "../api/review.api";
+import { reviewKeys } from "../hooks/review-queries";
 import type { ApproverCompare, ApproverCompareItem } from "../api/approver.api";
 import { approverKeys } from "../hooks/approver-queries";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
@@ -61,10 +63,14 @@ function RequestCard({
   item,
   readOnly,
   onSelect,
+  onPrefer,
+  isPreferPending,
 }: {
   item: ApproverCompareItem;
   readOnly: boolean;
   onSelect: (item: ApproverCompareItem) => void;
+  onPrefer: (item: ApproverCompareItem) => void;
+  isPreferPending: boolean;
 }) {
   return (
     <li className="flex flex-col gap-3 rounded-card-flat border border-line bg-white px-5 py-4">
@@ -112,6 +118,19 @@ function RequestCard({
         >
           이 신청 선택
         </Button>
+        {item.isPreferredBroker ? null : (
+          <Button
+            size="sm"
+            variant="ghost"
+            className="ml-2"
+            disabled={readOnly}
+            isLoading={isPreferPending}
+            aria-label={`${item.applicantBrokerName} 선호 중개사로 지정`}
+            onClick={() => onPrefer(item)}
+          >
+            선호 중개사로 지정
+          </Button>
+        )}
       </div>
     </li>
   );
@@ -174,6 +193,23 @@ export function ApproverRequestList({
     },
   });
 
+  const preferMutation = useMutation({
+    mutationFn: (item: ApproverCompareItem) =>
+      designatePreferredBroker(base, {
+        sourceRequestId: item.requestId,
+        acknowledgedNoticeVersion: noticeVersion,
+      }),
+    onSuccess: async () => {
+      setError(undefined);
+      await queryClient.invalidateQueries({ queryKey: approverKeys.all });
+      await queryClient.invalidateQueries({ queryKey: reviewKeys.preferred(base) });
+    },
+    onError: (caught) =>
+      setError(
+        describeVisitError(caught, "선호 중개사를 지정하지 못했습니다. 다시 시도해 주세요."),
+      ),
+  });
+
   return (
     <div className="flex flex-col gap-4">
       {result ? (
@@ -218,12 +254,18 @@ export function ApproverRequestList({
               item={item}
               readOnly={readOnly}
               onSelect={setTarget}
+              onPrefer={(entry) => preferMutation.mutate(entry)}
+              isPreferPending={
+                preferMutation.isPending && preferMutation.variables?.requestId === item.requestId
+              }
             />
           ))}
         </ul>
       )}
       <p className="text-caption text-ink-3">
-        접근 거리, 취급 적합성, 거래 실적은 아직 제공하지 않는 미확인 항목입니다.
+        접근 거리, 취급 적합성, 거래 실적은 아직 제공하지 않는 미확인 항목입니다. 선호 중개사로
+        지정해도 신청이 자동으로 확정되지 않고 다른 신청도 똑같이 선택할 수 있으며, 지정 여부는
+        중개사에게 보이지 않습니다. 표시 순서가 위쪽인 것은 표시 편의일 뿐입니다.
       </p>
       <Modal
         isOpen={target !== undefined}

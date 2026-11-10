@@ -1,5 +1,6 @@
 import { http, HttpResponse } from "msw";
 import type {
+  ApproverPortalApprovalListResponse,
   ApproverConditionResponse,
   ApproverConfirmedScheduleResponse,
   ApproverConditionImpactPreviewResponse,
@@ -25,7 +26,11 @@ export type MockConfirmed = ApproverConfirmedScheduleResponse["items"][number] &
   approvalId: number;
 };
 
+export type MockPortalApproval = ApproverPortalApprovalListResponse["items"][number];
+
 export type ApproverMockState = {
+  portalSession: boolean;
+  portalApprovals: MockPortalApproval[];
   tokens: Record<string, MockTokenInfo>;
   expiredTokens: string[];
   conditions: MockCondition[];
@@ -129,6 +134,8 @@ function initialState(): ApproverMockState {
       }),
     ],
     confirmed: [],
+    portalSession: false,
+    portalApprovals: [],
     impactItems: [],
     revalidationFailure: null,
     noticeVersion: NOTICE_VERSION,
@@ -150,7 +157,9 @@ export function setMockApproverState(partial: Partial<ApproverMockState>): void 
   state = { ...state, ...partial };
 }
 
-type Resolved = { kind: "ok"; info: MockTokenInfo } | { kind: "error"; response: Response };
+export type Resolved = { kind: "ok"; info: MockTokenInfo } | { kind: "error"; response: Response };
+
+export type ApproverResolver = (key: string | readonly string[] | undefined) => Resolved;
 
 function resolve(token: string | readonly string[] | undefined): Resolved {
   const key = String(token);
@@ -169,6 +178,22 @@ function resolve(token: string | readonly string[] | undefined): Resolved {
   }
   return { kind: "ok", info };
 }
+
+export const linkResolver: ApproverResolver = resolve;
+
+export const portalResolver: ApproverResolver = (key) => {
+  if (!state.portalSession) {
+    return {
+      kind: "error",
+      response: errorResponse(401, "UNAUTHENTICATED", "세션이 만료되었습니다."),
+    };
+  }
+  const approval = state.portalApprovals.find(
+    (item) => String(item.approvalId) === String(key) && item.linkState === "LINKED",
+  );
+  if (!approval) return { kind: "error", response: mockErrors.notFound() };
+  return { kind: "ok", info: { approvalId: approval.approvalId, role: approval.approvalRole } };
+};
 
 function conditionOwnerId(info: MockTokenInfo): number {
   if (info.role === "PRIMARY") return info.approvalId;
@@ -298,19 +323,18 @@ function overlaps(a: MockRequest, b: MockRequest): boolean {
   );
 }
 
-export const visitApproverHandlers = [
-  http.get("/api/public/approver-property-links/:token/conditions", ({ params }) => {
-    const resolved = resolve(params.token);
-    if (resolved.kind === "error") return resolved.response;
-    const condition = activeCondition(conditionOwnerId(resolved.info));
-    if (!condition) return errorResponse(404, "RESOURCE_NOT_FOUND", "활성 조건이 없습니다.");
-    return HttpResponse.json(withNotice(condition));
-  }),
+function approverHandlers(prefix: string, resolver: ApproverResolver) {
+  return [
+    http.get(`${prefix}/conditions`, ({ params }) => {
+      const resolved = resolver(params.token);
+      if (resolved.kind === "error") return resolved.response;
+      const condition = activeCondition(conditionOwnerId(resolved.info));
+      if (!condition) return errorResponse(404, "RESOURCE_NOT_FOUND", "활성 조건이 없습니다.");
+      return HttpResponse.json(withNotice(condition));
+    }),
 
-  http.post(
-    "/api/public/approver-property-links/:token/conditions/impact-preview",
-    ({ params }) => {
-      const resolved = resolve(params.token);
+    http.post(`${prefix}/conditions/impact-preview`, ({ params }) => {
+      const resolved = resolver(params.token);
       if (resolved.kind === "error") return resolved.response;
       if (resolved.info.role === "CO_APPROVER")
         return errorResponse(403, "APPROVER_READ_ONLY", "공동 승인자는 읽기만 할 수 있습니다.");
@@ -318,57 +342,54 @@ export const visitApproverHandlers = [
         hasImpact: state.impactItems.length > 0,
         affectedItems: state.impactItems,
       });
-    },
-  ),
+    }),
 
-  http.put("/api/public/approver-property-links/:token/conditions", async ({ params, request }) => {
-    const resolved = resolve(params.token);
-    if (resolved.kind === "error") return resolved.response;
-    if (resolved.info.role === "CO_APPROVER")
-      return errorResponse(403, "APPROVER_READ_ONLY", "공동 승인자는 읽기만 할 수 있습니다.");
-    const body = (await request.json()) as UpsertBody;
-    if (body.acknowledgedNoticeVersion !== state.noticeVersion) {
-      return errorResponse(409, "NOTICE_VERSION_CHANGED", "개인정보 안내 버전이 바뀌었습니다.");
-    }
-    const invalid = validateUpsert(body);
-    if (invalid) return invalid;
-    if (state.impactItems.length > 0 && !body.impactAcknowledged) {
-      return errorResponse(409, "IMPACT_NOT_ACKNOWLEDGED", "영향을 확인하지 않았습니다.");
-    }
-    return HttpResponse.json(createVersion(resolved.info.approvalId, body, "DIRECT"));
-  }),
+    http.put(`${prefix}/conditions`, async ({ params, request }) => {
+      const resolved = resolver(params.token);
+      if (resolved.kind === "error") return resolved.response;
+      if (resolved.info.role === "CO_APPROVER")
+        return errorResponse(403, "APPROVER_READ_ONLY", "공동 승인자는 읽기만 할 수 있습니다.");
+      const body = (await request.json()) as UpsertBody;
+      if (body.acknowledgedNoticeVersion !== state.noticeVersion) {
+        return errorResponse(409, "NOTICE_VERSION_CHANGED", "개인정보 안내 버전이 바뀌었습니다.");
+      }
+      const invalid = validateUpsert(body);
+      if (invalid) return invalid;
+      if (state.impactItems.length > 0 && !body.impactAcknowledged) {
+        return errorResponse(409, "IMPACT_NOT_ACKNOWLEDGED", "영향을 확인하지 않았습니다.");
+      }
+      return HttpResponse.json(createVersion(resolved.info.approvalId, body, "DIRECT"));
+    }),
 
-  http.get("/api/public/approver-property-links/:token/visit-requests", ({ params }) => {
-    const resolved = resolve(params.token);
-    if (resolved.kind === "error") return resolved.response;
-    if (resolved.info.role === "CO_APPROVER")
-      return errorResponse(403, "APPROVER_READ_ONLY", "공동 승인자는 읽기만 할 수 있습니다.");
-    const items = pendingRequests(resolved.info.approvalId).map((item) => {
-      const { approvalId, ...rest } = item;
-      void approvalId;
-      return rest;
-    });
-    return HttpResponse.json({
-      propertyAddress: "서울특별시 성북구 정릉로 77",
-      activeConditionVersionNo: activeCondition(resolved.info.approvalId)?.versionNo ?? null,
-      approvalRole: "PRIMARY",
-      grantedOfficeNames: ["정릉부동산"],
-      items,
-      trustPolicyVersion: "TRUST_V1",
-      trustAsOf: NOW,
-      unconfirmedIndicators: ["ACCESS_DISTANCE", "PROPERTY_TYPE_FIT", "VERIFIED_DEALS"],
-      privacyNotice: {
-        noticeCode: "GUEST_LINK_NOTICE_APPROVER",
-        noticeVersion: state.noticeVersion,
-        retentionDays: 365,
-      },
-    });
-  }),
+    http.get(`${prefix}/visit-requests`, ({ params }) => {
+      const resolved = resolver(params.token);
+      if (resolved.kind === "error") return resolved.response;
+      if (resolved.info.role === "CO_APPROVER")
+        return errorResponse(403, "APPROVER_READ_ONLY", "공동 승인자는 읽기만 할 수 있습니다.");
+      const items = pendingRequests(resolved.info.approvalId).map((item) => {
+        const { approvalId, ...rest } = item;
+        void approvalId;
+        return rest;
+      });
+      return HttpResponse.json({
+        propertyAddress: "서울특별시 성북구 정릉로 77",
+        activeConditionVersionNo: activeCondition(resolved.info.approvalId)?.versionNo ?? null,
+        approvalRole: "PRIMARY",
+        grantedOfficeNames: ["정릉부동산"],
+        items,
+        trustPolicyVersion: "TRUST_V1",
+        trustAsOf: NOW,
+        unconfirmedIndicators: ["ACCESS_DISTANCE", "PROPERTY_TYPE_FIT", "VERIFIED_DEALS"],
+        privacyNotice: {
+          noticeCode: "GUEST_LINK_NOTICE_APPROVER",
+          noticeVersion: state.noticeVersion,
+          retentionDays: 365,
+        },
+      });
+    }),
 
-  http.post(
-    "/api/public/approver-property-links/:token/visit-requests/:requestId/select",
-    async ({ params, request }) => {
-      const resolved = resolve(params.token);
+    http.post(`${prefix}/visit-requests/:requestId/select`, async ({ params, request }) => {
+      const resolved = resolver(params.token);
       if (resolved.kind === "error") return resolved.response;
       if (resolved.info.role === "CO_APPROVER")
         return errorResponse(403, "APPROVER_READ_ONLY", "공동 승인자는 읽기만 할 수 있습니다.");
@@ -443,26 +464,30 @@ export const visitApproverHandlers = [
         revalidation: { result: "PASSED", failureCode: null, failureDetail: null, checkedAt: NOW },
         timeClosedRequestIds: closed.map((item) => item.requestId),
       });
-    },
-  ),
+    }),
 
-  http.get("/api/public/approver-property-links/:token/confirmed-schedules", ({ params }) => {
-    const resolved = resolve(params.token);
-    if (resolved.kind === "error") return resolved.response;
-    const approvalId = conditionOwnerId(resolved.info);
-    return HttpResponse.json({
-      items: state.confirmed
-        .filter((item) => item.approvalId === approvalId)
-        .map((item) => {
-          const { approvalId: owner, ...rest } = item;
-          void owner;
-          return rest;
-        }),
-      officeName: "사이로공인중개사",
-      officeContactPhone: "02-1234-5678",
-    });
-  }),
+    http.get(`${prefix}/confirmed-schedules`, ({ params }) => {
+      const resolved = resolver(params.token);
+      if (resolved.kind === "error") return resolved.response;
+      const approvalId = conditionOwnerId(resolved.info);
+      return HttpResponse.json({
+        items: state.confirmed
+          .filter((item) => item.approvalId === approvalId)
+          .map((item) => {
+            const { approvalId: owner, ...rest } = item;
+            void owner;
+            return rest;
+          }),
+        officeName: "사이로공인중개사",
+        officeContactPhone: "02-1234-5678",
+      });
+    }),
+  ];
+}
 
+export const visitApproverHandlers = [
+  ...approverHandlers("/api/public/approver-property-links/:token", linkResolver),
+  ...approverHandlers("/api/approver-portal/approvals/:token", portalResolver),
   http.get(
     "/api/properties/:propertyId/access-approvals/:approvalId/approver-conditions",
     ({ params }) => {
