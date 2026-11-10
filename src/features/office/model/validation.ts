@@ -1,4 +1,7 @@
 import { countCodePoints } from "@/shared/lib/format";
+import { hasFinalConsonant, objectParticle, topicParticle } from "@/shared/lib/korean";
+
+export { hasFinalConsonant, objectParticle, topicParticle };
 import { EVIDENCE_TYPES } from "./labels";
 import type { EvidenceType } from "./labels";
 
@@ -25,22 +28,6 @@ export type RegistrationValues = {
 };
 
 export type RegistrationField = keyof RegistrationValues;
-
-export function hasFinalConsonant(word: string): boolean {
-  const last = word.trim().slice(-1);
-  if (!last) return false;
-  const code = last.charCodeAt(0);
-  if (code < 0xac00 || code > 0xd7a3) return false;
-  return (code - 0xac00) % 28 !== 0;
-}
-
-export function objectParticle(word: string): string {
-  return `${word}${hasFinalConsonant(word) ? "을" : "를"}`;
-}
-
-export function topicParticle(word: string): string {
-  return `${word}${hasFinalConsonant(word) ? "은" : "는"}`;
-}
 
 function tooLong(value: string, max: number): boolean {
   return countCodePoints(value.trim()) > max;

@@ -1,4 +1,11 @@
-import { describeAuthError } from "@/shared/lib/api-messages";
+import {
+  describeAuthError,
+  fieldErrorMap,
+  isApiCode,
+  isApiStatus,
+} from "@/shared/lib/api-messages";
+
+export { fieldErrorMap, isApiCode, isApiStatus };
 import { ApiError } from "@/shared/api/client";
 
 const MESSAGE_BY_CODE: Record<string, string> = {
@@ -28,23 +35,6 @@ export function describeOfficeError(error: unknown, fallback: string): string {
     if (known) return known;
   }
   return describeAuthError(error, fallback);
-}
-
-export function fieldErrorMap(error: unknown): Record<string, string> {
-  if (!(error instanceof ApiError) || !error.fieldErrors) return {};
-  const result: Record<string, string> = {};
-  for (const item of error.fieldErrors) {
-    if (item.field && !(item.field in result)) result[item.field] = item.message;
-  }
-  return result;
-}
-
-export function isApiStatus(error: unknown, status: number): boolean {
-  return error instanceof ApiError && error.status === status;
-}
-
-export function isApiCode(error: unknown, code: string): boolean {
-  return error instanceof ApiError && error.code === code;
 }
 
 export function describeRemaining(expiresAt: string | null | undefined, now: Date): string | null {

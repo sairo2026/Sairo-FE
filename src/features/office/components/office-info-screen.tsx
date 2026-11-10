@@ -27,7 +27,7 @@ import {
 } from "../model/labels";
 import { describeOfficeError, fieldErrorMap, isApiCode } from "../model/messages";
 import { formatBusinessNumber, isValidPhone, validateChangeRequest } from "../model/validation";
-import { DetailList, MutedNote } from "./office-ui";
+import { DetailList, MutedNote } from "@/shared/components/feedback/page-parts";
 
 const CHANGE_FIELDS: Record<
   string,

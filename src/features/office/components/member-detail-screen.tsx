@@ -30,7 +30,12 @@ import {
 } from "../model/labels";
 import { describeOfficeError } from "../model/messages";
 import { validateReason } from "../model/validation";
-import { DetailList, MutedNote, ReasonDialog, StatusBadge } from "./office-ui";
+import {
+  DetailList,
+  MutedNote,
+  ReasonDialog,
+  StatusBadge,
+} from "@/shared/components/feedback/page-parts";
 
 type Dialog = "role" | "suspend" | "reinstate" | "revoke" | null;
 

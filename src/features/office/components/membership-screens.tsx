@@ -32,7 +32,14 @@ import {
   validateQualification,
 } from "../model/validation";
 import type { FieldErrors, MembershipRole, QualificationField } from "../model/validation";
-import { Checklist, ButtonRow, FlowFrame, MutedNote, StatusBadge, TextLink } from "./office-ui";
+import {
+  Checklist,
+  ButtonRow,
+  FlowFrame,
+  MutedNote,
+  StatusBadge,
+  TextLink,
+} from "@/shared/components/feedback/page-parts";
 import { cn } from "@/shared/lib/cn";
 
 const SELECTED_OFFICE_KEY = "sairo.office.join-target";

@@ -13,7 +13,7 @@ import type { EntityType, FieldErrors, LookupField, RegistrationField } from "..
 import { Button } from "@/shared/components/ui/button";
 import { RadioGroup, SelectField } from "@/shared/components/ui/select-field";
 import { TextField } from "@/shared/components/ui/text-field";
-import { ButtonRow, FlowFrame, MutedNote, TextLink } from "./office-ui";
+import { ButtonRow, FlowFrame, MutedNote, TextLink } from "@/shared/components/feedback/page-parts";
 
 const ENTITY_OPTIONS = (Object.keys(ENTITY_TYPE_LABEL) as EntityType[]).map((value) => ({
   value,

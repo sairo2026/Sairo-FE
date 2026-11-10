@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/cn";
-import { ButtonRow, FlowFrame, MutedNote, TextLink } from "./office-ui";
+import { ButtonRow, FlowFrame, MutedNote, TextLink } from "@/shared/components/feedback/page-parts";
 
 type Choice = "create" | "join";
 

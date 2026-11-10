@@ -14,6 +14,23 @@ const OFFICE_PATH_PREFIXES = [
   "/api/owner-transfers/",
 ];
 
+const PROPERTY_PATH_PREFIXES = ["/api/properties", "/api/property-categories"];
+
+const PROPERTY_EXCLUDED_SEGMENTS = [
+  "/owner-occupants",
+  "/access-approvals",
+  "/contracts",
+  "/cross-office-",
+  "/coordinations",
+];
+
+const CUSTOMER_PATH_PREFIXES = [
+  "/api/customers",
+  "/api/owner-occupants",
+  "/api/customer-",
+  "/api/demand-conditions",
+];
+
 const OPS_SESSION_DTO_NAMES = ["OpsMeResponse", "OpsMfaVerifyRequest", "OpsStepUpRequest"];
 
 const COMMON_DTO_NAMES = ["AuthContextResponse", "CurrentSessionResponse"];
@@ -42,6 +59,25 @@ function isOfficeDto(dto) {
   );
 }
 
+function isCustomerApi(path) {
+  return startsWithAny(path, CUSTOMER_PATH_PREFIXES) || path.endsWith("/owner-occupants");
+}
+
+function isPropertyApi(path) {
+  return (
+    startsWithAny(path, PROPERTY_PATH_PREFIXES) &&
+    !PROPERTY_EXCLUDED_SEGMENTS.some((segment) => path.includes(segment))
+  );
+}
+
+function isPropertyDto(dto) {
+  return dto.apis.length > 0 && dto.apis.every((api) => isPropertyApi(api.path));
+}
+
+function isCustomerDto(dto) {
+  return dto.apis.length > 0 && dto.apis.every((api) => isCustomerApi(api.path));
+}
+
 export const AREAS = {
   common: {
     description: "접근 상태와 세션 응답",
@@ -54,6 +90,14 @@ export const AREAS = {
   office: {
     description: "사무소 등록·심사·소속·초대·고용명부·대표 이전 도메인",
     select: (dto) => !COMMON_DTO_NAMES.includes(dto.name) && !isAuthDto(dto) && isOfficeDto(dto),
+  },
+  property: {
+    description: "매물·카테고리·거래제안·사진 도메인",
+    select: (dto) => !COMMON_DTO_NAMES.includes(dto.name) && isPropertyDto(dto),
+  },
+  customer: {
+    description: "고객·소유점유·관심 매물·희망조건·상담·병합 도메인",
+    select: (dto) => !COMMON_DTO_NAMES.includes(dto.name) && isCustomerDto(dto),
   },
   auth: {
     description: "인증·계정 도메인",

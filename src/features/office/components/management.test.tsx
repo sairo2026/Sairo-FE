@@ -17,7 +17,7 @@ import { MemberRequestsScreen } from "./member-requests-screen";
 import { MembersScreen } from "./members-screen";
 import { OfficeInfoScreen } from "./office-info-screen";
 import { OwnerTransferScreen } from "./owner-transfer-screen";
-import { renderOffice } from "./test-utils";
+import { renderOffice } from "@/shared/testing/office-render";
 
 const navigation = vi.hoisted(() => ({ push: vi.fn(), replace: vi.fn() }));
 

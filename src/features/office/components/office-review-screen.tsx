@@ -13,7 +13,14 @@ import { cancelRegistration, startReapplication } from "../api/office.api";
 import { useLatestRegistration, useRefreshOfficeState } from "../hooks/office-queries";
 import { REGISTRATION_STATUS_LABEL, REGISTRATION_STATUS_TONE } from "../model/labels";
 import { describeOfficeError } from "../model/messages";
-import { ButtonRow, DetailList, FlowFrame, MutedNote, StatusBadge, TextLink } from "./office-ui";
+import {
+  ButtonRow,
+  DetailList,
+  FlowFrame,
+  MutedNote,
+  StatusBadge,
+  TextLink,
+} from "@/shared/components/feedback/page-parts";
 
 const REVIEW_TARGET_NOTE =
   "정상 접수 건은 접수 후 2영업일 이내 처리를 목표로 하며 법정 기한은 아닙니다.";

@@ -12,7 +12,7 @@ import {
   MembershipStatusScreen,
   OfficeSearchScreen,
 } from "./membership-screens";
-import { renderOffice } from "./test-utils";
+import { renderOffice } from "@/shared/testing/office-render";
 
 const navigation = vi.hoisted(() => ({ push: vi.fn(), replace: vi.fn() }));
 

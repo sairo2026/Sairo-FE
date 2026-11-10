@@ -230,3 +230,36 @@ describe("사무소 영역 선택", () => {
     expect(Object.keys(AREAS)).toContain("office");
   });
 });
+
+describe("매물·고객 영역 선택", () => {
+  const SPEC = `### 27.1 DTO 색인
+
+| DTO | 종류 | 연결 API | 필드 표 위치 |
+| --- | --- | --- | --- |
+| \`PropertyListResponse\` | 응답 | \`GET /api/properties\` | 8장 절 |
+| \`PropertyCategoryListResponse\` | 응답 | \`GET /api/property-categories\` | 8장 절 |
+| \`OwnerOccupantCreateRequest\` | 요청 | \`POST /api/properties/{propertyId}/owner-occupants\` | 10장 절 |
+| \`AccessApprovalResponse\` | 응답 | \`POST /api/properties/{propertyId}/access-approvals\` | 7장 절 |
+| \`ContractCreateRequest\` | 요청 | \`POST /api/properties/{propertyId}/contracts\` | 9장 절 |
+| \`CustomerListResponse\` | 응답 | \`GET /api/customers\` | 10장 절 |
+| \`DemandConditionUpdateRequest\` | 요청 | \`PATCH /api/demand-conditions/{conditionId}\` | 10장 절 |
+| \`CustomerConsultationUpdateRequest\` | 요청 | \`PATCH /api/customer-consultations/{consultationId}\` | 10장 절 |
+`;
+
+  it("매물 영역은 방문 승인과 계약 경로를 제외하고 소유·점유 연결은 고객 영역으로 보낸다", () => {
+    const dtos = parseSpec(SPEC);
+    const property = selectAreaDtos(dtos, "property").map((dto) => dto.name);
+    const customer = selectAreaDtos(dtos, "customer").map((dto) => dto.name);
+    expect(property).toEqual(["PropertyListResponse", "PropertyCategoryListResponse"]);
+    expect(customer).toEqual(
+      expect.arrayContaining([
+        "CustomerListResponse",
+        "OwnerOccupantCreateRequest",
+        "DemandConditionUpdateRequest",
+        "CustomerConsultationUpdateRequest",
+      ]),
+    );
+    expect(customer).not.toContain("AccessApprovalResponse");
+    expect(property).not.toContain("ContractCreateRequest");
+  });
+});
