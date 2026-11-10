@@ -74,6 +74,12 @@ export function CoordinationListScreen() {
           >
             + 조율 만들기
           </Link>
+          <Link
+            href="/granted-properties"
+            className="inline-flex h-14 items-center justify-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 hover:border-primary hover:text-primary"
+          >
+            허용받은 매물
+          </Link>
         </div>
       )}
       <ul aria-label="상태별 건수" className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">

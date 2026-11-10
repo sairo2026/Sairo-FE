@@ -29,7 +29,6 @@ import {
   CONFLICT_TYPE_LABEL,
   GRANT_STATE_LABEL,
   GRANT_STATE_TONE,
-  ITEM_RESULT_LABEL,
   MAX_CANDIDATES,
   labelOf,
   statusLabel,
@@ -40,6 +39,7 @@ import { minutesBetween } from "../model/time";
 import { IssuedLinkDialog } from "./issued-link-dialog";
 import type { IssuedLink } from "./issued-link-dialog";
 import { CandidatePicker } from "./pickers";
+import { ChangeSection, RequestsSection } from "./request-section";
 import type { CandidateChoice } from "./pickers";
 
 type Detail = VisitCoordinationDetailResponse;
@@ -571,67 +571,6 @@ function ManagerPanel({ detail, isReadOnly }: { detail: Detail; isReadOnly: bool
   );
 }
 
-function RequestsPanel({ detail }: { detail: Detail }) {
-  return (
-    <section id="requests" className="flex flex-col gap-3" aria-labelledby="requests-title">
-      <SectionTitle id="requests-title">신청 가능 구간</SectionTitle>
-      <p className="text-caption text-ink-2">
-        신청 가능한 구간은 고객 가능 시간과 승인자 조건, 중개사 일정의 교집합으로 서버가 계산합니다.
-        승인자의 시간표 전체는 보이지 않습니다.
-      </p>
-      <ul className="flex flex-col gap-2">
-        {detail.candidateProperties.map((candidate) => (
-          <li key={candidate.candidatePropertyId} className="flex flex-col gap-1">
-            <span className="text-body font-semibold text-ink">{candidate.propertyName}</span>
-            {candidate.applicableSlots.length === 0 ? (
-              <span className="text-caption text-ink-2">지금 신청할 수 있는 구간이 없습니다.</span>
-            ) : (
-              <span className="flex flex-wrap gap-2">
-                {candidate.applicableSlots.map((slot) => (
-                  <span
-                    key={slot.startsAt}
-                    className="rounded-control bg-primary-soft px-3 py-1 text-caption text-ink"
-                  >
-                    {formatSeoulDateTime(slot.startsAt)} ~ {formatSeoulDateTime(slot.endsAt)}
-                  </span>
-                ))}
-              </span>
-            )}
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
-function ScheduleItemsPanel({ detail }: { detail: Detail }) {
-  const items = detail.scheduleItems ?? [];
-  if (items.length === 0) return null;
-  const nameOf = (id: number) =>
-    detail.candidateProperties.find((item) => item.candidatePropertyId === id)?.propertyName ?? "";
-  return (
-    <section className="flex flex-col gap-3" aria-labelledby="items-title">
-      <SectionTitle id="items-title">확정된 방문</SectionTitle>
-      <ul className="flex flex-col gap-2">
-        {items.map((item) => (
-          <li key={item.itemId} className="flex flex-wrap items-center gap-3 text-body text-ink">
-            <span className="font-semibold">{nameOf(item.candidatePropertyId)}</span>
-            <span className="text-caption text-ink-2">
-              {item.scheduledStartAt ? formatSeoulDateTime(item.scheduledStartAt) : "시각 미정"}
-            </span>
-            <Badge tone={item.state === "RESCHEDULE_REQUIRED" ? "red" : "gray"}>
-              {labelOf(ITEM_RESULT_LABEL, item.result)}
-            </Badge>
-            {item.state === "RESCHEDULE_REQUIRED" ? (
-              <span className="text-caption text-danger">재조율 필요</span>
-            ) : null}
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
 function DetailBody({ detail }: { detail: Detail }) {
   const { role, isReadOnly } = useOfficeAccess();
   const isDeputy = role === "DEPUTY";
@@ -672,8 +611,8 @@ function DetailBody({ detail }: { detail: Detail }) {
             detail={detail}
             isReadOnly={isReadOnly}
           />
-          <RequestsPanel detail={detail} />
-          <ScheduleItemsPanel detail={detail} />
+          <RequestsSection detail={detail} />
+          <ChangeSection detail={detail} />
           {isDeputy ? null : <ManagerPanel detail={detail} isReadOnly={isReadOnly} />}
         </div>
       </Card>
