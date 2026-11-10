@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { TextField } from "@/shared/components/ui/text-field";
+import { PROPERTY_ENTRY_COPY } from "@/shared/legal/notice-copy";
 
 export const PHOTO_MAX_COUNT = 20;
 export const PHOTO_MAX_BYTES = 10 * 1024 * 1024;
@@ -70,6 +71,7 @@ function PhotoPicker({
       <p className="text-caption text-ink-2">
         JPG, PNG, WebP, 한 장당 10MB 이하, 최대 {PHOTO_MAX_COUNT}장까지 올릴 수 있습니다.
       </p>
+      <p className="text-caption text-ink-2">{PROPERTY_ENTRY_COPY.photoNotice}</p>
     </div>
   );
 }

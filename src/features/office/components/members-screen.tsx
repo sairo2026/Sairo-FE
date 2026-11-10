@@ -1,5 +1,6 @@
 "use client";
 
+import { ROSTER_NOTICE_COPY } from "@/shared/legal/notice-copy";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
@@ -398,6 +399,7 @@ function RosterTab() {
         <MutedNote>
           계정이 없는 고용인까지 포함한 실제 고용명부 기준으로 한도를 계산합니다.
         </MutedNote>
+        <MutedNote>{ROSTER_NOTICE_COPY.roster}</MutedNote>
         {!isReadOnly ? (
           <Button variant="outlined" size="sm" onClick={() => setIsAdding(true)}>
             항목 추가

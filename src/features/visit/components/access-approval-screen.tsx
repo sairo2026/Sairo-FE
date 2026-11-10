@@ -27,6 +27,7 @@ import {
 } from "../model/labels";
 import { describeVisitError, fieldErrorMap } from "../model/messages";
 import { todayKst, toKstIso } from "../model/time";
+import { ACCESS_APPROVAL_NOTICE_COPY } from "@/shared/legal/notice-copy";
 import { LinkIssueGuidance } from "./link-legal-notices";
 import { IssuedLinkDialog } from "./issued-link-dialog";
 import type { IssuedLink } from "./issued-link-dialog";
@@ -435,6 +436,9 @@ function ApprovalBody({ propertyId, propertyName }: { propertyId: number; proper
           승인자 조건은 승인자가 링크로 직접 등록합니다. 링크 원문은 발급 응답에서 한 번만 보입니다.
         </FormNotice>
       )}
+      <FormNotice>
+        {ACCESS_APPROVAL_NOTICE_COPY.registration} {ACCESS_APPROVAL_NOTICE_COPY.duty}
+      </FormNotice>
       <Card>
         <QueryGate query={approvals} loadingLabel="출입승인 이력을 불러오는 중입니다.">
           {(data) =>

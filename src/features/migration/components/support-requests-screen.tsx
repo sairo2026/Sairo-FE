@@ -15,9 +15,10 @@ import { Card } from "@/shared/components/ui/card";
 import { DataTable } from "@/shared/components/ui/data-table";
 import type { PageSize } from "@/shared/components/ui/data-table";
 import { PageHeader } from "@/shared/components/ui/page-header";
-import { SelectField } from "@/shared/components/ui/select-field";
+import { Checkbox, SelectField } from "@/shared/components/ui/select-field";
 import { TextField } from "@/shared/components/ui/text-field";
 import { DataMigrationSupportNotice } from "@/shared/legal/data-rights-notices";
+import { MIGRATION_SOURCE_CONSENT_COPY } from "@/shared/legal/notice-copy";
 import { formatKrw, formatSeoulDateTime } from "@/shared/lib/format";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { createImportSupportRequest } from "../api/support-request.api";
@@ -37,6 +38,8 @@ function ApplyForm({ initialBatchId }: { initialBatchId: string }) {
   const [batchId, setBatchId] = useState(initialBatchId);
   const [sourceSystem, setSourceSystem] = useState("");
   const [rowCount, setRowCount] = useState("");
+  const [viewConfirmed, setViewConfirmed] = useState(false);
+  const [noticeConfirmed, setNoticeConfirmed] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState<string>();
 
@@ -57,6 +60,8 @@ function ApplyForm({ initialBatchId }: { initialBatchId: string }) {
     if (sourceSystem.trim() === "") next.sourceSystem = COPY.sourceSystemRequired;
     const parsed = Number(rowCount);
     if (!/^\d+$/.test(rowCount) || parsed < 1) next.rowCount = COPY.rowCountInvalid;
+    if (!viewConfirmed || !noticeConfirmed)
+      next.sourceConsent = MIGRATION_SOURCE_CONSENT_COPY.required;
     setErrors(next);
     setError(undefined);
     if (Object.keys(next).length > 0) return;
@@ -114,6 +119,32 @@ function ApplyForm({ initialBatchId }: { initialBatchId: string }) {
             disabled={isReadOnly}
             required
           />
+          <div className="flex flex-col gap-2">
+            <p className="text-caption text-ink-2">{MIGRATION_SOURCE_CONSENT_COPY.scope}</p>
+            <Checkbox
+              label={MIGRATION_SOURCE_CONSENT_COPY.viewConfirm}
+              checked={viewConfirmed}
+              disabled={isReadOnly}
+              onCheckedChange={(value) => {
+                setViewConfirmed(value);
+                setErrors((current) => ({ ...current, sourceConsent: "" }));
+              }}
+            />
+            <Checkbox
+              label={MIGRATION_SOURCE_CONSENT_COPY.noticeConfirm}
+              checked={noticeConfirmed}
+              disabled={isReadOnly}
+              onCheckedChange={(value) => {
+                setNoticeConfirmed(value);
+                setErrors((current) => ({ ...current, sourceConsent: "" }));
+              }}
+            />
+            {errors.sourceConsent ? (
+              <p role="alert" className="text-caption text-danger">
+                {errors.sourceConsent}
+              </p>
+            ) : null}
+          </div>
           {error ? <FormAlert>{error}</FormAlert> : null}
           <div>
             <Button isLoading={mutation.isPending} disabled={isReadOnly} onClick={submit}>

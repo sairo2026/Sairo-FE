@@ -102,6 +102,9 @@ describe("이전 지원 신청 목록과 신청", () => {
     await user.type(screen.getByLabelText(/원본 시스템 이름/), "양셀-2026");
     await user.type(screen.getByLabelText(/예상 레코드 수/), "60000");
     await user.click(screen.getByRole("button", { name: "신청하기" }));
+    expect(screen.getByText("확인 문구를 모두 선택해 주세요.")).not.toBeNull();
+    for (const checkbox of screen.getAllByRole("checkbox")) await user.click(checkbox);
+    await user.click(screen.getByRole("button", { name: "신청하기" }));
     await waitFor(() => expect(push).toHaveBeenCalledWith("/import/support/500"));
     expect(migrationState.batches[1]?.supportRequestStatus).toBe("REQUESTED");
   });
@@ -117,6 +120,7 @@ describe("이전 지원 신청 목록과 신청", () => {
     renderOffice(<SupportRequestsScreen />, { role: "OWNER" });
     await user.type(await screen.findByLabelText(/원본 시스템 이름/), "양셀");
     await user.type(screen.getByLabelText(/예상 레코드 수/), "10");
+    for (const checkbox of screen.getAllByRole("checkbox")) await user.click(checkbox);
     await user.click(screen.getByRole("button", { name: "신청하기" }));
     expect(await screen.findByText("이미 다른 이전 지원 신청에 연결된 파일입니다.")).not.toBeNull();
   });

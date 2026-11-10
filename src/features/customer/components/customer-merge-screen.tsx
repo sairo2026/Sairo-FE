@@ -8,6 +8,7 @@ import type { CustomerDetailResponse } from "@/lib/api/contracts/customer.schema
 import { ApiError } from "@/shared/api/client";
 import { toErrorScreenKind } from "@/shared/api/error-kind";
 import { ErrorScreen } from "@/shared/components/feedback/error-screen";
+import { CUSTOMER_MERGE_NOTICE_COPY } from "@/shared/legal/notice-copy";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { PageSkeleton } from "@/shared/components/feedback/skeleton";
 import { Button } from "@/shared/components/ui/button";
@@ -288,6 +289,9 @@ function MergeForm({
         </Card>
       </fieldset>
 
+      <FormNotice>
+        {CUSTOMER_MERGE_NOTICE_COPY.identity} {CUSTOMER_MERGE_NOTICE_COPY.effect}
+      </FormNotice>
       <FormAlert>
         고객 A가 병합 후 남는 고객이며, 고객 B는 병합됨 상태로 표시됩니다. 병합은 되돌릴 수
         없습니다. 남길 고객과 선택한 값을 확인해 주세요.

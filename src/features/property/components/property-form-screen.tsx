@@ -15,6 +15,7 @@ import { Checkbox, SelectField } from "@/shared/components/ui/select-field";
 import { Modal } from "@/shared/components/ui/modal";
 import { PageHeader } from "@/shared/components/ui/page-header";
 import { TextField } from "@/shared/components/ui/text-field";
+import { PROPERTY_ENTRY_COPY } from "@/shared/legal/notice-copy";
 import { useAssignableMembers } from "@/shared/session/assignable-members";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import {
@@ -466,6 +467,7 @@ export function PropertyForm(props: FormProps) {
       }}
     >
       <PageHeader title={title} />
+      <FormNotice>{PROPERTY_ENTRY_COPY.responsibility}</FormNotice>
       {isReadOnly ? (
         <FormNotice>
           결제가 지연되어 읽기만 가능합니다. 저장하려면 결제를 먼저 마쳐 주세요.

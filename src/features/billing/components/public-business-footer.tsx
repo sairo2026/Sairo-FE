@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { CookieNotice } from "@/shared/legal/cookie-notice";
 import { useCompanyInfo } from "../hooks/billing-queries";
 
 const FALLBACK_LINKS = [
@@ -56,6 +57,7 @@ export function PublicBusinessFooter() {
           거래의 당사자나 중개인이 아니며 거래를 알선하지 않습니다.
         </p>
       ) : null}
+      <CookieNotice className="mt-4" />
     </div>
   );
 }

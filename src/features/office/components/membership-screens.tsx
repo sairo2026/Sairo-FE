@@ -41,6 +41,7 @@ import {
   StatusBadge,
   TextLink,
 } from "@/shared/components/feedback/page-parts";
+import { ROSTER_NOTICE_COPY } from "@/shared/legal/notice-copy";
 import { cn } from "@/shared/lib/cn";
 
 const SELECTED_OFFICE_KEY = "sairo.office.join-target";
@@ -139,7 +140,7 @@ export function OfficeSearchScreen() {
   return (
     <FlowFrame
       title="참여할 사무소를 찾아 주세요."
-      description="인증이 끝난 사무소만 검색됩니다. 사업자등록번호는 검색 조건으로만 쓰이고 결과에는 표시되지 않습니다."
+      description="인증이 끝난 사무소만 검색됩니다. 사업자등록번호는 검색 조건으로만 쓰이고 결과에는 표시되지 않습니다. 대표의 개인 연락처와 직원 목록은 공개하지 않습니다."
     >
       <div className="flex flex-col gap-5">
         <div role="radiogroup" aria-label="검색 방법" className="grid grid-cols-2 gap-2">
@@ -812,6 +813,7 @@ function InvitationAcceptForm({
     >
       <p className="text-body font-semibold text-ink">초대 수락</p>
       <MutedNote>초대로 들어와도 자격, 교육, 고용신고 확인은 다시 입력해야 합니다.</MutedNote>
+      <MutedNote>{ROSTER_NOTICE_COPY.acceptDisclosure}</MutedNote>
       <QualificationFields
         role={role}
         qualificationNumber={qualificationNumber}
