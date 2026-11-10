@@ -5,6 +5,7 @@ import { customerHandlers } from "./customer";
 import { officeHandlers } from "./office";
 import { propertyHandlers } from "./property";
 import { visitHandlers } from "./visit";
+import { visitApproverHandlers } from "./visit-approver";
 
 export const handlers = [
   ...billingHandlers,
@@ -14,4 +15,5 @@ export const handlers = [
   ...propertyHandlers,
   ...customerHandlers,
   ...visitHandlers,
+  ...visitApproverHandlers,
 ];
