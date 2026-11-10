@@ -7,8 +7,8 @@ import { ApiError } from "@/shared/api/client";
 import { Button } from "@/shared/components/ui/button";
 import { formatSeoulDate, formatSeoulDateTime } from "@/shared/lib/format";
 import { unsubscribeMarketing } from "../api/account.api";
-import { describeAuthError } from "../model/auth-messages";
-import { AuthFrame, FormAlert, FormNotice } from "./auth-frame";
+import { describeAuthError } from "@/shared/lib/api-messages";
+import { AuthFrame, FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 
 export function MarketingUnsubscribe({ token }: { token: string | null }) {
   const tokenRef = useRef(token);

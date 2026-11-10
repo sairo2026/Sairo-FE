@@ -21,13 +21,13 @@ import {
   verifyLoginMethodEmail,
 } from "../api/account.api";
 import { useCountdown } from "../hooks/use-countdown";
-import { describeAuthError } from "../model/auth-messages";
+import { describeAuthError } from "@/shared/lib/api-messages";
 import {
   PASSWORD_STRENGTH_LABEL,
   passwordStrength,
   validatePasswordInput,
 } from "../model/password-policy";
-import { AuthFrame, FormAlert, FormNotice } from "./auth-frame";
+import { AuthFrame, FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const meQueryKey = ["auth", "me"] as const;

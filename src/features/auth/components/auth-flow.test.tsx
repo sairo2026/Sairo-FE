@@ -14,7 +14,7 @@ import { createQueryClient } from "@/shared/api/query-client";
 import { AccessNoticeScreen } from "./access-notice-screen";
 import { AuthEventsProvider } from "./auth-events-provider";
 import { OfficeAccessGate, OfficeAccessShell } from "./office-access-gate";
-import { useOfficeAccess } from "./office-access-context";
+import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { OpsAccessGate } from "./ops-access-gate";
 import { ReconsentNotice } from "./reconsent-notice";
 

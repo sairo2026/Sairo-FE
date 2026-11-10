@@ -14,9 +14,9 @@ import { TextField } from "@/shared/components/ui/text-field";
 import { countCodePoints } from "@/shared/lib/format";
 import { fetchMe, fetchSignupTerms, signupWithKakao } from "../api/account.api";
 import { authContextQueryKey } from "../hooks/use-auth-context";
-import { describeAuthError } from "../model/auth-messages";
+import { describeAuthError } from "@/shared/lib/api-messages";
 import { landingPathFor } from "../model/landing";
-import { AuthFrame, FormAlert, FormNotice } from "./auth-frame";
+import { AuthFrame, FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { ExistingAccountNotice } from "./existing-account-notice";
 import { PhoneVerificationField } from "./phone-verification-field";
 import {

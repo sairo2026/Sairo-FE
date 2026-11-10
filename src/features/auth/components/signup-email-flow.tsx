@@ -20,7 +20,7 @@ import {
 } from "../api/account.api";
 import { authContextQueryKey } from "../hooks/use-auth-context";
 import { useCountdown } from "../hooks/use-countdown";
-import { describeAuthError } from "../model/auth-messages";
+import { describeAuthError } from "@/shared/lib/api-messages";
 import { landingPathFor } from "../model/landing";
 import {
   PASSWORD_STRENGTH_LABEL,
@@ -28,7 +28,7 @@ import {
   validatePasswordInput,
 } from "../model/password-policy";
 import { clearSignupDraft, saveSignupDraft, useSignupDraft } from "../model/signup-draft";
-import { AuthFrame, FormAlert, FormNotice } from "./auth-frame";
+import { AuthFrame, FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { ExistingAccountNotice } from "./existing-account-notice";
 import { PhoneVerificationField } from "./phone-verification-field";
 import {

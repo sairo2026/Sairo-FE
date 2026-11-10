@@ -7,7 +7,7 @@ import { PageSkeleton } from "@/shared/components/feedback/skeleton";
 import { toErrorScreenKind } from "@/shared/api/error-kind";
 import { Button } from "@/shared/components/ui/button";
 import { fetchRecoveryOptions } from "../api/account.api";
-import { AuthFrame, FormNotice } from "./auth-frame";
+import { AuthFrame, FormNotice } from "@/shared/components/feedback/form-frame";
 
 const METHOD_LABEL: Record<string, string> = { EMAIL: "이메일", KAKAO: "카카오" };
 

@@ -1,8 +1,9 @@
 import type { AuthContextResponse } from "@/lib/api/contracts/common.schema";
+import type { OfficeRole } from "@/shared/session/office-access-context";
 import { AUTH_ROUTES } from "./routes";
 
 export type AccessCondition = AuthContextResponse["accessCondition"];
-export type OfficeRole = "OWNER" | "AGENT" | "DEPUTY";
+export type { OfficeRole };
 
 /** 화면이 속한 접근 영역. 영역마다 허용되는 접근 상태가 다르다. */
 export type RouteArea = "account" | "verification" | "billing" | "business";
@@ -13,13 +14,18 @@ const ROUTE_AREA_PREFIXES: ReadonlyArray<readonly [string, RouteArea]> = [
   [AUTH_ROUTES.support, "account"],
   [AUTH_ROUTES.privacyRequests, "account"],
   [AUTH_ROUTES.officeVerification, "verification"],
+  ["/office/start", "verification"],
+  ["/office/register", "verification"],
+  ["/office/review", "verification"],
+  ["/office/join", "verification"],
+  ["/office/membership", "verification"],
+  ["/removed", "account"],
   [AUTH_ROUTES.billing, "billing"],
 ];
 
 /** 대표만 열 수 있는 업무 화면과 중개보조원에게 닫힌 업무 화면. */
 const BUSINESS_ROUTE_ROLES: ReadonlyArray<readonly [string, readonly OfficeRole[]]> = [
   ["/office", ["OWNER"]],
-  ["/members", ["OWNER"]],
   ["/properties", ["OWNER", "AGENT"]],
   ["/customers", ["OWNER", "AGENT"]],
   ["/contracts", ["OWNER", "AGENT"]],

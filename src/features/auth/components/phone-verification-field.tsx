@@ -5,7 +5,7 @@ import { ApiError } from "@/shared/api/client";
 import { TextField } from "@/shared/components/ui/text-field";
 import { sendPhoneVerification, verifyPhone } from "../api/account.api";
 import { formatClock, useCountdown } from "../hooks/use-countdown";
-import { describeAuthError } from "../model/auth-messages";
+import { describeAuthError } from "@/shared/lib/api-messages";
 
 const PHONE_PATTERN = /^01\d-\d{3,4}-\d{4}$/;
 const CODE_LENGTH = 6;

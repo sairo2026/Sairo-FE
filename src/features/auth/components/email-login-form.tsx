@@ -13,9 +13,9 @@ import { TextField } from "@/shared/components/ui/text-field";
 import { login } from "../api/account.api";
 import { authContextQueryKey } from "../hooks/use-auth-context";
 import { formatClock, useCountdown } from "../hooks/use-countdown";
-import { describeAuthError } from "../model/auth-messages";
+import { describeAuthError } from "@/shared/lib/api-messages";
 import { landingPathFor, safeNextPath } from "../model/landing";
-import { AuthFrame, FormAlert } from "./auth-frame";
+import { AuthFrame, FormAlert } from "@/shared/components/feedback/form-frame";
 
 const loginSchema = z.object({
   email: z

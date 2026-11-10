@@ -12,7 +12,7 @@ import { useAuthContext } from "../hooks/use-auth-context";
 import { describeGrace } from "../model/access-notice";
 import { decideAccess, isOfficeRole } from "../model/access-policy";
 import { getOfficeMenu } from "../model/role-menu";
-import { OfficeAccessProvider, useOfficeAccess } from "./office-access-context";
+import { OfficeAccessProvider, useOfficeAccess } from "@/shared/session/office-access-context";
 
 /** 접근 상태 판정 결과대로 화면을 보여주거나 안내 화면으로 보낸다. */
 export function OfficeAccessGate({ children }: { children: ReactNode }) {
