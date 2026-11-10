@@ -7,7 +7,6 @@ export type PaymentRequest = {
   failUrl: string;
 };
 
-/** 일반결제창을 여는 포트. 실제 결제대행사 SDK와 테스트용 대역이 같은 형태를 따른다. */
 export type PaymentLauncher = {
   isConfigured: () => boolean;
   requestPayment: (request: PaymentRequest) => Promise<void>;
@@ -65,7 +64,6 @@ function loadSdk(): Promise<TossFactory> {
   });
 }
 
-/** 환경변수에 키가 있을 때만 동작한다. 키가 없으면 결제창을 열지 않는다. */
 export const tossPaymentLauncher: PaymentLauncher = {
   isConfigured: () => readClientKey() !== "",
   async requestPayment({ customerKey, orderId, orderName, amount, successUrl, failUrl }) {

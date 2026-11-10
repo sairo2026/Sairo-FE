@@ -116,7 +116,6 @@ function applyAgreement(termsCode: string, agreed: boolean, version: string) {
   });
 }
 
-/** 동의 기록 요청을 반영한다. 거절해야 하면 오류 응답을, 아니면 null을 돌려준다. */
 export function recordMockAgreement(body: unknown) {
   if (typeof body !== "object" || body === null) return null;
   const { termsCode, version, agreed, consentPath } = body as {
