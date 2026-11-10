@@ -21,6 +21,10 @@ import { opsHomeHandlers } from "./ops-home";
 import { opsRegistrationHandlers } from "./ops-registrations";
 import { opsRawAccessHandlers } from "./ops-raw-access";
 import { opsOperatorHandlers } from "./ops-operators";
+import { opsSupportHandlers } from "./ops-support";
+import { opsBillingHandlers } from "./ops-billing";
+import { opsMigrationHandlers } from "./ops-migration";
+import { opsPrivacyHandlers } from "./ops-privacy";
 
 export const handlers = [
   ...billingHandlers,
@@ -46,4 +50,8 @@ export const handlers = [
   ...opsRegistrationHandlers,
   ...opsRawAccessHandlers,
   ...opsOperatorHandlers,
+  ...opsSupportHandlers,
+  ...opsBillingHandlers,
+  ...opsMigrationHandlers,
+  ...opsPrivacyHandlers,
 ];
