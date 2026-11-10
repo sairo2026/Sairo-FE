@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { cn } from "@/shared/lib/cn";
 import { Button } from "./button";
+import { formatCount } from "@/shared/lib/format";
 
 export const PAGE_SIZE_OPTIONS = [25, 50, 100] as const;
 export type PageSize = (typeof PAGE_SIZE_OPTIONS)[number];
@@ -142,7 +143,7 @@ export function DataTable<Row>({
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3 text-caption text-ink-2">
-        <p>총 {totalCount.toLocaleString("ko-KR")}건</p>
+        <p>총 {formatCount(totalCount)}건</p>
         <div className="flex items-center gap-3">
           <label className="flex items-center gap-2">
             페이지당

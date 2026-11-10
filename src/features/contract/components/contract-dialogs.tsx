@@ -269,7 +269,7 @@ export function SettlementStatusDialog({ detail, onClose }: DialogProps) {
 export function DuplicateDialog({ detail, onClose }: DialogProps) {
   const done = useAfterChange(onClose);
   const candidates = useQuery({
-    queryKey: ["contract", "duplicate-candidates"],
+    queryKey: contractKeys.duplicateCandidates,
     queryFn: () => listContracts({ page: 0, size: 100 }),
   });
   const [target, setTarget] = useState("");

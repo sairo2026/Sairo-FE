@@ -1,5 +1,6 @@
 import type { PropertyListResponse } from "@/lib/api/contracts/property.schema";
 import { DEAL_TYPE_LABEL, isDealType } from "./labels";
+import { formatCount } from "@/shared/lib/format";
 
 /** 원 단위 금액을 "1억 2,000만원"처럼 읽기 쉽게 표시한다. */
 export function formatWonCompact(amount: number | null | undefined): string {
@@ -11,9 +12,9 @@ export function formatWonCompact(amount: number | null | undefined): string {
   const man = Math.floor((abs % 100_000_000) / 10_000);
   const rest = abs % 10_000;
   const parts: string[] = [];
-  if (eok > 0) parts.push(`${eok.toLocaleString("ko-KR")}억`);
-  if (man > 0) parts.push(`${man.toLocaleString("ko-KR")}만`);
-  if (rest > 0) parts.push(rest.toLocaleString("ko-KR"));
+  if (eok > 0) parts.push(`${formatCount(eok)}억`);
+  if (man > 0) parts.push(`${formatCount(man)}만`);
+  if (rest > 0) parts.push(formatCount(rest));
   return `${sign}${parts.join(" ")}원`;
 }
 

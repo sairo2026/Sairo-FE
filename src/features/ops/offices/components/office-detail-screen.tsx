@@ -67,9 +67,15 @@ function MembersTab({ detail }: { detail: Detail }) {
       <caption className="sr-only">구성원 목록</caption>
       <thead>
         <tr className="border-b border-line text-caption text-ink-2">
-          <th className="py-2">이름</th>
-          <th className="py-2">역할</th>
-          <th className="py-2">상태</th>
+          <th scope="col" className="py-2">
+            이름
+          </th>
+          <th scope="col" className="py-2">
+            역할
+          </th>
+          <th scope="col" className="py-2">
+            상태
+          </th>
         </tr>
       </thead>
       <tbody>

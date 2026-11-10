@@ -173,7 +173,7 @@ function ChangeRequestDialog({ isOpen, onClose }: { isOpen: boolean; onClose: ()
     },
     onSuccess: async () => {
       setDone(true);
-      await queryClient.invalidateQueries({ queryKey: ["office", "change-requests"] });
+      await queryClient.invalidateQueries({ queryKey: officeKeys.changeRequestsAll });
     },
     onError: (caught) => {
       setErrors(fieldErrorMap(caught));

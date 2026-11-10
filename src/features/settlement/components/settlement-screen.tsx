@@ -10,7 +10,7 @@ import { FormNotice } from "@/shared/components/feedback/form-frame";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { PageHeader } from "@/shared/components/ui/page-header";
-import { formatKrw, formatSeoulDateTime } from "@/shared/lib/format";
+import { formatCount, formatKrw, formatSeoulDateTime } from "@/shared/lib/format";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { useSettlement, useSettlementList } from "../hooks/settlement-queries";
 import { METRIC_GROUPS, currentYearMonth, isYearMonth, shiftYearMonth } from "../model/metrics";
@@ -18,9 +18,7 @@ import type { MetricDef } from "../model/metrics";
 import { MemoPanel } from "./memo-panel";
 
 function formatValue(def: MetricDef, value: number): string {
-  return def.kind === "money"
-    ? formatKrw(value)
-    : `${value.toLocaleString("ko-KR")}${def.unit ?? ""}`;
+  return def.kind === "money" ? formatKrw(value) : `${formatCount(value)}${def.unit ?? ""}`;
 }
 
 function MonthNav({ yearMonth, earliest }: { yearMonth: string; earliest: string }) {

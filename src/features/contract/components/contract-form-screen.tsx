@@ -50,7 +50,7 @@ function FormBody({
     contract?.propertyId ?? (pickedProperty === "" ? null : Number(pickedProperty));
   const property = useContractProperty(targetPropertyId);
   const properties = useQuery({
-    queryKey: ["contract", "properties"],
+    queryKey: contractKeys.propertyOptions,
     queryFn: () => listProperties({ page: 0, size: 100 }),
     enabled: propertyId === null && contract === null,
   });

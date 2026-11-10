@@ -5,7 +5,7 @@ import { QueryGate } from "@/shared/components/feedback/query-gate";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import { ConfirmDialog } from "@/shared/components/ui/modal";
-import { formatSeoulDateTime } from "@/shared/lib/format";
+import { formatCount, formatSeoulDateTime } from "@/shared/lib/format";
 import { OpsDetailList } from "../components/common/ops-detail-list";
 import { OpsReasonDialog } from "../components/common/ops-reason-dialog";
 import { OpsScreen } from "../components/common/ops-screen";
@@ -125,7 +125,7 @@ function AccessCard({
                     label: "파일 크기",
                     value:
                       grant.fileSize !== null && grant.fileSize !== undefined
-                        ? `${grant.fileSize.toLocaleString("ko-KR")} 바이트`
+                        ? `${formatCount(grant.fileSize)} 바이트`
                         : "-",
                   },
                   { label: "파일 해시(SHA-256)", value: grant.fileSha256 },

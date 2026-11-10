@@ -15,6 +15,7 @@ export const supportKeys = {
   inquiries: (params: object) => ["support", "inquiries", params] as const,
   inquiry: (inquiryId: number) => ["support", "inquiry", inquiryId] as const,
   policies: ["support", "policy-documents"] as const,
+  privacyRequestsAll: ["support", "privacy-requests"] as const,
   privacyRequests: (params: object) => ["support", "privacy-requests", params] as const,
   privacyRequest: (requestId: number) => ["support", "privacy-request", requestId] as const,
 };

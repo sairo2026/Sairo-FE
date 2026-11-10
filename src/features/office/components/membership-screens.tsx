@@ -24,7 +24,7 @@ import {
   searchOffices,
   startMembershipReapplication,
 } from "../api/office.api";
-import { useMyMembership, useRefreshOfficeState } from "../hooks/office-queries";
+import { officeKeys, useMyMembership, useRefreshOfficeState } from "../hooks/office-queries";
 import { ENTITY_TYPE_LABEL, ROLE_LABEL, labelOf } from "../model/labels";
 import { describeOfficeError, describeRemaining, fieldErrorMap } from "../model/messages";
 import {
@@ -101,7 +101,7 @@ export function OfficeSearchScreen() {
   const [page, setPage] = useState(0);
 
   const resultQuery = useQuery({
-    queryKey: ["office", "search", submitted, page],
+    queryKey: officeKeys.search(submitted, page),
     enabled: submitted !== null,
     queryFn: () =>
       searchOffices({

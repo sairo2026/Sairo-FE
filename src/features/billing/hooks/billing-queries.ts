@@ -37,6 +37,12 @@ export const billingKeys = {
   notices: (params: PageParams) => ["billing", "notices", params] as const,
   taxRecipient: ["billing", "tax-recipient"] as const,
   authStatus: ["billing", "auth-status"] as const,
+  noticesAll: ["billing", "notices"] as const,
+  officeName: ["billing", "office-name"] as const,
+  returnGrant: ["billing", "return-grant"] as const,
+  archiveGrant: ["billing", "archive-grant"] as const,
+  returnExport: (grantId: number, exportId: number | null) =>
+    ["billing", "return-export", grantId, exportId] as const,
 };
 
 export function usePublicPricing() {
@@ -118,7 +124,7 @@ export function useAuthStatus() {
 
 export function useOfficeName() {
   return useQuery({
-    queryKey: ["billing", "office-name"] as const,
+    queryKey: billingKeys.officeName,
     queryFn: fetchOfficeName,
     retry: false,
     staleTime: 5 * 60_000,

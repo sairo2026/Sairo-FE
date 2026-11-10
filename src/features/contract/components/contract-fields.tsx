@@ -8,6 +8,7 @@ import { SelectField } from "@/shared/components/ui/select-field";
 import { TextField } from "@/shared/components/ui/text-field";
 import { TEXT_LIMITS } from "@/shared/lib/format";
 import { useAssignableMembers } from "@/shared/session/assignable-members";
+import { contractKeys } from "../hooks/contract-queries";
 import { DEAL_TYPES, DEAL_TYPE_LABEL, isLease } from "../model/labels";
 import { newParty } from "../model/form";
 import type { ContractFormValues, PartyInput } from "../model/form";
@@ -111,7 +112,7 @@ export function ContractFields({
 }: FieldsProps) {
   const members = useAssignableMembers();
   const customers = useQuery({
-    queryKey: ["contract", "customers"],
+    queryKey: contractKeys.customerOptions,
     queryFn: () => listCustomers({ page: 0, size: 100 }),
   });
   const customerOptions = (customers.data?.items ?? []).map((item) => ({
