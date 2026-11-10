@@ -203,8 +203,13 @@ function RelationPanel({ property }: { property: PropertyDetailResponse }) {
           <ul className="flex flex-col gap-2">
             {property.contracts.map((contract) => (
               <li key={contract.contractId} className="text-body text-ink">
-                {dealTypeLabel(contract.dealType)} ·{" "}
-                {labelOf(CONTRACT_STATUS_LABEL, contract.contractStatus)}
+                <Link
+                  href={`/contracts/${contract.contractId}`}
+                  className="font-semibold text-primary hover:underline"
+                >
+                  {dealTypeLabel(contract.dealType)} ·{" "}
+                  {labelOf(CONTRACT_STATUS_LABEL, contract.contractStatus)}
+                </Link>
                 {contract.signedDate ? ` · 체결 ${formatSeoulDate(contract.signedDate)}` : ""}
               </li>
             ))}
@@ -382,6 +387,12 @@ function DetailBody({ property }: { property: PropertyDetailResponse }) {
                 className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 hover:border-primary hover:text-primary"
               >
                 다른 사무소 신청
+              </Link>
+              <Link
+                href={`/contracts/new?propertyId=${property.propertyId}`}
+                className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 hover:border-primary hover:text-primary"
+              >
+                계약 등록
               </Link>
               <Link
                 href={`/properties/${property.propertyId}/edit`}

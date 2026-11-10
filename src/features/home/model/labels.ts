@@ -43,7 +43,6 @@ export const NOTIFICATION_TYPE_LABEL: Record<string, string> = {
   SUPPORT_REPLY: "지원 답변",
 };
 
-/** 알림이 가리키는 대상으로 이동할 경로. 이동할 화면이 없으면 null이다. */
 export function notificationHref(targetType: string, targetId: number | null | undefined) {
   switch (targetType) {
     case "OFFICE_REGISTRATION":
