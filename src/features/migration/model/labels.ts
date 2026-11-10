@@ -58,3 +58,31 @@ export const EDITABLE_BATCH_STATUSES: readonly string[] = ["UPLOADED", "MAPPING"
 export function isActiveSupportLink(status: string | null | undefined): boolean {
   return Boolean(status) && !ENDED_SUPPORT_STATUSES.includes(status as string);
 }
+
+export const SUPPORT_STEPS: ReadonlyArray<{ status: string; label: string }> = [
+  { status: "REQUESTED", label: "신청" },
+  { status: "QUOTED", label: "견적" },
+  { status: "ACCEPTED", label: "결제" },
+  { status: "PROCESSING", label: "처리" },
+  { status: "REVIEW", label: "검수" },
+  { status: "APPROVED", label: "승인" },
+  { status: "DELIVERED", label: "납품" },
+];
+
+export const EXPORT_STATUS: Record<string, Labeled> = {
+  PENDING: { label: "생성 중", tone: "amber" },
+  PROCESSING: { label: "생성 중", tone: "amber" },
+  COMPLETED: { label: "완료", tone: "green" },
+  FAILED: { label: "실패", tone: "red" },
+  EXPIRED: { label: "만료", tone: "gray" },
+};
+
+export const EXPORT_TABLES: ReadonlyArray<{ code: string; label: string }> = [
+  { code: "PROPERTY", label: "매물" },
+  { code: "CUSTOMER", label: "고객" },
+  { code: "CONTRACT", label: "계약" },
+  { code: "FEE", label: "수수료" },
+  { code: "PAYMENT", label: "잔금·지급" },
+  { code: "TASK", label: "업무" },
+  { code: "VISIT", label: "방문" },
+];

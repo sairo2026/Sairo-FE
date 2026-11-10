@@ -154,6 +154,9 @@ describe("역할별 화면 접근", () => {
     ["OWNER", "/import", "allow"],
     ["OWNER", "/import/301", "allow"],
     ["AGENT", "/import", "forbidden"],
+    ["OWNER", "/exports", "allow"],
+    ["AGENT", "/exports", "allow"],
+    ["DEPUTY", "/exports", "forbidden"],
     ["DEPUTY", "/import", "forbidden"],
     ["AGENT", "/customers", "allow"],
     ["DEPUTY", "/customers", "forbidden"],
@@ -207,13 +210,14 @@ describe("역할별 메뉴", () => {
       "coordinations",
       "contracts",
       "settlements",
+      "exports",
       "office",
       "import",
       "billing",
     ]);
   });
 
-  it("소속공인중개사는 여섯 개 메뉴만 본다", () => {
+  it("소속공인중개사는 여섯 개 메뉴와 데이터 내보내기를 본다", () => {
     expect(keys("AGENT")).toEqual([
       "home",
       "properties",
@@ -221,6 +225,7 @@ describe("역할별 메뉴", () => {
       "coordinations",
       "contracts",
       "settlements",
+      "exports",
     ]);
   });
 

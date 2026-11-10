@@ -27,6 +27,7 @@ const ROUTE_AREA_PREFIXES: ReadonlyArray<readonly [string, RouteArea]> = [
 const BUSINESS_ROUTE_ROLES: ReadonlyArray<readonly [string, readonly OfficeRole[]]> = [
   ["/office", ["OWNER"]],
   ["/import", ["OWNER"]],
+  ["/exports", ["OWNER", "AGENT"]],
   ["/properties", ["OWNER", "AGENT"]],
   ["/customers", ["OWNER", "AGENT"]],
   ["/contracts", ["OWNER", "AGENT"]],

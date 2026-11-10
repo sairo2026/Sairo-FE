@@ -6,6 +6,8 @@ export type MenuItem = { key: string; label: string; href: string };
 const DEPUTY_MENU_KEYS: readonly string[] = ["home", "coordinations"];
 const AGENT_MENU_KEYS: readonly string[] = OFFICE_NAV_ITEMS.map((item) => item.key);
 
+const EXPORT_ITEM: MenuItem = { key: "exports", label: "데이터 내보내기", href: "/exports" };
+
 const OWNER_EXTRA_ITEMS: readonly MenuItem[] = [
   { key: "office", label: "사무소 관리", href: "/office" },
   { key: "import", label: "데이터 이전", href: "/import" },
@@ -18,5 +20,6 @@ export function getOfficeMenu(role: OfficeRole): MenuItem[] {
   const base: MenuItem[] = OFFICE_NAV_ITEMS.filter((item) => allowedKeys.includes(item.key)).map(
     (item) => ({ key: item.key, label: item.label, href: item.href }),
   );
-  return role === "OWNER" ? [...base, ...OWNER_EXTRA_ITEMS] : base;
+  if (role === "OWNER") return [...base, EXPORT_ITEM, ...OWNER_EXTRA_ITEMS];
+  return role === "AGENT" ? [...base, EXPORT_ITEM] : base;
 }

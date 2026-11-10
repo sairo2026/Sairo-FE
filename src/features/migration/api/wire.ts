@@ -2,6 +2,7 @@ import { z } from "zod";
 import {
   ImportBatchDetailResponseSchema,
   ImportPreviewResponseSchema,
+  ImportSupportRequestDetailResponseSchema,
 } from "@/lib/api/contracts/migration.schema";
 
 const PreviewRowSchema = z.object({
@@ -68,3 +69,8 @@ export const BatchDetailWireSchema = ImportBatchDetailResponseSchema.extend({
     .nullish(),
 });
 export type ImportBatchDetail = z.infer<typeof BatchDetailWireSchema>;
+
+export const SupportDetailWireSchema = ImportSupportRequestDetailResponseSchema.extend({
+  scopeNote: z.string().nullish(),
+});
+export type ImportSupportDetail = z.infer<typeof SupportDetailWireSchema>;
