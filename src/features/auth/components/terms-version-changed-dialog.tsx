@@ -2,6 +2,7 @@
 
 import { Button } from "@/shared/components/ui/button";
 import { Modal } from "@/shared/components/ui/modal";
+import { TERMS_CHANGED_COPY } from "../model/legal-copy";
 
 export type ChangedTerm = {
   termsCode: string;
@@ -20,16 +21,13 @@ export function TermsVersionChangedDialog({
   return (
     <Modal
       isOpen
-      title="약관이 바뀌었습니다"
+      title={TERMS_CHANGED_COPY.dialogTitle}
       onClose={onConfirm}
-      footer={<Button onClick={onConfirm}>바뀐 약관 확인</Button>}
+      footer={<Button onClick={onConfirm}>{TERMS_CHANGED_COPY.confirmLabel}</Button>}
     >
       <div className="flex flex-col gap-4">
-        <p className="text-body font-semibold text-ink">아직 가입되지 않았습니다.</p>
-        <p className="text-body text-ink-2">
-          가입하는 동안 약관이 바뀌었습니다. 이름과 인증 정보는 그대로 두었고, 바뀐 항목은 체크가
-          비워져 있으니 내용을 확인한 뒤 다시 동의해 주세요.
-        </p>
+        <p className="text-body text-ink">{TERMS_CHANGED_COPY.body}</p>
+        <p className="text-caption text-ink-2">{TERMS_CHANGED_COPY.keptNotice}</p>
         <ul className="flex flex-col gap-3">
           {items.map((item) => (
             <li key={item.termsCode} className="rounded-control bg-surface p-4">

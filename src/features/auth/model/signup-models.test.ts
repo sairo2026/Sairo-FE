@@ -132,11 +132,11 @@ describe("약관 선택", () => {
 
   it("필수 항목을 앞에 두고 이메일이 없으면 마케팅을 숨긴다", () => {
     expect(visibleTerms([...items], true).map((i) => i.termsCode)).toEqual([
-      "PRIVACY",
       "TOS",
+      "PRIVACY",
       "MARKETING",
     ]);
-    expect(visibleTerms([...items], false).map((i) => i.termsCode)).toEqual(["PRIVACY", "TOS"]);
+    expect(visibleTerms([...items], false).map((i) => i.termsCode)).toEqual(["TOS", "PRIVACY"]);
   });
 
   it("필수 항목이 모두 체크돼야 통과한다", () => {

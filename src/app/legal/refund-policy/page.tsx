@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: "환불정책 | 사이로" };
 export default function Page() {
   return (
     <PublicSiteLayout footer={<PublicBusinessFooter />}>
-      <LegalDocumentScreen kind="refund" />
+      <LegalDocumentScreen slug="refund-policy" />
     </PublicSiteLayout>
   );
 }

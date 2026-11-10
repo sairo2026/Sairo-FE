@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: "개인정보처리방침 | 사이로
 export default function Page() {
   return (
     <PublicSiteLayout footer={<PublicBusinessFooter />}>
-      <LegalDocumentScreen kind="privacy" />
+      <LegalDocumentScreen slug="privacy" />
     </PublicSiteLayout>
   );
 }

@@ -56,7 +56,7 @@ export const MOCK_PUBLIC_PRICING: PublicPricing = {
     (monthlyAmount, index) => ({ members: index + 1, monthlyAmount }),
   ),
   enterprise: { quotedByInquiry: true, autoChargeBeforeApproval: false },
-  refundPolicyVersion: "2026-11-01",
+  refundPolicyVersion: "1.0",
   generalTrial: {
     freeEndMode: "DURATION",
     durationDays: 60,
@@ -84,9 +84,9 @@ export const MOCK_COMPANY_INFO: PublicCompanyInfoResponse = {
   privacyContact: "privacy@example.com",
   privacyRequestPath: "/privacy-requests",
   links: [
-    { kind: "TERMS", title: "이용약관", url: "/legal/policies/TERMS/2026-11-01" },
-    { kind: "PRIVACY", title: "개인정보처리방침", url: "/legal/policies/PRIVACY/2026-11-01" },
-    { kind: "REFUND", title: "환불정책", url: "/legal/policies/REFUND/2026-11-01" },
+    { kind: "TERMS", title: "이용약관", url: "/legal/policies/TERMS/1.0" },
+    { kind: "PRIVACY", title: "개인정보처리방침", url: "/legal/policies/PRIVACY/1.0" },
+    { kind: "REFUND", title: "환불정책", url: "/legal/policies/REFUND/1.0" },
   ],
 };
 
@@ -294,7 +294,7 @@ function plans(): BillingPlanListResponse {
 function preview(noticeId: number | null): PurchaseConsentPreviewResponse {
   const amount = noticeId ? 64900 : 59900;
   return {
-    termsVersion: "2026-11-01",
+    termsVersion: "1.0",
     plan: "TEAM",
     memberCount: 3,
     priceVersion: noticeId ? "2027-03" : "2026-11",
@@ -388,7 +388,7 @@ export const billingHandlers = [
       items: [
         {
           termsCode: "CARD_REGISTRATION",
-          version: "2026-11-01",
+          version: "1.0",
           required: true,
           title: "카드 등록 안내",
           documentUrl: "/legal/terms",

@@ -295,7 +295,9 @@ describe("ReconsentNotice", () => {
     setMockAuthContext(contextOf({ reconsentRequired: true }));
     renderWithQuery(<ReconsentNotice />);
     await waitFor(() =>
-      expect(screen.getByRole("heading", { name: "약관이 바뀌었습니다" })).not.toBeNull(),
+      expect(
+        screen.getByRole("heading", { name: "사이로 이용약관이 바뀌었습니다" }),
+      ).not.toBeNull(),
     );
     expect(screen.getByText("자동결제 안내 문구가 추가되었습니다")).not.toBeNull();
     await userEvent.click(screen.getByRole("button", { name: "동의하고 계속" }));
