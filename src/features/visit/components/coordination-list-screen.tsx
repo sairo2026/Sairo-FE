@@ -80,6 +80,12 @@ export function CoordinationListScreen() {
           >
             허용받은 매물
           </Link>
+          <Link
+            href="/coordinations/trust"
+            className="inline-flex h-14 items-center justify-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 hover:border-primary hover:text-primary"
+          >
+            신뢰 요약·받은 평가
+          </Link>
           {role === "OWNER" ? (
             <Link
               href="/coordinations/supervision"

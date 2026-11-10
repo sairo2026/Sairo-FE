@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { ApiError } from "@/shared/api/client";
 import { toErrorScreenKind } from "@/shared/api/error-kind";
@@ -24,7 +25,10 @@ import { isApiCode } from "../model/messages";
 import { ApproverConfirmed } from "./approver-confirmed";
 import { ApproverRequestList } from "./approver-requests";
 import { ConditionEditor } from "./condition-editor";
+import { portalApprovalBase } from "../api/review.api";
+import { ApproverPreferredPanel } from "./approver-preferred";
 import { ApproverPrivacyNotice } from "./approver-privacy-notice";
+import { ApproverReviewPanel } from "./approver-reviews";
 
 function LinkProblem({ error }: { error: unknown }) {
   const expired = isApiCode(error, "PUBLIC_LINK_EXPIRED");
@@ -36,6 +40,21 @@ function LinkProblem({ error }: { error: unknown }) {
         expired
           ? "링크가 만료되었습니다. 방문을 조율하는 사무소에 새 링크를 요청해 주세요."
           : "링크가 잘못되었거나 만료되었습니다. 받은 링크를 다시 확인해 주세요."
+      }
+    />
+  );
+}
+
+function SessionExpired() {
+  return (
+    <ErrorScreen
+      kind="unauthenticated"
+      title="로그인이 만료되었습니다"
+      description="번호 인증으로 다시 로그인해 주세요."
+      actions={
+        <Link href="/approver/account/login" className="font-semibold text-primary underline">
+          로그인으로 이동
+        </Link>
       }
     />
   );
@@ -53,7 +72,27 @@ function isLinkError(error: unknown): boolean {
 export function ApproverLinkScreen({ token }: { token: string | undefined }) {
   const normalized = normalizeLinkToken(token);
   const base = approverBase({ kind: "link", token: normalized ?? "" });
-  const enabled = normalized !== null;
+  return (
+    <ApproverWorkspace
+      base={base}
+      mode="link"
+      enabled={normalized !== null}
+      linkToken={normalized ?? undefined}
+    />
+  );
+}
+
+export function ApproverWorkspace({
+  base,
+  mode,
+  enabled,
+  linkToken,
+}: {
+  base: string;
+  mode: "link" | "portal";
+  enabled: boolean;
+  linkToken?: string;
+}) {
   const conditions = useApproverConditions(base, enabled);
   const requests = useApproverRequests(base, enabled);
   const confirmed = useApproverConfirmed(base, enabled);
@@ -62,8 +101,12 @@ export function ApproverLinkScreen({ token }: { token: string | undefined }) {
   if (!enabled) return <LinkProblem error={null} />;
   if (conditions.isPending || requests.isPending || confirmed.isPending) return <PageSkeleton />;
 
+  const sessionError = [conditions.error, requests.error, confirmed.error].find(
+    (error) => error instanceof ApiError && error.status === 401,
+  );
+  if (mode === "portal" && sessionError) return <SessionExpired />;
   const linkError = [conditions.error, requests.error, confirmed.error].find(isLinkError);
-  if (linkError) return <LinkProblem error={linkError} />;
+  if (mode === "link" && linkError) return <LinkProblem error={linkError} />;
 
   const readOnly = isApiCode(requests.error, "APPROVER_READ_ONLY");
   const noConditionYet = isApiCode(conditions.error, "RESOURCE_NOT_FOUND");
@@ -119,10 +162,29 @@ export function ApproverLinkScreen({ token }: { token: string | undefined }) {
         title="방문 조건과 신청"
         description="출입 가능한 시간 조건을 등록하고 들어온 방문 신청을 비교해 선택합니다."
       />
-      <FormNotice>
-        여러 매물을 한 화면에서 관리하려면 번호 인증으로 계정을 만들 수 있습니다. 선택 사항이며 이
-        링크만으로도 계속 사용할 수 있습니다.
-      </FormNotice>
+      {mode === "link" ? (
+        <FormNotice>
+          여러 매물을 한 화면에서 관리하려면 번호 인증으로 계정을 만들 수 있습니다. 선택 사항이며 이
+          링크만으로도 계속 사용할 수 있습니다.{" "}
+          <Link
+            href={
+              linkToken
+                ? `/approver/account/login?token=${encodeURIComponent(linkToken)}`
+                : "/approver/account/login"
+            }
+            className="font-semibold text-primary underline"
+          >
+            번호 인증 계정 만들기·로그인
+          </Link>
+        </FormNotice>
+      ) : (
+        <Link
+          href="/approver/account"
+          className="text-caption font-semibold text-primary underline"
+        >
+          내 매물 모아보기로 돌아가기
+        </Link>
+      )}
       <Card>
         <Tabs
           label="승인자 링크 화면"
@@ -169,10 +231,24 @@ export function ApproverLinkScreen({ token }: { token: string | undefined }) {
                 />
               ) : null,
             },
+            {
+              key: "reviews",
+              label: "방문 평가",
+              panel: <ApproverReviewPanel base={base} readOnly={readOnly} />,
+            },
+            {
+              key: "preferred",
+              label: "선호 중개사",
+              panel: <ApproverPreferredPanel base={base} readOnly={readOnly} />,
+            },
           ]}
         />
       </Card>
       <ApproverPrivacyNotice retentionDays={retentionDays} />
     </div>
   );
+}
+
+export function ApproverPortalApprovalScreen({ approvalId }: { approvalId: number }) {
+  return <ApproverWorkspace base={portalApprovalBase(approvalId)} mode="portal" enabled />;
 }
