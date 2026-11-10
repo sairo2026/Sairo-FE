@@ -2,26 +2,26 @@ import { http, HttpResponse } from "msw";
 import type { MeResponse, TermsCatalogResponse } from "@/lib/api/contracts/auth.schema";
 import { errorResponse, mockErrors } from "../error-responses";
 
-export const MOCK_TERMS_VERSION = "2026-11-01";
+export const MOCK_TERMS_VERSION = "1.0";
 
 export const MOCK_TERMS: TermsCatalogResponse["items"] = [
   {
-    termsCode: "TERMS_OF_SERVICE",
+    termsCode: "TOS",
     version: MOCK_TERMS_VERSION,
     required: true,
-    title: "서비스 이용 약관 동의",
-    documentUrl: "/legal/terms/TERMS_OF_SERVICE/2026-11-01",
-    category: "CONTRACT",
+    title: "사이로 이용약관",
+    documentUrl: "/legal/terms",
+    category: "TERMS",
     reconsentRequired: false,
     changeSummary: null,
   },
   {
-    termsCode: "PRIVACY_COLLECTION",
+    termsCode: "PRIVACY",
     version: MOCK_TERMS_VERSION,
-    required: true,
-    title: "개인정보 수집·이용 동의",
-    documentUrl: "/legal/terms/PRIVACY_COLLECTION/2026-11-01",
-    category: "SEPARATE_CONSENT",
+    required: false,
+    title: "사이로 개인정보처리방침",
+    documentUrl: "/legal/privacy",
+    category: "NOTICE",
     reconsentRequired: false,
     changeSummary: null,
   },
@@ -29,8 +29,8 @@ export const MOCK_TERMS: TermsCatalogResponse["items"] = [
     termsCode: "MARKETING",
     version: MOCK_TERMS_VERSION,
     required: false,
-    title: "마케팅 정보 수신 동의",
-    documentUrl: "/legal/terms/MARKETING/2026-11-01",
+    title: "이메일 공지·혜택 안내 수신 및 개인정보 수집·이용 동의(선택)",
+    documentUrl: "/legal/marketing",
     category: "MARKETING",
     reconsentRequired: false,
     changeSummary: null,
@@ -113,7 +113,8 @@ function findStaleTerms(agreed: AgreedTerm[] | undefined) {
       submittedVersion: item.version,
       currentVersion: state.termsVersion,
       changeSummary: "자동결제 안내 문구가 추가되었습니다",
-      documentUrl: `/legal/terms/${item.termsCode}/${state.termsVersion}`,
+      documentUrl:
+        MOCK_TERMS.find((term) => term.termsCode === item.termsCode)?.documentUrl ?? "/legal",
     }));
 }
 

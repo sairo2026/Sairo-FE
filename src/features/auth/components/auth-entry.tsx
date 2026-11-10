@@ -2,6 +2,7 @@ import Link from "next/link";
 import { BrandLogo } from "@/shared/components/ui/brand-logo";
 import { Card } from "@/shared/components/ui/card";
 import { FormAlert } from "@/shared/components/feedback/form-frame";
+import { KAKAO_LINK_NOTICE } from "../model/legal-copy";
 
 const ENTRY_ERRORS: Record<string, string> = {
   auth_failed: "카카오 로그인에 실패했습니다. 다시 시도해주세요.",
@@ -40,6 +41,7 @@ export function AuthEntry({
             >
               이메일로 계속하기
             </Link>
+            {isLogin ? null : <p className="mt-1 text-caption text-ink-2">{KAKAO_LINK_NOTICE}</p>}
           </div>
           <p className="text-caption text-ink-2">
             {isLogin ? (

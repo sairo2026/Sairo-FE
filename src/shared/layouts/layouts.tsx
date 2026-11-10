@@ -34,6 +34,7 @@ export function PublicSiteLayout({ children, footer }: LayoutProps & { footer?: 
           </Link>
           <nav aria-label="공개 메뉴" className="flex gap-5 text-caption font-semibold text-ink-2">
             <Link href="/pricing">요금 안내</Link>
+            <Link href="/legal">약관과 정책</Link>
             <Link href="/login">로그인</Link>
           </nav>
         </header>

@@ -4,6 +4,7 @@ export const AUTH_ROUTES = {
   accessNotice: "/access",
   reconsent: "/reconsent",
   account: "/account",
+  withdrawal: "/account/withdrawal",
   settings: "/settings",
   support: "/support",
   privacyRequests: "/privacy-requests",
