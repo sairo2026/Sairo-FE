@@ -15,7 +15,6 @@ export type TextAreaFieldProps = Omit<
   hint?: string;
 };
 
-/** 여러 줄 입력창. 오류와 안내는 입력창과 연결해 읽어 준다. */
 export function TextAreaField({
   label,
   value,
