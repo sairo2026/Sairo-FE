@@ -11,7 +11,7 @@ const FALLBACK_ORIGIN = "http://localhost";
  */
 export function startMockServer(): () => void {
   const origin = typeof location === "undefined" ? FALLBACK_ORIGIN : location.origin;
-  server.listen({ onUnhandledFrame: "error" });
+  server.listen({ onUnhandledRequest: "error" });
   const mockedFetch = globalThis.fetch;
   globalThis.fetch = (input, init) =>
     mockedFetch(typeof input === "string" && input.startsWith("/") ? origin + input : input, init);
