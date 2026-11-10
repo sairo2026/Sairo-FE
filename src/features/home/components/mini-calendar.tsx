@@ -14,7 +14,6 @@ function seoulToday(): { year: number; month: number; date: number } {
   };
 }
 
-/** 한 달 달력 칸. 앞쪽 빈칸은 null이다. */
 export function buildMonthCells(year: number, month: number): Array<number | null> {
   const first = new Date(Date.UTC(year, month - 1, 1)).getUTCDay();
   const last = new Date(Date.UTC(year, month, 0)).getUTCDate();

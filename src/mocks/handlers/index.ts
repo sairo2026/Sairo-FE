@@ -13,6 +13,8 @@ import { visitRequestHandlers } from "./visit-request";
 import { visitApproverHandlers } from "./visit-approver";
 import { visitReviewHandlers } from "./visit-review";
 import { workHandlers } from "./work";
+import { contractHandlers } from "./contract";
+import { contractExtraHandlers } from "./contract-extra";
 
 export const handlers = [
   ...billingHandlers,
@@ -30,4 +32,6 @@ export const handlers = [
   ...visitFollowHandlers,
   ...visitReviewHandlers,
   ...workHandlers,
+  ...contractHandlers,
+  ...contractExtraHandlers,
 ];
