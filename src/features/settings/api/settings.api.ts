@@ -6,7 +6,10 @@ import {
   TermsAgreementHistoryResponseSchema,
   TermsCatalogResponseSchema,
 } from "@/lib/api/contracts/auth.schema";
-import { OfficeDetailResponseSchema } from "@/lib/api/contracts/office.schema";
+import {
+  OfficeDetailResponseSchema,
+  OfficeMembershipListResponseSchema,
+} from "@/lib/api/contracts/office.schema";
 import { apiFetch, withQuery } from "@/shared/api/client";
 
 export function updateDisplayName(displayName: string) {
@@ -57,5 +60,38 @@ export function logoutSession() {
     method: "POST",
     schema: z.void(),
     skipAuthEvents: true,
+  });
+}
+
+const SubscriptionSummarySchema = z.object({
+  status: z.string(),
+  plan: z.string().optional(),
+  memberCount: z.number().optional(),
+});
+
+const OfficeCloseResultSchema = z.object({
+  officeId: z.number(),
+  subscriptionStatus: z.string(),
+  returnGrantId: z.number(),
+  returnExpiresAt: z.iso.datetime({ offset: true }),
+  archiveRequestStatus: z.string(),
+});
+export type OfficeCloseResult = z.infer<typeof OfficeCloseResultSchema>;
+
+export function fetchOfficeMemberships() {
+  return apiFetch("/api/offices/current/memberships", {
+    schema: OfficeMembershipListResponseSchema,
+  });
+}
+
+export function fetchSubscriptionSummary() {
+  return apiFetch("/api/subscriptions/current", { schema: SubscriptionSummarySchema });
+}
+
+export function closeOffice(request: { archiveChoice: "REQUEST" | "DECLINE" }) {
+  return apiFetch("/api/offices/current/close", {
+    method: "POST",
+    body: { confirmed: true, archiveChoice: request.archiveChoice },
+    schema: OfficeCloseResultSchema,
   });
 }

@@ -19,6 +19,10 @@ import { WITHDRAWAL_COPY, describeRetentionPeriod } from "../model/withdrawal-co
 
 const previewQueryKey = ["auth", "withdrawal-preview"] as const;
 
+function isLastOwnerError(error: unknown): boolean {
+  return error instanceof ApiError && error.code === "LAST_OWNER";
+}
+
 function describeWithdrawalError(error: unknown): string {
   if (error instanceof ApiError && error.code === "STEP_UP_REQUIRED") {
     return WITHDRAWAL_COPY.errors.stepUp;
@@ -73,7 +77,7 @@ function LastOwnerRestriction() {
         <Link href="/members/owner-transfer" className="underline">
           {WITHDRAWAL_COPY.lastOwner.transfer}
         </Link>
-        <Link href="/billing" className="underline">
+        <Link href="/office/close" className="underline">
           {WITHDRAWAL_COPY.lastOwner.close}
         </Link>
       </div>
@@ -86,6 +90,7 @@ function WithdrawalView({ preview }: { preview: WithdrawalPreviewResponse }) {
   const queryClient = useQueryClient();
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [error, setError] = useState<string>();
+  const [isBlockedByOwner, setIsBlockedByOwner] = useState(false);
 
   const mutation = useMutation({
     mutationFn: withdrawAccount,
@@ -93,7 +98,13 @@ function WithdrawalView({ preview }: { preview: WithdrawalPreviewResponse }) {
       queryClient.clear();
       router.replace("/login");
     },
-    onError: (caught) => setError(describeWithdrawalError(caught)),
+    onError: (caught) => {
+      if (isLastOwnerError(caught)) {
+        setIsBlockedByOwner(true);
+        return;
+      }
+      setError(describeWithdrawalError(caught));
+    },
   });
 
   function submit() {
@@ -122,7 +133,7 @@ function WithdrawalView({ preview }: { preview: WithdrawalPreviewResponse }) {
       <Card>
         <RetainedItemsTable items={preview.retainedItems} />
       </Card>
-      {preview.isLastOwner ? (
+      {preview.isLastOwner || isBlockedByOwner ? (
         <LastOwnerRestriction />
       ) : (
         <Card>
