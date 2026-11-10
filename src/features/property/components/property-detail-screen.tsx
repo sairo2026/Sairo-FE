@@ -378,6 +378,12 @@ function DetailBody({ property }: { property: PropertyDetailResponse }) {
                 출입승인
               </Link>
               <Link
+                href={`/properties/${property.propertyId}/cross-office`}
+                className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 hover:border-primary hover:text-primary"
+              >
+                다른 사무소 신청
+              </Link>
+              <Link
                 href={`/properties/${property.propertyId}/edit`}
                 className="inline-flex h-12 items-center rounded-control bg-primary px-6 text-body font-bold text-white hover:bg-primary-hover"
               >
