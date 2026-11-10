@@ -17,9 +17,19 @@ vi.mock("next/navigation", () => ({
 }));
 
 let stopServer: () => void;
+let originalFetch: typeof fetch;
+let sentForms: FormData[] = [];
 
 beforeAll(() => {
   stopServer = startMockServer();
+  originalFetch = globalThis.fetch;
+  globalThis.fetch = (input, init) => {
+    if (init?.body instanceof FormData) {
+      sentForms.push(init.body);
+      return originalFetch(input, { ...init, body: undefined });
+    }
+    return originalFetch(input, init);
+  };
 });
 
 afterEach(() => {
@@ -27,9 +37,13 @@ afterEach(() => {
   server.resetHandlers();
   resetMigrationState();
   push.mockClear();
+  sentForms = [];
 });
 
-afterAll(() => stopServer());
+afterAll(() => {
+  globalThis.fetch = originalFetch;
+  stopServer();
+});
 
 async function choose(user: ReturnType<typeof userEvent.setup>, file: File, type = "고객") {
   await user.selectOptions(await screen.findByLabelText("이전할 자료"), type);
@@ -80,6 +94,7 @@ describe("데이터 이전 업로드 화면", () => {
     await choose(user, new File(["a"], "list.csv", { type: "text/csv" }));
     await user.click(screen.getByRole("button", { name: "올리고 매핑하러 가기" }));
     await waitFor(() => expect(push).toHaveBeenCalledWith("/import/400"));
+    expect(sentForms[0]?.get("targetType")).toBe("CUSTOMER");
   });
 
   it("파일과 종류를 고르지 않으면 항목별 오류를 보여준다", async () => {
@@ -117,6 +132,8 @@ describe("데이터 이전 업로드 화면", () => {
     await choose(user, new File(["a"], "new.xlsx"));
     await user.click(screen.getByRole("button", { name: "올리고 매핑하러 가기" }));
     await waitFor(() => expect(push).toHaveBeenCalledWith("/import/400"));
+    const sent = sentForms[0]?.get("file");
+    expect(sent instanceof File ? sent.name : null).toBe("new.xlsx");
   });
 
   it.each([

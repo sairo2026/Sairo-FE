@@ -139,7 +139,11 @@ function BatchStatusBadge({ status }: { status: string }) {
 
 function SupportLink({ item }: { item: Item }) {
   if (item.supportRequestId === null || item.supportRequestId === undefined) {
-    return item.eligibleForSupport ? <TextLink href="/import/support">지원 신청</TextLink> : <>-</>;
+    return item.eligibleForSupport ? (
+      <TextLink href={`/import/support?batchId=${item.batchId}`}>지원 신청</TextLink>
+    ) : (
+      <>-</>
+    );
   }
   const status = item.supportRequestStatus ?? "";
   const label = SUPPORT_STATUS[status]?.label ?? status;
