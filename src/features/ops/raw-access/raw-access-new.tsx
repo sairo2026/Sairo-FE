@@ -6,9 +6,10 @@ import type { FormEvent } from "react";
 import { ApiError } from "@/shared/api/client";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
-import { RadioGroup, SelectField } from "@/shared/components/ui/select-field";
+import { Checkbox, RadioGroup, SelectField } from "@/shared/components/ui/select-field";
 import { TextAreaField } from "@/shared/components/ui/textarea-field";
 import { TextField } from "@/shared/components/ui/text-field";
+import { RAW_ACCESS_PLEDGE_COPY } from "@/shared/legal/notice-copy";
 import { OpsScreen } from "../components/common/ops-screen";
 import { describeOpsError } from "../model/ops-errors";
 import { useCreateRawAccess } from "./raw-access-api";
@@ -81,6 +82,8 @@ function RawAccessForm() {
   });
   const [errors, setErrors] = useState<Errors>({});
   const [failure, setFailure] = useState<string | null>(null);
+  const [pledges, setPledges] = useState<boolean[]>(RAW_ACCESS_PLEDGE_COPY.items.map(() => false));
+  const [pledgeError, setPledgeError] = useState<string | null>(null);
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -91,7 +94,9 @@ function RawAccessForm() {
     setFailure(null);
     const found = validate(form);
     setErrors(found);
-    if (Object.keys(found).length > 0) return;
+    const pledged = pledges.every(Boolean);
+    setPledgeError(pledged ? null : RAW_ACCESS_PLEDGE_COPY.required);
+    if (Object.keys(found).length > 0 || !pledged) return;
     try {
       const created = await create.mutateAsync({
         requestType: form.requestType,
@@ -233,6 +238,27 @@ function RawAccessForm() {
             error={errors.beneficiaryOperatorId}
             hint="선택 입력입니다. 비우면 요청자 본인이 실행합니다. 요청자와 수혜자는 이 요청을 직접 승인할 수 없습니다."
           />
+        </div>
+      </Card>
+      <Card title={RAW_ACCESS_PLEDGE_COPY.title}>
+        <div className="flex flex-col gap-3">
+          <p className="text-caption text-ink-2">{RAW_ACCESS_PLEDGE_COPY.intro}</p>
+          {RAW_ACCESS_PLEDGE_COPY.items.map((label, index) => (
+            <Checkbox
+              key={label}
+              label={label}
+              checked={pledges[index] === true}
+              onCheckedChange={(value) => {
+                setPledges((current) => current.map((item, i) => (i === index ? value : item)));
+                setPledgeError(null);
+              }}
+            />
+          ))}
+          {pledgeError ? (
+            <p role="alert" className="text-caption text-danger">
+              {pledgeError}
+            </p>
+          ) : null}
         </div>
       </Card>
       {failure ? (

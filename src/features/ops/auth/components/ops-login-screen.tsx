@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useOperatorMe } from "@/features/auth/hooks/use-auth-context";
 import { AUTH_ROUTES } from "@/features/auth/model/routes";
+import { CookieNotice } from "@/shared/legal/cookie-notice";
 import { OPS_AUTH_PATHS } from "../api/ops-auth-api";
 import { OpsNotice, OpsPublicFrame, primaryLinkClass } from "./ops-public-frame";
 
@@ -44,6 +45,7 @@ export function OpsLoginScreen({ errorCode, reason }: { errorCode?: string; reas
         <li>로그인 후 8시간이 지나면 다시 로그인해야 합니다.</li>
         <li>권한 변경 같은 중요한 처리는 최근 5분 이내 재인증을 한 번 더 요구합니다.</li>
       </ul>
+      <CookieNotice variant="ops" />
     </OpsPublicFrame>
   );
 }

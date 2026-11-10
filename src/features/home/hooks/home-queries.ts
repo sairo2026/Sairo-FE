@@ -7,7 +7,11 @@ import { getHomeSummary, listNotifications, listTasks } from "../api/home.api";
 import type { NotificationListParams, TaskListParams } from "../api/home.api";
 
 export const homeKeys = {
+  all: ["home"] as const,
   summary: ["home", "summary"] as const,
+  myMembership: ["home", "my-membership"] as const,
+  taskCustomers: ["home", "task-customers"] as const,
+  taskProperties: ["home", "task-properties"] as const,
   tasks: (params: TaskListParams) => ["home", "tasks", params] as const,
   notifications: (params: NotificationListParams) => ["home", "notifications", params] as const,
 };
@@ -33,7 +37,7 @@ export function useNotifications(params: NotificationListParams) {
 
 export function useMyMembership() {
   return useQuery({
-    queryKey: ["home", "my-membership"] as const,
+    queryKey: homeKeys.myMembership,
     queryFn: () => apiFetch("/api/memberships/me", { schema: MembershipStatusResponseSchema }),
   });
 }

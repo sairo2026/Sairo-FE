@@ -15,6 +15,9 @@ export const settingsKeys = {
   termsHistory: (params: object) => ["auth", "terms-history", params] as const,
   currentTerms: ["settings", "current-terms"] as const,
   office: ["settings", "office"] as const,
+  termsHistoryAll: ["auth", "terms-history"] as const,
+  officeMemberships: ["settings", "office-memberships"] as const,
+  subscriptionSummary: ["settings", "subscription-summary"] as const,
 };
 
 export function useLoginHistory(params: { page: number; size: number }) {

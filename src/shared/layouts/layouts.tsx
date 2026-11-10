@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { BrandLogo } from "@/shared/components/ui/brand-logo";
 import { OFFICE_NAV_ITEMS, SideNavItem } from "@/shared/components/ui/side-nav-item";
 import { ToastProvider } from "@/shared/components/ui/toast";
+import { CookieNotice } from "@/shared/legal/cookie-notice";
 
 type LayoutProps = { children: ReactNode };
 
@@ -55,6 +56,7 @@ export function ApproverLayout({ children }: LayoutProps) {
         <main className="mx-auto w-full max-w-lg px-4 py-10 sm:px-6">
           <BrandLogo className="mb-6 w-28" />
           {children}
+          <CookieNotice variant="approver" className="mt-8" />
         </main>
       </div>
     </ToastProvider>

@@ -33,6 +33,7 @@ import {
 } from "../model/form";
 import type { ContractFormValues } from "../model/form";
 import { describeContractError } from "../model/messages";
+import { CONTRACT_ENTRY_COPY } from "@/shared/legal/notice-copy";
 import { ContractFields } from "./contract-fields";
 
 function FormBody({
@@ -50,7 +51,7 @@ function FormBody({
     contract?.propertyId ?? (pickedProperty === "" ? null : Number(pickedProperty));
   const property = useContractProperty(targetPropertyId);
   const properties = useQuery({
-    queryKey: ["contract", "properties"],
+    queryKey: contractKeys.propertyOptions,
     queryFn: () => listProperties({ page: 0, size: 100 }),
     enabled: propertyId === null && contract === null,
   });
@@ -140,6 +141,7 @@ function FormBody({
         title={contract ? "계약 초안 수정" : "계약 등록"}
         description="초안으로 임시 저장하거나 필수값을 모두 채워 체결 등록합니다."
       />
+      <FormNotice>{CONTRACT_ENTRY_COPY.parties}</FormNotice>
       {formError ? <FormAlert>{formError}</FormAlert> : null}
       <section className="flex flex-col gap-3 rounded-card-flat border border-line px-5 py-4">
         <h2 className="text-body font-semibold text-ink">매물</h2>

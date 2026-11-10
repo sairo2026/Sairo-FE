@@ -8,7 +8,7 @@ export function proxy(request: NextRequest) {
   }
 
   const { pathname } = request.nextUrl;
-  if (isGateOpenPath(pathname, request.method)) {
+  if (isGateOpenPath(pathname, request.method, process.env)) {
     return NextResponse.next();
   }
   if (pathname === "/api" || pathname.startsWith("/api/")) {

@@ -14,6 +14,7 @@ export const migrationKeys = {
   sheets: (batchId: number) => ["migration", "sheets", batchId] as const,
   batch: (batchId: number) => ["migration", "batch", batchId] as const,
   suggestion: (batchId: number) => ["migration", "suggestion", batchId] as const,
+  previewAll: (batchId: number) => ["migration", "preview", batchId] as const,
   preview: (batchId: number, params: PageParams) =>
     ["migration", "preview", batchId, params] as const,
 };

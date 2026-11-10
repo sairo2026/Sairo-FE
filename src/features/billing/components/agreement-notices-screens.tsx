@@ -127,12 +127,12 @@ function NoticeCard({ notice }: { notice: Notice }) {
     onSuccess: async () => {
       setConfirming(false);
       setError(undefined);
-      await queryClient.invalidateQueries({ queryKey: ["billing"] });
+      await queryClient.invalidateQueries({ queryKey: billingKeys.all });
     },
     onError: async (caught) => {
       setConfirming(false);
       setError(describeBillingError(caught, "거절하지 못했습니다. 잠시 뒤에 다시 시도해 주세요."));
-      await queryClient.invalidateQueries({ queryKey: ["billing", "notices"] });
+      await queryClient.invalidateQueries({ queryKey: billingKeys.noticesAll });
     },
   });
   const isIncrease = notice.changeKind === "INCREASE";

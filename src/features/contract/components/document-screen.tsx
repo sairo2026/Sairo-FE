@@ -3,6 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import type { ContractDetailResponse } from "@/lib/api/contracts/contract.schema";
+import { CONTRACT_ENTRY_COPY } from "@/shared/legal/notice-copy";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
@@ -266,6 +267,7 @@ function DocumentBody({ detail }: { detail: ContractDetailResponse }) {
         거래계약서와 중개대상물 확인·설명서를 따로 올립니다. 보존기간은 거래계약서 5년, 확인·설명서
         3년이며 작성일과 교부일 중 늦은 날을 기준으로 계산합니다.
       </FormNotice>
+      <FormNotice>{CONTRACT_ENTRY_COPY.documents}</FormNotice>
       {isDraft ? (
         <FormNotice>초안 계약에는 서류를 올릴 수 없습니다. 체결 뒤 올려 주세요.</FormNotice>
       ) : missing.length > 0 ? (

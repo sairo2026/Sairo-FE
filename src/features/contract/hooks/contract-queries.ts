@@ -19,6 +19,9 @@ export const contractKeys = {
   history: (contractId: number, page: number, size: number) =>
     ["contract", "history", contractId, page, size] as const,
   property: (propertyId: number) => ["contract", "property", propertyId] as const,
+  duplicateCandidates: ["contract", "duplicate-candidates"] as const,
+  customerOptions: ["contract", "customers"] as const,
+  propertyOptions: ["contract", "properties"] as const,
 };
 
 export function useContractList(params: ContractListParams) {

@@ -77,8 +77,6 @@ export const SUPPORT_COPY = {
   migrationNeeded: "기존 자료 이전 지원이 필요합니다.",
   enterpriseContent: "문의 내용",
   privacyNoticeLabel: "개인정보 수집·이용 안내를 확인했습니다.",
-  privacyNotice:
-    "도입 상담을 위해 회사명, 담당자 이름, 연락처, 이메일을 수집해 견적과 상담에만 사용하며 문의 처리가 끝난 뒤 개인정보처리방침에 따라 보관하고 파기합니다.",
   privacyNoticeRequired: "개인정보 수집·이용 안내를 확인해 주세요.",
   emailInvalid: "이메일 형식이 올바르지 않습니다.",
   positiveNumber: "1 이상의 숫자를 입력해 주세요.",

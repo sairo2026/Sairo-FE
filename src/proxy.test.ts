@@ -73,3 +73,33 @@ describe("출시 준비 프록시", () => {
     expect(response.headers.get("x-middleware-next")).toBe("1");
   });
 });
+
+describe("심사 모드 프록시", () => {
+  it("심사 모드에서는 결제 흐름 경로와 API를 연다", () => {
+    vi.stubEnv("COMING_SOON", "true");
+    vi.stubEnv("REVIEW_MODE", "true");
+    const page = proxy(new NextRequest("https://app.sairo.agency/billing/card"));
+    expect(page.headers.get("x-middleware-rewrite")).toBeNull();
+    const api = proxy(
+      new NextRequest("https://app.sairo.agency/api/auth/login", { method: "POST" }),
+    );
+    expect(api.status).not.toBe(503);
+  });
+
+  it("심사 모드에서도 업무 화면은 안내 페이지로 연결한다", () => {
+    vi.stubEnv("COMING_SOON", "true");
+    vi.stubEnv("REVIEW_MODE", "true");
+    const response = proxy(new NextRequest("https://app.sairo.agency/properties"));
+    expect(response.headers.get("x-middleware-rewrite")).toBe(
+      "https://app.sairo.agency/coming-soon",
+    );
+  });
+
+  it("심사 모드 변수가 없으면 결제 흐름 경로를 막는다", () => {
+    vi.stubEnv("COMING_SOON", "true");
+    const response = proxy(new NextRequest("https://app.sairo.agency/billing/card"));
+    expect(response.headers.get("x-middleware-rewrite")).toBe(
+      "https://app.sairo.agency/coming-soon",
+    );
+  });
+});

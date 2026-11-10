@@ -68,7 +68,7 @@ function MappingForm({
       setError(undefined);
       setMessage(IMPORT_COPY.mappingSaved);
       await queryClient.invalidateQueries({ queryKey: migrationKeys.batch(batchId) });
-      await queryClient.invalidateQueries({ queryKey: ["migration", "preview", batchId] });
+      await queryClient.invalidateQueries({ queryKey: migrationKeys.previewAll(batchId) });
     },
     onError: (caught) => {
       setMessage(undefined);

@@ -66,10 +66,15 @@ export function formatTimeSlot(value: string | Date): string {
   return `${p.month}월 ${p.day}일 ${period} ${hour12}:${p.minute}`;
 }
 
+/** 개수와 수량은 천 단위 쉼표를 붙인 숫자로 표시한다. */
+export function formatCount(value: number): string {
+  return value.toLocaleString("ko-KR");
+}
+
 /** 금액은 원 단위 정수에 천 단위 쉼표를 붙인다. 미확인(null)은 "미확인"으로 표시한다. */
 export function formatKrw(amount: number | null | undefined): string {
   if (amount === null || amount === undefined || !Number.isFinite(amount)) return "미확인";
-  return `${Math.trunc(amount).toLocaleString("ko-KR")}원`;
+  return `${formatCount(Math.trunc(amount))}원`;
 }
 
 /** 면적은 ㎡ 단위 소수 둘째 자리까지 표시한다. */
