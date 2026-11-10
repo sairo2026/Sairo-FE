@@ -117,9 +117,11 @@ export function putFieldValue(
   propertyId: number,
   fieldDefinitionId: number,
   value: string | number | boolean | null,
+  version: number,
 ) {
   return apiFetch(`/api/properties/${propertyId}/fields/${fieldDefinitionId}`, {
     method: "PUT",
+    headers: ifMatch(version),
     body: { value },
     schema: PropertyFieldValueResponseSchema,
   });
@@ -137,9 +139,11 @@ export function updatePhoto(
   propertyId: number,
   photoId: number,
   request: PropertyPhotoUpdateRequest,
+  version: number,
 ) {
   return apiFetch(`/api/properties/${propertyId}/photos/${photoId}`, {
     method: "PATCH",
+    headers: ifMatch(version),
     body: request,
     schema: PropertyPhotoUpdateResponseSchema,
   });

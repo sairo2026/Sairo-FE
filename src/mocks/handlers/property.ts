@@ -19,7 +19,6 @@ export type PropertyMockState = {
   categories: CategoryItem[];
   fields: Record<number, FieldItem[]>;
   properties: PropertyDetailResponse[];
-  offerVersions: Record<number, number>;
   nextId: number;
 };
 
@@ -172,7 +171,6 @@ function initialState(): PropertyMockState {
         occupancyStatus: "UNKNOWN",
       }),
     ],
-    offerVersions: { 701: 1 },
     nextId: 900,
   };
 }
@@ -260,9 +258,18 @@ function bumped(property: PropertyDetailResponse, changes: Partial<PropertyDetai
   });
 }
 
-function matchVersion(request: Request, version: number): boolean {
+type VersionCheck = "ok" | "missing" | "conflict";
+
+function checkVersion(request: Request, version: number): VersionCheck {
   const header = request.headers.get("If-Match");
-  return header === null || Number(header) === version;
+  if (header === null || header.trim() === "" || Number.isNaN(Number(header))) return "missing";
+  return Number(header) === version ? "ok" : "conflict";
+}
+
+function versionFailure(check: VersionCheck, version: number) {
+  if (check === "missing")
+    return mockErrors.validation([{ field: "If-Match", message: "매물 버전이 필요합니다." }]);
+  return mockErrors.versionConflict(version);
 }
 
 function categoryOf(id: number) {
@@ -360,8 +367,8 @@ export const propertyHandlers = [
     const property = findProperty(params.propertyId);
     if (!property) return mockErrors.notFound();
     if (property.deletedAt) return errorResponse(409, "PROPERTY_ARCHIVED", "보관된 매물입니다.");
-    if (!matchVersion(request, property.version))
-      return mockErrors.versionConflict(property.version);
+    const check = checkVersion(request, property.version);
+    if (check !== "ok") return versionFailure(check, property.version);
     const { categoryId } = (await request.json()) as { categoryId: number };
     const category = categoryOf(categoryId);
     if (!category) return mockErrors.notFound();
@@ -386,8 +393,8 @@ export const propertyHandlers = [
     const property = findProperty(params.propertyId);
     if (!property) return mockErrors.notFound();
     if (property.deletedAt) return errorResponse(409, "PROPERTY_ARCHIVED", "보관된 매물입니다.");
-    if (!matchVersion(request, property.version))
-      return mockErrors.versionConflict(property.version);
+    const check = checkVersion(request, property.version);
+    if (check !== "ok") return versionFailure(check, property.version);
     const body = (await request.json()) as Partial<PropertyDetailResponse>;
     if (body.registrationStage === "ACTIVE") {
       const address = body.address ?? property.address;
@@ -437,6 +444,8 @@ export const propertyHandlers = [
     );
     if (!definition) return mockErrors.notFound();
     if (!definition.active) return errorResponse(409, "FIELD_INACTIVE", "보관된 입력 항목입니다.");
+    const check = checkVersion(request, property.version);
+    if (check !== "ok") return versionFailure(check, property.version);
     const { value } = (await request.json()) as { value: string | number | boolean | null };
     const others = property.customFields.filter((item) => item.fieldDefinitionId !== fieldId);
     const customFields =
@@ -451,13 +460,13 @@ export const propertyHandlers = [
               value,
             },
           ];
-    bumped(property, { customFields });
+    const next = bumped(property, { customFields });
     return HttpResponse.json({
       fieldDefinitionId: fieldId,
       value,
       officeId: 12,
       updatedAt: NOW,
-      version: 1,
+      version: next.version,
     });
   }),
 
@@ -478,9 +487,9 @@ export const propertyHandlers = [
       url: `https://storage.example.com/signed/photo-${photoId}.jpg`,
       urlExpiresAt: "2026-11-10T09:10:00+09:00",
     };
-    bumped(property, { photos: [...property.photos, photo] });
+    const next = bumped(property, { photos: [...property.photos, photo] });
     return HttpResponse.json(
-      { ...photo, officeId: 12, updatedAt: NOW, version: 1 },
+      { ...photo, officeId: 12, updatedAt: NOW, version: next.version },
       { status: 201 },
     );
   }),
@@ -489,12 +498,14 @@ export const propertyHandlers = [
     const property = findProperty(params.propertyId);
     const photo = property?.photos.find((item) => String(item.photoId) === params.photoId);
     if (!property || !photo) return mockErrors.notFound();
+    const check = checkVersion(request, property.version);
+    if (check !== "ok") return versionFailure(check, property.version);
     const body = (await request.json()) as { description?: string | null; sortOrder?: number };
     const updated = { ...photo, ...body };
-    bumped(property, {
+    const next = bumped(property, {
       photos: property.photos.map((item) => (item === photo ? updated : item)),
     });
-    return HttpResponse.json({ ...updated, officeId: 12, updatedAt: NOW, version: 2 });
+    return HttpResponse.json({ ...updated, officeId: 12, updatedAt: NOW, version: next.version });
   }),
 
   http.delete("/api/properties/:propertyId/photos/:photoId", ({ params }) => {
@@ -513,7 +524,7 @@ export const propertyHandlers = [
       items: property.offers.map((offer) => ({
         ...offer,
         officeId: 12,
-        version: state.offerVersions[offer.offerId] ?? 1,
+        version: property.version,
       })),
     });
   }),
@@ -540,10 +551,9 @@ export const propertyHandlers = [
       monthlyRentAmount: body.monthlyRentAmount ?? null,
       premiumAmount: body.premiumAmount ?? null,
     };
-    state.offerVersions[offerId] = 1;
-    bumped(property, { offers: [...property.offers, offer] });
+    const next = bumped(property, { offers: [...property.offers, offer] });
     return HttpResponse.json(
-      { ...offer, officeId: 12, updatedAt: NOW, version: 1 },
+      { ...offer, officeId: 12, updatedAt: NOW, version: next.version },
       { status: 201 },
     );
   }),
@@ -553,16 +563,17 @@ export const propertyHandlers = [
     const offer = property?.offers.find((item) => String(item.offerId) === params.offerId);
     if (!property || !offer) return mockErrors.notFound();
     if (property.deletedAt) return errorResponse(409, "PROPERTY_ARCHIVED", "보관된 매물입니다.");
-    const version = state.offerVersions[offer.offerId] ?? 1;
-    if (!matchVersion(request, version)) return mockErrors.versionConflict(version);
+    const check = checkVersion(request, property.version);
+    if (check !== "ok") return versionFailure(check, property.version);
     const body = (await request.json()) as Partial<OfferItem>;
     if (offer.status === "COMPLETED" || offer.status === "WITHDRAWN") {
       return errorResponse(409, "INVALID_TRANSITION", "종료된 제안은 바꿀 수 없습니다.");
     }
     const updated = { ...offer, ...body } as PropertyDetailResponse["offers"][number];
-    state.offerVersions[offer.offerId] = version + 1;
-    bumped(property, { offers: property.offers.map((item) => (item === offer ? updated : item)) });
-    return HttpResponse.json({ ...updated, officeId: 12, updatedAt: NOW, version: version + 1 });
+    const next = bumped(property, {
+      offers: property.offers.map((item) => (item === offer ? updated : item)),
+    });
+    return HttpResponse.json({ ...updated, officeId: 12, updatedAt: NOW, version: next.version });
   }),
 
   http.get("/api/property-categories", () => HttpResponse.json({ items: state.categories })),
