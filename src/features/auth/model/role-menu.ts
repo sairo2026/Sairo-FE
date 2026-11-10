@@ -8,6 +8,7 @@ const AGENT_MENU_KEYS: readonly string[] = OFFICE_NAV_ITEMS.map((item) => item.k
 
 const OWNER_EXTRA_ITEMS: readonly MenuItem[] = [
   { key: "office", label: "사무소 관리", href: "/office" },
+  { key: "import", label: "데이터 이전", href: "/import" },
   { key: "billing", label: "구독·결제", href: "/billing" },
 ];
 
