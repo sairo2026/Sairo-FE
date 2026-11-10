@@ -8,6 +8,7 @@ import {
   listRevisions,
   listStatusHistory,
 } from "../api/contract.api";
+import { listFees, listFollowups, listSchedules } from "../api/contract-extra.api";
 import type { ContractListParams } from "../api/contract.api";
 
 export const contractKeys = {
@@ -52,5 +53,32 @@ export function useContractProperty(propertyId: number | null) {
     queryKey: contractKeys.property(propertyId ?? 0),
     queryFn: () => fetchProperty(propertyId ?? 0),
     enabled: propertyId !== null,
+  });
+}
+
+export const contractExtraKeys = {
+  fees: (contractId: number) => ["contract", "fees", contractId] as const,
+  schedules: (contractId: number) => ["contract", "schedules", contractId] as const,
+  followups: (contractId: number) => ["contract", "followups", contractId] as const,
+};
+
+export function useFees(contractId: number) {
+  return useQuery({
+    queryKey: contractExtraKeys.fees(contractId),
+    queryFn: () => listFees(contractId),
+  });
+}
+
+export function useSchedules(contractId: number) {
+  return useQuery({
+    queryKey: contractExtraKeys.schedules(contractId),
+    queryFn: () => listSchedules(contractId),
+  });
+}
+
+export function useFollowups(contractId: number) {
+  return useQuery({
+    queryKey: contractExtraKeys.followups(contractId),
+    queryFn: () => listFollowups(contractId),
   });
 }

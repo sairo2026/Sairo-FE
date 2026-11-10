@@ -108,3 +108,31 @@ describe("계약 입력 모델", () => {
     expect(partyText(null, 0)).toBe("-");
   });
 });
+
+describe("서류 업로드 폼", () => {
+  it("계약 버전과 확인 값을 멀티파트 필드로 담고 비어 있는 날짜는 보내지 않는다", async () => {
+    const { toDocumentForm } = await import("./document");
+    const file = new File(["x"], "계약서.pdf", { type: "application/pdf" });
+    const form = toDocumentForm(
+      {
+        documentType: "SALES_CONTRACT",
+        writtenDate: "2026-10-01",
+        deliveredDate: "",
+        datePendingReason: " 교부일 확인 중 ",
+        piiReviewed: true,
+        piiMaskingConfirmed: false,
+      },
+      file,
+      77,
+      true,
+    );
+    expect(form.get("contractRevisionId")).toBe("77");
+    expect(form.get("documentType")).toBe("SALES_CONTRACT");
+    expect(form.get("writtenDate")).toBe("2026-10-01");
+    expect(form.has("deliveredDate")).toBe(false);
+    expect(form.get("datePendingReason")).toBe("교부일 확인 중");
+    expect(form.get("piiReviewed")).toBe("true");
+    expect(form.get("piiMaskingConfirmed")).toBe("false");
+    expect((form.get("file") as File).name).toBe("계약서.pdf");
+  });
+});

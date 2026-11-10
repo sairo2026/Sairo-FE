@@ -15,6 +15,9 @@ const MESSAGE_BY_CODE: Record<string, string> = {
     "지금 상태에서는 처리할 수 없습니다. 화면을 새로 고쳐 현재 상태를 확인해 주세요.",
   PROPERTY_ARCHIVED:
     "보관된 매물에는 계약을 등록할 수 없습니다. 매물을 복원한 뒤 다시 시도해 주세요.",
+  DOCUMENT_VERSION_CONFLICT:
+    "같은 서류 종류와 버전이 이미 있습니다. 화면을 새로 고쳐 최신 서류 목록을 확인해 주세요.",
+  FEE_AMOUNT_MISMATCH: "합계가 공급가액과 세액의 합과 다릅니다.",
   SENSITIVE_DATA_DETECTED:
     "주민등록번호나 전체 계좌번호는 입력할 수 없습니다. 해당 내용을 지워 주세요.",
   VERSION_CONFLICT: "다른 사용자가 먼저 수정했습니다. 최신 내용을 불러온 뒤 다시 시도해 주세요.",
