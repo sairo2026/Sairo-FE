@@ -300,3 +300,28 @@ describe("구독·결제 영역 선택", () => {
     expect(names).toEqual(["PublicCompanyInfoResponse"]);
   });
 });
+
+describe("방문 조율 영역 선택", () => {
+  const SPEC = `### 27.1 DTO 색인
+
+| DTO | 종류 | 연결 API | 필드 표 위치 |
+| --- | --- | --- | --- |
+| \`VisitCoordinationListResponse\` | 응답 | \`GET /api/visit-coordinations\` | 12장 절 |
+| \`AccessApprovalResponse\` | 응답 | \`POST /api/properties/{propertyId}/access-approvals\` | 12장 절 |
+| \`ApplyGrantResponse\` | 응답 | \`POST /api/properties/{propertyId}/access-approvals/{approvalId}/apply-grants\` | 12장 절 |
+| \`ApproverSessionResponse\` | 응답 | \`POST /api/public/approver-auth/verify\` | 12장 절 |
+| \`ReturnVisitResultRequest\` | 요청 | \`POST /api/return-grants/{grantId}/visit-coordinations/{coordinationId}/result\` | 12장 절 |
+| \`PropertyListResponse\` | 응답 | \`GET /api/properties\` | 7장 절 |
+| \`CustomerListResponse\` | 응답 | \`GET /api/customers\` | 10장 절 |
+`;
+
+  it("방문 조율·출입승인·신청 허용·승인자 계정 경로만 방문 영역에 넣는다", () => {
+    const visit = selectAreaDtos(parseSpec(SPEC), "visit").map((dto) => dto.name);
+    expect(visit).toEqual([
+      "VisitCoordinationListResponse",
+      "AccessApprovalResponse",
+      "ApplyGrantResponse",
+      "ApproverSessionResponse",
+    ]);
+  });
+});

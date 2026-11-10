@@ -35,6 +35,23 @@ const BILLING_PATH_PREFIXES = [
   "/api/archive-grants",
 ];
 
+const VISIT_PATH_PREFIXES = [
+  "/api/visit-",
+  "/api/public/customer-visit-links",
+  "/api/public/approver-",
+  "/api/approver-portal",
+  "/api/apply-grants",
+  "/api/public/privacy-intakes",
+];
+
+const VISIT_PATH_SEGMENTS = [
+  "/access-approvals",
+  "/apply-grants",
+  "/cross-office-",
+  "/approver-property-link",
+  "/approver-conditions",
+];
+
 const PUBLIC_SITE_DTO_NAMES = ["PublicCompanyInfoResponse"];
 
 const CUSTOMER_PATH_PREFIXES = [
@@ -103,6 +120,18 @@ function isCustomerDto(dto) {
   return dto.apis.length > 0 && dto.apis.every((api) => isCustomerApi(api.path));
 }
 
+function isVisitApi(path) {
+  if (path.startsWith("/api/return-grants")) return false;
+  return (
+    startsWithAny(path, VISIT_PATH_PREFIXES) ||
+    VISIT_PATH_SEGMENTS.some((segment) => path.includes(segment))
+  );
+}
+
+function isVisitDto(dto) {
+  return dto.apis.length > 0 && dto.apis.every((api) => isVisitApi(api.path));
+}
+
 export const AREAS = {
   common: {
     description: "접근 상태와 세션 응답",
@@ -127,6 +156,10 @@ export const AREAS = {
   billing: {
     description: "요금·구독·결제·환불·인증 중단·반환·보관 권한 도메인",
     select: (dto) => !COMMON_DTO_NAMES.includes(dto.name) && isBillingDto(dto),
+  },
+  visit: {
+    description: "방문 조율·출입승인·승인자 조건·방문 신청·평가·신청 허용·승인자 계정 도메인",
+    select: (dto) => !COMMON_DTO_NAMES.includes(dto.name) && isVisitDto(dto),
   },
   "public-site": {
     description: "공개 사이트 하단 사업자 정보",

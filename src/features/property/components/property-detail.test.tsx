@@ -55,6 +55,12 @@ describe("매물 상세", () => {
     expect(screen.getByText(/2027-03-31 · 계약/)).not.toBeNull();
   });
 
+  it("출입승인 화면으로 가는 링크를 보여준다", async () => {
+    renderOffice(<PropertyDetailScreen propertyId={501} />, { role: "OWNER" });
+    const link = await screen.findByRole("link", { name: "출입승인" });
+    expect(link.getAttribute("href")).toBe("/properties/501/access-approvals");
+  });
+
   it("없는 매물이면 찾을 수 없음 화면을 보여준다", async () => {
     renderOffice(<PropertyDetailScreen propertyId={9999} />, { role: "OWNER" });
     expect(await screen.findByText("페이지를 찾을 수 없습니다")).not.toBeNull();
