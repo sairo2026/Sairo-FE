@@ -35,6 +35,7 @@ import {
   PROCESSING_BASIS_LABEL,
   isCustomerRole,
 } from "../model/labels";
+import { CUSTOMER_COLLECTION_COPY } from "../model/legal-copy";
 import { describeCustomerError, fieldErrorMap, isApiCode } from "../model/messages";
 
 type DuplicateItem = {
@@ -328,6 +329,7 @@ export function CustomerForm(props: FormProps) {
           onValueChange={(value) => setField("memo", value)}
           error={errors.memo}
         />
+        <p className="-mt-3 text-caption text-ink-2">{CUSTOMER_COLLECTION_COPY.memoGuide}</p>
       </Section>
 
       <Section title="개인정보 수집 안내">
@@ -338,7 +340,7 @@ export function CustomerForm(props: FormProps) {
           label="수집 경로"
           required
           value={values.dataSource}
-          hint="예: 방문 상담, 전화 문의, 소개"
+          hint={CUSTOMER_COLLECTION_COPY.sourceHint}
           onValueChange={(value) => setField("dataSource", value)}
           error={errors.dataSource}
         />
@@ -354,9 +356,7 @@ export function CustomerForm(props: FormProps) {
           onValueChange={(value) => setField("processingBasis", value)}
           error={errors.processingBasis}
         />
-        <p className="-mt-3 text-caption text-ink-2">
-          처리 근거 선택지는 변호사 검토 전 초안이며 법적 효력과 적합성은 검토 뒤 확정됩니다.
-        </p>
+        <p className="-mt-3 text-caption text-ink-2">{CUSTOMER_COLLECTION_COPY.basisHint}</p>
         <TextField
           label="수집 목적"
           required
@@ -372,6 +372,7 @@ export function CustomerForm(props: FormProps) {
           onValueChange={(value) => setField("retentionUntil", value)}
           error={errors.retentionUntil}
         />
+        <p className="-mt-3 text-caption text-ink-2">{CUSTOMER_COLLECTION_COPY.retentionHint}</p>
       </Section>
 
       <div className="flex flex-wrap gap-3">

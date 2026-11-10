@@ -6,6 +6,7 @@ import type {
 import { countCodePoints, TEXT_LIMITS } from "@/shared/lib/format";
 import { objectParticle, topicParticle } from "@/shared/lib/korean";
 import { PROCESSING_BASES } from "./labels";
+import { CUSTOMER_COLLECTION_COPY } from "./legal-copy";
 
 export type CustomerFormValues = {
   isCorporation: boolean;
@@ -108,14 +109,15 @@ export function validateCustomerForm(
   else errors.dataSource = lengthError("수집 경로", source, SOURCE_MAX);
   const basis = values.processingBasis;
   if (basis === "") {
-    if (options.isCreate) errors.processingBasis = "처리 근거를 선택해 주세요.";
+    if (options.isCreate) errors.processingBasis = CUSTOMER_COLLECTION_COPY.basisMissing;
   } else if (!(PROCESSING_BASES as readonly string[]).includes(basis)) {
-    errors.processingBasis = "처리 근거를 선택해 주세요.";
+    errors.processingBasis = CUSTOMER_COLLECTION_COPY.basisMissing;
   }
   const purpose = values.dataPurpose.trim();
   if (purpose === "") errors.dataPurpose = `${objectParticle("수집 목적")} 입력해 주세요.`;
   else errors.dataPurpose = lengthError("수집 목적", purpose, PURPOSE_MAX);
-  if (values.retentionUntil === "") errors.retentionUntil = "보유 기한을 입력해 주세요.";
+  if (values.retentionUntil === "")
+    errors.retentionUntil = CUSTOMER_COLLECTION_COPY.retentionMissing;
   return Object.fromEntries(
     Object.entries(errors).filter(([, message]) => message !== undefined),
   ) as CustomerFormErrors;
