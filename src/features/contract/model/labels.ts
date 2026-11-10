@@ -1,0 +1,97 @@
+import type { BadgeTone } from "@/shared/components/ui/badge";
+
+export const DEAL_TYPES = ["SALE", "JEONSE", "MONTHLY"] as const;
+export type DealType = (typeof DEAL_TYPES)[number];
+
+export const DEAL_TYPE_LABEL: Record<string, string> = {
+  SALE: "매매",
+  JEONSE: "전세",
+  MONTHLY: "월세",
+};
+
+export function isLease(dealType: string): boolean {
+  return dealType === "JEONSE" || dealType === "MONTHLY";
+}
+
+export const CONTRACT_STATUS_LABEL: Record<string, string> = {
+  DRAFT: "초안",
+  SIGNED: "체결",
+  ENDED: "종료",
+  TERMINATED: "해제",
+  CANCELLED: "취소",
+  VOID: "무효",
+};
+
+export const CONTRACT_STATUS_TONE: Record<string, BadgeTone> = {
+  DRAFT: "gray",
+  SIGNED: "green",
+  ENDED: "blue",
+  TERMINATED: "amber",
+  CANCELLED: "gray",
+  VOID: "red",
+};
+
+export const LEASE_STATUS_LABEL: Record<string, string> = {
+  BEFORE_START: "시작 전",
+  IN_PROGRESS: "기간 중",
+  MATURITY_CONFIRMATION_NEEDED: "만기 도래·확인 필요",
+};
+
+export const LEASE_STATUS_TONE: Record<string, BadgeTone> = {
+  BEFORE_START: "gray",
+  IN_PROGRESS: "teal",
+  MATURITY_CONFIRMATION_NEEDED: "red",
+};
+
+export const SETTLEMENT_STATUS_LABEL: Record<string, string> = {
+  UNDECIDED: "미정",
+  SCHEDULED: "예정",
+  PARTIAL: "일부 지급",
+  COMPLETE: "완료",
+  NONE: "지급 없음",
+};
+
+export const SETTLEMENT_STATUS_TONE: Record<string, BadgeTone> = {
+  UNDECIDED: "gray",
+  SCHEDULED: "blue",
+  PARTIAL: "amber",
+  COMPLETE: "green",
+  NONE: "gray",
+};
+
+export const TRACK_LABEL: Record<string, string> = {
+  CONTRACT: "계약 상태",
+  LEASE_PERIOD: "임대기간",
+  SETTLEMENT: "잔금 상태",
+};
+
+export function statusLabelFor(track: string, status: string | null | undefined): string {
+  if (!status) return "-";
+  const table =
+    track === "CONTRACT"
+      ? CONTRACT_STATUS_LABEL
+      : track === "LEASE_PERIOD"
+        ? LEASE_STATUS_LABEL
+        : SETTLEMENT_STATUS_LABEL;
+  return table[status] ?? status;
+}
+
+export const DOCUMENT_TYPE_LABEL: Record<string, string> = {
+  SALES_CONTRACT: "거래계약서",
+  DISCLOSURE_STATEMENT: "중개대상물 확인·설명서",
+};
+
+export const REVISION_TYPE_LABEL: Record<string, string> = {
+  SIGNED: "체결",
+  CORRECTED: "정정",
+};
+
+export function labelOf(table: Record<string, string>, key: string | null | undefined): string {
+  if (!key) return "-";
+  return table[key] ?? key;
+}
+
+export function partyText(name: string | null | undefined, count: number): string {
+  if (!name) return "-";
+  return count > 1 ? `${name} 외 ${count - 1}명` : name;
+}

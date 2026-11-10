@@ -228,7 +228,6 @@ const CONTRACT_METRICS = [
   "overcollectedAmount",
 ];
 
-/** 항목 한 줄에서 알맞은 상세 화면 경로를 고른다. 이동할 곳이 없으면 null이다. */
 export function detailRowHref(metric: string, row: Record<string, unknown>): string | null {
   const id = (key: string): number | null => {
     const value = row[key];
