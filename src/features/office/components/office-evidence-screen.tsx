@@ -15,6 +15,7 @@ import { describeOfficeError, fieldErrorMap, isApiCode } from "../model/messages
 import { missingEvidence, requiredEvidenceTypes, validateEvidenceFile } from "../model/validation";
 import type { EntityType } from "../model/validation";
 import { ButtonRow, FlowFrame, MutedNote, TextLink } from "@/shared/components/feedback/page-parts";
+import { EVIDENCE_NOTICE_COPY } from "../model/legal-copy";
 
 function formatSize(bytes: number): string {
   if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
@@ -185,7 +186,7 @@ export function OfficeEvidenceScreen({
   return (
     <FlowFrame
       title="신규 사무소 등록을 위한 증빙 자료를 업로드해 주십시오."
-      description="이미지 또는 PDF 한 장당 최대 10MB까지 올릴 수 있습니다. 주민등록번호 뒷자리는 가려서 올려 주세요."
+      description="PDF, JPG, PNG 파일을 한 장당 최대 10MB까지 올릴 수 있습니다."
     >
       <form
         noValidate
@@ -195,6 +196,8 @@ export function OfficeEvidenceScreen({
           submit();
         }}
       >
+        <MutedNote>{EVIDENCE_NOTICE_COPY.masking}</MutedNote>
+        <MutedNote>{EVIDENCE_NOTICE_COPY.retention}</MutedNote>
         {warning === "DUPLICATE_BUSINESS_NUMBER" ? (
           <FormNotice>
             같은 사업자등록번호의 사무소가 이미 있습니다. 신청은 계속 진행되며 운영자가 확인합니다.

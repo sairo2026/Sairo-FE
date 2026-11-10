@@ -12,6 +12,7 @@ import type { OfficeRegistrationStatusResponse } from "@/lib/api/contracts/offic
 import { cancelRegistration, startReapplication } from "../api/office.api";
 import { useLatestRegistration, useRefreshOfficeState } from "../hooks/office-queries";
 import { REGISTRATION_STATUS_LABEL, REGISTRATION_STATUS_TONE } from "../model/labels";
+import { REVIEW_STATUS_COPY } from "../model/legal-copy";
 import { describeOfficeError } from "../model/messages";
 import {
   ButtonRow,
@@ -22,8 +23,7 @@ import {
   TextLink,
 } from "@/shared/components/feedback/page-parts";
 
-const REVIEW_TARGET_NOTE =
-  "정상 접수 건은 접수 후 2영업일 이내 처리를 목표로 하며 법정 기한은 아닙니다.";
+const REVIEW_TARGET_NOTE = REVIEW_STATUS_COPY.pending;
 const REREVIEW_NOTE =
   "인증 완료 뒤에도 핵심 정보가 바뀌거나 허위 확인이 드러나면 재심사하거나 인증이 회수될 수 있습니다.";
 
@@ -90,11 +90,11 @@ function StatusBody({ registration }: { registration: OfficeRegistrationStatusRe
 
   const headline: Record<typeof status, string> = {
     DRAFT: "신규 사무소 신청을 작성 중입니다.",
-    PENDING_REVIEW: "신규 사무소 등록 심사 진행 중입니다.",
-    SUPPLEMENT_REQUESTED: "서류 보완이 필요합니다.",
-    APPROVED: "사무소 인증이 완료되었습니다.",
-    REJECTED: "신규 사무소 등록이 반려되었습니다.",
-    REVOKED: "사무소 인증이 회수되었습니다.",
+    PENDING_REVIEW: "서류를 확인하고 있습니다.",
+    SUPPLEMENT_REQUESTED: REVIEW_STATUS_COPY.supplement,
+    APPROVED: REVIEW_STATUS_COPY.approved,
+    REJECTED: REVIEW_STATUS_COPY.rejected,
+    REVOKED: REVIEW_STATUS_COPY.revoked,
     CANCELLED: "신청을 철회했습니다.",
   };
 
@@ -118,14 +118,8 @@ function StatusBody({ registration }: { registration: OfficeRegistrationStatusRe
       {status === "SUPPLEMENT_REQUESTED" ? (
         <MutedNote>안내된 서류를 다시 올리면 심사가 이어집니다.</MutedNote>
       ) : null}
-      {status === "REJECTED" ? (
-        <MutedNote>재신청을 시작하면 처음부터 새로 신청할 수 있습니다.</MutedNote>
-      ) : null}
-      {status === "REVOKED" ? (
-        <MutedNote>
-          별도의 소명 경로는 없습니다. 새 사무소 인증을 신청해 다시 심사받아 주세요.
-        </MutedNote>
-      ) : null}
+      {status === "REJECTED" ? <MutedNote>{REVIEW_STATUS_COPY.rejectedTail}</MutedNote> : null}
+      {status === "REVOKED" ? <MutedNote>{REVIEW_STATUS_COPY.revokedTail}</MutedNote> : null}
       {status === "PENDING_REVIEW" || status === "DRAFT" || status === "SUPPLEMENT_REQUESTED" ? (
         <MutedNote>{REVIEW_TARGET_NOTE}</MutedNote>
       ) : null}

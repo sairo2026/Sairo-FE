@@ -76,7 +76,7 @@ describe("증빙 검증", () => {
     expect(validateEvidenceFile(new File(["a"], "a.pdf", { type: "application/pdf" }))).toBeNull();
     expect(validateEvidenceFile(new File(["a"], "a.jpg", { type: "" }))).toBeNull();
     expect(validateEvidenceFile(new File(["a"], "a.txt", { type: "text/plain" }))).toContain(
-      "이미지 또는 PDF",
+      "PDF, JPG, PNG만",
     );
     expect(validateEvidenceFile(new File([], "a.png", { type: "image/png" }))).toContain("비어");
   });

@@ -13,6 +13,7 @@ import type { EntityType, FieldErrors, LookupField, RegistrationField } from "..
 import { Button } from "@/shared/components/ui/button";
 import { RadioGroup, SelectField } from "@/shared/components/ui/select-field";
 import { TextField } from "@/shared/components/ui/text-field";
+import { REGISTRATION_NOTICE_COPY } from "../model/legal-copy";
 import { ButtonRow, FlowFrame, MutedNote, TextLink } from "@/shared/components/feedback/page-parts";
 
 const ENTITY_OPTIONS = (Object.keys(ENTITY_TYPE_LABEL) as EntityType[]).map((value) => ({
@@ -269,6 +270,8 @@ export function OfficeRegistrationForm() {
           }}
           error={errors.applicantRegistrationRelation}
         />
+        <MutedNote>{REGISTRATION_NOTICE_COPY.intro}</MutedNote>
+        <MutedNote>{REGISTRATION_NOTICE_COPY.scope}</MutedNote>
         <MutedNote>
           제출하면 작성 중 상태의 신청이 만들어지고 증빙 업로드 화면으로 이동합니다.
         </MutedNote>

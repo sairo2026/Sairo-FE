@@ -42,12 +42,12 @@ export const MEMBERSHIP_STATUS_TONE: Record<keyof typeof MEMBERSHIP_STATUS_LABEL
 
 export const TRANSFER_STATUS_LABEL = {
   PENDING: "대기",
-  ACCEPTED: "수락",
-  UNDER_REVIEW: "심사",
+  ACCEPTED: "수락됨",
+  UNDER_REVIEW: "심사 중",
   COMPLETED: "완료",
-  REJECTED: "거절",
-  WITHDRAWN: "철회",
-  EXPIRED: "만료",
+  REJECTED: "거절됨",
+  WITHDRAWN: "철회됨",
+  EXPIRED: "만료됨",
 } as const;
 
 export const ROLE_LABEL = {

@@ -27,6 +27,7 @@ import {
 } from "../model/labels";
 import { describeVisitError, fieldErrorMap } from "../model/messages";
 import { todayKst, toKstIso } from "../model/time";
+import { LinkIssueGuidance } from "./link-legal-notices";
 import { IssuedLinkDialog } from "./issued-link-dialog";
 import type { IssuedLink } from "./issued-link-dialog";
 
@@ -387,6 +388,7 @@ function ApprovalRow({
         title="승인자 링크"
         link={issued}
         notice="활성 링크는 출입승인당 하나이고 이 링크는 지금만 볼 수 있습니다. 복사해 승인자에게 전달해 주세요. 링크를 폐기해도 승인자 계정 접근에는 영향이 없고, 접근을 끊으려면 출입승인을 철회해야 합니다."
+        guidance={<LinkIssueGuidance />}
         onClose={() => setIssued(null)}
       />
       <ConfirmDialog

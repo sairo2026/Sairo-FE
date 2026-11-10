@@ -1,5 +1,6 @@
 "use client";
 
+import { MEMBERSHIP_NOTICE_COPY } from "../model/legal-copy";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { UseQueryResult } from "@tanstack/react-query";
 import type {
@@ -473,6 +474,7 @@ export function MembershipRequestForm({ officeId }: { officeId: number }) {
       }
       description="대표자 이름과 연락처는 보여드리지 않습니다. 역할과 자격 정보를 입력하면 대표가 확인한 뒤 승인합니다."
     >
+      <MutedNote>{MEMBERSHIP_NOTICE_COPY.join}</MutedNote>
       <form
         noValidate
         className="flex flex-col gap-5"
