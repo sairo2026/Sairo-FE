@@ -26,6 +26,7 @@ const ROUTE_AREA_PREFIXES: ReadonlyArray<readonly [string, RouteArea]> = [
 /** 대표만 열 수 있는 업무 화면과 중개보조원에게 닫힌 업무 화면. */
 const BUSINESS_ROUTE_ROLES: ReadonlyArray<readonly [string, readonly OfficeRole[]]> = [
   ["/office", ["OWNER"]],
+  ["/import", ["OWNER"]],
   ["/properties", ["OWNER", "AGENT"]],
   ["/customers", ["OWNER", "AGENT"]],
   ["/contracts", ["OWNER", "AGENT"]],

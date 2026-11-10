@@ -151,6 +151,10 @@ describe("역할별 화면 접근", () => {
     ["OWNER", "/office", "allow"],
     ["AGENT", "/office", "forbidden"],
     ["DEPUTY", "/office", "forbidden"],
+    ["OWNER", "/import", "allow"],
+    ["OWNER", "/import/301", "allow"],
+    ["AGENT", "/import", "forbidden"],
+    ["DEPUTY", "/import", "forbidden"],
     ["AGENT", "/customers", "allow"],
     ["DEPUTY", "/customers", "forbidden"],
     ["DEPUTY", "/properties", "forbidden"],
@@ -195,7 +199,7 @@ describe("운영 콘솔", () => {
 describe("역할별 메뉴", () => {
   const keys = (role: OfficeRole) => getOfficeMenu(role).map((item) => item.key);
 
-  it("대표는 여섯 개 메뉴에 사무소 관리와 결제를 더 본다", () => {
+  it("대표는 여섯 개 메뉴에 사무소 관리, 데이터 이전, 결제를 더 본다", () => {
     expect(keys("OWNER")).toEqual([
       "home",
       "properties",
@@ -204,6 +208,7 @@ describe("역할별 메뉴", () => {
       "contracts",
       "settlements",
       "office",
+      "import",
       "billing",
     ]);
   });

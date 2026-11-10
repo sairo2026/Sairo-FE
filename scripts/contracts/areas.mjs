@@ -52,6 +52,20 @@ const VISIT_PATH_SEGMENTS = [
   "/approver-conditions",
 ];
 
+const MIGRATION_PATH_PREFIXES = [
+  "/api/import-batches",
+  "/api/import-support-requests",
+  "/api/exports",
+  "/api/offices/current/export-policy",
+];
+
+const SUPPORT_PATH_PREFIXES = [
+  "/api/support-inquiries",
+  "/api/privacy-requests",
+  "/api/enterprise-leads",
+  "/api/policy-documents",
+];
+
 const WORK_PATH_PREFIXES = [
   "/api/home",
   "/api/tasks",
@@ -166,6 +180,18 @@ function isVisitDto(dto) {
   return dto.apis.length > 0 && dto.apis.every((api) => isVisitApi(api.path));
 }
 
+function isMigrationDto(dto) {
+  return (
+    dto.apis.length > 0 && dto.apis.every((api) => startsWithAny(api.path, MIGRATION_PATH_PREFIXES))
+  );
+}
+
+function isSupportDto(dto) {
+  return (
+    dto.apis.length > 0 && dto.apis.every((api) => startsWithAny(api.path, SUPPORT_PATH_PREFIXES))
+  );
+}
+
 export const AREAS = {
   common: {
     description: "접근 상태와 세션 응답",
@@ -194,6 +220,14 @@ export const AREAS = {
   visit: {
     description: "방문 조율·출입승인·승인자 조건·방문 신청·평가·신청 허용·승인자 계정 도메인",
     select: (dto) => !COMMON_DTO_NAMES.includes(dto.name) && isVisitDto(dto),
+  },
+  migration: {
+    description: "데이터 이전·유료 이전 지원·내보내기 도메인",
+    select: (dto) => !COMMON_DTO_NAMES.includes(dto.name) && isMigrationDto(dto),
+  },
+  support: {
+    description: "지원 문의·개인정보 권리 요청·기업 도입 문의·정책 문서 도메인",
+    select: (dto) => !COMMON_DTO_NAMES.includes(dto.name) && isSupportDto(dto),
   },
   work: {
     description: "홈·업무·알림·월말결산 도메인",
