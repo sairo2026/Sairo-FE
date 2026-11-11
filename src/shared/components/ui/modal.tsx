@@ -50,7 +50,7 @@ export function Modal({ isOpen, title, onClose, children, footer, size = "defaul
         >
           {children}
         </div>
-        {footer ? <div className="mt-6 flex justify-end gap-2">{footer}</div> : null}
+        {footer ? <div className="mt-6 flex flex-wrap justify-end gap-2">{footer}</div> : null}
       </div>
     </div>
   );
