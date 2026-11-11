@@ -7,7 +7,7 @@ import { Button } from "@/shared/components/ui/button";
 import { TextField } from "@/shared/components/ui/text-field";
 import { requestPasswordReset, resetPassword } from "../api/account.api";
 import { useCountdown } from "../hooks/use-countdown";
-import { describeAuthError } from "@/shared/lib/api-messages";
+import { describeAuthError, fieldErrorMap } from "@/shared/lib/api-messages";
 import {
   PASSWORD_STRENGTH_LABEL,
   passwordStrength,
@@ -162,12 +162,9 @@ export function PasswordResetForm({ token }: { token: string | null }) {
         setIsExpired(true);
         return;
       }
-      const passwordField =
-        error instanceof ApiError
-          ? error.fieldErrors?.find((item) => item.field === "newPassword")
-          : undefined;
-      if (passwordField) {
-        setPasswordError(passwordField.message);
+      const passwordMessage = fieldErrorMap(error).newPassword;
+      if (passwordMessage) {
+        setPasswordError(passwordMessage);
         return;
       }
       setFormError(

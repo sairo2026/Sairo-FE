@@ -111,9 +111,9 @@ export function ConditionForm({
   return (
     <div className="flex flex-col gap-8">
       <section aria-labelledby="cond-period" className="flex flex-col gap-4">
-        <h3 id="cond-period" className="text-h3 font-semibold text-ink">
+        <h2 id="cond-period" className="text-h3 font-semibold text-ink">
           적용 기간
-        </h3>
+        </h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <DateTimeField
             label="적용 시작일"
@@ -135,9 +135,9 @@ export function ConditionForm({
       </section>
 
       <section aria-labelledby="cond-weekday" className="flex flex-col gap-4">
-        <h3 id="cond-weekday" className="text-h3 font-semibold text-ink">
+        <h2 id="cond-weekday" className="text-h3 font-semibold text-ink">
           요일별 가능 시간
-        </h3>
+        </h2>
         <p className="text-caption text-ink-2">
           한 요일에 여러 시간대를 넣을 수 있습니다. 겹치거나 맞닿는 시간대는 저장할 때 하나로
           합쳐집니다.
@@ -187,9 +187,9 @@ export function ConditionForm({
       </section>
 
       <section aria-labelledby="cond-date" className="flex flex-col gap-4">
-        <h3 id="cond-date" className="text-h3 font-semibold text-ink">
+        <h2 id="cond-date" className="text-h3 font-semibold text-ink">
           날짜별 가능 시간과 날짜 예외
-        </h3>
+        </h2>
         <p className="text-caption text-ink-2">
           날짜 예외는 그 날짜에 한해 요일별 가능 시간을 대체합니다. 방문할 수 없는 날은 하루 종일
           방문 불가로 입력하세요.
@@ -264,9 +264,9 @@ export function ConditionForm({
       </section>
 
       <section aria-labelledby="cond-limits" className="flex flex-col gap-4">
-        <h3 id="cond-limits" className="text-h3 font-semibold text-ink">
+        <h2 id="cond-limits" className="text-h3 font-semibold text-ink">
           방문 제한
-        </h3>
+        </h2>
         <p className="text-caption text-ink-2">
           필수 조건을 위반하면 신청과 확정이 제한됩니다. 비워 두면 그 조건은 제한하지 않습니다.
         </p>
@@ -330,9 +330,9 @@ export function ConditionForm({
       </section>
 
       <section aria-labelledby="cond-rules" className="flex flex-col gap-4">
-        <h3 id="cond-rules" className="text-h3 font-semibold text-ink">
+        <h2 id="cond-rules" className="text-h3 font-semibold text-ink">
           날짜별 필수 조건
-        </h3>
+        </h2>
         <p className="text-caption text-ink-2">
           날짜를 정해 그 날짜의 조건만 따로 정합니다. 정하지 않은 항목은 기본 조건을 따릅니다.
         </p>

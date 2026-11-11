@@ -20,7 +20,7 @@ import {
 } from "../api/account.api";
 import { authContextQueryKey } from "../hooks/use-auth-context";
 import { useCountdown } from "../hooks/use-countdown";
-import { describeAuthError } from "@/shared/lib/api-messages";
+import { describeAuthError, fieldErrorMap } from "@/shared/lib/api-messages";
 import { landingPathFor } from "../model/landing";
 import {
   PASSWORD_STRENGTH_LABEL,
@@ -273,13 +273,12 @@ export function SignupEmailFlow({ token }: { token?: string }) {
         );
         return;
       }
-      const fieldErrors = error.fieldErrors ?? [];
-      const passwordField = fieldErrors.find((item) => item.field === "password");
-      if (passwordField) {
-        setPasswordError(passwordField.message);
+      const fieldErrors = fieldErrorMap(error);
+      if (fieldErrors.password) {
+        setPasswordError(fieldErrors.password);
         return;
       }
-      if (fieldErrors.some((item) => item.field === "displayName")) {
+      if (fieldErrors.displayName) {
         setNameError("이름을 확인해 주세요.");
         setStep("info");
         return;

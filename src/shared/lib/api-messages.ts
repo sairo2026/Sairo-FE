@@ -52,6 +52,14 @@ export function fieldErrorMap(error: unknown): Record<string, string> {
   return result;
 }
 
+/** 400 응답의 필드 오류 문구를 한 문장으로 합친다. 필드 오류가 없으면 undefined다. */
+export function fieldErrorSummary(error: unknown): string | undefined {
+  if (!(error instanceof ApiError) || error.status !== 400 || !error.fieldErrors?.length) {
+    return undefined;
+  }
+  return error.fieldErrors.map((item) => item.message).join(" ");
+}
+
 export function isApiStatus(error: unknown, status: number): boolean {
   return error instanceof ApiError && error.status === status;
 }

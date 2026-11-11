@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { ApiError } from "@/shared/api/client";
+import { fieldErrorSummary } from "@/shared/lib/api-messages";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import { Checkbox, RadioGroup, SelectField } from "@/shared/components/ui/select-field";
@@ -118,10 +119,10 @@ function RawAccessForm() {
         setFailure(
           "연결 문의나 대상 사무소를 찾을 수 없어 요청이 만들어지지 않았습니다. 번호를 확인해 주세요.",
         );
-      } else if (error instanceof ApiError && error.status === 400 && error.fieldErrors?.length) {
-        setFailure(error.fieldErrors.map((item) => item.message).join(" "));
       } else {
-        setFailure(describeOpsError(error, "요청을 만들지 못했습니다."));
+        setFailure(
+          fieldErrorSummary(error) ?? describeOpsError(error, "요청을 만들지 못했습니다."),
+        );
       }
     }
   }

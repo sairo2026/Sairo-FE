@@ -1,4 +1,5 @@
 import { ApiError } from "@/shared/api/client";
+import { fieldErrorSummary } from "@/shared/lib/api-messages";
 import type { OpsStatusMap } from "../components/common/ops-status-badge";
 import { describeOpsError } from "../model/ops-errors";
 
@@ -77,9 +78,6 @@ export function describeBillingError(error: unknown, fallback = "처리하지 �
   if (error instanceof ApiError) {
     const mapped = BILLING_MESSAGE_BY_CODE[error.code];
     if (mapped) return mapped;
-    if (error.status === 400 && error.fieldErrors?.length) {
-      return error.fieldErrors.map((item) => item.message).join(" ");
-    }
   }
-  return describeOpsError(error, fallback);
+  return fieldErrorSummary(error) ?? describeOpsError(error, fallback);
 }

@@ -216,7 +216,8 @@ PR에서는 다음을 확인한다.
 ### 15-4 접근성
 
 - 모달 대화상자는 `Modal`을 쓴다. `role="dialog"`, `aria-modal="true"`, 제목에 `aria-labelledby`, 열 때 대화상자 안으로 포커스, Tab 순환, ESC 닫기, 닫을 때 호출 요소로 포커스 복귀를 지원한다. 출처: https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/
-- `role="alertdialog"`는 이름(`aria-label`)과 경고 문구를 가리키는 `aria-describedby`를 모두 가진다. 출처: https://www.w3.org/WAI/ARIA/apg/patterns/alertdialog/
+- `role="alertdialog"`는 이름(`aria-label`)과 경고 문구를 가리키는 `aria-describedby`를 모두 가진다. 화면 안에 펼쳐지는 경고 대화상자는 `useInlineAlertDialog`로 포커스 이동, ESC 닫기, 포커스 복귀를 붙인다. 출처: https://www.w3.org/WAI/ARIA/apg/patterns/alertdialog/
+- `src/app/*.a11y.test.tsx`가 모든 `page.tsx`를 모의 API로 렌더링해 axe-core 규칙을 검사한다. 새 라우트는 자동으로 포함되며 위반은 해당 화면에서 고친다. 대비(색상)는 jsdom에서 계산하지 못해 토큰 값으로 따로 확인한다.
 - 표는 `caption`과 열 머리글 `th scope="col"`을 둔다. 클릭 동작은 `button`이나 `a`로 만든다.
 - 포인터 대상은 24x24 CSS px 이상이다(WCAG 2.2 SC 2.5.8). 출처: https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html
 - 새 패턴(combobox, tabs 등)은 APG 패턴 목록의 키보드 규칙을 따른다. 출처: https://www.w3.org/WAI/ARIA/apg/patterns/

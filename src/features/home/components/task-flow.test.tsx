@@ -182,6 +182,23 @@ describe("업무 목록과 업무 팝업", () => {
     await waitFor(() => expect(getMockWorkState().tasks).toHaveLength(0));
   });
 
+  it("삭제 확인은 포커스를 받고 ESC로 닫히며 업무 대화상자는 남는다", async () => {
+    setMockWorkState({ tasks: [buildMockTask({ taskId: 6, title: "지킬 업무" })] });
+    const user = userEvent.setup();
+    renderOffice(<TaskListScreen />, { role: "OWNER" });
+    await user.click(await screen.findByRole("button", { name: "업무 지킬 업무 열기" }));
+    const dialog = await screen.findByRole("dialog");
+    const deleteButton = within(dialog).getByRole("button", { name: "삭제" });
+    await user.click(deleteButton);
+    const confirm = await within(dialog).findByRole("alertdialog", { name: "업무 삭제 확인" });
+    expect(document.activeElement).toBe(confirm);
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(within(dialog).queryByRole("alertdialog")).toBeNull());
+    expect(screen.getByRole("dialog")).toBe(dialog);
+    expect(document.activeElement).toBe(deleteButton);
+    expect(getMockWorkState().tasks).toHaveLength(1);
+  });
+
   it("자동 업무 삭제가 403이면 안내 문구를 보여준다", async () => {
     server.use(
       http.patch("/api/tasks/:taskId", () =>

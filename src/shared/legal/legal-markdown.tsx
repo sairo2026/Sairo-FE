@@ -38,6 +38,14 @@ type LegalMarkdownProps = {
   isCompact?: boolean;
 };
 
+function tableCaption(blocks: MarkdownBlock[], index: number): string {
+  for (let cursor = index - 1; cursor >= 0; cursor -= 1) {
+    const block = blocks[cursor];
+    if (block?.type === "heading") return `${block.text} 표`;
+  }
+  return "표";
+}
+
 export function LegalMarkdown({ blocks, isCompact = false }: LegalMarkdownProps) {
   const offset = headingLevelOffset(blocks);
   const bodyClass = isCompact ? "text-caption leading-6" : "text-body leading-7";
@@ -76,6 +84,7 @@ export function LegalMarkdown({ blocks, isCompact = false }: LegalMarkdownProps)
           return (
             <div key={index} className="overflow-x-auto rounded-control border border-line">
               <table className="w-full min-w-[32rem] border-collapse text-left text-caption">
+                <caption className="sr-only">{tableCaption(blocks, index)}</caption>
                 <thead className="bg-surface">
                   <tr>
                     {block.header.map((cell) => (

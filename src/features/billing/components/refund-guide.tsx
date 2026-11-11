@@ -9,6 +9,7 @@ export function RefundGuide() {
       <p className="text-caption text-ink-2">{COPY.refundTop}</p>
       <div className="mt-4 overflow-x-auto rounded-control border border-line">
         <table className="w-full min-w-[28rem] border-collapse text-left text-caption">
+          <caption className="sr-only">{REFUND_GUIDE_COPY.title}</caption>
           <thead className="bg-surface">
             <tr>
               <th scope="col" className="px-3 py-2 font-semibold text-ink">

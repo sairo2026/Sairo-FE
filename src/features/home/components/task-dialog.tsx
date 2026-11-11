@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useId, useState } from "react";
+import { useCallback, useId, useState } from "react";
 import type { TaskListResponse } from "@/lib/api/contracts/work.schema";
 import { listCustomers } from "@/features/customer/api/customer.api";
 import { listProperties } from "@/features/property/api/property.api";
@@ -11,6 +11,7 @@ import { DateTimeField } from "@/shared/components/ui/date-time-field";
 import { Modal } from "@/shared/components/ui/modal";
 import { SelectField } from "@/shared/components/ui/select-field";
 import { TextField } from "@/shared/components/ui/text-field";
+import { useInlineAlertDialog } from "@/shared/hooks/use-inline-alert-dialog";
 import { fieldErrorMap } from "@/shared/lib/api-messages";
 import { useAssignableMembers } from "@/shared/session/assignable-members";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
@@ -76,6 +77,8 @@ function TaskDialogBody({ task, onClose }: TaskDialogProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string>();
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const closeConfirmDelete = useCallback(() => setConfirmDelete(false), []);
+  const confirmDeleteRef = useInlineAlertDialog(confirmDelete, closeConfirmDelete);
 
   const myId = me.data ? String(me.data.membershipId) : "";
   const assignee = values.assigneeMembershipId || (isEdit ? "" : myId);
@@ -281,10 +284,12 @@ function TaskDialogBody({ task, onClose }: TaskDialogProps) {
         />
         {confirmDelete ? (
           <div
+            ref={confirmDeleteRef}
             role="alertdialog"
             aria-label="업무 삭제 확인"
             aria-describedby={deleteMessageId}
-            className="rounded-control border border-line p-4"
+            tabIndex={-1}
+            className="rounded-control border border-line p-4 outline-none"
           >
             <p id={deleteMessageId} className="text-body text-ink">
               이 업무를 삭제할까요? 삭제하면 되돌릴 수 없습니다.

@@ -1,13 +1,14 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useId, useState } from "react";
+import { useCallback, useId, useState } from "react";
 import type { MonthlyMemoResponse } from "@/lib/api/contracts/work.schema";
 import { describeWorkError } from "@/features/home/model/messages";
 import { ApiError } from "@/shared/api/client";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
 import { FormAlert } from "@/shared/components/feedback/form-frame";
 import { Button } from "@/shared/components/ui/button";
+import { useInlineAlertDialog } from "@/shared/hooks/use-inline-alert-dialog";
 import { formatSeoulDateTime, countCodePoints } from "@/shared/lib/format";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { fetchMemo, saveMemo } from "../api/settlement.api";
@@ -31,6 +32,8 @@ function MemoEditor({ yearMonth, memo }: { yearMonth: string; memo: MonthlyMemoR
   const [error, setError] = useState<string>();
   const [notice, setNotice] = useState<string>();
   const [conflict, setConflict] = useState<Conflict | null>(null);
+  const closeConflict = useCallback(() => setConflict(null), []);
+  const conflictRef = useInlineAlertDialog(conflict !== null, closeConflict);
 
   const save = useMutation({
     mutationFn: (input: { content: string; version: number }) =>
@@ -103,10 +106,12 @@ function MemoEditor({ yearMonth, memo }: { yearMonth: string; memo: MonthlyMemoR
       ) : null}
       {conflict ? (
         <div
+          ref={conflictRef}
           role="alertdialog"
           aria-label="메모 충돌"
           aria-describedby={conflictMessageId}
-          className="rounded-card-flat border border-primary p-4"
+          tabIndex={-1}
+          className="rounded-card-flat border border-primary p-4 outline-none"
         >
           <p id={conflictMessageId} className="mb-3 font-semibold text-ink">
             저장하는 동안 다른 사람이 먼저 메모를 고쳤습니다. 내 입력과 최신 메모를 비교해 고르세요.
