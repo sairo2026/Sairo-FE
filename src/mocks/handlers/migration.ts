@@ -8,6 +8,11 @@ import { errorResponse, mockErrors } from "../error-responses";
 
 const NOW = "2026-11-10T09:00:00+09:00";
 
+/** 취소 가능 시한은 시험이 돌아가는 날짜에 관계없이 항상 미래여야 한다. */
+function futureIso(hours: number): string {
+  return new Date(Date.now() + hours * 3_600_000).toISOString();
+}
+
 export type MockBatch = {
   detail: ImportBatchDetail;
   sheets: Array<{ name: string; rowCount: number; columnCount: number }>;
@@ -70,7 +75,7 @@ function initialState(): MockMigrationState {
         status: "COMPLETED",
         counts: { total: 60, succeeded: 55, failed: 5, unprocessed: 0 },
         executedAt: "2026-11-09T10:30:00+09:00",
-        cancellableUntil: "2026-11-11T10:30:00+09:00",
+        cancellableUntil: futureIso(48),
         failureReason: "5건이 형식 오류로 실패했습니다.",
         version: 3,
       }),
@@ -228,7 +233,7 @@ function advanceExecution(batch: MockBatch) {
   if (done >= total) {
     batch.detail.status = "COMPLETED";
     batch.detail.executedAt = NOW;
-    batch.detail.cancellableUntil = "2026-11-11T09:00:00+09:00";
+    batch.detail.cancellableUntil = futureIso(48);
     batch.detail.failureReason = failed > 0 ? `${failed}건이 형식 오류로 실패했습니다.` : null;
   }
 }
