@@ -90,7 +90,10 @@ function SettlementBody({ yearMonth }: { yearMonth: string }) {
               </Link>
             </FormNotice>
           ) : null}
-          <ul aria-label="월말결산 지표" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <ul
+            aria-label="월말결산 지표"
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3"
+          >
             {METRIC_GROUPS.map((group) => (
               <li key={group.id}>
                 <section

@@ -262,7 +262,7 @@ function AddRelationForm({
           />
         )
       ) : null}
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <DateTimeField label="시작일" kind="date" value={startDate} onValueChange={setStartDate} />
         {kind === "INTEREST" ? (
           <DateTimeField

@@ -70,7 +70,7 @@ function RenewBody({ detail }: { detail: ContractDetailResponse }) {
         매물에서 기간이 겹치는 체결 계약이 있으면 등록할 수 없습니다.
       </FormNotice>
       <ContractFields values={values} onChange={setValues} errors={errors} lockDealType />
-      <div className="flex justify-end gap-2">
+      <div className="flex flex-wrap justify-end gap-2">
         <Link
           href={`/contracts/${detail.contractId}`}
           className="inline-flex h-12 items-center rounded-control bg-primary-soft px-8 text-body font-medium text-ink-2 hover:bg-primary-line"

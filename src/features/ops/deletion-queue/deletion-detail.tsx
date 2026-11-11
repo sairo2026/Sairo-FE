@@ -128,7 +128,7 @@ function ExcludeCard({ item, onDone }: { item: DeletionItem; onDone: (notice: No
           onValueChange={set("approverId")}
           error={errors.approverId}
         />
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <DateTimeField
             label="보류 만료 날짜"
             kind="date"
@@ -220,7 +220,7 @@ function VerifyCard({ item, onDone }: { item: DeletionItem; onDone: (notice: Not
           실행자와 다른 운영자가 저장소별 결과를 확인해 입력합니다. 모든 결과가 입력되어 검증을
           마치기 전에는 이 건을 완료로 표시하지 않습니다.
         </p>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {VERIFY_FIELDS.map((field) => (
             <SelectField
               key={field.key}

@@ -125,7 +125,7 @@ export function OpsLayout({
             <div className="flex items-center gap-3 text-caption">{headerRight}</div>
           ) : null}
         </header>
-        <div className="lg:grid lg:grid-cols-[220px_1fr]">
+        <div className="lg:grid lg:grid-cols-[220px_minmax(0,1fr)]">
           <nav
             aria-label="운영 메뉴"
             className="flex gap-4 overflow-x-auto border-b border-line bg-white px-6 py-4 lg:min-h-[calc(100vh-56px)] lg:flex-col lg:border-r lg:border-b-0"
@@ -139,7 +139,7 @@ export function OpsLayout({
               />
             ))}
           </nav>
-          <main className="px-6 py-8">{children}</main>
+          <main className="min-w-0 px-6 py-8">{children}</main>
         </div>
       </div>
     </ToastProvider>

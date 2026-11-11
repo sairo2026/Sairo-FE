@@ -34,7 +34,7 @@ export function StatusBadge({ tone, label }: { tone: BadgeTone; label: string })
 
 export function DetailList({ items }: { items: Array<{ label: string; value: ReactNode }> }) {
   return (
-    <dl className="grid gap-x-6 gap-y-4 sm:grid-cols-[160px_1fr]">
+    <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-[160px_1fr]">
       {items.map((item) => (
         <div key={item.label} className="contents">
           <dt className="text-caption font-semibold text-ink-2">{item.label}</dt>

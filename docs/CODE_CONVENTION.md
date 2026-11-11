@@ -222,7 +222,14 @@ PR에서는 다음을 확인한다.
 - 포인터 대상은 24x24 CSS px 이상이다(WCAG 2.2 SC 2.5.8). 출처: https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html
 - 새 패턴(combobox, tabs 등)은 APG 패턴 목록의 키보드 규칙을 따른다. 출처: https://www.w3.org/WAI/ARIA/apg/patterns/
 
-### 15-5 용어
+### 15-5 반응형
+
+- 기준 폭은 모바일 360px, 데스크톱 1280px이다. 사무소·공개·승인자 화면은 두 폭 모두에서 가로 넘침이 없어야 하고 운영 콘솔은 데스크톱 우선이되 넘침은 없어야 한다.
+- 목록 표는 카드로 바꾸지 않고 `DataTable`의 가로 스크롤 컨테이너(`TableScroll`)로 처리한다. 4열 이상인 표는 최소 폭 40rem을 유지해 좁은 화면에서 열이 뭉개지지 않게 한다. 직접 쓰는 `table`도 `TableScroll`과 `min-w-*`를 함께 둔다.
+- 버튼 묶음은 `flex-wrap`을 두어 좁은 폭에서 줄바꿈되게 한다. 고정 폭(`w-*`, `grid-cols-[...]`)은 `sm:` 이상 접두어로만 쓰고 기본 폭에서는 한 단이나 `flex-wrap`으로 둔다.
+- `e2e/responsive.spec.ts`가 모든 `page.tsx`를 두 폭에서 열어 문서 가로 스크롤, 화면 밖으로 나간 요소, 24px 미만 포인터 대상(WCAG 2.2 SC 2.5.8의 간격 예외 적용)을 검사한다. CI의 `e2e` 작업에서 실행된다.
+
+### 15-6 용어
 
 같은 개념은 한 이름만 쓴다.
 
@@ -235,7 +242,7 @@ PR에서는 다음을 확인한다.
 | 개수           | `formatCount`                                        | 직접 `toLocaleString` 호출 금지                                                                                                                 |
 | 금액           | `formatKrw`, 억·만 표기는 `formatWonCompact`         | 숫자는 `ko-KR` 천 단위 쉼표, 단위는 원                                                                                                          |
 
-### 15-6 한국어 표기
+### 15-7 한국어 표기
 
 - 금액은 `1,234,000원`, 큰 금액은 `1억 2,000만원`. 숫자 서식은 `Intl`의 `ko-KR` 로케일을 쓴다. 출처: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat
 - 날짜와 시각은 서울 시간대로 `formatSeoulDate`, `formatSeoulDateTime`을 쓴다. 전화번호는 `formatPhone`으로 하이픈을 넣는다.

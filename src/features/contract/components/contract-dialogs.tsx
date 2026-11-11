@@ -149,7 +149,7 @@ export function StatusDialog({ detail, onClose }: DialogProps) {
           onValueChange={setToStatus}
           error={errors.toStatus}
         />
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <DateTimeField
             label="실제 효력 날짜"
             kind="date"
@@ -245,7 +245,7 @@ export function SettlementStatusDialog({ detail, onClose }: DialogProps) {
           onValueChange={setToStatus}
           error={errors.toStatus}
         />
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <DateTimeField
             label="실제 효력 날짜(선택)"
             kind="date"
@@ -421,7 +421,7 @@ export function CorrectionDialog({ detail, onClose }: DialogProps) {
           lockDealType
           hideManager
         />
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <DateTimeField
             label="정정 효력 날짜"
             kind="date"

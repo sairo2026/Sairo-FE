@@ -191,7 +191,7 @@ export function QuoteDialog({
         표시됩니다. 유효기한은 발행 후 14일로 서버가 정합니다. 견적은 배정된 담당자만 발행할 수
         있습니다.
       </p>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <TextField
           label="도입 사무소 수"
           kind="number"

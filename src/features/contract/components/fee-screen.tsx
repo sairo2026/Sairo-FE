@@ -45,7 +45,7 @@ function AmountFields({
   onChange: (key: "agreed" | "supply" | "tax" | "total", value: string) => void;
 }) {
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
       <TextField
         label="약정보수(원)"
         kind="number"
@@ -219,7 +219,7 @@ function FeeCreateDialog({
           onChange={(key, value) => setAmounts((current) => ({ ...current, [key]: value }))}
         />
         <Checkbox label="부가세 포함" checked={vat} onCheckedChange={setVat} />
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <DateTimeField
             label="청구발생일"
             kind="date"
@@ -519,7 +519,7 @@ function FeeBody({ detail }: { detail: ContractDetailResponse }) {
               {data.payers.length === 0 ? (
                 <p className="text-caption text-ink-3">청구가 없어 집계할 내용이 없습니다.</p>
               ) : (
-                <ul className="grid gap-3 md:grid-cols-2">
+                <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
                   {data.payers.map((payer) => (
                     <li
                       key={payer.payerPartyId}
@@ -582,7 +582,7 @@ function FeeBody({ detail }: { detail: ContractDetailResponse }) {
                       {fee.vatIncluded ? "부가세 포함" : "부가세 별도"} · 순수납{" "}
                       {formatKrw(fee.netReceivedAmount)}
                     </p>
-                    <div className="grid gap-4 md:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <div>
                         <h3 className="text-caption font-semibold text-ink-2">보수 조정 이력</h3>
                         <ul className="mt-1 flex flex-col gap-1">

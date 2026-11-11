@@ -149,7 +149,7 @@ function RawAccessForm() {
         </div>
       </Card>
       <Card title="대상">
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <SelectField
             label="대상 종류"
             value={form.targetType}

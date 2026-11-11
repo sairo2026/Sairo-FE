@@ -204,7 +204,7 @@ function DemandForm({
       <h3 className="text-body font-semibold text-ink">
         {condition ? "희망조건 수정" : "희망조건 등록"}
       </h3>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <SelectField
           label="거래유형"
           value={values.dealType}
@@ -224,7 +224,7 @@ function DemandForm({
         />
       </div>
       {RANGE_FIELDS.filter((range) => range.appliesTo.includes(dealType)).map((range) => (
-        <div key={range.low} className="grid gap-4 sm:grid-cols-2">
+        <div key={range.low} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <TextField
             label={`${range.label} 하한 (${range.unit})`}
             inputMode="decimal"
@@ -241,7 +241,7 @@ function DemandForm({
           />
         </div>
       ))}
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <DateTimeField
           label="입주 희망일"
           kind="date"

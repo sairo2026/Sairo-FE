@@ -4,8 +4,10 @@ import type { ReactNode } from "react";
 import { cn } from "@/shared/lib/cn";
 import { Button } from "./button";
 import { formatCount } from "@/shared/lib/format";
+import { TableScroll } from "./table-scroll";
 
 export const PAGE_SIZE_OPTIONS = [25, 50, 100] as const;
+const WIDE_TABLE_COLUMNS = 4;
 export type PageSize = (typeof PAGE_SIZE_OPTIONS)[number];
 
 export type SortDirection = "asc" | "desc";
@@ -70,8 +72,13 @@ export function DataTable<Row>({
 
   return (
     <div className="flex flex-col gap-4" aria-busy={isLoading || undefined}>
-      <div className="overflow-x-auto rounded-card-flat border border-line bg-white">
-        <table className="w-full border-collapse text-left">
+      <TableScroll label={caption} className="rounded-card-flat border border-line bg-white">
+        <table
+          className={cn(
+            "w-full border-collapse text-left",
+            columns.length >= WIDE_TABLE_COLUMNS && "min-w-[40rem]",
+          )}
+        >
           <caption className="sr-only">{caption}</caption>
           <thead>
             <tr>
@@ -140,7 +147,7 @@ export function DataTable<Row>({
         {!errorMessage && !isLoading && rows.length === 0 ? (
           <p className="px-4 py-12 text-center text-body text-ink-2">{emptyMessage}</p>
         ) : null}
-      </div>
+      </TableScroll>
 
       <div className="flex flex-wrap items-center justify-between gap-3 text-caption text-ink-2">
         <p>총 {formatCount(totalCount)}건</p>

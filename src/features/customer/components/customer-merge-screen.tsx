@@ -181,7 +181,7 @@ function MergeForm({
         </p>
       </Card>
 
-      <fieldset disabled={mutation.isPending} className="flex flex-col gap-6">
+      <fieldset disabled={mutation.isPending} className="min-w-0 flex flex-col gap-6">
         <Card tone="flat" title="항목별 값 선택">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-left">

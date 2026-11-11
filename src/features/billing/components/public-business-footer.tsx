@@ -29,7 +29,7 @@ export function PublicBusinessFooter() {
       {info ? (
         <dl
           aria-label="사업자 정보"
-          className="mb-4 grid gap-x-8 gap-y-1 sm:grid-cols-2"
+          className="mb-4 grid grid-cols-1 gap-x-8 gap-y-1 sm:grid-cols-2"
           data-testid="business-info"
         >
           <Row label="상호" value={info.businessName} />

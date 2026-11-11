@@ -5,6 +5,7 @@ export default defineConfig({
   test: {
     setupFiles: ["./src/shared/testing/setup.ts"],
     testTimeout: 20000,
+    exclude: ["**/node_modules/**", "e2e/**", ".next/**"],
   },
   resolve: {
     alias: {

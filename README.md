@@ -35,3 +35,7 @@ npm run generate:contracts -- --spec <API 명세서 markdown 경로> --area comm
 | `NEXT_PUBLIC_TOSS_CLIENT_KEY` | 결제대행사 개발자센터의 테스트 클라이언트 키(`test_ck_`로 시작). 비어 있으면 카드 등록창을 열지 않고 준비 중 안내를 보인다           |
 | `COMING_SOON`                 | `true`면 출시 안내 화면으로 막는다. 운영 배포에서는 값이 없어도 켜진다                                                               |
 | `REVIEW_MODE`                 | `true`면 출시 안내가 켜진 배포에서도 로그인, 가입, 요금, 약관, 결제, 지원 경로와 API를 연다. 업무 화면은 계속 막고 기본값은 꺼짐이다 |
+
+## 브라우저 시험
+
+`e2e/`의 Playwright 시험은 모의 API를 켠 운영 빌드(`NEXT_PUBLIC_API_MOCKING=enabled npm run build` 뒤 `npm run start`) 위에서 돈다. 반응형 점검은 모든 화면을 모바일 폭과 데스크톱 폭에서 열어 가로 넘침과 포인터 대상 크기를 검사한다. 브라우저 설치와 실행은 CI의 `e2e` 작업이 맡고 로컬에서는 `npx playwright install chromium` 뒤 `npm run e2e`로 돌릴 수 있다.

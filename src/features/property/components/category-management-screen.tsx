@@ -391,7 +391,7 @@ export function CategoryManagementScreen() {
         {(data) => {
           const selected = data.items.find((item) => item.categoryId === selectedId) ?? null;
           return (
-            <div className="grid gap-6 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               <Card tone="flat" title="카테고리">
                 <div className="flex flex-col gap-5">
                   <ul className="flex flex-col gap-3">

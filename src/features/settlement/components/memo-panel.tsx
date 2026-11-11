@@ -116,7 +116,7 @@ function MemoEditor({ yearMonth, memo }: { yearMonth: string; memo: MonthlyMemoR
           <p id={conflictMessageId} className="mb-3 font-semibold text-ink">
             저장하는 동안 다른 사람이 먼저 메모를 고쳤습니다. 내 입력과 최신 메모를 비교해 고르세요.
           </p>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <p className="text-caption font-semibold text-ink-2">내 입력</p>
               <p className="whitespace-pre-wrap rounded-control bg-surface p-3 text-body">

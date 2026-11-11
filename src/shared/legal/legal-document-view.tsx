@@ -38,7 +38,7 @@ export function LegalDocumentView({
           className="mt-2 rounded-card-flat border border-line bg-surface px-6 py-5"
         >
           <p className="mb-3 text-body font-semibold text-ink">목차</p>
-          <ol className="grid gap-x-8 gap-y-1 text-caption sm:grid-cols-2">
+          <ol className="grid grid-cols-1 gap-x-8 gap-y-1 text-caption sm:grid-cols-2">
             {toc.map((entry) => (
               <li key={entry.id}>
                 <a href={`#${entry.id}`} className="text-ink-2 hover:text-primary hover:underline">

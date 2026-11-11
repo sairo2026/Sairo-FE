@@ -114,7 +114,7 @@ export function ConditionForm({
         <h2 id="cond-period" className="text-h3 font-semibold text-ink">
           적용 기간
         </h2>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <DateTimeField
             label="적용 시작일"
             kind="date"
@@ -196,7 +196,7 @@ export function ConditionForm({
         </p>
         {values.dateWindows.map((row, index) => (
           <div key={row.id} className="flex flex-col gap-3 rounded-control bg-surface p-4">
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <DateTimeField
                 label={`날짜 예외 ${index + 1} 날짜`}
                 kind="date"
@@ -270,7 +270,7 @@ export function ConditionForm({
         <p className="text-caption text-ink-2">
           필수 조건을 위반하면 신청과 확정이 제한됩니다. 비워 두면 그 조건은 제한하지 않습니다.
         </p>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <TextField
             label={RULE_LABEL.maxVisitsPerDay}
             kind="number"
@@ -349,7 +349,7 @@ export function ConditionForm({
             {RULE_KEYS.map((key: RuleKey) => {
               const field = row[key];
               return (
-                <div key={key} className="grid gap-3 sm:grid-cols-2">
+                <div key={key} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <SelectField
                     label={`${RULE_LABEL[key]} (날짜별 조건 ${index + 1})`}
                     value={field.mode}

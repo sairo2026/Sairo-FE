@@ -94,7 +94,7 @@ function RequestCard({
           </Badge>
         ) : null}
       </div>
-      <dl className="grid gap-1 text-caption text-ink-2 sm:grid-cols-2">
+      <dl className="grid grid-cols-1 gap-1 text-caption text-ink-2 sm:grid-cols-2">
         <div>
           희망 시간: {formatSeoulDateTime(item.requestedStartAt)} ~{" "}
           {formatSeoulDateTime(item.requestedEndAt)}

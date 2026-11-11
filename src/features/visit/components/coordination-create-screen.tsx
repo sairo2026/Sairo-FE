@@ -116,7 +116,7 @@ export function CoordinationCreateScreen() {
             max={MAX_CANDIDATES}
             error={errors.candidates}
           />
-          <div className="grid gap-5 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <DateTimeField
               label="방문 가능 시작일"
               kind="date"

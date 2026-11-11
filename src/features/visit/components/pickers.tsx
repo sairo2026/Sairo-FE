@@ -54,7 +54,7 @@ export function CustomerPicker({
   });
   const items = query.data?.items ?? [];
   return (
-    <fieldset className="flex flex-col gap-3">
+    <fieldset className="min-w-0 flex flex-col gap-3">
       <legend className="mb-1 text-caption font-semibold text-ink">고객 선택</legend>
       <SearchField
         label="고객 검색"
@@ -146,7 +146,7 @@ export function CandidatePicker({
   const ownItems = own.data?.items ?? [];
   const grantItems = grants.data?.items ?? [];
   return (
-    <fieldset className="flex flex-col gap-3">
+    <fieldset className="min-w-0 flex flex-col gap-3">
       <legend className="mb-1 text-caption font-semibold text-ink">
         후보 매물 선택 ({selected.length}/{max})
       </legend>

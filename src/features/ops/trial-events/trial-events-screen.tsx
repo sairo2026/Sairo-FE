@@ -121,7 +121,7 @@ function CreateCard() {
             onValueChange={(maxOffices) => patch({ maxOffices })}
           />
         ) : null}
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <SeoulDateTimeInput
             label="시작"
             value={form.startsAt}
@@ -135,7 +135,7 @@ function CreateCard() {
             onChange={(endsAt) => patch({ endsAt })}
           />
         </div>
-        <fieldset className="flex flex-col gap-2">
+        <fieldset className="min-w-0 flex flex-col gap-2">
           <legend className="mb-2 text-caption font-semibold text-ink">대상 조건</legend>
           <Checkbox
             label="기간 안에 사무소를 만든 경우만 대상으로 합니다"

@@ -288,7 +288,7 @@ export function CustomerForm(props: FormProps) {
           onValueChange={(value) => setField("name", value)}
           error={errors.name}
         />
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <TextField
             label="연락처"
             kind="tel"

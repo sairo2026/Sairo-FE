@@ -74,7 +74,7 @@ export function MappingEditor({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <SelectField
           label="대상 종류"
           value={targetType}
@@ -83,7 +83,7 @@ export function MappingEditor({
         />
         <TextField label="원본 시스템" value={sourceSystem} onValueChange={setSourceSystem} />
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {detail.sourceColumns.map((column) => (
           <SelectField
             key={column}

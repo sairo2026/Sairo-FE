@@ -430,7 +430,7 @@ function SchedulePanel({ detail, isReadOnly }: { detail: Detail; isReadOnly: boo
                 <span className="text-body font-semibold text-ink">
                   {nameOf(row.candidatePropertyId)}
                 </span>
-                <div className="grid gap-3 sm:grid-cols-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <TextField
                     label="방문 순서"
                     kind="number"

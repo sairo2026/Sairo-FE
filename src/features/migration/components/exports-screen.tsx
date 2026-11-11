@@ -143,7 +143,7 @@ function CreateForm({
           noTables ? (
             <FormNotice>{COPY.noAllowedTables}</FormNotice>
           ) : (
-            <fieldset className="flex flex-col gap-2">
+            <fieldset className="min-w-0 flex flex-col gap-2">
               <legend className="mb-2 text-caption font-semibold text-ink">
                 {COPY.tablesLabel}
               </legend>
