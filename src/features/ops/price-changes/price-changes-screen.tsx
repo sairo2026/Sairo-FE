@@ -83,7 +83,7 @@ function CreateCard() {
         <p role="note" className="text-caption text-ink-2">
           {NOTICE_RULE_TEXT}
         </p>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <SelectField
             label="새 가격 버전"
             value={scheduleId}

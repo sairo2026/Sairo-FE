@@ -8,10 +8,10 @@ type LayoutReport = {
   smallTargets: string[];
 };
 
-const TARGET_SELECTOR =
-  'button, input:not([type="hidden"]), select, textarea, a[href], [role="button"], [role="switch"], [role="checkbox"], [role="tab"]';
-
 function inspectLayout(): LayoutReport {
+  // page.evaluate는 함수 본문만 브라우저로 보내므로 선택자를 함수 안에 둔다.
+  const TARGET_SELECTOR =
+    'button, input:not([type="hidden"]), select, textarea, a[href], [role="button"], [role="switch"], [role="checkbox"], [role="tab"]';
   const root = document.documentElement;
   const viewportWidth = root.clientWidth;
   const describe = (element: Element): string => {
