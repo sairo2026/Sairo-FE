@@ -72,7 +72,7 @@ export function AnnouncementFormView({
         onValueChange={(content) => patch({ content })}
         hint={`${form.content.length}/${CONTENT_MAX}자`}
       />
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <SelectField
           label="대상"
           value={form.audienceType}
@@ -99,7 +99,7 @@ export function AnnouncementFormView({
           />
         ) : null}
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <SeoulDateTimeInput
           label="노출 시작"
           value={form.startsAt}
@@ -113,7 +113,7 @@ export function AnnouncementFormView({
           onChange={(endsAt) => patch({ endsAt })}
         />
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <SelectField
           label="중요도"
           value={form.importance}

@@ -95,7 +95,7 @@ function CreateCard() {
           options={PRICE_AUDIENCE_OPTIONS}
           onValueChange={(audience) => patch({ audience })}
         />
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <TextField
             label="Solo 기준액(원)"
             kind="number"
@@ -119,7 +119,7 @@ function CreateCard() {
           />
         </div>
         <AmountPreview form={form} />
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <SeoulDateTimeInput
             label="효력"
             value={form.effectiveAt}

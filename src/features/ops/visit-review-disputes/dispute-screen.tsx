@@ -228,7 +228,7 @@ function DirectRemoveCard({ onRemoved }: { onRemoved: (text: string) => void }) 
           법적 요청이나 개인정보 요청처럼 이의 없이 평가를 삭제해야 할 때만 씁니다. 열린 이의가
           있으면 함께 닫힙니다. 삭제는 되돌릴 수 없고 {AUDIT_NOTICE}
         </p>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <TextField label="평가 번호" kind="number" value={reviewId} onValueChange={setReviewId} />
           <SelectField
             label="삭제 사유 코드"

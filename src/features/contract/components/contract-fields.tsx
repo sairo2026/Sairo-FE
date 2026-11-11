@@ -40,10 +40,13 @@ function PartyEditor({
     onChange(parties.map((party) => (party.key === key ? { ...party, ...patch } : party)));
   }
   return (
-    <fieldset className="flex flex-col gap-3 rounded-card-flat border border-line px-5 py-4">
+    <fieldset className="min-w-0 flex flex-col gap-3 rounded-card-flat border border-line px-5 py-4">
       <legend className="px-1 text-caption font-semibold text-ink">{legend}</legend>
       {parties.map((party, index) => (
-        <div key={party.key} className="grid gap-3 sm:grid-cols-[1fr_1fr_1fr_auto] sm:items-end">
+        <div
+          key={party.key}
+          className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_1fr_1fr_auto] sm:items-end"
+        >
           <TextField
             label={`${legend} ${index + 1} 이름`}
             value={party.name}
@@ -130,7 +133,7 @@ export function ContractFields({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <SelectField
           label="거래유형"
           required
@@ -177,7 +180,7 @@ export function ContractFields({
         customers={customerOptions}
         onChange={(next) => set("buyerParties", next)}
       />
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {values.dealType === "SALE" ? (
           <TextField
             label="매매가(원)"

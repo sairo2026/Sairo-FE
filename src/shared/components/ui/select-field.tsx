@@ -90,7 +90,7 @@ export function RadioGroup({
   error,
 }: RadioGroupProps) {
   return (
-    <fieldset className="flex flex-col gap-2" aria-invalid={error ? true : undefined}>
+    <fieldset className="min-w-0 flex flex-col gap-2" aria-invalid={error ? true : undefined}>
       <legend className="mb-2 text-caption font-semibold text-ink">{legend}</legend>
       <div className="flex flex-wrap gap-4">
         {options.map((option) => (

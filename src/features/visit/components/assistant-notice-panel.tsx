@@ -109,7 +109,7 @@ function NoticeForm({ itemId, onDone }: { itemId: number; onDone: () => void }) 
 
   return (
     <div className="flex flex-col gap-3 rounded-control border border-line p-4">
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <SelectField
           label="고지 대상 유형"
           value={values.recipientType}
@@ -142,7 +142,7 @@ function NoticeForm({ itemId, onDone }: { itemId: number; onDone: () => void }) 
         />
       </div>
       {values.mode === "NOTIFIED" ? (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <DateTimeField
             label="실제 고지 날짜"
             kind="date"

@@ -34,7 +34,7 @@ export function AuthSuspensionScreen() {
             <div className="flex flex-col gap-6">
               <Card title={SUSPENSION_COPY.title}>
                 <p className="text-body text-ink">{SUSPENSION_COPY.body}</p>
-                <dl className="mt-4 grid gap-2 text-body sm:grid-cols-[160px_1fr]">
+                <dl className="mt-4 grid grid-cols-1 gap-2 text-body sm:grid-cols-[160px_1fr]">
                   {status.suspendedAt ? (
                     <>
                       <dt className="font-semibold text-ink-2">중단 시각</dt>

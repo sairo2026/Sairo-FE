@@ -83,7 +83,7 @@ function InviteForm() {
           취소하거나 다시 보낼 수 있습니다. 초대받은 분이 수락하면 사무소 대표가 그 분의 이름과
           역할, 자격 확인 상태를 볼 수 있습니다.
         </MutedNote>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <TextField
             label="초대할 이메일"
             value={email}

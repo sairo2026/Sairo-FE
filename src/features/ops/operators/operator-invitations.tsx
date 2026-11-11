@@ -70,7 +70,7 @@ function InviteForm({ onNotice }: { onNotice: (notice: Notice) => void }) {
           화면과 서버 응답에는 토큰 원문이 없습니다. 초대 생성에는 5분 이내 재인증이 필요하고 감사
           로그에 남습니다.
         </p>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <TextField label="이름" value={name} onValueChange={setName} error={errors.name} />
           <TextField
             label="이메일"
@@ -80,7 +80,7 @@ function InviteForm({ onNotice }: { onNotice: (notice: Notice) => void }) {
             autoComplete="off"
           />
         </div>
-        <fieldset className="flex flex-col gap-2">
+        <fieldset className="min-w-0 flex flex-col gap-2">
           <legend className="mb-2 text-caption font-semibold text-ink">부여할 역할</legend>
           <div className="flex flex-wrap gap-4">
             {OPS_ROLES.map((role) => (

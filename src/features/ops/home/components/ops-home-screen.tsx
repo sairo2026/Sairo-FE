@@ -68,7 +68,7 @@ function ExecSummaryCard({ summary }: { summary: NonNullable<OpsHomeResponse["ex
   ] as const;
   return (
     <Card title="경영 지표" tone="flat" aria-label="경영 지표">
-      <dl className="grid gap-4 sm:grid-cols-5">
+      <dl className="grid grid-cols-1 gap-4 sm:grid-cols-5">
         {counts.map(([label, value]) => (
           <div key={label}>
             <dt className="text-caption font-semibold text-ink-2">{label}</dt>
@@ -175,14 +175,17 @@ function HomeBody({ home }: { home: OpsHomeResponse }) {
   const canSeePrice = useHasOpsRole(["BILLING"]);
   return (
     <>
-      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="처리 대기 큐">
+      <ul
+        className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
+        aria-label="처리 대기 큐"
+      >
         {HOME_QUEUE_CARDS.map((card) => (
           <QueueCard key={card.key} card={card} home={home} />
         ))}
       </ul>
       {home.execSummary ? <ExecSummaryCard summary={home.execSummary} /> : null}
       {canSeeTrial || canSeePrice ? (
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {canSeeTrial ? <TrialWarningCard /> : null}
           {canSeePrice ? <PriceNoticeCard /> : null}
         </div>

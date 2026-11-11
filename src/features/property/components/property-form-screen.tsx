@@ -555,7 +555,7 @@ export function PropertyForm(props: FormProps) {
       </Section>
 
       <Section title="면적·입주·점유">
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <TextField
             label="전용면적 (㎡)"
             inputMode="decimal"
@@ -585,7 +585,7 @@ export function PropertyForm(props: FormProps) {
             error={errors.grossFloorAreaSqm}
           />
         </div>
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <DateTimeField
             label="입주 가능일"
             kind="date"
@@ -620,7 +620,7 @@ export function PropertyForm(props: FormProps) {
           options={OCCUPANCY_STATUSES.map((value) => ({ value, label: OCCUPANCY_LABEL[value] }))}
           onValueChange={(value) => setField("occupancyStatus", value)}
         />
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <DateTimeField
             label="참고 임대 만기일"
             kind="date"

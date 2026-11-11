@@ -99,7 +99,7 @@ function HomeBody({ summary }: { summary: HomeSummaryResponse }) {
           </>
         }
       />
-      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
         {isDeputy ? null : (
           <StatCard
             href="/contracts?tab=maturity"
@@ -121,7 +121,7 @@ function HomeBody({ summary }: { summary: HomeSummaryResponse }) {
           label="건"
         />
       </div>
-      <div className="grid gap-5 lg:grid-cols-[1.1fr_1fr]">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.1fr_1fr]">
         <section
           aria-labelledby="home-tasks"
           className="flex flex-col gap-5 rounded-card border border-line bg-white px-7 py-6"

@@ -93,7 +93,7 @@ function DeliveryForm({ detail, scheduleVersion }: { detail: Detail; scheduleVer
   return (
     <div className="flex flex-col gap-3 rounded-control border border-line p-4">
       <h3 className="text-body font-semibold text-ink">전달 기록 추가</h3>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <SelectField
           label="수신자"
           value={recipient}
@@ -127,7 +127,7 @@ function DeliveryForm({ detail, scheduleVersion }: { detail: Detail; scheduleVer
       </div>
       <Checkbox label="전달했습니다" checked={delivered} onCheckedChange={setDelivered} />
       {delivered ? (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <DateTimeField label="실제 전달 날짜" kind="date" value={date} onValueChange={setDate} />
           <DateTimeField label="실제 전달 시각" kind="time" value={time} onValueChange={setTime} />
         </div>

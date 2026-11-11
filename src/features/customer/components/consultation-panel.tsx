@@ -157,7 +157,7 @@ function CreateForm({
         }))}
         onValueChange={setType}
       />
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <DateTimeField
           label="상담 날짜"
           kind="date"
@@ -276,7 +276,7 @@ function CorrectionDialog({
             setType(value === "FIRST_INQUIRY" ? "FIRST_INQUIRY" : "FOLLOWUP")
           }
         />
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <DateTimeField
             label="상담 날짜"
             kind="date"

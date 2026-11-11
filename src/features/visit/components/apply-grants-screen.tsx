@@ -114,7 +114,7 @@ function AddGrantModal({
           허용은 방문 신청 권한만 줍니다. 승인자 연락처와 조건 값, 링크 발급, 재허용, 매물 수정은
           허용에 포함되지 않습니다.
         </p>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <TextField label="사무소명" value={name} onValueChange={setName} />
           <TextField label="지역" value={region} onValueChange={setRegion} />
         </div>
@@ -164,7 +164,7 @@ function AddGrantModal({
           onValueChange={setMembershipId}
           error={fieldErrors.membership || fieldErrors.granteeMembershipId}
         />
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <DateTimeField
             label="허용 만료일 (선택)"
             kind="date"

@@ -92,7 +92,7 @@ export function RequestForm({
         submit();
       }}
     >
-      <fieldset className="flex flex-col gap-2">
+      <fieldset className="min-w-0 flex flex-col gap-2">
         <legend className="text-caption font-semibold text-ink">신청 가능 구간</legend>
         <div className="flex flex-wrap gap-2">
           {slots.map((slot, index) => (
@@ -111,7 +111,7 @@ export function RequestForm({
           </p>
         ) : null}
       </fieldset>
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <DateTimeField
           label="방문 날짜"
           kind="date"
@@ -134,7 +134,7 @@ export function RequestForm({
           error={errors.endTime}
         />
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <TextField
           label="예상 소요시간 (분)"
           kind="number"

@@ -251,7 +251,7 @@ export function TaxWorkDialog({
           ]}
         />
         {mode === "record" ? (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <SelectField
               label="증빙 종류"
               value={kind}
@@ -290,7 +290,7 @@ export function TaxWorkDialog({
           </div>
         )}
         {showAmounts ? (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <TextField
               label="승인번호"
               value={approvalNumber}

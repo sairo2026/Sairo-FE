@@ -224,7 +224,7 @@ function TaskDialogBody({ task, onClose }: TaskDialogProps) {
           disabled={auto}
           maxLength={100}
         />
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <SelectField
             label="담당자"
             required
@@ -256,7 +256,7 @@ function TaskDialogBody({ task, onClose }: TaskDialogProps) {
         {isDeputy ? (
           <FormNotice>중개보조원은 본인 업무만 만들고 고칠 수 있습니다.</FormNotice>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <SelectField
               label="관련 고객(선택)"
               value={values.relatedCustomerId}

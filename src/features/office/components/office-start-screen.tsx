@@ -73,7 +73,7 @@ export function OfficeStartScreen() {
             <div
               role="radiogroup"
               aria-label="사무소 시작 방법"
-              className="grid gap-4 sm:grid-cols-2"
+              className="grid grid-cols-1 gap-4 sm:grid-cols-2"
             >
               {CHOICES.map((item) => {
                 const selected = choice === item.key;

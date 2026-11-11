@@ -18,7 +18,7 @@ export function DateTimePair({
   error?: string;
 }) {
   return (
-    <fieldset className="flex flex-col gap-2">
+    <fieldset className="min-w-0 flex flex-col gap-2">
       <legend className="text-caption font-semibold text-ink">{label}</legend>
       <div className="flex flex-wrap gap-3">
         <DateTimeField

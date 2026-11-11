@@ -224,7 +224,7 @@ function PhotosPanel({ property }: { property: PropertyDetailResponse }) {
   if (property.photos.length === 0) return <MutedNote>등록된 사진이 없습니다.</MutedNote>;
   const sorted = [...property.photos].sort((a, b) => a.sortOrder - b.sortOrder);
   return (
-    <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {sorted.map((photo) => (
         <li key={photo.photoId} className="flex flex-col gap-2">
           <Image

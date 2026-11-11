@@ -43,7 +43,7 @@ export function CustomFieldsSection({
     return <p className="text-caption text-ink-2">이 카테고리에는 전용 입력 항목이 없습니다.</p>;
   }
   return (
-    <div className="grid gap-5 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
       {active.map((definition) => {
         const id = definition.fieldDefinitionId;
         const raw = values[id] ?? "";

@@ -193,7 +193,7 @@ function ApprovalFormModal({
           }))}
           onValueChange={(value) => set("source", value)}
         />
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <DateTimeField
             label="승인 시작일"
             kind="date"
@@ -221,7 +221,7 @@ function ApprovalFormModal({
           />
         </div>
         {values.source === "PROXY" ? (
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <DateTimeField
               label="확인한 날짜"
               kind="date"

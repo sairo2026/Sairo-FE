@@ -64,7 +64,7 @@ function CreateCard({ onCreated }: { onCreated: (message: string) => void }) {
         <p role="note" className="text-caption text-ink-2">
           {NO_OVERWRITE_TEXT} 등록한 문서는 초안으로 저장되고 검토 요청 뒤에 게시할 수 있습니다.
         </p>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <SelectField
             label="문서 종류"
             value={form.docType}
@@ -94,7 +94,7 @@ function CreateCard({ onCreated }: { onCreated: (message: string) => void }) {
           hint={`${form.changeSummary.length}/${SUMMARY_MAX}자`}
           onValueChange={(changeSummary) => patch({ changeSummary })}
         />
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <SeoulDateTimeInput
             label="공지일"
             value={form.noticeAt}

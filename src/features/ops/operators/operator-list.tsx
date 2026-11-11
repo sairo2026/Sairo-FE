@@ -78,7 +78,7 @@ function RoleDialog({
           역할 지정에는 5분 이내 재인증이 필요하고 변경 기록은 감사 로그에 남습니다. 마지막 활성
           보안관리자의 역할은 회수할 수 없습니다.
         </p>
-        <fieldset className="flex flex-col gap-2">
+        <fieldset className="min-w-0 flex flex-col gap-2">
           <legend className="sr-only">부여할 역할</legend>
           {OPS_ROLES.map((role) => (
             <Checkbox

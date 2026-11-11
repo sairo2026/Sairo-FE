@@ -153,7 +153,7 @@ function DetailBody({ detail }: { detail: ContractDetailResponse }) {
           , 사유 {detail.duplicateExclusionReason ?? "-"}
         </FormNotice>
       ) : null}
-      <ul aria-label="계약 세 가지 상태" className="grid gap-4 md:grid-cols-3">
+      <ul aria-label="계약 세 가지 상태" className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <TrackCard
           title="계약 상태"
           badge={

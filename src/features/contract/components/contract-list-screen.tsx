@@ -68,7 +68,7 @@ function ContractTable({ tab }: { tab: string }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid gap-3 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         <SearchField
           label="당사자 이름"
           placeholder="당사자 이름"

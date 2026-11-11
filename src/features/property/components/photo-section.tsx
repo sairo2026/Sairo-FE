@@ -118,7 +118,7 @@ export function QueuedPhotoList({
         </p>
       ) : null}
       {photos.length > 0 ? (
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {photos.map((photo, index) => (
             <li
               key={photo.key}
@@ -178,7 +178,7 @@ export function SavedPhotoList({
       {photos.length === 0 ? (
         <p className="text-caption text-ink-2">등록된 사진이 없습니다.</p>
       ) : (
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {photos.map((photo) => (
             <SavedPhotoItem
               key={`${photo.photoId}-${photo.description ?? ""}-${photo.sortOrder}`}

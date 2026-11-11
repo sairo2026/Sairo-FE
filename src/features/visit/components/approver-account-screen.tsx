@@ -85,7 +85,7 @@ function ApprovalCard({
           </Badge>
         )}
       </div>
-      <dl className="grid gap-1 text-caption text-ink-2 sm:grid-cols-2">
+      <dl className="grid grid-cols-1 gap-1 text-caption text-ink-2 sm:grid-cols-2">
         <div>주소: {item.propertyAddress ?? item.propertyRegion}</div>
         <div>승인자 유형: {labelOf(APPROVER_TYPE_LABEL, item.approverType)}</div>
         <div>

@@ -81,7 +81,7 @@ export function TermsAgreementSection({
   }
 
   return (
-    <fieldset className="flex flex-col gap-3">
+    <fieldset className="min-w-0 flex flex-col gap-3">
       <legend className="mb-3 text-body font-semibold text-ink">
         {SIGNUP_TERMS_COPY.sectionTitle}
       </legend>

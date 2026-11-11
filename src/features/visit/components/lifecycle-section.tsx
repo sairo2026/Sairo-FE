@@ -152,7 +152,7 @@ function RevocationDialog({ detail, onClose }: { detail: Detail; onClose: () => 
           onValueChange={setApprovalId}
           error={errors.approvalId}
         />
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <DateTimeField
             label="철회 날짜"
             kind="date"
@@ -287,7 +287,7 @@ function CloneDialog({ detail, onClose }: { detail: Detail; onClose: () => void 
             취소된 조율의 고객과 후보 매물을 그대로 가져옵니다. 방문 가능 기간은 오늘부터 30일
             안에서 새로 입력합니다.
           </p>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <DateTimeField
               label="방문 가능 시작일"
               kind="date"

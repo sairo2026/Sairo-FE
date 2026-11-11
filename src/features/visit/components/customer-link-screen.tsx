@@ -121,7 +121,7 @@ function TimeForm({ token, link }: { token: string; link: PublicVisitLinkRespons
       <ul className="flex flex-col gap-3">
         {slots.map((slot, index) => (
           <li key={slot.key} className="flex flex-col gap-2 rounded-control border border-line p-3">
-            <div className="grid gap-2 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
               <DateTimeField
                 label={`${index + 1}번째 날짜`}
                 kind="date"

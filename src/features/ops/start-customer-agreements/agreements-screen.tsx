@@ -38,7 +38,7 @@ const STATUS_OPTIONS = [
 function CohortCards({ cohorts }: { cohorts: Cohort[] }) {
   if (cohorts.length === 0) return null;
   return (
-    <ul aria-label="이벤트별 승인 현황" className="grid gap-3 sm:grid-cols-2">
+    <ul aria-label="이벤트별 승인 현황" className="grid grid-cols-1 gap-3 sm:grid-cols-2">
       {cohorts.map((cohort) => {
         const isFull = cohort.maxOffices !== null && cohort.approvedCount >= cohort.maxOffices;
         return (
@@ -106,7 +106,7 @@ function RegisterCard({ cohorts }: { cohorts: Cohort[] }) {
   return (
     <Card title="시작 고객 합의 등록">
       <form onSubmit={(event) => void submit(event)} noValidate className="flex flex-col gap-4">
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <TextField
             label="대상 사무소 ID"
             kind="number"
@@ -163,7 +163,7 @@ function RegisterCard({ cohorts }: { cohorts: Cohort[] }) {
             maxLength={20}
           />
         </div>
-        <fieldset className="flex flex-col gap-2">
+        <fieldset className="min-w-0 flex flex-col gap-2">
           <legend className="mb-1 text-caption font-semibold text-ink">협력 조건 확인</legend>
           <Checkbox
             label="주간 사용을 확인했습니다"
