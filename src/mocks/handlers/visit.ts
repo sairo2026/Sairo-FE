@@ -478,7 +478,12 @@ export const visitHandlers = [
     const ordered = [...body.items].sort((a, b) => a.sortOrder - b.sortOrder);
     let cursor = Date.parse(first.startsAt);
     const limit = Date.parse(first.endsAt);
-    const items = [];
+    const items: Array<{
+      candidatePropertyId: number;
+      sortOrder: number;
+      suggestedStartAt: string;
+      suggestedEndAt: string;
+    }> = [];
     for (const item of ordered) {
       const visit = item.visitDurationMinutes ?? 30;
       const travel = item.travelDurationMinutes ?? 15;
@@ -495,7 +500,19 @@ export const visitHandlers = [
     }
     const nextStatus =
       found.status === "COORDINATABLE" ? "FINAL_CONFIRMATION_REQUIRED" : found.status;
-    const next = bump(found, { status: nextStatus });
+    // 일정 구성으로 계산된 시작 시각 구간을 후보 매물의 신청 가능 구간으로 돌려준다.
+    const candidateProperties = found.candidateProperties.map((candidate) => {
+      const item = items.find(
+        (entry) => entry.candidatePropertyId === candidate.candidatePropertyId,
+      );
+      return item
+        ? {
+            ...candidate,
+            applicableSlots: [{ startsAt: item.suggestedStartAt, endsAt: item.suggestedEndAt }],
+          }
+        : candidate;
+    });
+    const next = bump(found, { status: nextStatus, candidateProperties });
     return HttpResponse.json({
       coordinationId: next.coordinationId,
       status: next.status,

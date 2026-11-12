@@ -5,6 +5,7 @@ import type {
   WithdrawalPreviewResponse,
 } from "@/lib/api/contracts/auth.schema";
 import { errorResponse, mockErrors } from "../error-responses";
+import { MOCK_ACTIVE_CONTEXT, setMockAuthContext } from "./auth";
 
 export const MOCK_TERMS_VERSION = "1.0";
 
@@ -203,7 +204,7 @@ export function resetMockAccountState(): void {
 }
 
 const NEW_ACCOUNT_CONTEXT = {
-  accessCondition: "PRE_VERIFICATION",
+  accessCondition: "PRE_VERIFICATION" as const,
   officeId: null,
   role: null,
   pendingRegistrationId: null,
@@ -314,6 +315,8 @@ export const accountHandlers = [
         { field: "password", code: "INVALID_VALUE", message: "너무 흔한 비밀번호입니다." },
       ]);
     }
+    // 가입이 끝나면 세션이 만들어지므로 이후 접근 상태 조회도 인증 전 상태를 돌려준다.
+    setMockAuthContext({ ...MOCK_ACTIVE_CONTEXT, ...NEW_ACCOUNT_CONTEXT });
     return HttpResponse.json(NEW_ACCOUNT_CONTEXT, { status: 201 });
   }),
 
@@ -331,6 +334,8 @@ export const accountHandlers = [
         changedItems: stale,
       });
     }
+    // 가입이 끝나면 세션이 만들어지므로 이후 접근 상태 조회도 인증 전 상태를 돌려준다.
+    setMockAuthContext({ ...MOCK_ACTIVE_CONTEXT, ...NEW_ACCOUNT_CONTEXT });
     return HttpResponse.json(NEW_ACCOUNT_CONTEXT, { status: 201 });
   }),
 

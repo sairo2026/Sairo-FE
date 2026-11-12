@@ -11,6 +11,7 @@ import type {
   OwnerTransferCurrentResponse,
 } from "@/lib/api/contracts/office.schema";
 import { errorResponse, mockErrors } from "../error-responses";
+import { getMockAuthContext, setMockAuthContext } from "./auth";
 
 const NOW = "2026-11-10T09:00:00+09:00";
 const LATER = "2026-11-17T09:00:00+09:00";
@@ -218,6 +219,15 @@ export const officeHandlers = [
       return errorResponse(409, "INVALID_TRANSITION", "이미 심사 중입니다.");
     }
     state.registration = { registrationId: 31, status: "PENDING_REVIEW", currentRevisionNo: 1 };
+    // 증빙 제출로 심사가 시작되면 신청자의 접근 상태도 심사 중으로 바뀐다.
+    const context = getMockAuthContext();
+    if (context?.accessCondition === "PRE_VERIFICATION") {
+      setMockAuthContext({
+        ...context,
+        accessCondition: "OFFICE_UNDER_REVIEW",
+        pendingRegistrationId: 31,
+      });
+    }
     return HttpResponse.json({
       registrationId: 31,
       status: "PENDING_REVIEW",

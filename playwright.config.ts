@@ -23,6 +23,8 @@ export default defineConfig({
     },
     {
       name: "mobile",
+      // 시나리오 시험은 화면 흐름을 확인하므로 데스크톱 폭에서만 돈다.
+      testIgnore: /scenarios\//,
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 360, height: 740 },

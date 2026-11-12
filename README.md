@@ -38,4 +38,4 @@ npm run generate:contracts -- --spec <API 명세서 markdown 경로> --area comm
 
 ## 브라우저 시험
 
-`e2e/`의 Playwright 시험은 모의 API를 켠 운영 빌드(`NEXT_PUBLIC_API_MOCKING=enabled npm run build` 뒤 `npm run start`) 위에서 돈다. 반응형 점검은 모든 화면을 모바일 폭과 데스크톱 폭에서 열어 가로 넘침과 포인터 대상 크기를 검사한다. 브라우저 설치와 실행은 CI의 `e2e` 작업이 맡고 로컬에서는 `npx playwright install chromium` 뒤 `npm run e2e`로 돌릴 수 있다.
+`e2e/`의 Playwright 시험은 모의 API를 켠 운영 빌드(`NEXT_PUBLIC_API_MOCKING=enabled npm run build` 뒤 `npm run start`) 위에서 돈다. 반응형 점검은 모든 화면을 모바일 폭과 데스크톱 폭에서 열어 가로 넘침과 포인터 대상 크기를 검사한다. `e2e/scenarios/`는 개발플로우의 필수 시나리오를 데스크톱 폭에서 화면 흐름으로 재현한다. 모의 API 상태는 페이지 메모리에 있으므로 한 시나리오 안에서는 클라이언트 이동(`e2e/support/scenario.ts`의 `clientNavigate`)으로 상태를 이어 가고, 모의 응답이 없어 재현할 수 없는 단계는 `test.fixme`로 이름을 남긴다. 브라우저 설치와 실행은 CI의 `e2e` 작업이 맡고 로컬에서는 `npx playwright install chromium` 뒤 `npm run e2e`로 돌릴 수 있다.
