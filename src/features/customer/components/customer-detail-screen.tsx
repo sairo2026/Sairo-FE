@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import type { CustomerDetailResponse } from "@/lib/api/contracts/customer.schema";
+import type { CustomerDetail } from "../api/wire";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { DetailList, MutedNote } from "@/shared/components/feedback/page-parts";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
@@ -35,7 +35,7 @@ import { ConsultationPanel } from "./consultation-panel";
 import { DemandPanel } from "./demand-panel";
 import { RelationsPanel } from "./relations-panel";
 
-type Contract = CustomerDetailResponse["upcomingContracts"][number];
+type Contract = CustomerDetail["upcomingContracts"][number];
 
 function ContractList({ title, items }: { title: string; items: Contract[] }) {
   return (
@@ -49,8 +49,8 @@ function ContractList({ title, items }: { title: string; items: Contract[] }) {
             <li key={item.contractId} className="text-body text-ink">
               {item.propertyName} ·{" "}
               {isDealType(item.dealType) ? DEAL_TYPE_LABEL[item.dealType] : item.dealType} ·{" "}
-              {labelOf(CONTRACT_STATUS_LABEL, item.contractStatus)} · 체결{" "}
-              {formatSeoulDate(item.signedDate)}
+              {labelOf(CONTRACT_STATUS_LABEL, item.contractStatus)} ·{" "}
+              {item.signedDate ? `체결 ${formatSeoulDate(item.signedDate)}` : "체결일 미정"}
             </li>
           ))}
         </ul>
@@ -59,7 +59,7 @@ function ContractList({ title, items }: { title: string; items: Contract[] }) {
   );
 }
 
-function BasicInfo({ customer }: { customer: CustomerDetailResponse }) {
+function BasicInfo({ customer }: { customer: CustomerDetail }) {
   const members = useAssignableMembers();
   const managerName =
     members.data?.find((item) => item.membershipId === customer.managingMembershipId)
@@ -112,7 +112,7 @@ function BasicInfo({ customer }: { customer: CustomerDetailResponse }) {
   );
 }
 
-function ActivityPanel({ customer }: { customer: CustomerDetailResponse }) {
+function ActivityPanel({ customer }: { customer: CustomerDetail }) {
   return (
     <div className="flex flex-col gap-6">
       <section className="flex flex-col gap-3">
@@ -150,13 +150,7 @@ function ActivityPanel({ customer }: { customer: CustomerDetailResponse }) {
   );
 }
 
-function RemoveDialog({
-  customer,
-  onClose,
-}: {
-  customer: CustomerDetailResponse;
-  onClose: () => void;
-}) {
+function RemoveDialog({ customer, onClose }: { customer: CustomerDetail; onClose: () => void }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string>();
@@ -202,7 +196,7 @@ function RemoveDialog({
   );
 }
 
-function MergedNotice({ customer }: { customer: CustomerDetailResponse }) {
+function MergedNotice({ customer }: { customer: CustomerDetail }) {
   return (
     <div className="flex flex-col gap-4">
       <header className="flex flex-wrap items-center gap-3">
@@ -226,7 +220,7 @@ function MergedNotice({ customer }: { customer: CustomerDetailResponse }) {
   );
 }
 
-function DetailBody({ customer }: { customer: CustomerDetailResponse }) {
+function DetailBody({ customer }: { customer: CustomerDetail }) {
   const queryClient = useQueryClient();
   const { isReadOnly } = useOfficeAccess();
   const [tab, setTab] = useState("info");

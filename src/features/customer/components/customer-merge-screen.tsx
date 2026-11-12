@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
-import type { CustomerDetailResponse } from "@/lib/api/contracts/customer.schema";
+import type { CustomerDetail } from "../api/wire";
 import { ApiError } from "@/shared/api/client";
 import { toErrorScreenKind } from "@/shared/api/error-kind";
 import { ErrorScreen } from "@/shared/components/feedback/error-screen";
@@ -36,7 +36,7 @@ import {
 import type { MergeChoices, MergeField, MergeSide } from "../model/merge";
 
 function displayValue(
-  customer: CustomerDetailResponse,
+  customer: CustomerDetail,
   field: MergeField,
   managerName: (id: number) => string,
 ): string {
@@ -45,13 +45,7 @@ function displayValue(
   return value === "" ? "없음" : value;
 }
 
-function MergeForm({
-  first,
-  second,
-}: {
-  first: CustomerDetailResponse;
-  second: CustomerDetailResponse;
-}) {
+function MergeForm({ first, second }: { first: CustomerDetail; second: CustomerDetail }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const members = useAssignableMembers();

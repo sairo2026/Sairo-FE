@@ -55,6 +55,16 @@ describe("승인자 조건 입력 모델", () => {
     expect(errors[`dateRule-${rule.id}-minGapMinutes`]).toBe("값을 입력해 주세요.");
   });
 
+  it("날짜별 조건의 네 항목이 모두 기본 조건 따르기면 한 가지 이상 지정하라고 안내한다", () => {
+    const form = emptyConditionForm(new Date("2026-11-10T00:00:00+09:00"));
+    const rule = emptyDateRule();
+    rule.date = form.appliesFrom;
+    form.dateRules = [rule];
+    expect(validateCondition(form)[`dateRule-${rule.id}`]).toBe(
+      "기본 조건과 다르게 정할 항목을 한 가지 이상 지정해 주세요.",
+    );
+  });
+
   it("요청 본문에 제한 없음과 날짜 예외와 날짜별 조건을 옮긴다", () => {
     const form = emptyConditionForm(new Date("2026-11-10T00:00:00+09:00"));
     form.maxVisitsPerDay = "";

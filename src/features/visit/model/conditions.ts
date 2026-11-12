@@ -264,6 +264,9 @@ export function validateCondition(values: ConditionFormValues): ConditionErrors 
     ) {
       errors[`dateRule-${row.id}`] = "적용 기간 안의 날짜여야 합니다.";
     }
+    if (RULE_KEYS.every((key) => row[key].mode === "FOLLOW") && !errors[`dateRule-${row.id}`]) {
+      errors[`dateRule-${row.id}`] = "기본 조건과 다르게 정할 항목을 한 가지 이상 지정해 주세요.";
+    }
     for (const key of RULE_KEYS) {
       const field = row[key];
       if (field.mode !== "VALUE") continue;

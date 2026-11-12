@@ -3,10 +3,7 @@
 import { MEMBERSHIP_NOTICE_COPY } from "../model/legal-copy";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { UseQueryResult } from "@tanstack/react-query";
-import type {
-  MembershipStatusResponse,
-  OfficeSearchResponse,
-} from "@/lib/api/contracts/office.schema";
+import type { OfficeSearchResponse } from "@/lib/api/contracts/office.schema";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useSyncExternalStore } from "react";
@@ -24,6 +21,7 @@ import {
   searchOffices,
   startMembershipReapplication,
 } from "../api/office.api";
+import type { MembershipStatusWire } from "../api/office.api";
 import { officeKeys, useMyMembership, useRefreshOfficeState } from "../hooks/office-queries";
 import { ENTITY_TYPE_LABEL, ROLE_LABEL, labelOf } from "../model/labels";
 import { describeOfficeError, describeRemaining, fieldErrorMap } from "../model/messages";
@@ -590,7 +588,7 @@ export function MembershipStatusScreen() {
   );
 }
 
-type MembershipStatus = MembershipStatusResponse;
+type MembershipStatus = MembershipStatusWire;
 
 function MembershipStatusBody({ membership }: { membership: MembershipStatus }) {
   const router = useRouter();
@@ -622,14 +620,7 @@ function MembershipStatusBody({ membership }: { membership: MembershipStatus }) 
     },
   });
 
-  const reapplyMutation = useMutation({
-    mutationFn: () => startMembershipReapplication(membership.membershipId),
-    onSuccess: async () => {
-      await refresh();
-    },
-    onError: (caught) =>
-      setError(describeOfficeError(caught, "재신청을 시작하지 못했습니다. 다시 시도해 주세요.")),
-  });
+  const [isReapplying, setIsReapplying] = useState(false);
 
   const status = expired ? "EXPIRED" : membership.status;
 
@@ -710,15 +701,24 @@ function MembershipStatusBody({ membership }: { membership: MembershipStatus }) 
         <InvitationAcceptForm membership={membership} onDone={() => void refresh()} />
       ) : null}
 
+      {status === "REJECTED" && membership.resolved !== true && isReapplying ? (
+        <ReapplicationForm
+          membership={membership}
+          onCancel={() => setIsReapplying(false)}
+          onDone={() => {
+            setIsReapplying(false);
+            void refresh();
+          }}
+        />
+      ) : null}
+
       {notice ? <FormNotice>{notice}</FormNotice> : null}
       {error ? <FormAlert>{error}</FormAlert> : null}
 
       <ButtonRow>
         {status === "APPROVED" ? <Button onClick={() => router.push("/")}>업무 시작</Button> : null}
-        {status === "REJECTED" && membership.resolved !== true ? (
-          <Button isLoading={reapplyMutation.isPending} onClick={() => reapplyMutation.mutate()}>
-            재신청 시작
-          </Button>
+        {status === "REJECTED" && membership.resolved !== true && !isReapplying ? (
+          <Button onClick={() => setIsReapplying(true)}>재신청 시작</Button>
         ) : null}
         {status === "REJECTED" && membership.resolved === true ? (
           <Button onClick={() => router.push("/office/start")}>새로 시작</Button>
@@ -748,6 +748,132 @@ function MembershipStatusBody({ membership }: { membership: MembershipStatus }) 
         onCancel={() => setConfirmingCancel(false)}
       />
     </div>
+  );
+}
+
+function ReapplicationForm({
+  membership,
+  onCancel,
+  onDone,
+}: {
+  membership: MembershipStatus;
+  onCancel: () => void;
+  onDone: () => void;
+}) {
+  const [role, setRole] = useState<MembershipRole>(
+    membership.role === "DEPUTY" ? "DEPUTY" : "AGENT",
+  );
+  const [qualificationNumber, setQualificationNumber] = useState("");
+  const [employmentReportConfirmed, setEmploymentReportConfirmed] = useState(false);
+  const [trainingConfirmed, setTrainingConfirmed] = useState(false);
+  const [errors, setErrors] = useState<FieldErrors<QualificationField>>({});
+  const [formError, setFormError] = useState<string>();
+
+  const mutation = useMutation({
+    mutationFn: () =>
+      startMembershipReapplication(membership.membershipId, {
+        role,
+        ...qualificationBody({
+          role,
+          qualificationNumber,
+          employmentReportConfirmed,
+          trainingConfirmed,
+        }),
+      }),
+    onSuccess: onDone,
+    onError: (caught) => {
+      const mapped = fieldErrorMap(caught);
+      setErrors({
+        qualificationNumber: mapped.qualificationNumber,
+        employmentReportConfirmed: mapped.employmentReportConfirmed,
+        trainingConfirmed: mapped.trainingConfirmed,
+      });
+      setFormError(describeOfficeError(caught, "재신청하지 못했습니다. 다시 시도해 주세요."));
+    },
+  });
+
+  function submit() {
+    setFormError(undefined);
+    const problems = validateQualification({
+      role,
+      qualificationNumber,
+      employmentReportConfirmed,
+      trainingConfirmed,
+    });
+    setErrors(problems);
+    if (Object.keys(problems).length > 0) return;
+    mutation.mutate();
+  }
+
+  return (
+    <form
+      noValidate
+      aria-label="재신청"
+      className="flex flex-col gap-4 rounded-control border border-line p-4"
+      onSubmit={(event) => {
+        event.preventDefault();
+        submit();
+      }}
+    >
+      <p className="text-body font-semibold text-ink">재신청</p>
+      <MutedNote>재신청하려면 역할과 자격, 교육, 고용신고 확인을 다시 입력해야 합니다.</MutedNote>
+      <div className="flex flex-col gap-2">
+        <p id="reapply-role-label" className="text-caption font-semibold text-ink">
+          역할 선택
+        </p>
+        <div
+          role="radiogroup"
+          aria-labelledby="reapply-role-label"
+          className="grid grid-cols-2 gap-2"
+        >
+          {ROLE_CHOICES.map((choice) => (
+            <button
+              key={choice.role}
+              type="button"
+              role="radio"
+              aria-checked={role === choice.role}
+              onClick={() => {
+                setRole(choice.role);
+                setErrors({});
+              }}
+              className={cn(
+                "h-12 rounded-control border text-body",
+                role === choice.role
+                  ? "border-primary bg-primary-soft font-semibold text-primary"
+                  : "border-line bg-surface text-ink-2 hover:border-primary",
+              )}
+            >
+              {choice.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <QualificationFields
+        role={role}
+        qualificationNumber={qualificationNumber}
+        employmentReportConfirmed={employmentReportConfirmed}
+        trainingConfirmed={trainingConfirmed}
+        errors={errors}
+        onChange={(patch) => {
+          if (patch.qualificationNumber !== undefined)
+            setQualificationNumber(patch.qualificationNumber);
+          if (patch.employmentReportConfirmed !== undefined) {
+            setEmploymentReportConfirmed(patch.employmentReportConfirmed);
+          }
+          if (patch.trainingConfirmed !== undefined) setTrainingConfirmed(patch.trainingConfirmed);
+          setErrors({});
+        }}
+      />
+      {formError ? <FormAlert>{formError}</FormAlert> : null}
+      <ButtonRow>
+        <Button variant="cancel" onClick={onCancel}>
+          취소
+        </Button>
+        <Button type="submit" isLoading={mutation.isPending}>
+          재신청
+        </Button>
+      </ButtonRow>
+    </form>
   );
 }
 
