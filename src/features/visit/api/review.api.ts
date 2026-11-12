@@ -96,7 +96,7 @@ export function releasePreferredBroker(base: string, preferredBrokerId: number) 
   });
 }
 
-export type ReviewScope = "ME" | "OFFICE";
+export type ReviewScope = "MINE" | "OFFICE";
 
 export function fetchTrustSummary() {
   return apiFetch("/api/visit-trust/me", { schema: BrokerVisitTrustSummaryResponseSchema });
