@@ -29,6 +29,10 @@ export function setMockAuthContext(context: AuthContextResponse | null): void {
   state.context = context;
 }
 
+export function getMockAuthContext(): AuthContextResponse | null {
+  return state.context;
+}
+
 export function resetMockAuthState(): void {
   state.context = MOCK_ACTIVE_CONTEXT;
   state.failedLogins = 0;

@@ -56,12 +56,24 @@ const NEW_ACCOUNT_CONTEXT: AuthContextResponse = {
   reconsentRequired: false,
 };
 
+const MOCK_OFFICE_ROLE_KEY = "sairo-mock-office-role";
+
 function currentScenario(): string {
   if (typeof window === "undefined") return "";
   try {
     return window.localStorage.getItem(REVIEW_SCENARIO_KEY) ?? "";
   } catch {
     return "";
+  }
+}
+
+/** 브라우저 시험이 사무소 역할을 정했으면 고정 응답 대신 로그인 상태를 따르는 기본 응답으로 넘긴다. */
+function usesStoredOfficeRole(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.localStorage.getItem(MOCK_OFFICE_ROLE_KEY) !== null;
+  } catch {
+    return false;
   }
 }
 
@@ -74,6 +86,7 @@ export const legalReviewHandlers = [
     if (scenario === "reconsent") {
       return HttpResponse.json({ ...OWNER_CONTEXT, reconsentRequired: true });
     }
+    if (usesStoredOfficeRole()) return undefined;
     return HttpResponse.json(OWNER_CONTEXT);
   }),
 
