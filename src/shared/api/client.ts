@@ -32,6 +32,28 @@ function readCsrfToken(): string | null {
   return parseCookieValue(document.cookie, CSRF_COOKIE_NAME);
 }
 
+/** 서버는 /api 요청을 한 번 받아야 CSRF 쿠키를 내려준다. 쿠키가 없으면 공개 조회로 먼저 받는다. */
+const CSRF_PRIMING_PATH = "/api/terms?context=SIGNUP";
+let csrfPriming: Promise<void> | null = null;
+
+async function ensureCsrfToken(): Promise<string | null> {
+  const existing = readCsrfToken();
+  if (existing !== null || typeof document === "undefined") return existing;
+  csrfPriming ??= fetch(CSRF_PRIMING_PATH, {
+    credentials: "include",
+    headers: { [REQUEST_ID_HEADER]: createRequestId() },
+  })
+    .then(
+      () => undefined,
+      () => undefined,
+    )
+    .finally(() => {
+      csrfPriming = null;
+    });
+  await csrfPriming;
+  return readCsrfToken();
+}
+
 export function createRequestId(): string {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();
@@ -151,7 +173,7 @@ async function sendOnce<T>(
   const { body, headers, signal, method, timeoutMs, idempotencyKey, skipAuthEvents, skipStepUp } =
     options;
   const isMutating = method !== undefined && !SAFE_METHODS.has(method.toUpperCase());
-  const csrfToken = isMutating ? readCsrfToken() : null;
+  const csrfToken = isMutating ? await ensureCsrfToken() : null;
 
   const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
   let response: Response;

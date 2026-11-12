@@ -2,7 +2,7 @@
 import { http, HttpResponse } from "msw";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
-import { mockErrors } from "@/mocks/error-responses";
+import { errorResponse, mockErrors } from "@/mocks/error-responses";
 import { server, startMockServer } from "@/mocks/server";
 import { ApiContractError, ApiError, ApiNetworkError } from "./api-error";
 import { setStepUpHandler, subscribeApiAuthEvents } from "./auth-events";
@@ -74,7 +74,9 @@ describe("FormData 본문", () => {
     const sent: { body: unknown; headers: Record<string, string> | undefined }[] = [];
     const baseFetch = globalThis.fetch;
     vi.stubGlobal("fetch", (input: RequestInfo | URL, init?: RequestInit) => {
-      sent.push({ body: init?.body, headers: init?.headers as Record<string, string> });
+      if (init?.method !== undefined) {
+        sent.push({ body: init.body, headers: init.headers as Record<string, string> });
+      }
       return baseFetch(input, init);
     });
     return sent;
@@ -115,6 +117,40 @@ describe("CSRF와 변경 요청 헤더", () => {
     );
     await apiFetch("/api/things", { method: "POST", body: { a: 1 } });
     expect(header).toBe("token/1");
+  });
+
+  it("CSRF 쿠키가 없으면 공개 조회로 쿠키를 먼저 받은 뒤 변경 요청을 보낸다", async () => {
+    const order: string[] = [];
+    let header: string | null = null;
+    server.use(
+      http.get("/api/terms", () => {
+        order.push("GET /api/terms");
+        document.cookie = "XSRF-TOKEN=primed; path=/";
+        return HttpResponse.json({ items: [] });
+      }),
+      http.post("/api/things", ({ request }) => {
+        order.push("POST /api/things");
+        header = request.headers.get("X-XSRF-TOKEN");
+        return HttpResponse.json({});
+      }),
+    );
+    await apiFetch("/api/things", { method: "POST", body: { a: 1 } });
+    expect(order).toEqual(["GET /api/terms", "POST /api/things"]);
+    expect(header).toBe("primed");
+  });
+
+  it("CSRF 쿠키가 있으면 먼저 조회하지 않는다", async () => {
+    document.cookie = "XSRF-TOKEN=token1; path=/";
+    const primed = vi.fn();
+    server.use(
+      http.get("/api/terms", () => {
+        primed();
+        return HttpResponse.json({ items: [] });
+      }),
+      http.post("/api/things", () => HttpResponse.json({})),
+    );
+    await apiFetch("/api/things", { method: "POST", body: { a: 1 } });
+    expect(primed).not.toHaveBeenCalled();
   });
 
   it("조회 요청에는 CSRF 헤더를 보내지 않는다", async () => {
@@ -221,9 +257,13 @@ describe("공통 오류 응답 파싱", () => {
   });
 
   it("권한 제한 안내의 actionUrl을 읽는다", async () => {
-    server.use(http.get("/api/work", () => mockErrors.reconsentRequired()));
+    server.use(
+      http.get("/api/work", () =>
+        errorResponse(403, "FORBIDDEN", "권한이 없습니다.", { actionUrl: "/billing" }),
+      ),
+    );
     const error = (await catchError(apiFetch("/api/work", { skipAuthEvents: true }))) as ApiError;
-    expect(error.actionUrl).toBe("/reconsent");
+    expect(error.actionUrl).toBe("/billing");
   });
 
   it("형식이 다른 오류 본문은 알 수 없는 오류로 처리한다", async () => {
