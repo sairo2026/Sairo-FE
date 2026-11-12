@@ -48,6 +48,27 @@ import type {
 } from "@/lib/api/contracts/office.schema";
 import { ApiError, apiFetch, withQuery } from "@/shared/api/client";
 
+/** 명세 6장 상세 응답이 허용하는 참여 경로 네 가지. 대표 본인 행은 REGISTRATION 또는 TRANSFER로 온다. */
+const REQUEST_SOURCES = ["REQUEST", "INVITE", "REGISTRATION", "TRANSFER"] as const;
+
+export const MembershipStatusWireSchema = MembershipStatusResponseSchema.extend({
+  requestSource: z.enum(REQUEST_SOURCES),
+});
+export type MembershipStatusWire = z.infer<typeof MembershipStatusWireSchema>;
+
+/** 명세 6장은 대표가 아닌 호출자에게 소속 메타 정보를 null로 준다고 적는다. */
+const MembershipListItemWireSchema = OfficeMembershipListResponseSchema.shape.items.element.extend({
+  requestSource: z.enum(REQUEST_SOURCES).nullable().optional(),
+  officeId: z.number().nullable(),
+  createdAt: z.iso.datetime({ offset: true }).nullable(),
+  updatedAt: z.iso.datetime({ offset: true }).nullable(),
+  version: z.number().nullable(),
+});
+export const OfficeMembershipListWireSchema = OfficeMembershipListResponseSchema.extend({
+  items: z.array(MembershipListItemWireSchema),
+});
+export type OfficeMembershipListWire = z.infer<typeof OfficeMembershipListWireSchema>;
+
 function ifMatch(version: number) {
   return { "If-Match": String(version) };
 }
@@ -155,7 +176,7 @@ export function createMembership(officeId: number, request: MembershipCreateRequ
 }
 
 export function fetchMyMembership() {
-  return nullOn404(apiFetch("/api/memberships/me", { schema: MembershipStatusResponseSchema }));
+  return nullOn404(apiFetch("/api/memberships/me", { schema: MembershipStatusWireSchema }));
 }
 
 export function cancelMembership(membershipId: number) {
@@ -165,9 +186,13 @@ export function cancelMembership(membershipId: number) {
   });
 }
 
-export function startMembershipReapplication(membershipId: number) {
+export function startMembershipReapplication(
+  membershipId: number,
+  request: MembershipCreateRequest,
+) {
   return apiFetch(`/api/memberships/${membershipId}/reapplication-start`, {
     method: "POST",
+    body: request,
     schema: MembershipReapplicationStartResponseSchema,
   });
 }
@@ -188,7 +213,7 @@ export type MembershipListParams = {
 
 export function listMemberships(params: MembershipListParams) {
   return apiFetch(withQuery("/api/offices/current/memberships", { ...params }), {
-    schema: OfficeMembershipListResponseSchema,
+    schema: OfficeMembershipListWireSchema,
   });
 }
 
@@ -299,7 +324,7 @@ export function updateRosterItem(
 export function fetchCurrentTransfer() {
   return nullOn404(
     apiFetch("/api/offices/current/owner-transfer", {
-      schema: OwnerTransferCurrentResponseSchema.nullable(),
+      schema: OwnerTransferCurrentResponseSchema,
     }),
   );
 }

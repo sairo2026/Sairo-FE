@@ -86,7 +86,11 @@ export function PhoneVerificationField({
       expiry.start(0);
       onVerified(result.verifiedPhoneTicket);
     } catch (error) {
-      if (error instanceof ApiError && error.code === "TOKEN_INVALID") {
+      if (
+        error instanceof ApiError &&
+        (error.code === "TOKEN_INVALID" ||
+          (error.code === "VERIFICATION_CODE_INVALID" && error.remainingAttempts === 0))
+      ) {
         setCodeError("인증번호를 5회 틀렸거나 사용할 수 없습니다. 새 인증번호를 받아 주세요.");
         setIsSent(false);
         setCode("");
@@ -95,6 +99,14 @@ export function PhoneVerificationField({
         setCodeError("인증 시간이 지났습니다. 새 인증번호를 받아 주세요.");
         setIsSent(false);
         setCode("");
+      } else if (
+        error instanceof ApiError &&
+        error.code === "VERIFICATION_CODE_INVALID" &&
+        error.remainingAttempts !== undefined
+      ) {
+        setCodeError(
+          `인증번호가 맞지 않습니다. ${error.remainingAttempts}회 더 입력할 수 있습니다.`,
+        );
       } else {
         setCodeError(
           describeAuthError(error, "인증번호를 확인하지 못했습니다. 다시 시도해 주세요."),

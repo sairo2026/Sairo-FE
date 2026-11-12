@@ -295,6 +295,13 @@ describe("승인 대기와 초대 수락", () => {
     renderOffice(<MembershipStatusScreen />);
     expect(await screen.findByText("거절 사유: 자격 확인 불가")).not.toBeNull();
     await user.click(screen.getByRole("button", { name: "재신청 시작" }));
+    const form = await screen.findByRole("form", { name: "재신청" });
+    await user.click(within(form).getByRole("button", { name: "재신청" }));
+    expect(await within(form).findByText("고용신고 확인에 체크해 주세요.")).not.toBeNull();
+    await user.type(within(form).getByLabelText("자격증 번호"), "A-1");
+    await user.click(within(form).getByLabelText("고용신고를 확인했습니다"));
+    await user.click(within(form).getByLabelText("필요한 교육을 이수했습니다"));
+    await user.click(within(form).getByRole("button", { name: "재신청" }));
     expect(await screen.findByText("대표의 승인을 기다리고 있습니다.")).not.toBeNull();
   });
 

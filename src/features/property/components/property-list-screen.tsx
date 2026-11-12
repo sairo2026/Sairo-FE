@@ -81,8 +81,8 @@ function toParams(filters: Filters, page: number, size: number): PropertyListPar
     areaType: hasArea ? filters.areaType || undefined : undefined,
     areaMin: optionalNumber(filters.areaMin),
     areaMax: optionalNumber(filters.areaMax),
-    priceMin: optionalNumber(filters.priceMin, MAN_WON),
-    priceMax: optionalNumber(filters.priceMax, MAN_WON),
+    priceMin: filters.dealType ? optionalNumber(filters.priceMin, MAN_WON) : undefined,
+    priceMax: filters.dealType ? optionalNumber(filters.priceMax, MAN_WON) : undefined,
     archived: filters.archived ? true : undefined,
     page: page - 1,
     size,
@@ -124,6 +124,11 @@ export function PropertyListScreen() {
     const hasArea = draft.areaMin.trim() !== "" || draft.areaMax.trim() !== "";
     if (hasArea && draft.areaType === "") {
       setFilterError("면적 범위를 쓰려면 면적 종류를 먼저 선택해 주세요.");
+      return;
+    }
+    const hasPrice = draft.priceMin.trim() !== "" || draft.priceMax.trim() !== "";
+    if (hasPrice && draft.dealType === "") {
+      setFilterError("가격 범위를 쓰려면 거래유형을 먼저 선택해 주세요.");
       return;
     }
     applyNow(draft);
