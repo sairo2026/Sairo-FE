@@ -54,10 +54,12 @@ export function fetchMappingSuggestion(batchId: number) {
 
 export function confirmImportMapping(request: {
   batchId: number;
+  version: number;
   body: ImportMappingConfirmRequest;
 }) {
   return apiFetch(`/api/import-batches/${request.batchId}/mapping`, {
     method: "PUT",
+    headers: { "If-Match": String(request.version) },
     body: request.body,
     schema: ImportMappingConfirmResponseSchema,
   });

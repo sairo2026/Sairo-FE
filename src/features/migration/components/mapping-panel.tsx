@@ -17,6 +17,7 @@ const UNMAPPED = "";
 
 type Props = {
   batchId: number;
+  version: number;
   isLocked: boolean;
 };
 
@@ -52,6 +53,7 @@ export function validateMapping(
 
 function MappingForm({
   batchId,
+  version,
   isLocked,
   data,
 }: Props & { data: ImportMappingSuggestionResponse }) {
@@ -84,6 +86,7 @@ function MappingForm({
     if (problems.sourceSystem || problems.mapping) return;
     mutation.mutate({
       batchId,
+      version,
       body: {
         sourceSystem: sourceSystem.trim(),
         mappings: Object.entries(selection)
@@ -193,7 +196,7 @@ function MappingForm({
   );
 }
 
-export function MappingPanel({ batchId, isLocked }: Props) {
+export function MappingPanel({ batchId, version, isLocked }: Props) {
   const query = useMappingSuggestion(batchId, true);
   return (
     <Card title="매핑 검토">
@@ -201,7 +204,9 @@ export function MappingPanel({ batchId, isLocked }: Props) {
         올린 파일의 열이 사이로의 어떤 항목인지 확인합니다. 추천은 참고용이며 바꿀 수 있습니다.
       </p>
       <QueryGate query={query} loadingLabel="매핑 제안을 불러오는 중입니다.">
-        {(data) => <MappingForm batchId={batchId} isLocked={isLocked} data={data} />}
+        {(data) => (
+          <MappingForm batchId={batchId} version={version} isLocked={isLocked} data={data} />
+        )}
       </QueryGate>
     </Card>
   );

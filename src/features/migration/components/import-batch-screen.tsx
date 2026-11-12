@@ -34,7 +34,10 @@ function SheetSelector({ batch, isLocked }: { batch: ImportBatchDetail; isLocked
     enabled: false,
   });
   const [error, setError] = useState<string>();
-  const upload = sheetsQuery.data;
+  const upload =
+    batch.sheets && batch.sheets.length > 0
+      ? { sheets: batch.sheets, selectedSheetName: batch.selectedSheetName ?? "" }
+      : sheetsQuery.data;
 
   const mutation = useMutation({
     mutationFn: selectImportSheet,
@@ -112,7 +115,9 @@ function Body({ batch }: { batch: ImportBatchDetail }) {
           </p>
         </Card>
       ) : null}
-      {isEditable ? <MappingPanel batchId={batch.batchId} isLocked={isLocked} /> : null}
+      {isEditable ? (
+        <MappingPanel batchId={batch.batchId} version={batch.version} isLocked={isLocked} />
+      ) : null}
       {hasMapping ? <PreviewPanel batchId={batch.batchId} isLocked={isLocked} /> : null}
       {!isEditable ? <ResultPanel batch={batch} isLocked={isLocked} /> : null}
     </div>
