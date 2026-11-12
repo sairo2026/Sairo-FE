@@ -37,7 +37,8 @@ function RescheduleBlock({ detail }: { detail: Detail }) {
   const [reason, setReason] = useState("");
   const [result, setResult] = useState<VisitCoordinationRescheduleResponse | null>(null);
   const mutation = useMutation({
-    mutationFn: () => rescheduleCoordination(detail.coordinationId, reason.trim() || null),
+    mutationFn: () =>
+      rescheduleCoordination(detail.coordinationId, detail.version, reason.trim() || null),
     onSuccess: async (response) => {
       setResult(response);
       await refresh();
@@ -46,28 +47,38 @@ function RescheduleBlock({ detail }: { detail: Detail }) {
   const nameOf = (candidateId: number) =>
     detail.candidateProperties.find((entry) => entry.candidatePropertyId === candidateId)
       ?.propertyName ?? "";
+  // 재조율 전환은 확정 완료 상태에서만 받는다(백엔드 CoordinationDisruptionService).
+  const canStart = detail.status === "CONFIRMED";
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-caption text-ink-2">
-        이미 끝난 방문과 영향이 없는 확정 방문은 그대로 고정되고 변경이 필요한 방문만 다시
-        구성합니다. 확정 방문은 자동으로 바뀌거나 취소되지 않습니다.
-      </p>
-      <TextField
-        label="재조율이 필요한 이유"
-        value={reason}
-        maxLength={REASON_LIMIT}
-        onValueChange={setReason}
-      />
-      <div>
-        <Button
-          size="sm"
-          variant="outlined"
-          isLoading={mutation.isPending}
-          onClick={() => mutation.mutate()}
-        >
-          재조율 필요로 전환
-        </Button>
-      </div>
+      {canStart ? (
+        <>
+          <p className="text-caption text-ink-2">
+            이미 끝난 방문과 영향이 없는 확정 방문은 그대로 고정되고 변경이 필요한 방문만 다시
+            구성합니다. 확정 방문은 자동으로 바뀌거나 취소되지 않습니다.
+          </p>
+          <TextField
+            label="재조율이 필요한 이유"
+            value={reason}
+            maxLength={REASON_LIMIT}
+            onValueChange={setReason}
+          />
+          <div>
+            <Button
+              size="sm"
+              variant="outlined"
+              isLoading={mutation.isPending}
+              onClick={() => mutation.mutate()}
+            >
+              재조율 필요로 전환
+            </Button>
+          </div>
+        </>
+      ) : (
+        <p className="text-caption text-ink-2">
+          재조율이 필요한 상태입니다. 변경이 필요한 방문은 일정 구성에서 다시 정하고 확정합니다.
+        </p>
+      )}
       {mutation.isError ? (
         <FormAlert>{describeVisitError(mutation.error, "재조율로 전환하지 못했습니다.")}</FormAlert>
       ) : null}
@@ -102,7 +113,7 @@ function RevocationDialog({ detail, onClose }: { detail: Detail; onClose: () => 
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
   const mutation = useMutation({
     mutationFn: () =>
-      recordAccessRevocation(detail.coordinationId, {
+      recordAccessRevocation(detail.coordinationId, detail.version, {
         approvalId: Number(approvalId),
         revokedAt: toKstIso(date, time),
         revocationReason: reason.trim(),
@@ -188,7 +199,8 @@ function CancelDialog({
   const refresh = useRefreshAll();
   const [reason, setReason] = useState("");
   const mutation = useMutation({
-    mutationFn: () => cancelCoordination(detail.coordinationId, reason.trim() || null),
+    mutationFn: () =>
+      cancelCoordination(detail.coordinationId, detail.version, reason.trim() || null),
     onSuccess: async () => {
       await refresh();
       onClose();

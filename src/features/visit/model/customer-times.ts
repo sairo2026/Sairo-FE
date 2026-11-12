@@ -14,13 +14,39 @@ export function parseSubmittedSlots(raw: unknown): Array<{ startsAt: string; end
   return parsed.success ? parsed.data : [];
 }
 
+/** 백엔드가 고객 응답을 받는 조율 상태(CoordinationStatus.acceptsCustomerResponse). */
+export const CUSTOMER_RESPONSE_STATUSES = [
+  "TIME_COLLECTING",
+  "COORDINATABLE",
+  "FINAL_CONFIRMATION_REQUIRED",
+  "RESCHEDULE_REQUIRED",
+];
+
+export function acceptsCustomerResponse(
+  status: string,
+  linkExpiresAt: string,
+  now: Date = new Date(),
+): boolean {
+  if (!CUSTOMER_RESPONSE_STATUSES.includes(status)) return false;
+  const expires = Date.parse(linkExpiresAt);
+  return Number.isNaN(expires) || expires > now.getTime();
+}
+
+/**
+ * 빈 목록은 이미 제출한 시간을 모두 거두는 제출 취소다(allowEmpty). 처음 제출할 때는 한 개 이상 받는다.
+ */
 export function validateSlots(
   slots: SlotDraft[],
   window: { startDate: string; endDate: string },
   now: Date = new Date(),
+  allowEmpty = false,
 ): { errors: SlotErrors; formError?: string } {
   const errors: SlotErrors = {};
-  if (slots.length === 0) return { errors, formError: "가능한 시간을 한 개 이상 추가해 주세요." };
+  if (slots.length === 0) {
+    return allowEmpty
+      ? { errors }
+      : { errors, formError: "가능한 시간을 한 개 이상 추가해 주세요." };
+  }
   if (slots.length > MAX_CUSTOMER_SLOTS) {
     return { errors, formError: `가능한 시간은 ${MAX_CUSTOMER_SLOTS}개까지 보낼 수 있습니다.` };
   }

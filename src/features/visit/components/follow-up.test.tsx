@@ -20,6 +20,7 @@ import {
 } from "@/mocks/handlers/visit-follow";
 import { server, startMockServer } from "@/mocks/server";
 import { renderOffice } from "@/shared/testing/office-render";
+import { cancelCoordination, recordItemResult, rescheduleCoordination } from "../api/follow.api";
 import { CoordinationDetailScreen } from "./coordination-detail-screen";
 import { SupervisionScreen } from "./supervision-screen";
 import { validateResult } from "./result-section";
@@ -255,6 +256,32 @@ describe("재조율과 취소", () => {
     expect(await screen.findByText(/재조율 필요로 전환했습니다/)).not.toBeNull();
     expect(screen.getByText(/대안 없음, 이번 조율에서 제외하려면/)).not.toBeNull();
     expect(getMockVisitState().coordinations[0]?.status).toBe("RESCHEDULE_REQUIRED");
+  });
+
+  it("재조율 필요 상태에서는 다시 전환하지 않고 일정 구성 안내만 보여준다", async () => {
+    prepare({ status: "RESCHEDULE_REQUIRED" });
+    renderOffice(<CoordinationDetailScreen coordinationId={801} />, { role: "OWNER" });
+    expect(await screen.findByText(/재조율이 필요한 상태입니다/)).not.toBeNull();
+    expect(screen.queryByRole("button", { name: "재조율 필요로 전환" })).toBeNull();
+  });
+
+  it("결과 기록·재조율·철회·취소는 조율 버전을 If-Match로 보내고 다르면 충돌로 받는다", async () => {
+    prepare();
+    const version = getMockVisitState().coordinations[0]?.version ?? 0;
+    await expect(cancelCoordination(801, version + 1, null)).rejects.toMatchObject({
+      code: "VERSION_CONFLICT",
+    });
+    await expect(rescheduleCoordination(801, version + 1, null)).rejects.toMatchObject({
+      code: "VERSION_CONFLICT",
+    });
+    const recorded = await recordItemResult(9101, version, {
+      result: "NO_SHOW",
+      actualVisitedAt: null,
+      correctionReason: null,
+      cancelReasonCode: null,
+    });
+    expect(recorded.result).toBe("NO_SHOW");
+    expect(getMockVisitState().coordinations[0]?.version).toBe(version + 1);
   });
 
   it("출입승인 철회를 접수하면 재조율 필요로 바뀐다", async () => {

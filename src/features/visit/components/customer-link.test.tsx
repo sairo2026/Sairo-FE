@@ -15,7 +15,12 @@ import {
 import { server, startMockServer } from "@/mocks/server";
 import { createQueryClient } from "@/shared/api/query-client";
 import { CustomerLinkScreen } from "./customer-link-screen";
-import { parseSubmittedSlots, toSubmitSlots, validateSlots } from "../model/customer-times";
+import {
+  acceptsCustomerResponse,
+  parseSubmittedSlots,
+  toSubmitSlots,
+  validateSlots,
+} from "../model/customer-times";
 
 let stopServer: () => void;
 
@@ -56,6 +61,21 @@ describe("고객 시간 입력 모델", () => {
       validateSlots([{ ...base, date: "2026-11-11" }], WINDOW, new Date("2026-11-12T00:00:00Z"))
         .errors[1],
     ).toContain("지난 시간");
+  });
+
+  it("이미 낸 시간이 있으면 빈 목록을 제출 취소로 허용한다", () => {
+    expect(validateSlots([], WINDOW, NOW, true)).toEqual({ errors: {} });
+  });
+
+  it("백엔드가 받는 상태와 제출 마감으로 제출 가능 여부를 정한다", () => {
+    const later = "2026-11-17T09:00:00+09:00";
+    expect(acceptsCustomerResponse("TIME_COLLECTING", later, NOW)).toBe(true);
+    expect(acceptsCustomerResponse("RESCHEDULE_REQUIRED", later, NOW)).toBe(true);
+    expect(acceptsCustomerResponse("CONFIRMED", later, NOW)).toBe(false);
+    expect(acceptsCustomerResponse("APPLYING", later, NOW)).toBe(false);
+    expect(acceptsCustomerResponse("TIME_COLLECTING", "2026-11-09T09:00:00+09:00", NOW)).toBe(
+      false,
+    );
   });
 
   it("제출 형식으로 바꾸고 서버 값은 안전하게 해석한다", () => {
@@ -126,6 +146,32 @@ describe("고객 공개 링크 화면", () => {
     expect(await screen.findByDisplayValue("2026-11-19")).not.toBeNull();
     await user.click(screen.getByRole("button", { name: "가능한 시간 수정 제출" }));
     expect(await screen.findByText("가능한 시간을 제출했습니다.")).not.toBeNull();
+  });
+
+  it("이미 낸 시간을 모두 지우고 제출하면 제출 취소로 보낸다", async () => {
+    setMockVisitFollowState({
+      customerSubmitted: [
+        { startsAt: "2026-11-19T10:00:00+09:00", endsAt: "2026-11-19T11:00:00+09:00" },
+      ],
+    });
+    const user = userEvent.setup();
+    renderLink();
+    await screen.findByDisplayValue("2026-11-19");
+    await user.click(screen.getByRole("button", { name: "1번째 시간 삭제" }));
+    expect(screen.getByText(/앞서 보낸 가능한 시간이 모두 취소됩니다/)).not.toBeNull();
+    await user.click(screen.getByRole("button", { name: "제출한 시간 모두 취소" }));
+    expect(await screen.findByText("가능한 시간을 제출했습니다.")).not.toBeNull();
+    expect(getMockVisitFollowState().customerSubmitted).toHaveLength(0);
+  });
+
+  it("고객 응답을 받지 않는 조율 상태면 제출할 수 없다", async () => {
+    setMockVisitFollowState({
+      customerLink: { ...getMockVisitFollowState().customerLink, coordinationStatus: "CONFIRMED" },
+    });
+    renderLink();
+    const button = await screen.findByRole("button", { name: "가능한 시간 제출" });
+    expect((button as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByText("지금은 가능한 시간을 제출하거나 고칠 수 없습니다.")).not.toBeNull();
   });
 
   it("시간을 삭제할 수 있다", async () => {

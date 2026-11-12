@@ -425,7 +425,7 @@ export const visitRequestHandlers = [
     const found = state.notices.find((item) => String(item.noticeId) === params.noticeId);
     if (!found) return mockErrors.notFound();
     state.notices = state.notices.map((item) => (item === found ? { ...item, readAt: NOW } : item));
-    return HttpResponse.json({});
+    return new HttpResponse(null, { status: 204 });
   }),
 
   http.get(

@@ -6,7 +6,6 @@ import {
   VisitRequestDetailResponseSchema,
   VisitRequestListResponseSchema,
   VisitRequestNoticeListResponseSchema,
-  VisitRequestNoticeReadResponseSchema,
   VisitRequestResponseSchema,
 } from "@/lib/api/contracts/visit.schema";
 import type {
@@ -100,11 +99,9 @@ export function listRequestNotices() {
   return apiFetch("/api/visit-request-notices", { schema: VisitRequestNoticeListResponseSchema });
 }
 
-export function readRequestNotice(noticeId: number) {
-  return apiFetch(`/api/visit-request-notices/${noticeId}/read`, {
-    method: "POST",
-    schema: VisitRequestNoticeReadResponseSchema,
-  });
+/** 백엔드는 204 본문 없음으로 답한다. */
+export async function readRequestNotice(noticeId: number): Promise<void> {
+  await apiFetch(`/api/visit-request-notices/${noticeId}/read`, { method: "POST" });
 }
 
 function grantsPath(propertyId: number, approvalId: number) {
