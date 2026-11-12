@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useState } from "react";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
-import type { OfficeMembershipListResponse } from "@/lib/api/contracts/office.schema";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import { DataTable } from "@/shared/components/ui/data-table";
@@ -21,13 +20,14 @@ import {
   rejectMembership,
   resendInvitation,
 } from "../api/office.api";
+import type { OfficeMembershipListWire } from "../api/office.api";
 import { officeKeys, useMemberships } from "../hooks/office-queries";
 import { REQUEST_SOURCE_LABEL, ROLE_LABEL, labelOf } from "../model/labels";
 import { describeOfficeError, fieldErrorMap } from "../model/messages";
 import { validateInvite, validateReason } from "../model/validation";
 import { MutedNote, ReasonDialog } from "@/shared/components/feedback/page-parts";
 
-type PendingRow = OfficeMembershipListResponse["items"][number];
+type PendingRow = OfficeMembershipListWire["items"][number];
 
 function yesNo(value: boolean | null | undefined) {
   if (value === null || value === undefined) return "-";

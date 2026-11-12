@@ -290,6 +290,9 @@ export const propertyHandlers = [
     if ((areaMin || areaMax) && !url.searchParams.get("areaType")) {
       return mockErrors.validation([{ field: "areaType", message: "면적 종류를 선택해 주세요." }]);
     }
+    if ((url.searchParams.get("priceMin") || url.searchParams.get("priceMax")) && !dealType) {
+      return mockErrors.validation([{ field: "dealType", message: "거래유형을 선택해 주세요." }]);
+    }
     const filtered = state.properties.filter((item) => {
       if ((item.deletedAt !== null && item.deletedAt !== undefined) !== archived) return false;
       if (keyword && !`${item.name}${item.address ?? ""}`.includes(keyword)) return false;

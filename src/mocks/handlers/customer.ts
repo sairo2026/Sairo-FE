@@ -249,18 +249,31 @@ function replaceCustomer(next: CustomerDetailResponse) {
   return next;
 }
 
+/** 희망조건 항목의 version은 백엔드처럼 고객 집계 버전을 그대로 쓴다. */
 function bumped(customer: CustomerDetailResponse, changes: Partial<CustomerDetailResponse>) {
+  const version = customer.version + 1;
+  const demandConditions = (changes.demandConditions ?? customer.demandConditions).map((item) => ({
+    ...item,
+    version,
+  }));
   return replaceCustomer({
     ...customer,
     ...changes,
+    demandConditions,
     updatedAt: NOW,
-    version: customer.version + 1,
+    version,
   });
 }
 
-function matchVersion(request: Request, version: number): boolean {
+/** 백엔드는 수정 요청에 If-Match가 없으면 400, 버전이 다르면 409를 돌려준다. */
+function versionProblem(request: Request, version: number): Response | null {
   const header = request.headers.get("If-Match");
-  return header === null || Number(header) === version;
+  if (header === null) {
+    return mockErrors.validation([
+      { field: "If-Match", code: "REQUIRED", message: "버전 정보가 필요합니다." },
+    ]);
+  }
+  return Number(header) === version ? null : mockErrors.versionConflict(version);
 }
 
 const SENSITIVE = /\d{6}-?[1-4]\d{6}/;
@@ -323,7 +336,9 @@ export const customerHandlers = [
     if (primary.status === "ARCHIVED" || merged.status === "ARCHIVED") {
       return errorResponse(409, "CUSTOMER_ARCHIVED", "보관된 고객입니다.");
     }
-    if (!matchVersion(request, primary.version) || merged.version !== body.mergedCustomerVersion) {
+    const mergeVersionProblem = versionProblem(request, primary.version);
+    if (mergeVersionProblem) return mergeVersionProblem;
+    if (merged.version !== body.mergedCustomerVersion) {
       return mockErrors.versionConflict(primary.version);
     }
     const choices = body.fieldChoices ?? {};
@@ -401,9 +416,8 @@ export const customerHandlers = [
       return errorResponse(409, "INVALID_TRANSITION", "병합된 고객입니다.");
     }
     if (customer.deletedAt) return errorResponse(409, "CUSTOMER_ARCHIVED", "보관된 고객입니다.");
-    if (!matchVersion(request, customer.version)) {
-      return mockErrors.versionConflict(customer.version);
-    }
+    const customerVersionProblem = versionProblem(request, customer.version);
+    if (customerVersionProblem) return customerVersionProblem;
     const body = (await request.json()) as Record<string, unknown>;
     if (hasSensitive(body)) {
       return errorResponse(400, "SENSITIVE_DATA_DETECTED", "민감정보가 감지되었습니다.");
@@ -496,7 +510,8 @@ export const customerHandlers = [
       (item) => String(item.consultationId) === params.consultationId,
     );
     if (!target) return mockErrors.notFound();
-    if (!matchVersion(request, target.version)) return mockErrors.versionConflict(target.version);
+    const consultationVersionProblem = versionProblem(request, target.version);
+    if (consultationVersionProblem) return consultationVersionProblem;
     const body = (await request.json()) as {
       occurredAt?: string;
       content?: string;
@@ -565,7 +580,7 @@ export const customerHandlers = [
       return errorResponse(400, "INVALID_RANGE", "종료일이 시작일보다 빠릅니다.");
     }
     const interestId = state.nextId++;
-    bumped(customer, {
+    const saved = bumped(customer, {
       relatedProperties: [
         ...customer.relatedProperties,
         {
@@ -591,7 +606,7 @@ export const customerHandlers = [
         note: body.note ?? null,
         createdAt: NOW,
         updatedAt: NOW,
-        version: 1,
+        version: saved.version,
       },
       { status: 201 },
     );
@@ -605,7 +620,8 @@ export const customerHandlers = [
       (item) => String(item.interestId) === params.interestId,
     );
     if (!owner || !interest) return mockErrors.notFound();
-    if (!matchVersion(request, owner.version)) return mockErrors.versionConflict(owner.version);
+    const interestVersionProblem = versionProblem(request, owner.version);
+    if (interestVersionProblem) return interestVersionProblem;
     const body = (await request.json()) as { endDate?: string | null; note?: string | null };
     const endDate = body.endDate === undefined ? interest.endDate : body.endDate;
     if (endDate && endDate < interest.startDate) {
@@ -644,7 +660,7 @@ export const customerHandlers = [
     const customer = state.customers.find((item) => item.customerId === body.customerId);
     if (!customer) return mockErrors.notFound();
     const linkId = state.nextId++;
-    bumped(customer, {
+    const saved = bumped(customer, {
       relatedProperties: [
         ...customer.relatedProperties,
         {
@@ -672,7 +688,7 @@ export const customerHandlers = [
         confirmedAt: NOW,
         createdAt: NOW,
         updatedAt: NOW,
-        version: 1,
+        version: saved.version,
       },
       { status: 201 },
     );
@@ -684,12 +700,14 @@ export const customerHandlers = [
     );
     const link = owner?.relatedProperties.find((item) => String(item.linkId) === params.linkId);
     if (!owner || !link) return mockErrors.notFound();
+    const linkVersionProblem = versionProblem(request, owner.version);
+    if (linkVersionProblem) return linkVersionProblem;
     const body = (await request.json()) as { endDate?: string | null };
     if (body.endDate && body.endDate < link.startDate) {
       return errorResponse(400, "INVALID_RANGE", "종료일이 시작일보다 빠릅니다.");
     }
     const updated = { ...link, endDate: body.endDate ?? null };
-    bumped(owner, {
+    const nextOwner = bumped(owner, {
       relatedProperties: owner.relatedProperties.map((item) => (item === link ? updated : item)),
     });
     return HttpResponse.json({
@@ -704,7 +722,7 @@ export const customerHandlers = [
       confirmedAt: null,
       createdAt: NOW,
       updatedAt: NOW,
-      version: 2,
+      version: nextOwner.version,
     });
   }),
 
@@ -738,13 +756,14 @@ export const customerHandlers = [
       regions,
       version: 1,
     };
-    bumped(customer, {
+    const savedCustomer = bumped(customer, {
       demandConditions: [...customer.demandConditions, condition],
       roles: customer.roles.includes("DEMAND") ? customer.roles : [...customer.roles, "DEMAND"],
     });
     return HttpResponse.json(
       {
         ...condition,
+        version: savedCustomer.version,
         customerId: customer.customerId,
         createdAt: NOW,
         officeId: 12,
@@ -763,9 +782,8 @@ export const customerHandlers = [
       (item) => String(item.conditionId) === params.conditionId,
     );
     if (!owner || !condition) return mockErrors.notFound();
-    if (!matchVersion(request, condition.version)) {
-      return mockErrors.versionConflict(condition.version);
-    }
+    const conditionVersionProblem = versionProblem(request, owner.version);
+    if (conditionVersionProblem) return conditionVersionProblem;
     const body = (await request.json()) as Record<string, unknown> & { regions?: string[] | null };
     const rangeError = findRangeError({ ...condition, ...body });
     if (rangeError) return rangeError;
@@ -773,10 +791,11 @@ export const customerHandlers = [
     const updated = {
       ...condition,
       ...rest,
-      regions: regionNames
-        ? regionNames.map((regionName, index) => ({ regionId: index + 1, regionName }))
-        : condition.regions,
-      version: condition.version + 1,
+      regions:
+        regionNames === undefined
+          ? condition.regions
+          : (regionNames ?? []).map((regionName, index) => ({ regionId: index + 1, regionName })),
+      version: owner.version + 1,
     } as typeof condition;
     bumped(owner, {
       demandConditions: owner.demandConditions.map((item) => (item === condition ? updated : item)),

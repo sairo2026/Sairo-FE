@@ -17,6 +17,7 @@ import { DataExportNotice } from "@/shared/legal/data-rights-notices";
 import { formatSeoulDateTime } from "@/shared/lib/format";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { createExport, updateExportPolicy } from "../api/export.api";
+import type { ExportTables } from "../api/wire";
 import {
   exportKeys,
   useAllowedExportTables,
@@ -180,10 +181,12 @@ function CreateForm({
   );
 }
 
-function PolicyPanel() {
+function PolicyPanel({ tables }: { tables: ExportTables["tables"] }) {
   const { isReadOnly } = useOfficeAccess();
   const queryClient = useQueryClient();
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selected, setSelected] = useState<string[]>(() =>
+    tables.filter((table) => table.allowed === true).map((table) => table.code),
+  );
   const [message, setMessage] = useState<string>();
   const [error, setError] = useState<string>();
 
@@ -191,7 +194,14 @@ function PolicyPanel() {
     mutationFn: updateExportPolicy,
     onSuccess: async (result) => {
       setError(undefined);
-      setMessage(COPY.policySaved(result.tables.map((table) => table.label).join(", ")));
+      setMessage(
+        COPY.policySaved(
+          result.tables
+            .filter((table) => table.allowed !== false)
+            .map((table) => table.label)
+            .join(", "),
+        ),
+      );
       await queryClient.invalidateQueries({ queryKey: exportKeys.allowedTables });
     },
     onError: (caught) => {
@@ -327,7 +337,7 @@ export function ExportsScreen() {
           <ExportStatusPanel exportId={exportId} />
         </Card>
       ) : null}
-      {isOwner ? <PolicyPanel /> : null}
+      {isOwner && tables.data ? <PolicyPanel tables={tables.data.tables} /> : null}
       <History onSelect={setExportId} />
       <p className="text-caption text-ink-2">{COPY.returnGuide}</p>
     </div>

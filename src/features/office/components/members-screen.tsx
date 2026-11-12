@@ -6,10 +6,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
-import type {
-  EmploymentRosterListResponse,
-  OfficeMembershipListResponse,
-} from "@/lib/api/contracts/office.schema";
+import type { EmploymentRosterListResponse } from "@/lib/api/contracts/office.schema";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { DataTable } from "@/shared/components/ui/data-table";
@@ -22,6 +19,7 @@ import { TextField } from "@/shared/components/ui/text-field";
 import { formatSeoulDate } from "@/shared/lib/format";
 import { MEMBERSHIP_NOTICE_COPY } from "../model/legal-copy";
 import { createRosterItem, updateRosterItem } from "../api/office.api";
+import type { OfficeMembershipListWire } from "../api/office.api";
 import { officeKeys, useMemberships, useRoster } from "../hooks/office-queries";
 import {
   CONFIRMATION_SOURCE_LABEL,
@@ -161,7 +159,7 @@ function MemberListTab({ status, isOwner }: { status?: "SUSPENDED"; isOwner: boo
   );
 }
 
-type MemberRow = OfficeMembershipListResponse["items"][number];
+type MemberRow = OfficeMembershipListWire["items"][number];
 type RosterRow = EmploymentRosterListResponse["items"][number];
 
 function RosterCreateDialog({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {

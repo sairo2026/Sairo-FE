@@ -367,8 +367,13 @@ export const migrationSupportHandlers = [
   http.get("/api/exports/allowed-tables", () => {
     const tables =
       migrationState.callerRole === "OWNER"
-        ? MOCK_EXPORT_TABLES
-        : MOCK_EXPORT_TABLES.filter((table) => supportState.exportPolicy.includes(table.code));
+        ? MOCK_EXPORT_TABLES.map((table) => ({
+            ...table,
+            allowed: supportState.exportPolicy.includes(table.code),
+          }))
+        : MOCK_EXPORT_TABLES.filter((table) => supportState.exportPolicy.includes(table.code)).map(
+            (table) => ({ ...table, allowed: true }),
+          );
     const body: ExportAllowedTablesResponse = { tables };
     return HttpResponse.json(body);
   }),
@@ -452,7 +457,10 @@ export const migrationSupportHandlers = [
     }
     supportState.exportPolicy = body.allowedTables;
     return HttpResponse.json({
-      tables: MOCK_EXPORT_TABLES.filter((table) => body.allowedTables.includes(table.code)),
+      tables: MOCK_EXPORT_TABLES.map((table) => ({
+        ...table,
+        allowed: body.allowedTables.includes(table.code),
+      })),
     });
   }),
 ];

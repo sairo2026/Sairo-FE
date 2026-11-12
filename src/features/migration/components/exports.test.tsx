@@ -161,16 +161,20 @@ describe("데이터 내보내기", () => {
     ).not.toBeNull();
   });
 
-  it("대표는 소속공인중개사에게 허용할 표를 저장한다", async () => {
+  it("대표는 현재 허용 목록에서 시작해 소속공인중개사에게 허용할 표를 저장한다", async () => {
     const user = userEvent.setup();
     renderOffice(<ExportsScreen />, { role: "OWNER" });
-    await user.click(await screen.findByLabelText("매물 허용"));
+    const customer = await screen.findByLabelText("고객 허용");
+    expect((customer as HTMLInputElement).checked).toBe(true);
+    await user.click(screen.getByLabelText("매물 허용"));
     await user.click(screen.getByLabelText("방문 허용"));
     await user.click(screen.getByRole("button", { name: "허용 목록 저장" }));
     expect(
-      await screen.findByText("허용 목록을 저장했습니다. 현재 허용: 매물, 방문"),
+      await screen.findByText("허용 목록을 저장했습니다. 현재 허용: 매물, 고객, 방문"),
     ).not.toBeNull();
-    await waitFor(() => expect(supportState.exportPolicy).toEqual(["PROPERTY", "VISIT"]));
+    await waitFor(() =>
+      expect(supportState.exportPolicy).toEqual(["CUSTOMER", "PROPERTY", "VISIT"]),
+    );
   });
 
   it("허용 목록 저장이 거절되면 문구를 보여준다", async () => {

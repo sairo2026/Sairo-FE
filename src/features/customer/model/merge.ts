@@ -1,7 +1,5 @@
-import type {
-  CustomerDetailResponse,
-  CustomerMergeRequest,
-} from "@/lib/api/contracts/customer.schema";
+import type { CustomerMergeRequest } from "@/lib/api/contracts/customer.schema";
+import type { CustomerDetail } from "../api/wire";
 
 export const MERGE_FIELDS = [
   "name",
@@ -26,9 +24,9 @@ export const MERGE_FIELD_LABEL: Record<MergeField, string> = {
 
 /** 먼저 등록된 고객을 남는 고객으로 삼는다. 등록 시각이 같으면 고객 ID가 작은 쪽이다. */
 export function pickDefaultPrimary(
-  first: CustomerDetailResponse,
-  second: CustomerDetailResponse,
-): [CustomerDetailResponse, CustomerDetailResponse] {
+  first: CustomerDetail,
+  second: CustomerDetail,
+): [CustomerDetail, CustomerDetail] {
   const firstTime = Date.parse(first.createdAt);
   const secondTime = Date.parse(second.createdAt);
   if (firstTime !== secondTime) {
@@ -37,45 +35,39 @@ export function pickDefaultPrimary(
   return first.customerId <= second.customerId ? [first, second] : [second, first];
 }
 
-export function fieldValue(customer: CustomerDetailResponse, field: MergeField): string {
+export function fieldValue(customer: CustomerDetail, field: MergeField): string {
   const value = customer[field];
   if (value === null || value === undefined) return "";
   return String(value).trim();
 }
 
 export function isSameValue(
-  primary: CustomerDetailResponse,
-  merged: CustomerDetailResponse,
+  primary: CustomerDetail,
+  merged: CustomerDetail,
   field: MergeField,
 ): boolean {
   return fieldValue(primary, field) === fieldValue(merged, field);
 }
 
-export function differingFields(
-  primary: CustomerDetailResponse,
-  merged: CustomerDetailResponse,
-): MergeField[] {
+export function differingFields(primary: CustomerDetail, merged: CustomerDetail): MergeField[] {
   return MERGE_FIELDS.filter((field) => !isSameValue(primary, merged, field));
 }
 
-export function firstInquiryIds(customer: CustomerDetailResponse): number[] {
+export function firstInquiryIds(customer: CustomerDetail): number[] {
   return customer.consultations
     .filter((item) => item.consultationType === "FIRST_INQUIRY")
     .map((item) => item.consultationId);
 }
 
-export function needsFirstInquiryChoice(
-  primary: CustomerDetailResponse,
-  merged: CustomerDetailResponse,
-): boolean {
+export function needsFirstInquiryChoice(primary: CustomerDetail, merged: CustomerDetail): boolean {
   return firstInquiryIds(primary).length > 0 && firstInquiryIds(merged).length > 0;
 }
 
 export type MergeReadiness = { isReady: boolean; missing: string[] };
 
 export function checkMergeReadiness(input: {
-  primary: CustomerDetailResponse;
-  merged: CustomerDetailResponse;
+  primary: CustomerDetail;
+  merged: CustomerDetail;
   choices: MergeChoices;
   note: string;
   keepFirstInquiryId: number | null;
@@ -95,8 +87,8 @@ export function checkMergeReadiness(input: {
 }
 
 export function toMergeRequest(input: {
-  primary: CustomerDetailResponse;
-  merged: CustomerDetailResponse;
+  primary: CustomerDetail;
+  merged: CustomerDetail;
   choices: MergeChoices;
   note: string;
   keepFirstInquiryId: number | null;
