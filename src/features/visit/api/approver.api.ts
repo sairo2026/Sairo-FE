@@ -12,8 +12,9 @@ import type {
 } from "@/lib/api/contracts/visit.schema";
 import { apiFetch } from "@/shared/api/client";
 
+/** 선택 요청의 If-Match 출처다. 백엔드가 항목마다 필수로 준다. */
 const CompareItemSchema = ApproverVisitRequestCompareResponseSchema.shape.items.element.extend({
-  version: z.number().optional(),
+  version: z.number(),
 });
 
 export const ApproverCompareSchema = ApproverVisitRequestCompareResponseSchema.extend({
@@ -81,13 +82,13 @@ export function selectApproverRequest(
   base: string,
   requestId: number,
   request: ApproverSelectionRequest,
-  version?: number,
+  version: number,
 ) {
   return apiFetch(`${base}/visit-requests/${requestId}/select`, {
     ...GUEST,
     method: "POST",
     body: request,
-    headers: version === undefined ? undefined : { "If-Match": String(version) },
+    headers: { "If-Match": String(version) },
     schema: ApproverSelectionResponseSchema,
   });
 }
@@ -113,8 +114,10 @@ export function saveProxyConditions(
   approvalId: number,
   request: ApproverConditionUpsertRequest,
 ) {
+  const { acknowledgedNoticeVersion, ...body } = request;
+  void acknowledgedNoticeVersion;
   return apiFetch(
     `/api/properties/${propertyId}/access-approvals/${approvalId}/approver-conditions/proxy`,
-    { method: "PUT", body: request, schema: ApproverConditionResponseSchema },
+    { method: "PUT", body, schema: ApproverConditionResponseSchema },
   );
 }
