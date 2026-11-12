@@ -53,7 +53,9 @@ export function toDocumentForm(
   if (includeType) form.set("documentType", values.documentType);
   if (values.writtenDate !== "") form.set("writtenDate", values.writtenDate);
   if (values.deliveredDate !== "") form.set("deliveredDate", values.deliveredDate);
-  if (values.datePendingReason.trim() !== "") {
+  // 작성일과 교부일이 모두 있으면 백엔드가 미기재 사유를 받지 않는다(400 NOT_ALLOWED).
+  const hasBothDates = values.writtenDate !== "" && values.deliveredDate !== "";
+  if (!hasBothDates && values.datePendingReason.trim() !== "") {
     form.set("datePendingReason", values.datePendingReason.trim());
   }
   form.set("piiReviewed", String(values.piiReviewed));
