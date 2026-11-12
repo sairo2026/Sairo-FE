@@ -232,7 +232,7 @@ describe("인증 심사 상세", () => {
     await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "승인" }));
     expect(await screen.findByText("인증 신청을 승인했습니다.")).toBeTruthy();
     await waitFor(() => expect(screen.getAllByText("승인").length).toBeGreaterThan(0));
-    expect(screen.getByRole("button", { name: "사무소 인증 회수" })).toBeTruthy();
+    expect(screen.getByText("인증 회수는 고객사 상세에서 합니다.")).toBeTruthy();
   });
 
   it("서버가 필수 확인 미완료로 막으면 안내한다", async () => {
@@ -421,35 +421,11 @@ describe("보완 요청·반려·회수", () => {
     expect(await within(dialog).findByRole("alert")).toBeTruthy();
   });
 
-  it("승인된 사무소는 되돌릴 수 없음을 확인하고 사유를 넣어야 회수된다", async () => {
-    const user = userEvent.setup();
+  it("승인된 신청은 사무소 번호를 모르므로 고객사 상세에서 회수하도록 안내한다", async () => {
     renderOps(<RegistrationDetailScreen registrationId={104} />);
     await screen.findByText("청계공인중개사");
-    await user.click(screen.getByRole("button", { name: "사무소 인증 회수" }));
-    const dialog = screen.getByRole("dialog");
-    const submit = within(dialog).getByRole("button", { name: "인증 회수" });
-    await user.type(within(dialog).getByLabelText("회수 사유"), "허위 서류 확인");
-    expect(submit.getAttribute("aria-disabled")).toBe("true");
-    expect(within(dialog).getByText(/되돌릴 수 없습니다/)).toBeTruthy();
-    await user.click(within(dialog).getByLabelText("되돌릴 수 없음을 확인했습니다"));
-    await user.click(submit);
-    expect(await screen.findByText("사무소 인증을 회수했습니다.")).toBeTruthy();
-    await waitFor(() =>
-      expect(screen.queryByRole("button", { name: "사무소 인증 회수" })).toBeNull(),
-    );
-  });
-
-  it("회수 대상이 없으면 404를 안내한다", async () => {
-    const user = userEvent.setup();
-    server.use(http.post("/api/ops/offices/:officeId/revoke", () => mockErrors.notFound()));
-    renderOps(<RegistrationDetailScreen registrationId={104} />);
-    await screen.findByText("청계공인중개사");
-    await user.click(screen.getByRole("button", { name: "사무소 인증 회수" }));
-    const dialog = screen.getByRole("dialog");
-    await user.type(within(dialog).getByLabelText("회수 사유"), "사유");
-    await user.click(within(dialog).getByLabelText("되돌릴 수 없음을 확인했습니다"));
-    await user.click(within(dialog).getByRole("button", { name: "인증 회수" }));
-    expect(await within(dialog).findByText("대상을 찾을 수 없습니다.")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "사무소 인증 회수" })).toBeNull();
+    expect(screen.getByText("인증 회수는 고객사 상세에서 합니다.")).toBeTruthy();
   });
 
   it("승인되지 않은 신청에는 회수 버튼이 없다", async () => {

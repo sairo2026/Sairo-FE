@@ -6,7 +6,7 @@ import {
   OperatorMfaEnrollmentResponseSchema,
   OpsMfaVerifyResponseSchema,
 } from "@/lib/api/contracts/ops.schema";
-import { ApiError, ApiNetworkError, apiFetch, parseCookieValue } from "@/shared/api/client";
+import { ApiError, ApiNetworkError, apiFetch, ensureCsrfToken } from "@/shared/api/client";
 
 export const OPS_AUTH_PATHS = {
   kakaoStart: "/api/ops/auth/kakao/start",
@@ -61,8 +61,8 @@ async function invitationPost<T>(
   schema: z.ZodType<T>,
   signal?: AbortSignal,
 ): Promise<T> {
-  const csrf =
-    typeof document === "undefined" ? null : parseCookieValue(document.cookie, "XSRF-TOKEN");
+  // 메일 링크로 새 브라우저에서 열면 CSRF 쿠키가 없어 첫 POST가 403이 된다. apiFetch처럼 먼저 받아 온다.
+  const csrf = await ensureCsrfToken();
   let response: Response;
   try {
     response = await fetch(path, {

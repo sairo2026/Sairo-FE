@@ -29,6 +29,7 @@ export const MEMBER_ROLE_LABELS: Record<string, string> = {
 export const MEMBERSHIP_STATUS_LABELS: Record<string, string> = {
   APPROVED: "승인",
   PENDING: "대기",
+  SUSPENDED: "정지",
   REMOVED: "제외",
 };
 

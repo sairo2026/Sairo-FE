@@ -1,16 +1,23 @@
+import { z } from "zod";
 import {
   OpsIntegrationCheckResponseSchema,
   OpsIntegrationListResponseSchema,
   OpsIntegrationUpdateResponseSchema,
 } from "@/lib/api/contracts/ops.schema";
-import type { OpsIntegrationListResponse } from "@/lib/api/contracts/ops.schema";
 import type { OpsStatusMap } from "../components/common/ops-status-badge";
 
-export const IntegrationListSchema = OpsIntegrationListResponseSchema;
+/** 승인 전 연동은 승인 운영자가 없어 null이다(백엔드 OpsSystemResponses, V12 nullable). */
+const IntegrationSchema = OpsIntegrationListResponseSchema.shape.items.element.extend({
+  approvedByOperatorId: z.number().nullable(),
+});
+
+export const IntegrationListSchema = OpsIntegrationListResponseSchema.extend({
+  items: z.array(IntegrationSchema),
+});
 export const IntegrationUpdateSchema = OpsIntegrationUpdateResponseSchema;
 export const IntegrationCheckSchema = OpsIntegrationCheckResponseSchema;
 
-export type Integration = OpsIntegrationListResponse["items"][number];
+export type Integration = z.infer<typeof IntegrationSchema>;
 
 export const ENVIRONMENT_LABELS: Record<string, string> = {
   TEST: "시험",

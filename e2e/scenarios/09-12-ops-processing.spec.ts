@@ -173,7 +173,7 @@ test.describe("시나리오 11 출시 활성화 전 준비", () => {
       await page.getByLabel(label, { exact: true }).fill(value);
     }
     await page.getByRole("button", { name: "새 버전으로 게시" }).click();
-    await expect(page.getByText(/회사 정보 \d+판을 게시했습니다/)).toBeVisible();
+    await expect(page.getByText(/회사 정보 \d+판을 등록했습니다/)).toBeVisible();
     await page.getByRole("button", { name: "수신 시험 성공 기록" }).click();
     await page.getByRole("dialog").getByRole("button", { name: "기록", exact: true }).click();
     await expect(page.getByText("실제 문의 수신 시험 성공을 기록했습니다.")).toBeVisible();

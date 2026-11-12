@@ -165,6 +165,14 @@ describe("견적 입력 검증", () => {
   });
 });
 
+describe("요청 단계 상세", () => {
+  it("매핑 확정 전이라 업로드 행 수가 비어 있어도 상세를 연다", async () => {
+    await openDetail(401);
+    const row = screen.getByText("업로드 행 수").parentElement;
+    expect(row?.textContent).toContain("-");
+  });
+});
+
 describe("견적 제시", () => {
   it("요청됨 상태는 기본 22만 원과 표준 범위 안내를 보인다", async () => {
     await openDetail(401);

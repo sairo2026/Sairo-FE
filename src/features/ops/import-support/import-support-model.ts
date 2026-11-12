@@ -1,13 +1,21 @@
+import { z } from "zod";
 import {
   OpsImportSupportRequestDetailResponseSchema,
   OpsImportSupportRequestListResponseSchema,
 } from "@/lib/api/contracts/ops.schema";
-import type { OpsImportSupportRequestDetailResponse } from "@/lib/api/contracts/ops.schema";
 import type { OpsStatusMap } from "../components/common/ops-status-badge";
 
 export const ImportSupportListSchema = OpsImportSupportRequestListResponseSchema;
-export const ImportSupportDetailSchema = OpsImportSupportRequestDetailResponseSchema;
-export type ImportSupportDetail = OpsImportSupportRequestDetailResponse;
+/**
+ * 업로드 행 수는 매핑을 확정할 때 처음 채워지고, 사무소 이름은 찾지 못하면 비어 온다
+ * (백엔드 OpsImportSupportResponses, ImportBatch). 요청·견적 단계에서는 null일 수 있다.
+ */
+export const ImportSupportDetailSchema = OpsImportSupportRequestDetailResponseSchema.extend({
+  rowCount: z.number().nullable(),
+  estimatedRowCount: z.number().nullable(),
+  officeName: z.string().nullable(),
+});
+export type ImportSupportDetail = z.infer<typeof ImportSupportDetailSchema>;
 
 export const IMPORT_SUPPORT_STATUS: OpsStatusMap = {
   REQUESTED: { label: "요청됨", tone: "blue" },

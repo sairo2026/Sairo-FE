@@ -1,18 +1,28 @@
+import { z } from "zod";
 import {
   AuthorityRequestListResponseSchema,
   AuthorityRequestResponseSchema,
 } from "@/lib/api/contracts/ops.schema";
-import type {
-  AuthorityRequestListResponse,
-  AuthorityRequestResponse,
-} from "@/lib/api/contracts/ops.schema";
+import type { AuthorityRequestResponse } from "@/lib/api/contracts/ops.schema";
 import type { OpsStatusMap } from "../components/common/ops-status-badge";
 import { parsePositiveInt, toSeoulIso } from "../system-common/system-form";
 
-export const AuthorityListSchema = AuthorityRequestListResponseSchema;
+/**
+ * 백엔드 목록 항목은 기록자와 삭제 예정일을 함께 준다(OpsPrivacyRecordResponses.AuthorityRequestItem).
+ * 명세 목록 표에는 아직 없어 값이 없을 수 있게 받는다.
+ */
+const AuthorityRowSchema = AuthorityRequestListResponseSchema.shape.items.element.extend({
+  recordedByOperatorId: z.number().nullable().optional(),
+  recordedByOperatorName: z.string().nullable().optional(),
+  retentionUntil: z.string().nullable().optional(),
+});
+
+export const AuthorityListSchema = AuthorityRequestListResponseSchema.extend({
+  items: z.array(AuthorityRowSchema),
+});
 export const AuthorityRecordSchema = AuthorityRequestResponseSchema;
 
-export type AuthorityRow = AuthorityRequestListResponse["items"][number];
+export type AuthorityRow = z.infer<typeof AuthorityRowSchema>;
 export type AuthorityRecord = AuthorityRequestResponse;
 
 export const AGENCY_LABELS: Record<string, string> = {

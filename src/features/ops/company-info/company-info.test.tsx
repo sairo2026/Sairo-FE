@@ -153,7 +153,7 @@ describe("출시 준비 상태", () => {
     expect(screen.queryByRole("list", { name: "빠진 항목" })).toBeNull();
   });
 
-  it("수신 시험 실패를 기록하면 수신 시험이 계속 빠진다", async () => {
+  it("수신 시험 실패는 기록을 바꾸지 않아 수신 시험과 검토가 계속 빠진다", async () => {
     const user = userEvent.setup();
     await loaded();
     await user.click(screen.getByRole("button", { name: "수신 시험 실패 기록" }));
@@ -161,7 +161,7 @@ describe("출시 준비 상태", () => {
     expect(await screen.findByText(/수신 시험 실패를 기록했습니다/)).toBeTruthy();
     const missing = await screen.findByRole("list", { name: "빠진 항목" });
     expect(within(missing).getByText("실제 문의 수신 시험")).toBeTruthy();
-    expect(within(missing).queryByText("검토")).toBeNull();
+    expect(within(missing).getByText("검토")).toBeTruthy();
     expect(screen.getByText("출시 활성화 차단")).toBeTruthy();
   });
 
@@ -326,7 +326,7 @@ describe("게시", () => {
     await screen.findByText("출시 준비 완료");
     fill("상호", "예시 주식회사 2");
     await user.click(screen.getByRole("button", { name: "새 버전으로 게시" }));
-    expect(await screen.findByText(/회사 정보 2판을 게시했습니다/)).toBeTruthy();
+    expect(await screen.findByText(/회사 정보 2판을 등록했습니다/)).toBeTruthy();
     expect(await screen.findByText("출시 활성화 차단")).toBeTruthy();
     expect(screen.getByText("2판")).toBeTruthy();
   });
@@ -342,7 +342,7 @@ describe("게시", () => {
     const user = userEvent.setup();
     await loaded();
     await user.click(screen.getByRole("button", { name: "새 버전으로 게시" }));
-    await screen.findByText(/회사 정보 2판을 게시했습니다/);
+    await screen.findByText(/회사 정보 2판을 등록했습니다/);
     expect(sent.ecommerceNotice).toBeNull();
     expect(sent.businessNumber).toBe("000-00-00000");
   });
@@ -357,7 +357,7 @@ describe("게시", () => {
     expect(screen.getByText("상호을(를) 입력해 주세요.")).toBeTruthy();
     expect(screen.getByText("주소을(를) 입력해 주세요.")).toBeTruthy();
     expect(screen.getByText("구독 해지 경로을(를) 입력해 주세요.")).toBeTruthy();
-    expect(screen.queryByText(/회사 정보 2판을 게시했습니다/)).toBeNull();
+    expect(screen.queryByText(/회사 정보 2판을 등록했습니다/)).toBeNull();
   });
 
   it("사업자등록번호와 지원 이메일 형식을 검사한다", async () => {

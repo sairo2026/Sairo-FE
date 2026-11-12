@@ -11,7 +11,7 @@ import { OpsFilterBar } from "../components/common/ops-filter-bar";
 import { OpsScreen } from "../components/common/ops-screen";
 import { OpsStatusBadge } from "../components/common/ops-status-badge";
 import { OpsTable, useOpsPaging } from "../components/common/ops-table";
-import { useOpsSession } from "../model/ops-session";
+import { useHasOpsRole, useOpsSession } from "../model/ops-session";
 import { DateTimePair, DraftNotice, FormMessage } from "../system-common/system-fields";
 import { describeSystemError } from "../system-common/system-form";
 import { AuthorityCloseDialog } from "./authority-close-dialog";
@@ -158,8 +158,11 @@ function AuthorityBody() {
     size: paging.size,
   });
 
-  function isSelfRecorded(requestId: number): boolean {
-    return selfBlocked.includes(requestId) || recorders[requestId] === session.operatorId;
+  const canRecord = useHasOpsRole(["PRIVACY"]);
+
+  function isSelfRecorded(row: AuthorityRow): boolean {
+    const recorder = row.recordedByOperatorId ?? recorders[row.requestId];
+    return selfBlocked.includes(row.requestId) || recorder === session.operatorId;
   }
 
   return (
@@ -169,15 +172,17 @@ function AuthorityBody() {
         다른 보안관리자만 종결할 수 있고 모든 처리는 감사 로그에 남습니다.
       </p>
       <DraftNotice extra="출시 후 확장 기능입니다." />
-      <CreateForm
-        onCreated={(record) => {
-          setRecorders((current) => ({
-            ...current,
-            [record.requestId]: record.recordedByOperatorId,
-          }));
-          setFeedback(`요청 ${record.requestId}를 기록했습니다.`);
-        }}
-      />
+      {canRecord ? (
+        <CreateForm
+          onCreated={(record) => {
+            setRecorders((current) => ({
+              ...current,
+              [record.requestId]: record.recordedByOperatorId,
+            }));
+            setFeedback(`요청 ${record.requestId}를 기록했습니다.`);
+          }}
+        />
+      ) : null}
       {feedback ? <FormMessage tone="success">{feedback}</FormMessage> : null}
       <OpsFilterBar
         label="자료 요청 조회"
@@ -242,7 +247,7 @@ function AuthorityBody() {
             key: "retention",
             header: "삭제 예정일",
             render: (row) => {
-              const until = retention[row.requestId];
+              const until = retention[row.requestId] ?? row.retentionUntil;
               return until ? formatSeoulDate(until) : "-";
             },
           },
@@ -270,7 +275,7 @@ function AuthorityBody() {
         <AuthorityCloseDialog
           key={closing.requestId}
           row={closing}
-          isSelfRecorded={isSelfRecorded(closing.requestId)}
+          isSelfRecorded={isSelfRecorded(closing)}
           onSelfForbidden={() => setSelfBlocked((current) => [...current, closing.requestId])}
           onClose={() => setClosing(null)}
           onClosed={(record) => {
@@ -293,7 +298,7 @@ export function AuthorityRequestsScreen() {
     <OpsScreen
       title="수사기관 요청 기록"
       description="외부 기관의 자료 요청과 제공 결정을 기록합니다."
-      roles={["PRIVACY"]}
+      roles={["PRIVACY", "SECURITY_ADMIN"]}
     >
       <AuthorityBody />
     </OpsScreen>

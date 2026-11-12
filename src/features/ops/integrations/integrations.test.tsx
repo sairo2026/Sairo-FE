@@ -137,6 +137,7 @@ describe("연동 설정 목록", () => {
     await renderList();
     expect(screen.getAllByText("운영자 2").length).toBeGreaterThan(0);
     expect(screen.getAllByText("운영자 5").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("승인 전").length).toBeGreaterThan(0);
     expect(screen.getAllByText("미지정").length).toBeGreaterThan(0);
     expect(screen.getAllByText("점검 전").length).toBeGreaterThan(0);
   });

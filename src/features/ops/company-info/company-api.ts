@@ -2,13 +2,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   OpsBusinessCalendarResponseSchema,
   OpsBusinessCalendarUpdateResponseSchema,
-  OpsCompanyServiceInfoCreateResponseSchema,
   OpsCompanyServiceInfoInquiryTestResponseSchema,
-  OpsCompanyServiceInfoResponseSchema,
-  OpsIntegrationListResponseSchema,
   OpsPolicyDocumentListResponseSchema,
   OpsPriceScheduleListResponseSchema,
 } from "@/lib/api/contracts/ops.schema";
+import { IntegrationListSchema } from "../integrations/integrations-model";
+import { CompanyInfoCreateSchema, CompanyInfoListSchema } from "./company-model";
 import type { OpsCompanyServiceInfoRequest } from "@/lib/api/contracts/ops.schema";
 import { apiFetch } from "@/shared/api/client";
 import { opsKeys, opsPath } from "../api/ops-api";
@@ -22,7 +21,7 @@ export function useCompanyInfo() {
     queryKey: opsKeys.scope(SCOPE, "info"),
     queryFn: () =>
       apiFetch(opsPath(BASE, { page: 0, size: 100 }), {
-        schema: OpsCompanyServiceInfoResponseSchema,
+        schema: CompanyInfoListSchema,
       }),
   });
 }
@@ -36,7 +35,7 @@ export function useCompanyActions() {
         apiFetch(BASE, {
           method: "POST",
           body,
-          schema: OpsCompanyServiceInfoCreateResponseSchema,
+          schema: CompanyInfoCreateSchema,
         }),
       onSuccess: refresh,
     }),
@@ -80,7 +79,7 @@ export function useIntegrationsForCompany(params: OpsListParams) {
     queryKey: opsKeys.scope(SCOPE, "integrations", params),
     queryFn: () =>
       apiFetch(opsPath("/api/ops/integrations", params), {
-        schema: OpsIntegrationListResponseSchema,
+        schema: IntegrationListSchema,
       }),
   });
 }

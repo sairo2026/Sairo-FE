@@ -11,15 +11,13 @@ import type { toIntegrationPatchBody } from "./integrations-model";
 
 const SCOPE = "integrations";
 
+/** 환경은 서버 필터로 보낸다. 받은 한 페이지 안에서 거르면 전체 건수와 페이지가 어긋난다. */
 export function useIntegrations(params: OpsListParams, environment: string) {
+  const query = { ...params, environment: environment === "" ? undefined : environment };
   return useQuery({
-    queryKey: opsKeys.scope(SCOPE, "list", params),
+    queryKey: opsKeys.scope(SCOPE, "list", query),
     queryFn: () =>
-      apiFetch(opsPath("/api/ops/integrations", params), { schema: IntegrationListSchema }),
-    select: (data) => ({
-      ...data,
-      items: data.items.filter((row) => environment === "" || row.environment === environment),
-    }),
+      apiFetch(opsPath("/api/ops/integrations", query), { schema: IntegrationListSchema }),
   });
 }
 

@@ -1180,7 +1180,7 @@ export const opsBillingHandlers: RequestHandler[] = [
       return mockErrors.validation([{ field: "If-Match", message: "버전이 필요합니다." }]);
     if (Number(version) !== row.version) return mockErrors.versionConflict(row.version);
     if (row.createdByOperatorId === me())
-      return errorResponse(403, "FORBIDDEN", "등록한 운영자는 승인할 수 없습니다.");
+      return errorResponse(403, "SELF_APPROVAL_FORBIDDEN", "등록한 운영자는 승인할 수 없습니다.");
     if (row.status !== "REGISTERED") return invalidTransition();
     const event = EVENTS.find((item) => item.trialEventId === row.trialEventId);
     if (!event?.isOpen)
@@ -1217,6 +1217,11 @@ export const opsBillingHandlers: RequestHandler[] = [
     if (rejected) return rejected;
     const row = state.agreements.find((item) => String(item.agreementId) === String(params.id));
     if (!row) return mockErrors.notFound();
+    // 백엔드는 합의 취소에도 If-Match를 요구한다(OpsPricingService.revoke).
+    const version = request.headers.get("If-Match");
+    if (version === null)
+      return mockErrors.validation([{ field: "If-Match", message: "버전이 필요합니다." }]);
+    if (Number(version) !== row.version) return mockErrors.versionConflict(row.version);
     const body = await readBody(request);
     if (textOf(body.reason) === "")
       return mockErrors.validation([{ field: "reason", message: "취소 사유를 입력해 주세요." }]);

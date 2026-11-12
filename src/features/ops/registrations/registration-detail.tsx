@@ -195,7 +195,7 @@ function SupplementDialog({
   return <SupplementForm onSubmit={onSubmit} onClose={onClose} />;
 }
 
-function RevokeDialog({
+export function RevokeDialog({
   isOpen,
   onSubmit,
   onClose,
@@ -348,6 +348,9 @@ function RegistrationBody({ detail }: { detail: RegistrationDetail }) {
               </Button>
             ) : null}
           </div>
+          {detail.status === "APPROVED" && !canRevoke ? (
+            <p className="text-caption text-ink-2">인증 회수는 고객사 상세에서 합니다.</p>
+          ) : null}
         </div>
       </Card>
       <Card title="상태 이력">

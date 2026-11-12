@@ -146,7 +146,7 @@ type MockCompanyInfo = {
   cancellationPath: string;
   inquiryDeliveryTestedAt: string | null;
   reviewedByOperatorId: number | null;
-  publishedAt: string;
+  publishedAt: string | null;
 };
 
 type MockCalendarDay = { calendarDate: string; isBusinessDay: boolean; reason: string | null };
@@ -1187,7 +1187,8 @@ export const opsContentHandlers: RequestHandler[] = [
       cancellationPath: text(body.cancellationPath),
       inquiryDeliveryTestedAt: null,
       reviewedByOperatorId: null,
-      publishedAt: new Date().toISOString(),
+      // 백엔드처럼 등록 때는 게시하지 않고 수신 시험 성공을 기록할 때 게시한다.
+      publishedAt: null,
     };
     state.companyInfos.push(row);
     return HttpResponse.json(
@@ -1211,12 +1212,18 @@ export const opsContentHandlers: RequestHandler[] = [
     if (body.result !== "SUCCESS" && body.result !== "FAILED") {
       return invalid([{ field: "result", message: "SUCCESS 또는 FAILED만 받습니다." }]);
     }
-    row.inquiryDeliveryTestedAt = body.result === "SUCCESS" ? new Date().toISOString() : null;
-    row.reviewedByOperatorId = operatorId();
+    // 실패는 기록을 바꾸지 않는다(백엔드 OpsContentController 설명).
+    if (body.result === "SUCCESS") {
+      const now = new Date().toISOString();
+      row.inquiryDeliveryTestedAt = now;
+      row.reviewedByOperatorId = operatorId();
+      row.publishedAt = now;
+    }
     return HttpResponse.json({
       infoId: row.infoId,
       inquiryDeliveryTestedAt: row.inquiryDeliveryTestedAt,
       reviewedByOperatorId: row.reviewedByOperatorId,
+      publishedAt: row.publishedAt,
     });
   }),
 

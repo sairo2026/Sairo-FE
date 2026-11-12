@@ -566,9 +566,10 @@ export const opsPrivacyHandlers: RequestHandler[] = [
   http.get("/api/ops/deletion-queue", ({ request }) => {
     const rejected = requireMockOps(PRIVACY);
     if (rejected) return rejected;
-    const rows = [...state.deletion].sort(
-      (a, b) => Date.parse(a.scheduledAt) - Date.parse(b.scheduledAt),
-    );
+    const queueId = new URL(request.url).searchParams.get("queueId");
+    const rows = [...state.deletion]
+      .filter((row) => !queueId || String(row.queueId) === queueId)
+      .sort((a, b) => Date.parse(a.scheduledAt) - Date.parse(b.scheduledAt));
     return HttpResponse.json(
       pageOf(
         rows.map((row) => {
