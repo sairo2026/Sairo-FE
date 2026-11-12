@@ -369,7 +369,7 @@ describe("약관 개정 재동의", () => {
   it("항목마다 이전·새 버전과 바뀐 내용과 이전 약관 링크를 보여준다", async () => {
     setMockAuthContext(reconsentContext);
     renderWithQuery(<ReconsentNotice />);
-    expect(await screen.findByText(/이전 버전 2026-09-01, 새 버전 2026-12-01/)).not.toBeNull();
+    expect(await screen.findByText(/이전 버전 1\.0, 새 버전 1\.1/)).not.toBeNull();
     expect(screen.getByText("자동결제 안내 문구가 추가되었습니다")).not.toBeNull();
     expect(screen.getByRole("link", { name: "바뀐 내용 보기" })).not.toBeNull();
     expect(screen.getByRole("link", { name: "이전 약관 보기" })).not.toBeNull();

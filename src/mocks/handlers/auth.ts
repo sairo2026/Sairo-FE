@@ -109,14 +109,14 @@ export const authHandlers = [
         ? [
             {
               termsCode: "TOS",
-              previousVersion: "2026-09-01",
-              version: "2026-12-01",
+              previousVersion: "1.0",
+              version: "1.1",
               category: "TERMS",
               required: true,
               effectiveAt: "2026-12-01T04:00:00+09:00",
               changeSummary: "자동결제 안내 문구가 추가되었습니다",
-              documentUrl: "/legal/terms/TOS/2026-12-01",
-              previousDocumentUrl: "/legal/terms/TOS/2026-09-01",
+              documentUrl: "/legal/terms",
+              previousDocumentUrl: "/legal/terms",
             },
           ]
         : [],
