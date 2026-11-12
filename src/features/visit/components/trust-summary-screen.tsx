@@ -306,7 +306,7 @@ export function TrustSummaryScreen() {
       />
     );
   }
-  const mine = <ReceivedTable scope="ME" />;
+  const mine = <ReceivedTable scope="MINE" />;
   return (
     <div className="flex flex-col gap-6">
       <PageHeader

@@ -30,6 +30,7 @@ import {
 } from "../model/labels";
 import { SUPPORT_COPY as COPY, describeSupportError } from "../model/messages";
 import { toCustomerView } from "../model/public-view";
+import type { SupportInquiryDetail } from "../api/wire";
 
 function validateAttachment(file: File, currentCount: number): string | undefined {
   const lower = file.name.toLowerCase();
@@ -41,7 +42,7 @@ function validateAttachment(file: File, currentCount: number): string | undefine
   return undefined;
 }
 
-type Props = { detail: SupportInquiryResponse; justReceived: boolean };
+type Props = { detail: SupportInquiryDetail; justReceived: boolean };
 
 function Messages({ detail }: { detail: SupportInquiryResponse }) {
   const view = toCustomerView(detail);
@@ -259,6 +260,18 @@ function Body({ detail, justReceived }: Props) {
           ]}
         />
       </Card>
+      {detail.content ? (
+        <Card title={COPY.originalTitle}>
+          <div className="flex flex-col gap-3">
+            <p className="whitespace-pre-wrap text-body text-ink">{detail.content}</p>
+            {detail.requestScope ? (
+              <p className="whitespace-pre-wrap text-caption text-ink-2">
+                {COPY.originalScope}: {detail.requestScope}
+              </p>
+            ) : null}
+          </div>
+        </Card>
+      ) : null}
       <Card title={COPY.messagesTitle}>
         <div className="flex flex-col gap-5">
           <Messages detail={detail} />

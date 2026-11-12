@@ -29,7 +29,8 @@ const SUBSCRIPTION_LABEL: Record<string, string> = {
 function Summary() {
   const members = useOfficeMemberships();
   const subscription = useSubscriptionSummary();
-  const approved = members.data?.items.filter((item) => item.status === "APPROVED").length;
+  // 상태를 주지 않으면 백엔드가 승인 구성원만 돌려주므로 전체 건수가 승인 구성원 수다(첫 페이지만 세면 25명에서 잘린다).
+  const approved = members.data?.totalElements;
   return (
     <DetailList
       items={[

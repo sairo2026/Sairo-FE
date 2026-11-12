@@ -59,6 +59,8 @@ export function notificationHref(targetType: string, targetId: number | null | u
       return "/billing";
     case "DATA_RETURN":
       return "/billing/return-guide";
+    case "SUPPORT_TICKET":
+      return targetId ? `/support/${targetId}` : "/support";
     default:
       return null;
   }

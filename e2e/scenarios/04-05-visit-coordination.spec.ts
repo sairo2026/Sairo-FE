@@ -162,10 +162,9 @@ test.describe("시나리오 5 점유자 변경에 따른 재조율", () => {
       await expect(page.getByText(/재조율이 필요합니다/).first()).toBeVisible();
     });
 
-    await test.step("재조율 사유를 남기고 일정을 다시 저장해도 재조율 필요가 유지된다", async () => {
-      await page.getByLabel("재조율이 필요한 이유").fill("점유자 변경으로 새 승인 필요");
-      await page.getByRole("button", { name: "재조율 필요로 전환" }).click();
-      await expect(page.getByText(/재조율 필요로 전환했습니다/)).toBeVisible();
+    await test.step("이미 재조율 필요이므로 다시 전환하지 않고 일정을 다시 저장해도 재조율 필요가 유지된다", async () => {
+      await expect(page.getByText(/재조율이 필요한 상태입니다/)).toBeVisible();
+      await expect(page.getByRole("button", { name: "재조율 필요로 전환" })).toHaveCount(0);
       await page.getByRole("button", { name: "일정 저장" }).click();
       await expect(page.getByText(/일정 구성을 저장했습니다/)).toBeVisible();
       await expect(page.getByText("재조율 필요").first()).toBeVisible();

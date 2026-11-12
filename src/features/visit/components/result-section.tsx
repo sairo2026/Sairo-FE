@@ -89,11 +89,13 @@ function HistoryList({ itemId }: { itemId: number }) {
 
 function ResultDialog({
   item,
+  version,
   name,
   onClose,
   onRecorded,
 }: {
   item: Item;
+  version: number;
   name: string;
   onClose: () => void;
   onRecorded: (reviewWindowEndsAt: string | null) => void;
@@ -115,7 +117,7 @@ function ResultDialog({
   const [errors, setErrors] = useState<Partial<Record<keyof ResultFormValues, string>>>({});
   const mutation = useMutation({
     mutationFn: () =>
-      recordItemResult(item.itemId, {
+      recordItemResult(item.itemId, version, {
         result: values.result as "COMPLETED" | "NO_SHOW" | "CANCELLED",
         actualVisitedAt: values.result === "COMPLETED" ? toKstIso(values.date, values.time) : null,
         correctionReason: isCorrection ? values.correctionReason.trim() : null,
@@ -296,6 +298,7 @@ export function ResultSection({ detail }: { detail: Detail }) {
       {target ? (
         <ResultDialog
           item={target}
+          version={detail.version}
           name={nameOf(target.candidatePropertyId)?.propertyName ?? ""}
           onClose={() => setTarget(null)}
           onRecorded={(endsAt) => {
