@@ -281,8 +281,19 @@ describe("휴대폰 본인확인", () => {
     await user.click(screen.getByRole("button", { name: "인증번호 받기" }));
     await user.type(await screen.findByLabelText(/^인증번호/), "000000");
     await user.click(screen.getByRole("button", { name: "확인" }));
-    expect(await screen.findByText("인증번호가 맞지 않습니다.")).not.toBeNull();
+    expect(await screen.findByText(/인증번호가 맞지 않습니다\. 4회 더/)).not.toBeNull();
     expect(screen.getByLabelText(/^인증번호/)).not.toBeNull();
+  });
+
+  it("남은 입력 횟수가 0이면 새 인증번호를 받도록 안내한다", async () => {
+    const user = userEvent.setup();
+    renderWithQuery(<Harness />);
+    await user.type(screen.getByLabelText(/^휴대폰 번호/), "01012345678");
+    await user.click(screen.getByRole("button", { name: "인증번호 받기" }));
+    await user.type(await screen.findByLabelText(/^인증번호/), "000005");
+    await user.click(screen.getByRole("button", { name: "확인" }));
+    expect(await screen.findByText(/새 인증번호를 받아 주세요/)).not.toBeNull();
+    expect(screen.queryByLabelText(/^인증번호/)).toBeNull();
   });
 
   it("시간이 지나면 새 인증번호를 받도록 안내한다", async () => {

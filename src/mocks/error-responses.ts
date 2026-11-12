@@ -23,10 +23,7 @@ export const mockErrors = {
     errorResponse(401, "INVALID_CREDENTIALS", "이메일 또는 비밀번호가 맞지 않습니다."),
   stepUpRequired: () => errorResponse(401, "STEP_UP_REQUIRED", "본인 확인이 필요합니다."),
   forbidden: () => errorResponse(403, "FORBIDDEN", "권한이 없습니다."),
-  reconsentRequired: () =>
-    errorResponse(403, "RECONSENT_REQUIRED", "약관 재동의가 필요합니다.", {
-      actionUrl: "/reconsent",
-    }),
+  reconsentRequired: () => errorResponse(403, "RECONSENT_REQUIRED", "약관 재동의가 필요합니다."),
   notFound: () => errorResponse(404, "RESOURCE_NOT_FOUND", "대상을 찾을 수 없습니다."),
   versionConflict: (currentVersion: number) =>
     errorResponse(409, "VERSION_CONFLICT", "다른 사용자가 먼저 수정했습니다.", { currentVersion }),

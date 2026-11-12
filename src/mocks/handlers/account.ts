@@ -237,8 +237,8 @@ function findStaleTerms(agreed: AgreedTerm[] | undefined) {
     }));
 }
 
-function unprocessable(code: string, message: string) {
-  return errorResponse(422, code, message);
+function unprocessable(code: string, message: string, extra?: Record<string, unknown>) {
+  return errorResponse(422, code, message, extra);
 }
 
 export const accountHandlers = [
@@ -283,7 +283,14 @@ export const accountHandlers = [
   http.post("/api/auth/phone-verification/verify", async ({ request }) => {
     const body = (await request.json()) as { phone?: string; code?: string };
     if (body.code === "000000") {
-      return unprocessable("VERIFICATION_CODE_INVALID", "인증번호가 맞지 않습니다.");
+      return unprocessable("VERIFICATION_CODE_INVALID", "인증번호가 맞지 않습니다.", {
+        remainingAttempts: 4,
+      });
+    }
+    if (body.code === "000005") {
+      return unprocessable("VERIFICATION_CODE_INVALID", "인증번호가 맞지 않습니다.", {
+        remainingAttempts: 0,
+      });
     }
     if (body.code === "999999") return unprocessable("TOKEN_EXPIRED", "인증 시간이 지났습니다.");
     if (body.code === "111111") return unprocessable("TOKEN_INVALID", "인증번호가 폐기되었습니다.");
@@ -342,6 +349,14 @@ export const accountHandlers = [
   http.get("/api/auth/recovery-options", ({ request }) => {
     const url = new URL(request.url);
     const hasPhone = url.searchParams.has("verifiedPhoneTicket");
+    const hasEmail = url.searchParams.has("verifiedEmailTicket");
+    if (hasPhone === hasEmail) {
+      return errorResponse(
+        400,
+        "INVALID_REQUEST",
+        "확인한 이메일 또는 휴대폰 중 하나만 보내 주세요.",
+      );
+    }
     return HttpResponse.json({
       existingAccountFound: true,
       availableLoginMethods: hasPhone ? ["EMAIL", "KAKAO"] : ["EMAIL"],
@@ -349,9 +364,7 @@ export const accountHandlers = [
     });
   }),
 
-  http.post("/api/auth/password/reset-request", () =>
-    HttpResponse.json({ accepted: true }, { status: 202 }),
-  ),
+  http.post("/api/auth/password/reset-request", () => HttpResponse.json({ accepted: true })),
 
   http.post("/api/auth/password/reset", async ({ request }) => {
     const body = (await request.json()) as { token?: string };
@@ -398,7 +411,7 @@ export const accountHandlers = [
   }),
 
   http.post("/api/me/login-methods/email", () =>
-    HttpResponse.json({ method: "EMAIL", linked: true }, { status: 201 }),
+    HttpResponse.json({ method: "EMAIL", linked: true }),
   ),
 
   http.post("/api/me/login-methods/kakao", async ({ request }) => {
@@ -406,7 +419,7 @@ export const accountHandlers = [
     if (body.code === "taken-code") {
       return errorResponse(409, "KAKAO_ALREADY_LINKED", "이미 다른 계정에 연결되었습니다.");
     }
-    return HttpResponse.json({ method: "KAKAO", linked: true }, { status: 201 });
+    return HttpResponse.json({ method: "KAKAO", linked: true });
   }),
 
   http.delete("/api/me/login-methods/:method", ({ params }) => {
