@@ -112,6 +112,10 @@ describe("빈 상태와 로딩", () => {
 describe("링크 토큰 형식", () => {
   it("형식이 맞는 토큰만 돌려준다", () => {
     expect(normalizeLinkToken("abcdEFGH12345678")).toBe("abcdEFGH12345678");
+    expect(normalizeLinkToken("MTIzOjE3NjI5MDAwMDAwMDA.c2lnbmF0dXJlLXZhbHVl")).toBe(
+      "MTIzOjE3NjI5MDAwMDAwMDA.c2lnbmF0dXJlLXZhbHVl",
+    );
+    expect(normalizeLinkToken("a".repeat(513))).toBeNull();
     expect(normalizeLinkToken(" abcdEFGH12345678 ")).toBe("abcdEFGH12345678");
     expect(normalizeLinkToken("짧다")).toBeNull();
     expect(normalizeLinkToken("abc/../defghijklmnop")).toBeNull();

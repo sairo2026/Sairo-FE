@@ -121,6 +121,9 @@ function CardView({
         {notice.isError ? (
           <FormAlert>카드 등록 안내를 불러오지 못했습니다. 잠시 뒤에 다시 시도해 주세요.</FormAlert>
         ) : null}
+        {notice.isSuccess && !noticeItem ? (
+          <FormAlert>시행 중인 카드 등록 안내가 없어 지금은 카드를 등록할 수 없습니다.</FormAlert>
+        ) : null}
         <div className="mb-4 rounded-control bg-surface px-4 py-4">
           <p className="text-caption text-ink-2">{CARD_NOTICE_COPY.body}</p>
         </div>

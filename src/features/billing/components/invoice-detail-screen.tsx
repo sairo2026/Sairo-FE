@@ -41,7 +41,7 @@ function RefundDialog({ invoice, onClose }: { invoice: InvoiceDetail; onClose: (
     mutationFn: () => createRefundRequest({ invoiceId: invoice.invoiceId, reasonCode: reason }),
     onSuccess: async (result) => {
       setError(undefined);
-      setNotice(COPY.refundReceived);
+      setNotice(result.status === "RECEIVED" ? COPY.refundReceived : COPY.refundExisting);
       await queryClient.invalidateQueries({ queryKey: billingKeys.all });
       return result;
     },

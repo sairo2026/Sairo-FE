@@ -108,7 +108,7 @@ function initialState(): OfficeMockState {
         confirmationSource: "REGISTRATION_DOC",
         createdAt: NOW,
         updatedAt: NOW,
-        version: 1,
+        version: MOCK_OFFICE.version,
       },
     ],
     quota: { qualifiedCount: 2, deputyCount: 1, deputyLimit: 10, exceeded: false },
@@ -160,6 +160,12 @@ function paged<T>(items: T[], url: URL) {
     size,
     totalElements: items.length,
   };
+}
+
+/** 백엔드는 고용명부 변경마다 사무소 집계 버전을 올리고 모든 명부 항목이 그 버전을 쓴다. */
+function bumpOfficeVersion(): number {
+  state.office = { ...state.office, version: state.office.version + 1 };
+  return state.office.version;
 }
 
 function invalid(field: string, code: string, message: string) {
@@ -394,7 +400,18 @@ export const officeHandlers = [
     });
   }),
 
-  http.post("/api/memberships/:membershipId/reapplication-start", () => {
+  http.post("/api/memberships/:membershipId/reapplication-start", async ({ request }) => {
+    const body = (await request.json().catch(() => null)) as {
+      employmentReportConfirmed?: unknown;
+      trainingConfirmed?: unknown;
+    } | null;
+    if (
+      body === null ||
+      typeof body.employmentReportConfirmed !== "boolean" ||
+      typeof body.trainingConfirmed !== "boolean"
+    ) {
+      return invalid("employmentReportConfirmed", "REQUIRED", "필수 확인 항목이 없습니다.");
+    }
     if (state.myMembership) {
       state.myMembership = {
         ...state.myMembership,
@@ -563,19 +580,16 @@ export const officeHandlers = [
         billable: false,
       }),
     ];
-    return HttpResponse.json(
-      {
-        membershipId: 60,
-        status: "PENDING",
-        role: body.role ?? "AGENT",
-        officeId: 12,
-        createdAt: NOW,
-        updatedAt: NOW,
-        version: 1,
-        expiresAt: LATER,
-      },
-      { status: 201 },
-    );
+    return HttpResponse.json({
+      membershipId: 60,
+      status: "PENDING",
+      role: body.role ?? "AGENT",
+      officeId: 12,
+      createdAt: NOW,
+      updatedAt: NOW,
+      version: 1,
+      expiresAt: LATER,
+    });
   }),
 
   http.post("/api/memberships/:membershipId/invitation/cancel", ({ params }) => {
@@ -621,6 +635,7 @@ export const officeHandlers = [
     if (body.personName === "형식오류") {
       return invalid("personName", "INVALID_VALUE", "이름 형식이 올바르지 않습니다.");
     }
+    const officeVersion = bumpOfficeVersion();
     const item: RosterItem = {
       rosterId: state.roster.length + 1,
       officeId: 12,
@@ -628,10 +643,10 @@ export const officeHandlers = [
       employmentEndDate: null,
       createdAt: NOW,
       updatedAt: NOW,
-      version: 1,
+      version: officeVersion,
       ...body,
     };
-    state.roster = [...state.roster, item];
+    state.roster = [...state.roster.map((row) => ({ ...row, version: officeVersion })), item];
     return HttpResponse.json(item, { status: 201 });
   }),
 
@@ -642,25 +657,30 @@ export const officeHandlers = [
     };
     const target = state.roster.find((item) => String(item.rosterId) === params.rosterId);
     if (!target) return mockErrors.notFound();
-    if (request.headers.get("If-Match") !== String(target.version)) {
-      return mockErrors.versionConflict(target.version);
+    if (request.headers.get("If-Match") !== String(state.office.version)) {
+      return mockErrors.versionConflict(state.office.version);
     }
+    const officeVersion = bumpOfficeVersion();
     const updated: RosterItem = {
       ...target,
       ...(body.employmentEndDate !== undefined
         ? { employmentEndDate: body.employmentEndDate }
         : {}),
       ...(body.legalQualification ? { legalQualification: body.legalQualification } : {}),
-      version: target.version + 1,
+      version: officeVersion,
     };
-    state.roster = state.roster.map((item) => (item === target ? updated : item));
+    state.roster = state.roster.map((item) =>
+      item === target ? updated : { ...item, version: officeVersion },
+    );
     return HttpResponse.json({
       ...updated,
       ...(state.quota.exceeded ? { warning: "DEPUTY_QUOTA_EXCEEDED" } : {}),
     });
   }),
 
-  http.get("/api/offices/current/owner-transfer", () => HttpResponse.json(state.transfer)),
+  http.get("/api/offices/current/owner-transfer", () =>
+    state.transfer ? HttpResponse.json(state.transfer) : mockErrors.notFound(),
+  ),
 
   http.post("/api/offices/current/owner-transfer", async ({ request }) => {
     const body = (await request.json()) as { toUserId: number };

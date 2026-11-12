@@ -5,11 +5,9 @@ import {
   CustomerConsultationRevisionListResponseSchema,
   CustomerConsultationUpdateResponseSchema,
   CustomerCreateResponseSchema,
-  CustomerDetailResponseSchema,
   CustomerListResponseSchema,
   CustomerMergeResponseSchema,
   CustomerRestoreResponseSchema,
-  CustomerUpdateResponseSchema,
   DemandConditionCreateResponseSchema,
   DemandConditionUpdateResponseSchema,
   DuplicateCustomerCheckResponseSchema,
@@ -36,6 +34,7 @@ import {
   PropertyListResponseSchema,
 } from "@/lib/api/contracts/property.schema";
 import { apiFetch, withQuery } from "@/shared/api/client";
+import { CustomerDetailWireSchema, CustomerUpdateWireSchema } from "./wire";
 
 export type CustomerListParams = {
   role?: string;
@@ -70,7 +69,7 @@ export function createCustomer(request: CustomerCreateRequest) {
 }
 
 export function fetchCustomer(customerId: number) {
-  return apiFetch(`/api/customers/${customerId}`, { schema: CustomerDetailResponseSchema });
+  return apiFetch(`/api/customers/${customerId}`, { schema: CustomerDetailWireSchema });
 }
 
 export function updateCustomer(
@@ -82,7 +81,7 @@ export function updateCustomer(
     method: "PATCH",
     body: request,
     headers: ifMatch(version),
-    schema: CustomerUpdateResponseSchema,
+    schema: CustomerUpdateWireSchema,
   });
 }
 

@@ -1,8 +1,8 @@
 import type {
   CustomerCreateRequest,
-  CustomerDetailResponse,
   CustomerUpdateRequest,
 } from "@/lib/api/contracts/customer.schema";
+import type { CustomerDetail } from "../api/wire";
 import { countCodePoints, TEXT_LIMITS } from "@/shared/lib/format";
 import { objectParticle, topicParticle } from "@/shared/lib/korean";
 import { PROCESSING_BASES } from "./labels";
@@ -52,7 +52,7 @@ export function hasResidentNumber(value: string): boolean {
   return RESIDENT_NUMBER_PATTERN.test(value);
 }
 
-export function formFromDetail(detail: CustomerDetailResponse): CustomerFormValues {
+export function formFromDetail(detail: CustomerDetail): CustomerFormValues {
   return {
     isCorporation: detail.isCorporation,
     name: detail.name,

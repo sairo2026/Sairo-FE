@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
-import type { CustomerDetailResponse } from "@/lib/api/contracts/customer.schema";
+import type { CustomerDetail } from "../api/wire";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { DetailList } from "@/shared/components/feedback/page-parts";
 import { Button } from "@/shared/components/ui/button";
@@ -21,7 +21,7 @@ import { DEAL_TYPES, DEAL_TYPE_LABEL, isDealType } from "../model/labels";
 import type { DealType } from "../model/labels";
 import { describeCustomerError, isApiCode } from "../model/messages";
 
-type Condition = CustomerDetailResponse["demandConditions"][number];
+type Condition = CustomerDetail["demandConditions"][number];
 
 const MAN_WON = 10_000;
 
@@ -158,7 +158,7 @@ function DemandForm({
   onDone,
   onCancel,
 }: {
-  customer: CustomerDetailResponse;
+  customer: CustomerDetail;
   condition: Condition | null;
   onDone: (message: string) => void;
   onCancel: () => void;
@@ -316,7 +316,7 @@ function ConditionCard({
   canEdit,
   onNotice,
 }: {
-  customer: CustomerDetailResponse;
+  customer: CustomerDetail;
   condition: Condition;
   canEdit: boolean;
   onNotice: (message: string) => void;
@@ -377,13 +377,7 @@ function ConditionCard({
   );
 }
 
-export function DemandPanel({
-  customer,
-  canEdit,
-}: {
-  customer: CustomerDetailResponse;
-  canEdit: boolean;
-}) {
+export function DemandPanel({ customer, canEdit }: { customer: CustomerDetail; canEdit: boolean }) {
   const [isAdding, setIsAdding] = useState(false);
   const [notice, setNotice] = useState<string>();
   return (

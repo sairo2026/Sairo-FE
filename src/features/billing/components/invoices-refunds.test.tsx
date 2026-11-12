@@ -130,6 +130,40 @@ describe("청구서 상세와 환불 신청", () => {
     );
   });
 
+  it("증빙 발급 실패와 발급 대상 아님을 백엔드 상태 값으로 표시한다", async () => {
+    server.use(
+      http.get("/api/billing/invoices/501", () =>
+        HttpResponse.json({
+          ...buildInvoiceItem({}),
+          nextRetryAt: null,
+          attempts: [],
+          supplier: null,
+          taxDocuments: [
+            {
+              documentKind: "TAX_INVOICE",
+              status: "ISSUE_FAILED",
+              issuedOn: null,
+              maskedReceiverEmail: null,
+              supplyAmount: null,
+              vatAmount: null,
+            },
+            {
+              documentKind: "CASH_RECEIPT",
+              status: "NOT_REQUIRED",
+              issuedOn: null,
+              maskedReceiverEmail: null,
+              supplyAmount: null,
+              vatAmount: null,
+            },
+          ],
+        }),
+      ),
+    );
+    renderOffice(<InvoiceDetailScreen invoiceId={501} />, { role: "OWNER" });
+    expect(await screen.findByText(/^발급 실패 · 수신/)).not.toBeNull();
+    expect(screen.getByText(/^발급 대상 아님 · 수신/)).not.toBeNull();
+  });
+
   it("사유를 고르지 않으면 검증 오류를 보여준다", async () => {
     const user = userEvent.setup();
     renderOffice(<InvoiceDetailScreen invoiceId={501} />, { role: "OWNER" });
@@ -162,6 +196,25 @@ describe("청구서 상세와 환불 신청", () => {
       ),
     ).not.toBeNull();
     expect(sent).toEqual({ invoiceId: 501, reasonCode: "DUPLICATE_CHARGE" });
+  });
+
+  it("이미 처리 중인 같은 신청이 있으면 기존 신청 안내를 보여준다", async () => {
+    server.use(
+      http.post("/api/refund-requests", () =>
+        HttpResponse.json({ refundId: 901, status: "REVIEWING" }),
+      ),
+    );
+    const user = userEvent.setup();
+    renderOffice(<InvoiceDetailScreen invoiceId={501} />, { role: "OWNER" });
+    await user.click(await screen.findByRole("button", { name: "환불 신청" }));
+    const dialog = await screen.findByRole("dialog");
+    await user.selectOptions(within(dialog).getByRole("combobox"), "DUPLICATE_CHARGE");
+    await user.click(within(dialog).getByRole("button", { name: "환불 신청" }));
+    expect(
+      await within(dialog).findByText(
+        "이미 접수된 환불 신청이 있어 기존 신청 상태를 보여드립니다.",
+      ),
+    ).not.toBeNull();
   });
 
   it("환불할 수 없는 청구서이면 안내를 보여준다", async () => {
