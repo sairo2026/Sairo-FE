@@ -180,6 +180,14 @@ describe("권리 요청 처리 상태", () => {
     expect(screen.getByText(/처리 기한은 멈추지 않습니다/)).not.toBeNull();
   });
 
+  it("운영자가 적은 보완 요청이 있으면 그 내용으로 안내한다", async () => {
+    seed({ status: "WAITING_FOR_INFO", supplementRequest: "가입 휴대폰 번호" });
+    open();
+    expect(
+      await screen.findByText(/본인 확인을 위해 가입 휴대폰 번호을 추가로 확인해 주세요/),
+    ).not.toBeNull();
+  });
+
   it("보완 항목이 없으면 일반 안내를 보여준다", async () => {
     seed({ status: "WAITING_FOR_INFO" });
     open();

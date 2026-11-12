@@ -4,13 +4,14 @@ import type {
   PolicyDocumentListResponse,
   PrivacyRequestResponse,
   SupportInquiryListResponse,
-  SupportInquiryResponse,
 } from "@/lib/api/contracts/support.schema";
+import type { PrivacyRequestDetail, SupportInquiryDetail } from "@/features/support/api/wire";
 import { errorResponse, mockErrors } from "../error-responses";
 
 const NOW = "2026-11-10T09:00:00+09:00";
 
-export type MockInquiry = SupportInquiryResponse;
+/** 백엔드처럼 최초 문의 본문은 최상위 content·requestScope에 두고 messages에는 답글만 둔다. */
+export type MockInquiry = SupportInquiryDetail;
 
 export type MockSupportInquiryState = {
   inquiries: MockInquiry[];
@@ -20,15 +21,15 @@ export type MockSupportInquiryState = {
   policyBody: string | null;
   leads: Array<EnterpriseLeadStatusResponse & { trackingKey: string }>;
   nextLeadId: number;
-  privacyRequests: PrivacyRequestResponse[];
+  privacyRequests: PrivacyRequestDetail[];
   nextPrivacyRequestId: number;
   guestIntakeCount: number;
   guestNoticeVersion: string;
 };
 
 export function buildMockPrivacyRequest(
-  overrides: Partial<PrivacyRequestResponse> = {},
-): PrivacyRequestResponse {
+  overrides: Partial<PrivacyRequestDetail> = {},
+): PrivacyRequestDetail {
   return {
     requestId: 31,
     requestType: "ACCESS",
@@ -39,6 +40,7 @@ export function buildMockPrivacyRequest(
     internalDueAt: "2026-11-17T09:00:00+09:00",
     completedAt: null,
     decisionReason: null,
+    supplementRequest: null,
     responsibleOfficeName: null,
     handlerType: "SAIRO",
     ...overrides,
@@ -59,16 +61,9 @@ export function buildMockInquiry(overrides: Partial<MockInquiry> = {}): MockInqu
     createdAt: NOW,
     updatedAt: NOW,
     version: 1,
-    messages: [
-      {
-        messageId: 1,
-        visibility: "PUBLIC",
-        content: "결제가 두 번 된 것 같습니다.",
-        createdAt: NOW,
-        authorType: "REQUESTER",
-        authorDisplayName: null,
-      },
-    ],
+    content: "결제가 두 번 된 것 같습니다.",
+    requestScope: null,
+    messages: [],
     attachments: [],
     ...overrides,
   };
@@ -84,15 +79,8 @@ function initialState(): MockSupportInquiryState {
         status: "ANSWERED",
         assignedOperatorName: "김지원",
         answeredAt: "2026-11-10T10:00:00+09:00",
+        content: "로그인이 안 됩니다.",
         messages: [
-          {
-            messageId: 21,
-            visibility: "PUBLIC",
-            content: "로그인이 안 됩니다.",
-            createdAt: NOW,
-            authorType: "REQUESTER",
-            authorDisplayName: null,
-          },
           {
             messageId: 22,
             visibility: "PUBLIC",
@@ -167,19 +155,11 @@ export const supportHandlers = [
     const created = buildMockInquiry({
       inquiryId: supportInquiryState.nextInquiryId,
       category: body.category,
-      messages: [
-        {
-          messageId: supportInquiryState.nextMessageId,
-          visibility: "PUBLIC",
-          content: body.content,
-          createdAt: NOW,
-          authorType: "REQUESTER",
-          authorDisplayName: null,
-        },
-      ],
+      content: body.content,
+      requestScope: body.requestScope ?? null,
+      messages: [],
     });
     supportInquiryState.nextInquiryId += 1;
-    supportInquiryState.nextMessageId += 1;
     supportInquiryState.inquiries.unshift(created);
     return HttpResponse.json(
       {

@@ -52,6 +52,15 @@ function open(justReceived = false) {
   });
 }
 
+const requesterReply = {
+  messageId: 1,
+  visibility: "PUBLIC" as const,
+  content: "추가로 영수증을 확인해 주세요.",
+  createdAt: "2026-11-10T09:30:00+09:00",
+  authorType: "REQUESTER",
+  authorDisplayName: null,
+};
+
 const operatorMessage = {
   messageId: 2,
   visibility: "PUBLIC" as const,
@@ -64,7 +73,7 @@ const operatorMessage = {
 describe("고객에게 보이는 범위", () => {
   const base = buildMockInquiry({
     messages: [
-      ...buildMockInquiry().messages,
+      requesterReply,
       operatorMessage,
       {
         messageId: 3,
@@ -128,7 +137,7 @@ describe("문의 상세", () => {
     seed({
       status: "ANSWERED",
       assignedOperatorName: "김지원",
-      messages: [...buildMockInquiry().messages, operatorMessage],
+      messages: [requesterReply, operatorMessage],
     });
     open();
     expect(await screen.findByText("결제 문의")).not.toBeNull();
@@ -149,6 +158,13 @@ describe("문의 상세", () => {
     seed({ status });
     open();
     expect(await screen.findByText(label, { selector: "span" })).not.toBeNull();
+  });
+
+  it("최초 문의 본문과 요청 범위는 대화가 아니라 문의 내용으로 보여준다", async () => {
+    seed({ content: "환불 금액을 확인하고 싶습니다.", requestScope: "11월 청구서", messages: [] });
+    open();
+    expect(await screen.findByText("환불 금액을 확인하고 싶습니다.")).not.toBeNull();
+    expect(screen.getByText(/요청 범위: 11월 청구서/)).not.toBeNull();
   });
 
   it("방금 접수했다면 접수 완료 문구를 보여준다", async () => {
