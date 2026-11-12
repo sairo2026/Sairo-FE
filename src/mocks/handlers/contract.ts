@@ -1,14 +1,14 @@
 import { http, HttpResponse } from "msw";
+import type { ContractRevisionList } from "@/features/contract/api/wire";
 import type {
   ContractDetailResponse,
-  ContractRevisionListResponse,
   ContractStatusHistoryResponse,
 } from "@/lib/api/contracts/contract.schema";
 import { errorResponse, mockErrors } from "../error-responses";
 
 const NOW = "2026-11-10T09:00:00+09:00";
 
-export type MockRevision = ContractRevisionListResponse["items"][number];
+export type MockRevision = ContractRevisionList["items"][number];
 export type MockHistory = ContractStatusHistoryResponse["items"][number];
 export type MockParty = ContractDetailResponse["sellerLandlordParties"][number];
 type Snapshot = MockRevision["currentSnapshot"];
@@ -123,7 +123,7 @@ export function buildMockContract(
             recordedAt: NOW,
             recordedByMembershipId: 2,
             reason: null,
-            supersedesRevisionId: 0,
+            supersedesRevisionId: null,
           },
         ]
       : [],
@@ -282,7 +282,7 @@ function sign(contract: MockContract, memberName = "이중개"): MockContract {
         recordedAt: NOW,
         recordedByMembershipId: state.callerMembershipId,
         reason: null,
-        supersedesRevisionId: 0,
+        supersedesRevisionId: null,
       },
     ],
     history: [

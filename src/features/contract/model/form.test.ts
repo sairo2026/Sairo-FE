@@ -135,4 +135,23 @@ describe("서류 업로드 폼", () => {
     expect(form.get("piiMaskingConfirmed")).toBe("false");
     expect((form.get("file") as File).name).toBe("계약서.pdf");
   });
+
+  it("작성일과 교부일이 모두 있으면 미기재 사유를 보내지 않는다", async () => {
+    const { toDocumentForm } = await import("./document");
+    const file = new File(["x"], "계약서.pdf", { type: "application/pdf" });
+    const form = toDocumentForm(
+      {
+        documentType: "SALES_CONTRACT",
+        writtenDate: "2026-10-01",
+        deliveredDate: "2026-10-02",
+        datePendingReason: "이전에 적은 사유",
+        piiReviewed: true,
+        piiMaskingConfirmed: false,
+      },
+      file,
+      77,
+      true,
+    );
+    expect(form.has("datePendingReason")).toBe(false);
+  });
 });

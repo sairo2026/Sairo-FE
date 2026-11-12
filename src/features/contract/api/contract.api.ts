@@ -7,7 +7,6 @@ import {
   ContractDuplicateExclusionResponseSchema,
   ContractListResponseSchema,
   ContractRenewResponseSchema,
-  ContractRevisionListResponseSchema,
   ContractRevisionResponseSchema,
   ContractSettlementStatusResponseSchema,
   ContractSignResponseSchema,
@@ -24,6 +23,7 @@ import type {
   ContractStatusUpdateRequest,
 } from "@/lib/api/contracts/contract.schema";
 import { apiFetch, withQuery } from "@/shared/api/client";
+import { ContractRevisionListWireSchema } from "./wire";
 
 function ifMatch(version: number) {
   return { "If-Match": String(version) };
@@ -118,7 +118,7 @@ export function createSignedContract(propertyId: number, request: ContractCreate
 
 export function listRevisions(contractId: number) {
   return apiFetch(`/api/contracts/${contractId}/revisions`, {
-    schema: ContractRevisionListResponseSchema,
+    schema: ContractRevisionListWireSchema,
   });
 }
 

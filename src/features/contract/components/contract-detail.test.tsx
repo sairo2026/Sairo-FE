@@ -12,6 +12,7 @@ import {
 } from "@/mocks/handlers/contract";
 import { server, startMockServer } from "@/mocks/server";
 import { renderOffice } from "@/shared/testing/office-render";
+import { listRevisions } from "../api/contract.api";
 import { describeRevisionChanges } from "./contract-history";
 import { ContractDetailScreen } from "./contract-detail-screen";
 
@@ -378,6 +379,12 @@ describe("효력시각별 이력과 정정 버전", () => {
     const item = (await screen.findByText("거래계약서")).closest("li");
     await waitFor(() => expect(item?.textContent).toContain("계약 버전 1"));
     expect(item?.textContent).toContain("문서 버전 1");
+  });
+
+  it("체결 버전의 대체 버전 번호가 null이어도 버전 이력을 읽는다", async () => {
+    const response = await listRevisions(9101);
+    const signed = response.items.find((item) => item.revisionType === "SIGNED");
+    expect(signed?.supersedesRevisionId).toBeNull();
   });
 
   it("버전 비교는 바뀐 항목만 이전과 현재로 만든다", () => {

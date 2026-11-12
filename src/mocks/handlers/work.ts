@@ -153,7 +153,13 @@ function isOverdue(task: MockTask): boolean {
 
 function visibleTasks(): MockTask[] {
   if (state.callerRole !== "DEPUTY") return state.tasks;
-  return state.tasks.filter((task) => task.assigneeMembershipId === state.callerMembershipId);
+  // 백엔드처럼 중개보조원에게는 계약 자동 업무를 보여주지 않는다(TaskRepository excludeContract).
+  return state.tasks.filter(
+    (task) =>
+      task.assigneeMembershipId === state.callerMembershipId &&
+      task.sourceType !== "CONTRACT_BALANCE" &&
+      task.sourceType !== "CONTRACT_MATURITY",
+  );
 }
 
 function paged<T>(items: T[], url: URL) {
@@ -250,6 +256,18 @@ export const workHandlers = [
 
   http.post("/api/tasks", async ({ request }) => {
     const body = (await request.json()) as Partial<MockTask> & { assigneeMembershipId?: number };
+    const allowedKeys = [
+      "title",
+      "assigneeMembershipId",
+      "dueDate",
+      "dueTime",
+      "relatedCustomerId",
+      "relatedPropertyId",
+      "memo",
+    ];
+    const extra = Object.keys(body).find((key) => !allowedKeys.includes(key));
+    if (extra)
+      return mockErrors.validation([{ field: extra, message: "허용되지 않은 필드입니다." }]);
     if (!body.title || String(body.title).trim() === "") {
       return mockErrors.validation([{ field: "title", message: "제목은 필수입니다." }]);
     }
@@ -276,14 +294,15 @@ export const workHandlers = [
     if (header === null) {
       return mockErrors.validation([{ field: "If-Match", message: "업무 버전이 필요합니다." }]);
     }
-    if (Number(header) !== found.version) return mockErrors.versionConflict(found.version);
     const body = (await request.json()) as Partial<MockTask>;
+    // 백엔드 TaskService는 자동 업무 제한을 버전 비교보다 먼저 본다.
     if (found.sourceType !== "MANUAL") {
       const allowed = Object.keys(body).every((key) => key === "memo" || key === "status");
       if (!allowed || body.status === "CANCELLED") {
         return errorResponse(403, "AUTO_TASK_IMMUTABLE", "자동 생성 업무는 고칠 수 없습니다.");
       }
     }
+    if (Number(header) !== found.version) return mockErrors.versionConflict(found.version);
     if (typeof body.memo === "string" && SENSITIVE.test(body.memo)) {
       return errorResponse(400, "SENSITIVE_DATA_DETECTED", "민감한 정보가 감지되었습니다.");
     }

@@ -264,8 +264,7 @@ export const contractExtraHandlers = [
   http.post("/api/contract-fees/:feeId/revisions", async ({ params, request }) => {
     const found = findFee(params.feeId);
     if (!found) return mockErrors.notFound();
-    const problem = versionProblem(request, found.fee.version);
-    if (problem) return problem;
+    // 백엔드는 중개보수 조정·수납에 If-Match를 쓰지 않는다(ContractRecordController).
     const body = (await request.json()) as {
       revisionType: string;
       effectiveDate: string;
@@ -329,8 +328,7 @@ export const contractExtraHandlers = [
   http.post("/api/contract-fees/:feeId/transactions", async ({ params, request }) => {
     const found = findFee(params.feeId);
     if (!found) return mockErrors.notFound();
-    const problem = versionProblem(request, found.fee.version);
-    if (problem) return problem;
+    // 백엔드는 중개보수 조정·수납에 If-Match를 쓰지 않는다(ContractRecordController).
     const body = (await request.json()) as {
       transactionType: string;
       amount: number;
@@ -475,8 +473,7 @@ export const contractExtraHandlers = [
   http.post("/api/payment-schedules/:scheduleId/transactions", async ({ params, request }) => {
     const found = findSchedule(params.scheduleId);
     if (!found) return mockErrors.notFound();
-    const problem = versionProblem(request, found.schedule.version);
-    if (problem) return problem;
+    // 백엔드는 계약대금 실지급에 If-Match를 쓰지 않는다(ContractRecordController).
     const body = (await request.json()) as {
       actualAmount: number;
       actualDate: string;
@@ -562,8 +559,7 @@ export const contractExtraHandlers = [
     for (const [contractId, items] of Object.entries(state.followups)) {
       const found = items.find((item) => String(item.taskId) === params.taskId);
       if (!found) continue;
-      const problem = versionProblem(request, found.version);
-      if (problem) return problem;
+      // 백엔드처럼 이미 제출한 업무는 버전 검사 없이 현재 값을 돌려준다.
       if (found.submitted) {
         return HttpResponse.json({
           taskId: found.taskId,
@@ -573,6 +569,8 @@ export const contractExtraHandlers = [
           version: found.version,
         });
       }
+      const problem = versionProblem(request, found.version);
+      if (problem) return problem;
       const updated = { ...found, submitted: true, submittedAt: NOW, version: found.version + 1 };
       state.followups = {
         ...state.followups,
@@ -609,6 +607,12 @@ export const contractExtraHandlers = [
     }
     if (contract.detail.documents.some((item) => item.documentType === form.documentType)) {
       return errorResponse(409, "DOCUMENT_VERSION_CONFLICT", "이미 있는 서류입니다.");
+    }
+    // 백엔드 ContractDocumentService: 두 날짜가 모두 있으면 미기재 사유를 받지 않는다.
+    if (form.writtenDate && form.deliveredDate && form.datePendingReason) {
+      return mockErrors.validation([
+        { field: "datePendingReason", message: "작성일과 교부일이 모두 있으면 사유를 비웁니다." },
+      ]);
     }
     const created = documentFrom(form, 1, null);
     replaceDocuments(contract, [...contract.detail.documents, created]);
