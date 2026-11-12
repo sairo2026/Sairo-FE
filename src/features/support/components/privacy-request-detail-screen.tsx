@@ -1,6 +1,7 @@
 "use client";
 
 import type { PrivacyRequestResponse } from "@/lib/api/contracts/support.schema";
+import type { PrivacyRequestDetail } from "../api/wire";
 import { FormNotice } from "@/shared/components/feedback/form-frame";
 import { DetailList, TextLink } from "@/shared/components/feedback/page-parts";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
@@ -22,7 +23,9 @@ function handlerText(detail: PrivacyRequestResponse): string {
     : COPY.handlerOfficeNoName;
 }
 
-function Body({ detail, justReceived }: { detail: PrivacyRequestResponse; justReceived: boolean }) {
+function Body({ detail, justReceived }: { detail: PrivacyRequestDetail; justReceived: boolean }) {
+  // 보완 대기 안내는 운영자가 적은 보완 요청을 먼저 쓴다.
+  const supplement = detail.supplementRequest ?? detail.decisionReason;
   const company = useLegalCompanyInfo();
   const contact = company.data?.privacyContact ?? COPY.noContact;
   const typeLabel = privacyTypeLabel(detail.requestType);
@@ -56,9 +59,7 @@ function Body({ detail, justReceived }: { detail: PrivacyRequestResponse; justRe
           />
           {detail.status === "WAITING_FOR_INFO" ? (
             <FormNotice>
-              {detail.decisionReason
-                ? PRIVACY_RIGHTS_COPY.identity(detail.decisionReason)
-                : COPY.waitingGeneric}
+              {supplement ? PRIVACY_RIGHTS_COPY.identity(supplement) : COPY.waitingGeneric}
             </FormNotice>
           ) : null}
           {detail.status === "REJECTED" && detail.decisionReason ? (

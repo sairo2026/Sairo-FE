@@ -6,13 +6,12 @@ import {
   PolicyDocumentListResponseSchema,
   PrivacyRequestCreateResponseSchema,
   PrivacyRequestListResponseSchema,
-  PrivacyRequestResponseSchema,
   SupportInquiryAttachmentResponseSchema,
   SupportInquiryCreateResponseSchema,
   SupportInquiryListResponseSchema,
   SupportInquiryReplyResponseSchema,
-  SupportInquiryResponseSchema,
 } from "@/lib/api/contracts/support.schema";
+import { PrivacyRequestWireSchema, SupportInquiryWireSchema } from "./wire";
 import type {
   EnterpriseLeadCreateRequest,
   PrivacyRequestCreateRequest,
@@ -38,7 +37,7 @@ export function createInquiry(request: SupportInquiryCreateRequest) {
 
 export function fetchInquiry(inquiryId: number) {
   return apiFetch(`/api/support-inquiries/${inquiryId}`, {
-    schema: SupportInquiryResponseSchema,
+    schema: SupportInquiryWireSchema,
   });
 }
 
@@ -140,6 +139,6 @@ export function createPrivacyRequest(request: PrivacyRequestCreateRequest) {
 
 export function fetchPrivacyRequest(requestId: number) {
   return apiFetch(`/api/privacy-requests/${requestId}`, {
-    schema: PrivacyRequestResponseSchema,
+    schema: PrivacyRequestWireSchema,
   });
 }

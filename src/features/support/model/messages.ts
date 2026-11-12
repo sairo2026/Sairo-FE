@@ -48,6 +48,8 @@ export const SUPPORT_COPY = {
   assignedTo: "담당",
   unassigned: "배정 전",
   messagesTitle: "대화",
+  originalTitle: "문의 내용",
+  originalScope: "요청 범위",
   requesterLabel: "나",
   operatorLabel: "사이로 담당자",
   replyLabel: "추가 내용",
