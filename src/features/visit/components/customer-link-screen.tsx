@@ -30,6 +30,7 @@ import {
   MAX_CUSTOMER_SLOTS,
   parseSubmittedSlots,
   toSubmitSlots,
+  acceptsCustomerResponse,
   validateSlots,
 } from "../model/customer-times";
 import type { SlotDraft, SlotErrors } from "../model/customer-times";
@@ -94,8 +95,9 @@ function TimeForm({ token, link }: { token: string; link: PublicVisitLinkRespons
       }
     },
   });
-  const isClosed = link.coordinationStatus === "CANCELLED";
+  const isClosed = !acceptsCustomerResponse(link.coordinationStatus, link.linkExpiresAt);
   const isResubmit = initial.length > 0;
+  const isWithdrawAll = isResubmit && slots.length === 0;
 
   function update(key: number, changes: Partial<SlotDraft>) {
     setSlots((current) =>
@@ -105,7 +107,7 @@ function TimeForm({ token, link }: { token: string; link: PublicVisitLinkRespons
   }
 
   function submit() {
-    const result = validateSlots(slots, link.candidateWindow);
+    const result = validateSlots(slots, link.candidateWindow, new Date(), isResubmit);
     setErrors(result.errors);
     setFormError(result.formError);
     if (!result.formError && Object.keys(result.errors).length === 0) mutation.mutate();
@@ -183,8 +185,18 @@ function TimeForm({ token, link }: { token: string; link: PublicVisitLinkRespons
         </FormAlert>
       ) : null}
       {mutation.isSuccess ? <FormNotice>가능한 시간을 제출했습니다.</FormNotice> : null}
+      {isClosed ? <FormNotice>지금은 가능한 시간을 제출하거나 고칠 수 없습니다.</FormNotice> : null}
+      {isWithdrawAll && !isClosed ? (
+        <FormNotice>
+          시간을 모두 삭제하고 제출하면 앞서 보낸 가능한 시간이 모두 취소됩니다.
+        </FormNotice>
+      ) : null}
       <Button fullWidth isLoading={mutation.isPending} disabled={isClosed} onClick={submit}>
-        {isResubmit ? "가능한 시간 수정 제출" : "가능한 시간 제출"}
+        {isWithdrawAll
+          ? "제출한 시간 모두 취소"
+          : isResubmit
+            ? "가능한 시간 수정 제출"
+            : "가능한 시간 제출"}
       </Button>
     </div>
   );

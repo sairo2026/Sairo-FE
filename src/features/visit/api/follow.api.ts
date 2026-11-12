@@ -26,9 +26,19 @@ import type {
 } from "@/lib/api/contracts/visit.schema";
 import { apiFetch, withQuery } from "@/shared/api/client";
 
-export function recordItemResult(itemId: number, request: VisitScheduleItemResultRequest) {
+/** 결과 기록·재조율·철회 접수·취소는 조율 건 version을 If-Match로 보낸다. */
+function ifMatch(version: number) {
+  return { "If-Match": String(version) };
+}
+
+export function recordItemResult(
+  itemId: number,
+  version: number,
+  request: VisitScheduleItemResultRequest,
+) {
   return apiFetch(`/api/visit-schedule-items/${itemId}/result`, {
     method: "PATCH",
+    headers: ifMatch(version),
     body: request,
     schema: VisitScheduleItemResultResponseSchema,
   });
@@ -40,9 +50,14 @@ export function fetchResultHistory(itemId: number) {
   });
 }
 
-export function rescheduleCoordination(coordinationId: number, reason: string | null) {
+export function rescheduleCoordination(
+  coordinationId: number,
+  version: number,
+  reason: string | null,
+) {
   return apiFetch(`/api/visit-coordinations/${coordinationId}/reschedule`, {
     method: "POST",
+    headers: ifMatch(version),
     body: { reason },
     schema: VisitCoordinationRescheduleResponseSchema,
   });
@@ -50,18 +65,21 @@ export function rescheduleCoordination(coordinationId: number, reason: string | 
 
 export function recordAccessRevocation(
   coordinationId: number,
+  version: number,
   request: StaffAccessRevocationRequest,
 ) {
   return apiFetch(`/api/visit-coordinations/${coordinationId}/access-revocations`, {
     method: "POST",
+    headers: ifMatch(version),
     body: request,
     schema: VisitAccessRevocationResponseSchema,
   });
 }
 
-export function cancelCoordination(coordinationId: number, reason: string | null) {
+export function cancelCoordination(coordinationId: number, version: number, reason: string | null) {
   return apiFetch(`/api/visit-coordinations/${coordinationId}/cancel`, {
     method: "POST",
+    headers: ifMatch(version),
     body: { reason },
     schema: VisitCoordinationCancelResponseSchema,
   });

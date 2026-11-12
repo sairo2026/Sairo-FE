@@ -54,7 +54,7 @@ function initialState(): VisitFollowMockState {
       submittedTimeSlots: [],
       responseVersion: 0,
       coordinationStatus: "TIME_COLLECTING",
-      linkExpiresAt: "2026-11-17T09:00:00+09:00",
+      linkExpiresAt: "2026-11-20T18:00:00+09:00",
       officeContactPhone: "02-1234-5678",
       privacyNotice: {
         purpose: "방문 가능 시간 수집과 방문 일정 조율",
@@ -144,6 +144,17 @@ function pageOf<T>(items: T[], url: URL) {
   };
 }
 
+/** 백엔드 IfMatchVersion.parse처럼 헤더가 없으면 400, 조율 버전과 다르면 409. */
+function versionProblem(request: Request, coordination: MockCoordination) {
+  const header = request.headers.get("If-Match");
+  if (header === null || header.trim() === "" || Number.isNaN(Number(header))) {
+    return mockErrors.validation([{ field: "If-Match", message: "조율 버전이 필요합니다." }]);
+  }
+  return Number(header) === coordination.version
+    ? null
+    : mockErrors.versionConflict(coordination.version);
+}
+
 function denyDeputy() {
   return getMockVisitState().callerRole === "DEPUTY" ? mockErrors.forbidden() : null;
 }
@@ -153,6 +164,8 @@ export const visitFollowHandlers = [
     const found = locate(params.itemId);
     if (!found) return mockErrors.notFound();
     const { coordination, item } = found;
+    const stale = versionProblem(request, coordination);
+    if (stale) return stale;
     const body = (await request.json()) as {
       result: "COMPLETED" | "NO_SHOW" | "CANCELLED";
       actualVisitedAt?: string | null;
@@ -229,7 +242,9 @@ export const visitFollowHandlers = [
     if (denied) return denied;
     const coordination = findCoordination(params.id);
     if (!coordination) return mockErrors.notFound();
-    if (!["CONFIRMED", "RESCHEDULE_REQUIRED"].includes(coordination.status)) {
+    const stale = versionProblem(request, coordination);
+    if (stale) return stale;
+    if (coordination.status !== "CONFIRMED") {
       return errorResponse(409, "INVALID_TRANSITION", "지금은 재조율로 전환할 수 없습니다.");
     }
     const body = (await request.json()) as { reason?: string | null };
@@ -291,6 +306,8 @@ export const visitFollowHandlers = [
     if (denied) return denied;
     const coordination = findCoordination(params.id);
     if (!coordination) return mockErrors.notFound();
+    const stale = versionProblem(request, coordination);
+    if (stale) return stale;
     const body = (await request.json()) as {
       approvalId: number;
       revokedAt: string;
@@ -340,9 +357,11 @@ export const visitFollowHandlers = [
     });
   }),
 
-  http.post("/api/visit-coordinations/:id/cancel", async ({ params }) => {
+  http.post("/api/visit-coordinations/:id/cancel", async ({ params, request }) => {
     const coordination = findCoordination(params.id);
     if (!coordination) return mockErrors.notFound();
+    const stale = versionProblem(request, coordination);
+    if (stale) return stale;
     if (["CANCELLED", "VISIT_COMPLETED", "VISIT_INCOMPLETE"].includes(coordination.status)) {
       return errorResponse(409, "INVALID_TRANSITION", "이미 종료된 조율입니다.");
     }
@@ -594,7 +613,7 @@ export const visitFollowHandlers = [
 
   http.get("/api/public/customer-visit-links/:token", ({ params }) => {
     if (params.token === MOCK_CUSTOMER_EXPIRED_TOKEN) {
-      return errorResponse(410, "PUBLIC_LINK_EXPIRED", "링크가 만료되었습니다.");
+      return errorResponse(404, "PUBLIC_LINK_EXPIRED", "링크가 만료되었습니다.");
     }
     if (params.token !== MOCK_CUSTOMER_TOKEN) {
       return errorResponse(404, "PUBLIC_LINK_NOT_FOUND", "링크를 찾을 수 없습니다.");
@@ -618,11 +637,7 @@ export const visitFollowHandlers = [
       if (body.acknowledgedNoticeVersion !== state.customerLink.privacyNotice.noticeVersion) {
         return errorResponse(409, "NOTICE_VERSION_CHANGED", "개인정보 안내가 바뀌었습니다.");
       }
-      if (body.timeSlots.length === 0) {
-        return mockErrors.validation([
-          { field: "timeSlots", message: "시간을 한 개 이상 보내 주세요." },
-        ]);
-      }
+      // 빈 목록은 제출 취소다(백엔드 PublicCustomerLinkSubmitService).
       state.customerSubmitted = body.timeSlots;
       state.customerLink = {
         ...state.customerLink,
