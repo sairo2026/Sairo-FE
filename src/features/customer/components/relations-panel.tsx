@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
-import type { CustomerDetailResponse } from "@/lib/api/contracts/customer.schema";
+import type { CustomerDetail } from "../api/wire";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { Badge } from "@/shared/components/ui/badge";
 import type { BadgeTone } from "@/shared/components/ui/badge";
@@ -22,7 +22,7 @@ import { customerKeys, usePropertySearch } from "../hooks/customer-queries";
 import { RELATION_ROLE_LABEL } from "../model/labels";
 import { describeCustomerError, isApiCode } from "../model/messages";
 
-type Relation = CustomerDetailResponse["relatedProperties"][number];
+type Relation = CustomerDetail["relatedProperties"][number];
 
 const ROLE_TONE: Record<Relation["role"], BadgeTone> = {
   OWNER: "green",
@@ -45,7 +45,7 @@ function RelationRow({
   isEditable,
   onChanged,
 }: {
-  customer: CustomerDetailResponse;
+  customer: CustomerDetail;
   relation: Relation;
   isEditable: boolean;
   onChanged: (message: string) => void;
@@ -158,7 +158,7 @@ function AddRelationForm({
   customer,
   onAdded,
 }: {
-  customer: CustomerDetailResponse;
+  customer: CustomerDetail;
   onAdded: (message: string) => void;
 }) {
   const queryClient = useQueryClient();
@@ -295,7 +295,7 @@ export function RelationsPanel({
   customer,
   canEdit,
 }: {
-  customer: CustomerDetailResponse;
+  customer: CustomerDetail;
   canEdit: boolean;
 }) {
   const [notice, setNotice] = useState<string>();

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { http } from "msw";
+import { http, HttpResponse } from "msw";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { errorResponse, mockErrors } from "@/mocks/error-responses";
 import {
@@ -99,6 +99,25 @@ describe("고객 상세", () => {
     await openTab(user, "방문·업무");
     expect(screen.getByText(/확정 · 2026-11-12 ~ 2026-11-14 · 후보 매물 3개/)).not.toBeNull();
     expect(screen.getByText(/계약서 초안 확인 · 기한 2026-11-15 · 할 일/)).not.toBeNull();
+  });
+
+  it("체결일이 없는 초안 계약은 체결일 미정으로 보여준다", async () => {
+    const base = getMockCustomerState().customers.find((item) => item.customerId === 301);
+    server.use(
+      http.get("/api/customers/301", () =>
+        HttpResponse.json({
+          ...base,
+          upcomingContracts: (base?.upcomingContracts ?? []).map((item) => ({
+            ...item,
+            signedDate: null,
+          })),
+        }),
+      ),
+    );
+    const user = userEvent.setup();
+    renderOffice(<CustomerDetailScreen customerId={301} />, { role: "AGENT" });
+    await openTab(user, "계약");
+    expect(screen.getByText(/국민대 앞 아파트 · 전세 · 초안 · 체결일 미정/)).not.toBeNull();
   });
 });
 

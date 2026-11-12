@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
 import type { ReactNode } from "react";
-import type { CustomerDetailResponse } from "@/lib/api/contracts/customer.schema";
+import type { CustomerDetail } from "../api/wire";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
 import { Badge } from "@/shared/components/ui/badge";
@@ -160,7 +160,7 @@ type FormProps =
   | { mode: "create" }
   | {
       mode: "edit";
-      detail: CustomerDetailResponse;
+      detail: CustomerDetail;
       onReload: () => void;
     };
 
