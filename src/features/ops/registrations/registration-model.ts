@@ -64,6 +64,7 @@ export const CHANGE_TYPE_LABELS: Record<string, string> = {
 export const CHANGE_VALUE_LABELS: Record<string, string> = {
   address: "주소",
   businessRegistrationNumber: "사업자등록번호",
+  entityType: "사업자 구분",
   realEstateLicenseNumber: "개설등록번호",
   registrationAuthority: "개설등록관청",
   representativeName: "대표자명",

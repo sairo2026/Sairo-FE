@@ -87,7 +87,7 @@ export function CompanyFormCard({
     try {
       const result = await create.mutateAsync(toCompanyRequest(form));
       onSaved(
-        `회사 정보 ${result.versionNo}판을 게시했습니다. 실제 문의 수신 시험과 검토를 기록해 주세요.`,
+        `회사 정보 ${result.versionNo}판을 등록했습니다. 실제 문의 수신 시험 성공을 기록하면 게시됩니다.`,
       );
     } catch (caught) {
       setFailure(describeContentError(caught, "회사 정보를 게시하지 못했습니다."));

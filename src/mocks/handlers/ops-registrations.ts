@@ -251,7 +251,7 @@ function detailOf(row: MockRegistration) {
     registrationAuthority: "서울특별시 종로구청",
     applicantRegistrationRelation: "REPRESENTATIVE",
     currentRevisionNo: 1,
-    officeId: row.officeId,
+    // 백엔드 심사 상세 응답에는 사무소 번호가 없다(OperatorRegistrationDetailResponse).
     revisions: [
       {
         revisionNo: 1,

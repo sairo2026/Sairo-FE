@@ -36,7 +36,7 @@ function readCsrfToken(): string | null {
 const CSRF_PRIMING_PATH = "/api/terms?context=SIGNUP";
 let csrfPriming: Promise<void> | null = null;
 
-async function ensureCsrfToken(): Promise<string | null> {
+export async function ensureCsrfToken(): Promise<string | null> {
   const existing = readCsrfToken();
   if (existing !== null || typeof document === "undefined") return existing;
   csrfPriming ??= fetch(CSRF_PRIMING_PATH, {

@@ -17,6 +17,7 @@ import { FormMessage } from "../system-common/system-fields";
 import { describeSystemError } from "../system-common/system-form";
 import { useRerunSystemJob, useSystemJobs } from "./system-jobs-api";
 import {
+  JOB_NAME_PATTERN,
   JOB_STATUS,
   JOB_STATUS_OPTIONS,
   RERUN_BLOCK_MESSAGE,
@@ -67,6 +68,7 @@ function JobTable({ onFeedback }: { onFeedback: (message: string, isError: boole
   const [draft, setDraft] = useState<Filters>(EMPTY_FILTERS);
   const [applied, setApplied] = useState<Filters>(EMPTY_FILTERS);
   const [target, setTarget] = useState<SystemJobRun | null>(null);
+  const [nameError, setNameError] = useState<string>();
   const paging = useOpsPaging();
   const query = useSystemJobs({
     jobName: applied.jobName.trim(),
@@ -97,10 +99,18 @@ function JobTable({ onFeedback }: { onFeedback: (message: string, isError: boole
       <OpsFilterBar
         label="시스템 작업 조회"
         onApply={() => {
-          setApplied(draft);
+          // 백엔드는 소문자·숫자·하이픈 작업 이름만 받는다(형식이 다르면 400).
+          const jobName = draft.jobName.trim().toLowerCase();
+          if (jobName !== "" && !JOB_NAME_PATTERN.test(jobName)) {
+            setNameError("작업 이름은 영문 소문자, 숫자, 하이픈으로 입력해 주세요.");
+            return;
+          }
+          setNameError(undefined);
+          setApplied({ ...draft, jobName });
           paging.resetPage();
         }}
         onReset={() => {
+          setNameError(undefined);
           setDraft(EMPTY_FILTERS);
           setApplied(EMPTY_FILTERS);
           paging.resetPage();
@@ -109,6 +119,7 @@ function JobTable({ onFeedback }: { onFeedback: (message: string, isError: boole
         <TextField
           label="작업 이름"
           value={draft.jobName}
+          error={nameError}
           onValueChange={(jobName) => setDraft((current) => ({ ...current, jobName }))}
         />
         <SelectField

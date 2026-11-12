@@ -52,7 +52,7 @@ export function LaunchStatusCard({
               { label: "가장 최근 게시 버전", value: `${latest.versionNo}판` },
               {
                 label: "게시 시각",
-                value: formatSeoulDateTime(latest.publishedAt),
+                value: latest.publishedAt ? formatSeoulDateTime(latest.publishedAt) : "게시 전",
               },
               {
                 label: "수신 시험 성공 시각",

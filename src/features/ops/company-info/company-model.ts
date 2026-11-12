@@ -1,9 +1,27 @@
-import type {
-  OpsCompanyServiceInfoRequest,
-  OpsCompanyServiceInfoResponse,
+import { z } from "zod";
+import {
+  OpsCompanyServiceInfoCreateResponseSchema,
+  OpsCompanyServiceInfoResponseSchema,
 } from "@/lib/api/contracts/ops.schema";
+import type { OpsCompanyServiceInfoRequest } from "@/lib/api/contracts/ops.schema";
 
-export type CompanyInfoItem = OpsCompanyServiceInfoResponse["items"][number];
+/**
+ * 회사 정보는 등록 때 게시되지 않고 실제 문의 수신 시험 성공을 기록할 때 게시된다(백엔드 OpsContentService).
+ * 게시 전 버전의 publishedAt은 null이다.
+ */
+const CompanyInfoItemSchema = OpsCompanyServiceInfoResponseSchema.shape.items.element.extend({
+  publishedAt: z.string().nullable(),
+});
+
+export const CompanyInfoListSchema = OpsCompanyServiceInfoResponseSchema.extend({
+  items: z.array(CompanyInfoItemSchema),
+});
+
+export const CompanyInfoCreateSchema = OpsCompanyServiceInfoCreateResponseSchema.extend({
+  publishedAt: z.string().nullable(),
+});
+
+export type CompanyInfoItem = z.infer<typeof CompanyInfoItemSchema>;
 
 export type CompanyForm = {
   businessName: string;

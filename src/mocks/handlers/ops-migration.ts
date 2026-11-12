@@ -23,7 +23,7 @@ type MockSupport = {
   officeName: string;
   importBatchId: number;
   batchStatus: string;
-  rowCount: number;
+  rowCount: number | null;
   sourceSystem: string;
   estimatedRowCount: number;
   quoteAmount: number | null;
@@ -111,7 +111,8 @@ function seed(): MockSupport[] {
   const mine = { assignedOperatorId: SELF, assignedOperatorName: "운영 김사이" };
   const quoted = { quoteAmount: 220_000, scopeNote: "원본 1종, 최대 5만 레코드" };
   return [
-    base(401, "REQUESTED"),
+    // 백엔드처럼 매핑 확정 전 요청은 업로드 행 수가 비어 있다.
+    base(401, "REQUESTED", { rowCount: null }),
     base(402, "QUOTED", quoted),
     base(403, "ACCEPTED", quoted),
     base(404, "PAID", quoted),
@@ -212,7 +213,12 @@ function allowedActions(row: MockSupport): string[] {
 
 function previewSummary(row: MockSupport) {
   if (row.mappings.length === 0) return null;
-  return { rowCount: row.rowCount, warningCount: 12, duplicateCount: 4, relationMatchCount: 120 };
+  return {
+    rowCount: row.rowCount ?? 0,
+    warningCount: 12,
+    duplicateCount: 4,
+    relationMatchCount: 120,
+  };
 }
 
 function detailOf(row: MockSupport) {

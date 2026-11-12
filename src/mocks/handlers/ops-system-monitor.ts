@@ -1,6 +1,5 @@
 import { http, HttpResponse } from "msw";
 import type { RequestHandler } from "msw";
-import { jobKindRole } from "@/features/ops/system-jobs/system-jobs-model";
 import { errorResponse, mockErrors } from "../error-responses";
 import { getMockOperator, requireMockOps } from "./ops-session";
 
@@ -119,7 +118,7 @@ type Integration = {
   lastCheckResult: "SUCCESS" | "FAILED" | "NOT_TESTED" | null;
   lastSuccessAt: string | null;
   assignedOperatorId: number | null;
-  approvedByOperatorId: number;
+  approvedByOperatorId: number | null;
 };
 
 type ContractCopy = {
@@ -206,6 +205,23 @@ type MonitorState = {
   authority: AuthorityRequest[];
 };
 
+/** 백엔드 OpsSystemJobService.JobType처럼 작업 이름으로 작업 종류와 재실행 역할을 정한다. */
+function jobTypeOf(jobName: string): { jobType: string; rerunRoles: string[] } {
+  if (["billing-first-charge", "billing-renewal", "billing-retry"].includes(jobName)) {
+    return { jobType: "CHARGE_RETRY", rerunRoles: ["BILLING"] };
+  }
+  if (jobName === "ops-announcement-publish") {
+    return { jobType: "ANNOUNCEMENT_PUBLISH", rerunRoles: ["OPS"] };
+  }
+  if (jobName === "ops-integration-check") {
+    return { jobType: "INTEGRATION_CHECK", rerunRoles: ["OPS"] };
+  }
+  if (["retention-sweep", "approver-anonymize", "legal-link-log-purge"].includes(jobName)) {
+    return { jobType: "LEGAL_RETENTION", rerunRoles: ["PRIVACY"] };
+  }
+  return { jobType: "OTHER", rerunRoles: [] };
+}
+
 function job(runId: number, jobName: string, patch: Partial<JobRun> = {}): JobRun {
   return {
     runId,
@@ -227,7 +243,7 @@ function job(runId: number, jobName: string, patch: Partial<JobRun> = {}): JobRu
 
 function seedJobs(): JobRun[] {
   return [
-    job(101, "MIGRATION_EXECUTE", {
+    job(101, "retention-sweep", {
       officeId: 42,
       officeName: "한빛공인중개사",
       attemptCount: 2,
@@ -236,22 +252,22 @@ function seedJobs(): JobRun[] {
       assignedOperatorId: 5,
       assignedOperatorName: "김이전",
     }),
-    job(102, "PRIVACY_DELETION", { status: "SUCCESS", errorCode: null }),
-    job(103, "BILLING_RETRY", {
+    job(102, "legal-link-log-purge", { status: "SUCCESS", errorCode: null }),
+    job(103, "billing-retry", {
       status: "RUNNING",
       finishedAt: null,
       errorCode: null,
       officeId: 43,
       officeName: "새봄공인중개사",
     }),
-    job(104, "NOTICE_PUBLISH", { errorCode: "DELIVERY_FAILED" }),
-    job(105, "REFUND_EXECUTE", {
+    job(104, "ops-announcement-publish", { errorCode: "DELIVERY_FAILED" }),
+    job(105, "billing-first-charge", {
       errorCode: "PG_REJECTED",
       assignedOperatorId: 6,
       assignedOperatorName: "박결제",
     }),
-    job(106, "RAW_RETURN_DELIVERY", { errorCode: "STORAGE_UNAVAILABLE" }),
-    job(107, "INTEGRATION_CHECK", { errorCode: "CONNECTION_REFUSED" }),
+    job(106, "billing-reconciliation", { errorCode: "STORAGE_UNAVAILABLE" }),
+    job(107, "ops-integration-check", { errorCode: "CONNECTION_REFUSED" }),
   ];
 }
 
@@ -352,6 +368,8 @@ function seedIntegrations(): Integration[] {
       lastCheckResult: "FAILED",
       lastSuccessAt: null,
       assignedOperatorId: null,
+      // 백엔드처럼 승인 전 시험 연동은 승인 운영자가 비어 있다.
+      approvedByOperatorId: null,
     }),
     integration(5, {
       environment: "PRODUCTION",
@@ -584,7 +602,11 @@ const jobHandlers: RequestHandler[] = [
     const rows = state.jobs
       .filter((row) => !name || row.jobName.includes(name))
       .filter((row) => !status || row.status === status)
-      .filter((row) => !officeId || String(row.officeId) === officeId);
+      .filter((row) => !officeId || String(row.officeId) === officeId)
+      .map((row) => ({ ...row, ...jobTypeOf(row.jobName) }));
+    if (name && !/^[a-z][a-z0-9-]{0,99}$/.test(name)) {
+      return bad("jobName", "작업 이름 형식이 아닙니다.");
+    }
     return HttpResponse.json(pageOf(rows, url));
   }),
 
@@ -596,8 +618,9 @@ const jobHandlers: RequestHandler[] = [
     if (typeof body.runId !== "number") return bad("runId", "재실행할 실행 ID를 입력해 주세요.");
     const original = state.jobs.find((row) => row.runId === body.runId && row.jobName === jobName);
     if (!original) return mockErrors.notFound();
-    const needed = jobKindRole(jobName);
-    if (needed !== null && !(getMockOperator()?.roles ?? []).includes(needed)) {
+    const { rerunRoles } = jobTypeOf(jobName);
+    const owned: readonly string[] = getMockOperator()?.roles ?? [];
+    if (!rerunRoles.some((role) => owned.includes(role))) {
       return mockErrors.forbidden();
     }
     if (original.status !== "FAILED") {
@@ -817,7 +840,12 @@ const integrationHandlers: RequestHandler[] = [
   http.get("/api/ops/integrations", ({ request }) => {
     const rejected = requireMockOps(OPS);
     if (rejected) return rejected;
-    return HttpResponse.json(pageOf(state.integrations, new URL(request.url)));
+    const url = new URL(request.url);
+    const environment = url.searchParams.get("environment");
+    const rows = state.integrations.filter(
+      (row) => !environment || row.environment === environment,
+    );
+    return HttpResponse.json(pageOf(rows, url));
   }),
 
   http.post("/api/ops/integrations/:integrationId/check", ({ params }) => {
@@ -1084,7 +1112,7 @@ const termsHandlers: RequestHandler[] = [
 
 const authorityHandlers: RequestHandler[] = [
   http.get("/api/ops/authority-requests", ({ request }) => {
-    const rejected = requireMockOps(PRIVACY);
+    const rejected = requireMockOps(["PRIVACY", "SECURITY_ADMIN"]);
     if (rejected) return rejected;
     const url = new URL(request.url);
     const decision = url.searchParams.get("decision");
@@ -1100,7 +1128,10 @@ const authorityHandlers: RequestHandler[] = [
         documentReference: row.documentReference,
         decision: row.decision,
         officeNoticeStatus: row.officeNoticeStatus,
+        recordedByOperatorId: row.recordedByOperatorId,
+        recordedByOperatorName: `운영자 ${row.recordedByOperatorId}`,
         closedAt: row.closedAt,
+        retentionUntil: row.retentionUntil,
       }));
     return HttpResponse.json(pageOf(rows, url));
   }),

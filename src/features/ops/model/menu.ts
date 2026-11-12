@@ -107,7 +107,8 @@ export const OPS_MENU: readonly OpsMenuItem[] = [
     key: "authority-requests",
     label: "수사기관 요청",
     href: "/ops/authority-requests",
-    roles: ["PRIVACY"],
+    // 제공 종결은 보안관리자도 하므로 목록을 함께 연다(백엔드 OpsPrivacyRecordController).
+    roles: ["PRIVACY", "SECURITY_ADMIN"],
   },
   { key: "raw-access", label: "원문 접근", href: "/ops/raw-access", roles: ALL },
   {

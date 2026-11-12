@@ -169,6 +169,41 @@ describe("고객사 상세", () => {
     expect(screen.getByText("회수")).not.toBeNull();
   });
 
+  it("결제 전 구독은 현재 기간 종료가 없어도 상세를 열고 미정으로 보인다", async () => {
+    const office = mockOffices.items[0];
+    if (!office?.detail.subscription) throw new Error("모의 구독이 없습니다.");
+    office.detail.subscription = {
+      ...office.detail.subscription,
+      status: "PRE_PAYMENT",
+      currentPeriodEnd: null,
+    };
+    renderDetail(["SUPPORT"]);
+    await screen.findByText("현재 기간 종료");
+    expect(screen.getByText("현재 기간 종료").nextElementSibling?.textContent).toBe("미정");
+  });
+
+  it("심사담당은 인증 완료 사무소의 인증을 고객사 상세에서 회수한다", async () => {
+    server.use(
+      http.post("/api/ops/offices/501/revoke", () =>
+        HttpResponse.json({ officeId: 501, registrationId: 9, registrationStatus: "REVOKED" }),
+      ),
+    );
+    renderDetail(["REVIEW", "OPS"]);
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: "사무소 인증 회수" }));
+    const dialog = screen.getByRole("dialog");
+    await user.type(within(dialog).getByLabelText("회수 사유"), "허위 서류 확인");
+    await user.click(within(dialog).getByLabelText("되돌릴 수 없음을 확인했습니다"));
+    await user.click(within(dialog).getByRole("button", { name: "인증 회수" }));
+    expect(await screen.findByText("사무소 인증을 회수했습니다.")).not.toBeNull();
+  });
+
+  it("심사담당이 아니면 인증 회수 버튼이 없다", async () => {
+    renderDetail(["SUPPORT"]);
+    await screen.findByText("현재 기간 종료");
+    expect(screen.queryByRole("button", { name: "사무소 인증 회수" })).toBeNull();
+  });
+
   it("인증 이력 탭이 기본이고 구성원과 고용명부 탭으로 바꿀 수 있다", async () => {
     renderDetail(["SUPPORT"]);
     expect(await screen.findByRole("list", { name: "인증 이력" })).not.toBeNull();

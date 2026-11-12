@@ -442,7 +442,11 @@ export function AgreementsScreen() {
           setFailure(null);
           setApproved(null);
           setRevoked(
-            await actions.revoke.mutateAsync({ agreementId: revokeTarget.agreementId, reason }),
+            await actions.revoke.mutateAsync({
+              agreementId: revokeTarget.agreementId,
+              version: revokeTarget.version,
+              reason,
+            }),
           );
         }}
         onClose={() => setRevokeTarget(null)}

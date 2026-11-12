@@ -90,6 +90,18 @@ describe("시스템 작업 모델", () => {
     expect(rerunBlock(run({ jobName: "MIGRATION_EXECUTE" }), ["MIGRATION"])).toBeNull();
   });
 
+  it("서버가 준 재실행 역할이 있으면 그 역할로 판단하고 빈 목록은 재실행 대상이 아니다", () => {
+    expect(
+      rerunBlock(run({ jobName: "billing-retry", rerunRoles: ["BILLING"] }), ["BILLING"]),
+    ).toBeNull();
+    expect(rerunBlock(run({ jobName: "billing-retry", rerunRoles: ["BILLING"] }), ["OPS"])).toBe(
+      "NO_ROLE",
+    );
+    expect(rerunBlock(run({ jobName: "billing-reconciliation", rerunRoles: [] }), ["OPS"])).toBe(
+      "NOT_RERUNNABLE",
+    );
+  });
+
   it("알 수 없는 작업은 재실행 역할이 하나라도 있으면 허용한다", () => {
     expect(rerunBlock(run({ jobName: "ETC_JOB" }), ["OPS"])).toBeNull();
     expect(rerunBlock(run({ jobName: "ETC_JOB" }), ["REVIEW"])).toBe("NO_ROLE");
@@ -99,7 +111,7 @@ describe("시스템 작업 모델", () => {
 describe("시스템 작업 화면", () => {
   it("로딩 뒤 작업 목록과 담당자 이름과 사무소 이름을 보여준다", async () => {
     renderJobs();
-    expect(await screen.findByText("MIGRATION_EXECUTE")).toBeTruthy();
+    expect(await screen.findByText("retention-sweep")).toBeTruthy();
     expect(screen.getByText("한빛공인중개사")).toBeTruthy();
     expect(screen.getByText("김이전")).toBeTruthy();
     expect(screen.getByText("MAPPING_TIMEOUT")).toBeTruthy();
@@ -108,7 +120,7 @@ describe("시스템 작업 화면", () => {
 
   it("역할별 재실행 대상 표를 안내한다", async () => {
     renderJobs();
-    await screen.findByText("MIGRATION_EXECUTE");
+    await screen.findByText("retention-sweep");
     const table = screen.getByRole("table", { name: "역할별 재실행 대상 작업" });
     expect(within(table).getByText("데이터 이전 실행")).toBeTruthy();
     expect(within(table).getByText("파기, 원문 반환 전달")).toBeTruthy();
@@ -118,7 +130,7 @@ describe("시스템 작업 화면", () => {
 
   it("내 역할 중 재실행할 수 있는 종류를 보여준다", async () => {
     renderJobs(["OPS", "BILLING"]);
-    await screen.findByText("MIGRATION_EXECUTE");
+    await screen.findByText("retention-sweep");
     expect(screen.getByText(/내 역할 중 재실행할 수 있는 종류: 결제담당, 운영담당/)).toBeTruthy();
   });
 
@@ -172,52 +184,70 @@ describe("시스템 작업 화면", () => {
 
   it("결과 필터를 적용해 서버에 보낸다", async () => {
     renderJobs();
-    await screen.findByText("MIGRATION_EXECUTE");
+    await screen.findByText("retention-sweep");
     const user = userEvent.setup();
     await user.selectOptions(screen.getByLabelText("결과"), "SUCCESS");
     await user.click(screen.getByRole("button", { name: "조회" }));
-    await waitFor(() => expect(screen.queryByText("MIGRATION_EXECUTE")).toBeNull());
-    expect(screen.getByText("PRIVACY_DELETION")).toBeTruthy();
+    await waitFor(() => expect(screen.queryByText("retention-sweep")).toBeNull());
+    expect(screen.getByText("legal-link-log-purge")).toBeTruthy();
   });
 
   it("작업 이름 필터를 적용하고 초기화한다", async () => {
     renderJobs();
-    await screen.findByText("MIGRATION_EXECUTE");
+    await screen.findByText("retention-sweep");
     const user = userEvent.setup();
-    await user.type(screen.getByLabelText("작업 이름"), "REFUND");
+    await user.type(screen.getByLabelText("작업 이름"), "first-charge");
     await user.click(screen.getByRole("button", { name: "조회" }));
-    await waitFor(() => expect(screen.queryByText("MIGRATION_EXECUTE")).toBeNull());
-    expect(screen.getByText("REFUND_EXECUTE")).toBeTruthy();
+    await waitFor(() => expect(screen.queryByText("retention-sweep")).toBeNull());
+    expect(screen.getByText("billing-first-charge")).toBeTruthy();
     await user.click(screen.getByRole("button", { name: "초기화" }));
-    expect(await screen.findByText("MIGRATION_EXECUTE")).toBeTruthy();
+    expect(await screen.findByText("retention-sweep")).toBeTruthy();
   });
 
   it("성공한 실행의 재실행 버튼은 비활성이고 이유를 안내한다", async () => {
     renderJobs();
-    await screen.findByText("PRIVACY_DELETION");
+    await screen.findByText("legal-link-log-purge");
     expect(isDisabled(screen.getByRole("button", { name: "실행 102 재실행" }))).toBe(true);
     expect(screen.getByText("이미 성공한 실행은 다시 실행할 수 없습니다.")).toBeTruthy();
   });
 
   it("진행 중인 실행의 재실행 버튼은 비활성이다", async () => {
     renderJobs();
-    await screen.findByText("BILLING_RETRY");
+    await screen.findByText("billing-retry");
     expect(isDisabled(screen.getByRole("button", { name: "실행 103 재실행" }))).toBe(true);
     expect(screen.getByText("진행 중인 실행은 다시 실행할 수 없습니다.")).toBeTruthy();
   });
 
   it("실패한 실행은 보유 역할에 따라 활성 여부가 달라진다", async () => {
     renderJobs(["OPS", "BILLING"]);
-    await screen.findByText("MIGRATION_EXECUTE");
+    await screen.findByText("retention-sweep");
     expect(isDisabled(screen.getByRole("button", { name: "실행 101 재실행" }))).toBe(true);
     expect(isDisabled(screen.getByRole("button", { name: "실행 105 재실행" }))).toBe(false);
     expect(isDisabled(screen.getByRole("button", { name: "실행 104 재실행" }))).toBe(false);
     expect(isDisabled(screen.getByRole("button", { name: "실행 106 재실행" }))).toBe(true);
   });
 
+  it("재실행 대상이 아닌 작업에는 안내 문구를 보인다", async () => {
+    renderJobs();
+    await screen.findByText("billing-reconciliation");
+    expect(isDisabled(screen.getByRole("button", { name: "실행 106 재실행" }))).toBe(true);
+    expect(screen.getByText("재실행 대상이 아닌 작업입니다.")).toBeTruthy();
+  });
+
+  it("작업 이름 형식이 아니면 조회하지 않고 안내한다", async () => {
+    renderJobs();
+    await screen.findByText("retention-sweep");
+    const user = userEvent.setup();
+    await user.type(screen.getByLabelText("작업 이름"), "환불");
+    await user.click(screen.getByRole("button", { name: "조회" }));
+    expect(
+      await screen.findByText("작업 이름은 영문 소문자, 숫자, 하이픈으로 입력해 주세요."),
+    ).toBeTruthy();
+  });
+
   it("역할이 없는 실행에는 역할 안내 문구를 보인다", async () => {
     renderJobs(["OPS"]);
-    await screen.findByText("MIGRATION_EXECUTE");
+    await screen.findByText("retention-sweep");
     expect(
       screen.getAllByText("이 작업 종류를 재실행할 수 있는 역할이 아닙니다.").length,
     ).toBeGreaterThan(0);
@@ -225,7 +255,7 @@ describe("시스템 작업 화면", () => {
 
   it("재실행을 확인하면 새 실행 번호를 안내하고 목록을 새로 불러온다", async () => {
     renderJobs();
-    await screen.findByText("MIGRATION_EXECUTE");
+    await screen.findByText("retention-sweep");
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: "실행 105 재실행" }));
     const dialog = screen.getByRole("dialog");
@@ -244,7 +274,7 @@ describe("시스템 작업 화면", () => {
         return HttpResponse.json(
           {
             runId: 200,
-            jobName: "REFUND_EXECUTE",
+            jobName: "billing-first-charge",
             status: "RUNNING",
             startedAt: "2026-11-11T09:00:00+09:00",
             attemptCount: 2,
@@ -254,7 +284,7 @@ describe("시스템 작업 화면", () => {
         );
       }),
     );
-    await screen.findByText("REFUND_EXECUTE");
+    await screen.findByText("billing-first-charge");
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: "실행 105 재실행" }));
     await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "재실행" }));
@@ -271,7 +301,7 @@ describe("시스템 작업 화면", () => {
         return mockErrors.server();
       }),
     );
-    await screen.findByText("REFUND_EXECUTE");
+    await screen.findByText("billing-first-charge");
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: "실행 105 재실행" }));
     await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "취소" }));
@@ -286,7 +316,7 @@ describe("시스템 작업 화면", () => {
         errorResponse(409, "INVALID_TRANSITION", "이미 성공했습니다."),
       ),
     );
-    await screen.findByText("REFUND_EXECUTE");
+    await screen.findByText("billing-first-charge");
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: "실행 105 재실행" }));
     await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "재실행" }));
@@ -296,7 +326,7 @@ describe("시스템 작업 화면", () => {
   it("서버가 실행 ID 불일치로 404를 주면 대상을 찾을 수 없다고 안내한다", async () => {
     renderJobs();
     server.use(http.post("/api/ops/system-jobs/:jobName/rerun", () => mockErrors.notFound()));
-    await screen.findByText("REFUND_EXECUTE");
+    await screen.findByText("billing-first-charge");
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: "실행 105 재실행" }));
     await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "재실행" }));
@@ -306,7 +336,7 @@ describe("시스템 작업 화면", () => {
   it("서버가 역할 부족으로 403을 주면 권한 안내를 보인다", async () => {
     renderJobs();
     server.use(http.post("/api/ops/system-jobs/:jobName/rerun", () => mockErrors.forbidden()));
-    await screen.findByText("REFUND_EXECUTE");
+    await screen.findByText("billing-first-charge");
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: "실행 105 재실행" }));
     await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "재실행" }));
@@ -316,7 +346,7 @@ describe("시스템 작업 화면", () => {
   it("재실행이 429이면 기다릴 시간을 안내한다", async () => {
     renderJobs();
     server.use(http.post("/api/ops/system-jobs/:jobName/rerun", () => mockErrors.rateLimited(10)));
-    await screen.findByText("REFUND_EXECUTE");
+    await screen.findByText("billing-first-charge");
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: "실행 105 재실행" }));
     await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "재실행" }));
@@ -326,7 +356,7 @@ describe("시스템 작업 화면", () => {
   it("재실행이 서버 오류이면 실패 문구를 보인다", async () => {
     renderJobs();
     server.use(http.post("/api/ops/system-jobs/:jobName/rerun", () => mockErrors.server()));
-    await screen.findByText("REFUND_EXECUTE");
+    await screen.findByText("billing-first-charge");
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: "실행 105 재실행" }));
     await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "재실행" }));
@@ -340,7 +370,7 @@ describe("시스템 작업 화면", () => {
         mockErrors.validation([{ field: "runId", message: "실행 ID가 올바르지 않습니다." }]),
       ),
     );
-    await screen.findByText("REFUND_EXECUTE");
+    await screen.findByText("billing-first-charge");
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: "실행 105 재실행" }));
     await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "재실행" }));

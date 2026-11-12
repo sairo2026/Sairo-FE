@@ -3,11 +3,11 @@ import {
   OpsBillingInvoiceListResponseSchema,
   OpsImportSupportRequestListResponseSchema,
   OpsSupportInquiryListResponseSchema,
-  OperatorOfficeDetailResponseSchema,
   OperatorOfficeListResponseSchema,
 } from "@/lib/api/contracts/ops.schema";
 import { apiFetch } from "@/shared/api/client";
 import { opsKeys, opsPath } from "../../api/ops-api";
+import { OfficeDetailWireSchema } from "./wire";
 import type { OpsListParams } from "../../api/ops-api";
 
 export type OfficeListFilter = {
@@ -38,7 +38,7 @@ export function fetchOfficeList(filter: OfficeListFilter, page: number, size: nu
 }
 
 export function fetchOfficeDetail(officeId: number) {
-  return apiFetch(`/api/ops/offices/${officeId}`, { schema: OperatorOfficeDetailResponseSchema });
+  return apiFetch(`/api/ops/offices/${officeId}`, { schema: OfficeDetailWireSchema });
 }
 
 function tabParams(officeId: number, page: number, size: number): OpsListParams {

@@ -167,7 +167,8 @@ function IntegrationTable() {
           {
             key: "approver",
             header: "활성화 승인자",
-            render: (row) => `운영자 ${row.approvedByOperatorId}`,
+            render: (row) =>
+              row.approvedByOperatorId === null ? "승인 전" : `운영자 ${row.approvedByOperatorId}`,
           },
           {
             key: "actions",

@@ -1,10 +1,7 @@
 import { http, HttpResponse } from "msw";
+import type { OfficeDetail } from "@/features/ops/offices/api/wire";
 import type { RequestHandler } from "msw";
-import type {
-  OperatorMemberDetailResponse,
-  OperatorOfficeDetailResponse,
-  OpsHomeResponse,
-} from "@/lib/api/contracts/ops.schema";
+import type { OperatorMemberDetailResponse, OpsHomeResponse } from "@/lib/api/contracts/ops.schema";
 import { OPS_ROLES, OPS_WORK_ROLES } from "@/features/ops/model/roles";
 import { errorResponse, mockErrors } from "../error-responses";
 import { MOCK_OTP_CODE, getMockOperator, requireMockOps, setMockOperator } from "./ops-session";
@@ -66,8 +63,8 @@ const MOCK_EXEC_SUMMARY = {
 
 export function buildMockOffice(
   officeId: number,
-  overrides: Partial<OperatorOfficeDetailResponse> = {},
-): OperatorOfficeDetailResponse {
+  overrides: Partial<OfficeDetail> = {},
+): OfficeDetail {
   return {
     officeId,
     name: `테스트중개 ${officeId}`,
@@ -150,7 +147,7 @@ export function buildMockMember(
   };
 }
 
-type MockOfficeRecord = { detail: OperatorOfficeDetailResponse };
+type MockOfficeRecord = { detail: OfficeDetail };
 type MockMemberRecord = { detail: OperatorMemberDetailResponse; createdAt: string };
 
 function defaultOffices(): MockOfficeRecord[] {
@@ -227,7 +224,7 @@ function pageOf<T>(url: URL, rows: T[]) {
   };
 }
 
-function toOfficeListItem(detail: OperatorOfficeDetailResponse) {
+function toOfficeListItem(detail: OfficeDetail) {
   return {
     officeId: detail.officeId,
     name: detail.name,

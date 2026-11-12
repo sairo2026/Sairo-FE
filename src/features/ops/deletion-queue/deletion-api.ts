@@ -21,12 +21,15 @@ export function useDeletionList(params: { page: number; size: number }) {
   });
 }
 
-/** 단건 조회 API가 없어 목록 한 페이지에서 찾는다. 없으면 404로 다룬다. */
+/**
+ * 목록을 queueId로 걸러 한 건을 찾는다(백엔드 목록 필터). 첫 페이지에서만 찾으면 101번째 이후 건이
+ * 404가 된다. 없으면 404로 다룬다.
+ */
 export function useDeletionItem(queueId: number) {
   return useQuery({
     queryKey: opsKeys.scope(SCOPE, "item", queueId),
     queryFn: async () => {
-      const page = await apiFetch(opsPath(BASE, { page: 0, size: LOOKUP_SIZE }), {
+      const page = await apiFetch(opsPath(BASE, { queueId, page: 0, size: LOOKUP_SIZE }), {
         schema: DeletionListSchema,
       });
       const item = page.items.find((candidate) => candidate.queueId === queueId);

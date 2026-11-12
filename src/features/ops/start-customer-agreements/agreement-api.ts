@@ -44,9 +44,10 @@ export function useAgreementActions() {
       onSettled: refresh,
     }),
     revoke: useMutation({
-      mutationFn: (input: { agreementId: number; reason: string }) =>
+      mutationFn: (input: { agreementId: number; version: number; reason: string }) =>
         apiFetch(`${BASE}/${input.agreementId}/revoke`, {
           method: "POST",
+          headers: ifMatch(input.version),
           body: { reason: input.reason },
           schema: OpsStartCustomerAgreementRevokeResponseSchema,
         }),

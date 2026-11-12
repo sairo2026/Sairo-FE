@@ -1,10 +1,10 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
-import type { OperatorOfficeDetailResponse } from "@/lib/api/contracts/ops.schema";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
+import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import { Tabs } from "@/shared/components/ui/tabs";
 import type { TabItem } from "@/shared/components/ui/tabs";
@@ -16,6 +16,9 @@ import { OpsStatusBadge } from "../../components/common/ops-status-badge";
 import { OpsTable, useOpsPaging } from "../../components/common/ops-table";
 import { useHasOpsRole } from "../../model/ops-session";
 import { OPS_WORK_ROLES } from "../../model/roles";
+import { useOfficeRevoke } from "../../registrations/registration-api";
+import type { OfficeDetail } from "../api/wire";
+import { RevokeDialog } from "../../registrations/registration-detail";
 import {
   fetchOfficeAuditLog,
   fetchOfficeDetail,
@@ -31,7 +34,7 @@ import {
   SUBSCRIPTION_STATUS,
 } from "../model/office-status";
 
-type Detail = OperatorOfficeDetailResponse;
+type Detail = OfficeDetail;
 
 function RegistrationHistoryTab({ detail }: { detail: Detail }) {
   if (detail.registrationHistory.length === 0) {
@@ -295,7 +298,11 @@ function SubscriptionInfo({ detail }: { detail: Detail }) {
           },
           {
             label: "현재 기간 종료",
-            value: subscription ? formatSeoulDateTime(subscription.currentPeriodEnd) : null,
+            value: subscription
+              ? subscription.currentPeriodEnd
+                ? formatSeoulDateTime(subscription.currentPeriodEnd)
+                : "미정"
+              : null,
           },
           {
             label: "미납 시작",
@@ -318,6 +325,45 @@ function SubscriptionInfo({ detail }: { detail: Detail }) {
         ]}
       />
     </Card>
+  );
+}
+
+/**
+ * 인증 회수는 사무소 번호로 한다. 인증 심사 상세 응답에는 사무소 번호가 없어(백엔드
+ * OperatorRegistrationDetailResponse) 사무소 번호를 아는 고객사 상세에서 회수한다.
+ */
+function RevokeAction({ detail }: { detail: Detail }) {
+  const canReview = useHasOpsRole(["REVIEW"]);
+  const client = useQueryClient();
+  const revoke = useOfficeRevoke();
+  const [isOpen, setOpen] = useState(false);
+  const [done, setDone] = useState(false);
+  const canRevoke = canReview && detail.registrationStatus === "APPROVED";
+  if (!canRevoke && !done) return null;
+  return (
+    <div className="flex flex-col gap-2">
+      {done ? (
+        <p role="status" className="text-caption text-ink">
+          사무소 인증을 회수했습니다.
+        </p>
+      ) : null}
+      {canRevoke && !done ? (
+        <div>
+          <Button variant="ghost" onClick={() => setOpen(true)}>
+            사무소 인증 회수
+          </Button>
+        </div>
+      ) : null}
+      <RevokeDialog
+        isOpen={isOpen}
+        onSubmit={async (reason) => {
+          await revoke.mutateAsync({ officeId: detail.officeId, reason });
+          setDone(true);
+          await client.invalidateQueries({ queryKey: opsOfficeKeys.detail(detail.officeId) });
+        }}
+        onClose={() => setOpen(false)}
+      />
+    </div>
   );
 }
 
@@ -352,6 +398,7 @@ function OfficeDetailBody({ detail }: { detail: Detail }) {
         원문 조회를 요청해 주세요. 요청과 열람은 감사 로그에 남습니다.
       </p>
       <BasicInfo detail={detail} />
+      <RevokeAction detail={detail} />
       <SubscriptionInfo detail={detail} />
       <Card tone="flat">
         <Tabs

@@ -244,9 +244,15 @@ describe("수사기관 요청 목록", () => {
     expect(await screen.findByText(/18초 뒤에 다시 시도해 주세요/)).toBeTruthy();
   });
 
-  it("개인정보담당이 아니면 접근 불가 안내를 보인다", () => {
-    renderWithMonitor(<AuthorityRequestsScreen />, ["SECURITY_ADMIN"]);
+  it("개인정보담당이나 보안관리자가 아니면 접근 불가 안내를 보인다", () => {
+    renderWithMonitor(<AuthorityRequestsScreen />, ["REVIEW"]);
     expect(screen.getByText("이 화면을 볼 수 있는 운영 역할이 아닙니다")).toBeTruthy();
+  });
+
+  it("보안관리자는 목록과 종결만 쓰고 접수 기록 폼은 보지 않는다", async () => {
+    renderWithMonitor(<AuthorityRequestsScreen />, ["SECURITY_ADMIN"]);
+    expect(await screen.findByRole("button", { name: "요청 72 종결" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "요청 기록" })).toBeNull();
   });
 
   it("미종결만 보기 필터를 적용한다", async () => {
@@ -391,8 +397,8 @@ describe("종결", () => {
       await screen.findByText(/요청 72를 종결했습니다. 기록 삭제 예정일은 .+입니다/),
     ).toBeTruthy();
     expect(
-      await screen.findByText(/^\d{4}\. ?\d{1,2}\. ?\d{1,2}\.?$|^\d{4}-\d{2}-\d{2}$/),
-    ).toBeTruthy();
+      (await screen.findAllByText(/^\d{4}\. ?\d{1,2}\. ?\d{1,2}\.?$|^\d{4}-\d{2}-\d{2}$/)).length,
+    ).toBeGreaterThan(0);
   });
 
   it("종결한 요청은 목록에서 종결 버튼이 비활성이 된다", async () => {
@@ -469,8 +475,23 @@ describe("종결", () => {
     });
   });
 
-  it("본인이 기록한 요청의 제공 결정은 서버가 거절하면 안내하고 버튼을 비활성으로 바꾼다", async () => {
-    const { user, dialog } = await openClose(71);
+  it("목록의 기록자가 본인이면 제공 결정을 처음부터 막는다", async () => {
+    const { dialog } = await openClose(71);
+    chooseDecision(dialog, "PROVIDED");
+    fillProvided(dialog);
+    expect(isDisabled(within(dialog).getByRole("button", { name: "종결" }))).toBe(true);
+    expect(
+      within(dialog).getByText(/본인이 기록한 요청의 제공 결정은 직접 승인할 수 없습니다/),
+    ).toBeTruthy();
+  });
+
+  it("서버가 본인 승인으로 거절하면 안내하고 버튼을 비활성으로 바꾼다", async () => {
+    const { user, dialog } = await openClose(72);
+    server.use(
+      http.post("/api/ops/authority-requests/:id/close", () =>
+        errorResponse(403, "SELF_APPROVAL_FORBIDDEN", "본인 승인"),
+      ),
+    );
     chooseDecision(dialog, "PROVIDED");
     fillProvided(dialog);
     await user.click(within(dialog).getByRole("button", { name: "종결" }));
@@ -480,9 +501,6 @@ describe("종결", () => {
     await waitFor(() =>
       expect(isDisabled(within(dialog).getByRole("button", { name: "종결" }))).toBe(true),
     );
-    expect(
-      within(dialog).getByText(/본인이 기록한 요청의 제공 결정은 직접 승인할 수 없습니다/),
-    ).toBeTruthy();
   });
 
   it("이 화면에서 직접 기록한 요청은 처음부터 제공 결정을 막는다", async () => {

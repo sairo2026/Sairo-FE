@@ -256,10 +256,19 @@ function ImportSupportBody({ detail }: { detail: ImportSupportDetail }) {
               label: "상태",
               value: <OpsStatusBadge status={detail.status} map={IMPORT_SUPPORT_STATUS} />,
             },
-            { label: "사무소", value: `${detail.officeName} (${detail.officeId})` },
+            { label: "사무소", value: `${detail.officeName ?? "이름 없음"} (${detail.officeId})` },
             { label: "원본 시스템", value: detail.sourceSystem },
-            { label: "업로드 행 수", value: detail.rowCount.toLocaleString("ko-KR") },
-            { label: "예상 레코드", value: detail.estimatedRowCount.toLocaleString("ko-KR") },
+            {
+              label: "업로드 행 수",
+              value: detail.rowCount === null ? "-" : detail.rowCount.toLocaleString("ko-KR"),
+            },
+            {
+              label: "예상 레코드",
+              value:
+                detail.estimatedRowCount === null
+                  ? "-"
+                  : detail.estimatedRowCount.toLocaleString("ko-KR"),
+            },
             {
               label: "견적 금액",
               value:
