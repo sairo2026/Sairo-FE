@@ -124,6 +124,7 @@ describe("방문 신청 현황", () => {
     await user.click(screen.getByRole("button", { name: "시간 마감 알림 확인" }));
     await waitFor(() => expect(getMockVisitRequestState().notices[0]?.readAt).not.toBeNull());
     await waitFor(() => expect(screen.queryByText("새 알림")).toBeNull());
+    expect(screen.queryByText(/알림을 확인 처리하지 못했습니다/)).toBeNull();
   });
 
   it("알림 확인 처리가 실패하면 오류를 보여준다", async () => {

@@ -426,7 +426,10 @@ export const visitReviewHandlers = [
     const role = getMockVisitState().callerRole;
     if (role === "DEPUTY") return mockErrors.forbidden();
     const url = new URL(request.url);
-    const scope = url.searchParams.get("scope") ?? "ME";
+    const scope = url.searchParams.get("scope") || "MINE";
+    if (scope !== "MINE" && scope !== "OFFICE") {
+      return mockErrors.validation([{ field: "scope", message: "MINE 또는 OFFICE여야 합니다." }]);
+    }
     if (scope === "OFFICE" && role !== "OWNER") return mockErrors.forbidden();
     const page = Number(url.searchParams.get("page") ?? 0);
     const size = Number(url.searchParams.get("size") ?? 25);
