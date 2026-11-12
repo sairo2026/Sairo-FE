@@ -98,6 +98,17 @@ describe("매물 목록", () => {
     ).not.toBeNull();
   });
 
+  it("가격 범위만 입력하면 거래유형을 고르라고 안내한다", async () => {
+    const user = userEvent.setup();
+    renderOffice(<PropertyListScreen />, { role: "OWNER" });
+    await screen.findByRole("link", { name: "국민대 앞 아파트" });
+    await user.type(screen.getByLabelText("가격 하한(만원)"), "1000");
+    await user.click(screen.getByRole("button", { name: "조건 적용" }));
+    expect(
+      await screen.findByText("가격 범위를 쓰려면 거래유형을 먼저 선택해 주세요."),
+    ).not.toBeNull();
+  });
+
   it("서버가 면적 종류 누락을 검증 오류로 알려도 오류 문구를 보여준다", async () => {
     server.use(
       http.get("/api/properties", () =>
