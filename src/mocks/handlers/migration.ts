@@ -291,7 +291,11 @@ export const migrationHandlers = [
     const batch = findBatch(params.batchId);
     if (!batch) return mockErrors.notFound();
     advanceExecution(batch);
-    return HttpResponse.json(batch.detail);
+    return HttpResponse.json({
+      ...batch.detail,
+      sheets: batch.sheets,
+      selectedSheetName: batch.selectedSheetName,
+    });
   }),
 
   http.put("/api/import-batches/:batchId/sheet", async ({ params, request }) => {
@@ -347,6 +351,15 @@ export const migrationHandlers = [
     }
     if (!EDITABLE.includes(batch.detail.status)) {
       return errorResponse(409, "INVALID_TRANSITION", "변경할 수 없는 상태입니다.");
+    }
+    const mappingMatch = request.headers.get("If-Match");
+    if (mappingMatch === null) {
+      return mockErrors.validation([
+        { field: "If-Match", code: "REQUIRED", message: "버전 정보가 필요합니다." },
+      ]);
+    }
+    if (Number(mappingMatch) !== batch.detail.version) {
+      return mockErrors.versionConflict(batch.detail.version);
     }
     const body = (await request.json()) as { mappings: unknown[]; sourceSystem: string };
     if (!body.sourceSystem?.trim()) {

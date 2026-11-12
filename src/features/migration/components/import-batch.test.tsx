@@ -219,6 +219,29 @@ describe("시트 선택", () => {
   });
 });
 
+describe("시트 선택 다시 들어오기", () => {
+  it("업로드 응답 없이 다시 열어도 상세 응답의 시트 목록으로 시트를 고를 수 있다", async () => {
+    openBatch(302);
+    const select = await screen.findByLabelText("이전할 시트");
+    expect((select as HTMLSelectElement).value).toBe("고객");
+  });
+
+  it("매핑 확정에 상세 버전을 If-Match로 보낸다", async () => {
+    const seen: Array<string | null> = [];
+    server.use(
+      http.put("/api/import-batches/:batchId/mapping", ({ request }) => {
+        seen.push(request.headers.get("If-Match"));
+        return errorResponse(409, "VERSION_CONFLICT", "충돌", { currentVersion: 5 });
+      }),
+    );
+    const user = userEvent.setup();
+    openBatch(302);
+    await fillSourceSystem(user);
+    await user.click(await screen.findByRole("button", { name: "매핑 확정하고 미리보기" }));
+    await waitFor(() => expect(seen).toEqual(["1"]));
+  });
+});
+
 describe("미리보기와 실행", () => {
   async function toPreview(user: ReturnType<typeof userEvent.setup>) {
     openBatch(302);
