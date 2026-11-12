@@ -242,6 +242,34 @@ describe("구성원 목록", () => {
     expect(screen.getByText(/대표만 볼 수 있습니다/)).not.toBeNull();
   });
 
+  it("대표가 아닌 호출자에게 소속 메타 정보가 null이고 대표 행의 참여 경로가 등록이어도 목록을 보여준다", async () => {
+    server.use(
+      http.get("/api/offices/current/memberships", () =>
+        HttpResponse.json({
+          items: [
+            {
+              membershipId: 1,
+              userId: null,
+              displayName: "김대표",
+              role: "OWNER",
+              status: "APPROVED",
+              requestSource: "REGISTRATION",
+              officeId: null,
+              createdAt: null,
+              updatedAt: null,
+              version: null,
+            },
+          ],
+          page: 0,
+          size: 25,
+          totalElements: 1,
+        }),
+      ),
+    );
+    renderOffice(<MembersScreen />, { role: "AGENT" });
+    expect(await screen.findByText("김대표")).not.toBeNull();
+  });
+
   it("목록이 비면 빈 화면을 보여주고 실패하면 다시 시도할 수 있다", async () => {
     setMockOfficeState({ members: [] });
     const { unmount } = renderOffice(<MembersScreen />, { role: "OWNER" });
