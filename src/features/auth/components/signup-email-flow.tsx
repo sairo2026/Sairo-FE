@@ -97,7 +97,7 @@ export function SignupEmailFlow({ token }: { token?: string }) {
   const [submitError, setSubmitError] = useState<string>();
   const [changedTerms, setChangedTerms] = useState<ChangedTerm[] | null>(null);
   const [changedCodes, setChangedCodes] = useState<string[]>([]);
-  const [isConflict, setIsConflict] = useState(false);
+  const [conflictCode, setConflictCode] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
   const resend = useCountdown();
   const verifiedToken = useRef<string | null>(null);
@@ -126,13 +126,21 @@ export function SignupEmailFlow({ token }: { token?: string }) {
     if (name || email || phone) saveSignupDraft({ name, email, phone });
   }, [name, email, phone]);
 
-  if (isConflict && (emailTicket || phoneTicket)) {
+  const conflictTicket =
+    conflictCode === "EMAIL_ALREADY_REGISTERED"
+      ? { verifiedEmailTicket: emailTicket ?? undefined }
+      : conflictCode === "PHONE_ALREADY_REGISTERED"
+        ? { verifiedPhoneTicket: phoneTicket ?? undefined }
+        : null;
+  if (
+    conflictTicket !== null &&
+    (conflictTicket.verifiedEmailTicket || conflictTicket.verifiedPhoneTicket)
+  ) {
     return (
       <ExistingAccountNotice
-        verifiedEmailTicket={emailTicket ?? undefined}
-        verifiedPhoneTicket={phoneTicket ?? undefined}
+        {...conflictTicket}
         onBack={() => {
-          setIsConflict(false);
+          setConflictCode(null);
           setStep("info");
         }}
       />
@@ -261,7 +269,7 @@ export function SignupEmailFlow({ token }: { token?: string }) {
         return;
       }
       if (error.code === "EMAIL_ALREADY_REGISTERED" || error.code === "PHONE_ALREADY_REGISTERED") {
-        setIsConflict(true);
+        setConflictCode(error.code);
         return;
       }
       if (error.code === "TOKEN_EXPIRED" || error.code === "TOKEN_INVALID") {
