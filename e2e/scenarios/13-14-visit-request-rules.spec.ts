@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { useMockOfficeRole } from "../support/app";
 import { callMockApi, clientNavigate, fixMockClock } from "../support/scenario";
 
-const APPROVER_LINK = "/approver/approver-token-primary-0001";
+const APPROVER_LINK = "/approver/NzAwMToxNzYyNzM2NDAwMDAw.approver-token-primary-0001";
 
 test.beforeEach(async ({ page }) => {
   await fixMockClock(page);
@@ -41,8 +41,9 @@ test.describe("시나리오 13 승인자 조건과 신청 선택", () => {
       const selected = await callMockApi(
         page,
         "POST",
-        "/api/public/approver-property-links/approver-token-primary-0001/visit-requests/9001/select",
+        "/api/public/approver-property-links/NzAwMToxNzYyNzM2NDAwMDAw.approver-token-primary-0001/visit-requests/9001/select",
         { comparedRequestIds: [9001, 9002], acknowledgedNoticeVersion: "2026-11" },
+        { "If-Match": "1" },
       );
       expect(selected.status).toBe(200);
       await page.getByRole("button", { name: "박중개 신청 선택" }).click();
@@ -56,8 +57,9 @@ test.describe("시나리오 13 승인자 조건과 신청 선택", () => {
       const again = await callMockApi(
         page,
         "POST",
-        "/api/public/approver-property-links/approver-token-primary-0001/visit-requests/9002/select",
+        "/api/public/approver-property-links/NzAwMToxNzYyNzM2NDAwMDAw.approver-token-primary-0001/visit-requests/9002/select",
         { comparedRequestIds: [9002], acknowledgedNoticeVersion: "2026-11" },
+        { "If-Match": "1" },
       );
       expect(again.status).toBe(409);
       expect(again.body).toMatchObject({ code: "VISIT_REQUEST_INVALID_STATE" });

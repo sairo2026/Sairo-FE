@@ -82,7 +82,7 @@ test.describe("시나리오 4 방문 조율 생성부터 결과 기록까지", (
   });
 
   test("승인자가 승인자 링크에서 방문 조건을 등록한다", async ({ page }) => {
-    await page.goto("/approver/approver-token-primary-0001");
+    await page.goto("/approver/NzAwMToxNzYyNzM2NDAwMDAw.approver-token-primary-0001");
     await expect(page.getByRole("tab", { name: "조건 등록" })).toBeVisible();
     await page.getByLabel("하루 최대 방문 횟수").fill("4");
     await page.getByRole("button", { name: "조건 저장" }).click();
@@ -118,7 +118,7 @@ test.describe("시나리오 4 방문 조율 생성부터 결과 기록까지", (
     });
 
     await test.step("승인자가 겹치는 두 신청 중 하나를 선택하면 다른 신청은 시간 마감된다", async () => {
-      await clientNavigate(page, "/approver/approver-token-primary-0001");
+      await clientNavigate(page, "/approver/NzAwMToxNzYyNzM2NDAwMDAw.approver-token-primary-0001");
       await page.getByRole("tab", { name: "신청 비교·선택" }).click();
       await expect(page.getByText("사이로공인중개사 · 김중개")).toBeVisible();
       await expect(page.getByText("정릉부동산 · 박중개")).toBeVisible();

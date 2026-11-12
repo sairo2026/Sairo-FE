@@ -7,7 +7,7 @@ export type AppRoute = { path: string; area: RouteArea };
 
 const APP_DIR = join(process.cwd(), "src", "app");
 
-export const MOCK_APPROVER_TOKEN = "approver-token-primary-0001";
+export const MOCK_APPROVER_TOKEN = "NzAwMToxNzYyNzM2NDAwMDAw.approver-token-primary-0001";
 
 const PARAM_VALUES: Record<string, string> = {
   token: MOCK_APPROVER_TOKEN,

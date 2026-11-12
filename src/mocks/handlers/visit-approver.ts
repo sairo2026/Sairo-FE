@@ -12,7 +12,7 @@ import { getMockVisitState } from "./visit";
 const NOW = "2026-11-10T09:00:00+09:00";
 const NOTICE_VERSION = "2026-11";
 
-export const MOCK_PRIMARY_TOKEN = "approver-token-primary-0001";
+export const MOCK_PRIMARY_TOKEN = "NzAwMToxNzYyNzM2NDAwMDAw.approver-token-primary-0001";
 export const MOCK_CO_APPROVER_TOKEN = "approver-token-coapprover-0001";
 export const MOCK_EXPIRED_TOKEN = "approver-token-expired-0000001";
 
@@ -407,7 +407,12 @@ function approverHandlers(prefix: string, resolver: ApproverResolver) {
       );
       if (!target) return mockErrors.notFound();
       const header = request.headers.get("If-Match");
-      if (header !== null && Number(header) !== target.version) {
+      if (header === null) {
+        return mockErrors.validation([
+          { field: "If-Match", code: "REQUIRED", message: "버전 정보가 필요합니다." },
+        ]);
+      }
+      if (Number(header) !== target.version) {
         return mockErrors.versionConflict(target.version);
       }
       if (target.status !== "PENDING") {
@@ -513,7 +518,17 @@ export const visitApproverHandlers = [
       if (activeCondition(approvalId)?.source === "DIRECT") {
         return errorResponse(409, "INVALID_TRANSITION", "승인자 본인 입력이 활성입니다.");
       }
-      const body = (await request.json()) as UpsertBody;
+      const raw = (await request.json()) as Record<string, unknown>;
+      if ("acknowledgedNoticeVersion" in raw) {
+        return mockErrors.validation([
+          {
+            field: "acknowledgedNoticeVersion",
+            code: "NOT_ALLOWED",
+            message: "대리 입력은 안내 확인 버전을 받지 않습니다.",
+          },
+        ]);
+      }
+      const body = raw as unknown as UpsertBody;
       const invalid = validateUpsert(body);
       if (invalid) return invalid;
       if (state.impactItems.length > 0 && !body.impactAcknowledged) {

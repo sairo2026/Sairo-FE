@@ -22,18 +22,22 @@ export async function callMockApi(
   method: string,
   path: string,
   body?: unknown,
+  headers: Record<string, string> = {},
 ): Promise<ApiResult> {
   return page.evaluate(
-    async ({ method, path, body }) => {
+    async ({ method, path, body, headers }) => {
       const response = await fetch(path, {
         method,
-        headers: body === undefined ? undefined : { "Content-Type": "application/json" },
+        headers: {
+          ...(body === undefined ? {} : { "Content-Type": "application/json" }),
+          ...headers,
+        },
         body: body === undefined ? undefined : JSON.stringify(body),
       });
       const text = await response.text();
       return { status: response.status, body: text ? (JSON.parse(text) as unknown) : null };
     },
-    { method, path, body },
+    { method, path, body, headers },
   );
 }
 
