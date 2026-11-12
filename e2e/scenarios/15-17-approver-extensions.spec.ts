@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { useMockOfficeRole } from "../support/app";
 import { callMockApi, clientNavigate, fixMockClock } from "../support/scenario";
 
-const APPROVER_LINK = "/approver/approver-token-primary-0001";
+const APPROVER_LINK = "/approver/NzAwMToxNzYyNzM2NDAwMDAw.approver-token-primary-0001";
 const CO_APPROVER_LINK = "/approver/approver-token-coapprover-0001";
 
 test.beforeEach(async ({ page }) => {
