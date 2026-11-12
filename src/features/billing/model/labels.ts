@@ -66,10 +66,10 @@ export const TAX_TYPES: ReadonlyArray<{ value: string; label: string }> = [
 ];
 
 export const TAX_DOCUMENT_STATUS: Record<string, string> = {
-  NOT_APPLICABLE: "발급 대상 아님",
+  NOT_REQUIRED: "발급 대상 아님",
   PENDING: "발급 대기",
   ISSUED: "발급됨",
-  FAILED: "발급 실패",
+  ISSUE_FAILED: "발급 실패",
   AMENDED: "수정 발급",
   CANCELLED: "취소",
 };
