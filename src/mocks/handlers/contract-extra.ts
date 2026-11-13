@@ -14,7 +14,7 @@ const NOW = "2026-11-10T09:00:00+09:00";
 export type MockFee = ContractFeeListResponse["items"][number];
 export type MockSchedule = ContractPaymentScheduleListResponse["items"][number];
 export type MockFollowup = ContractFollowupTaskListResponse["items"][number];
-const MASKED_COPY_NOTICE = "마스킹한 사본은 법정 원본 보존을 마친 것으로 보지 않습니다.";
+const MASKED_COPY_NOTICE = "번호를 가린 사본은 법령에 따른 원본 보존을 마친 것으로 보지 않습니다.";
 
 type MockDocument = ContractDetailResponse["documents"][number];
 
