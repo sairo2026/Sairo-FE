@@ -11,15 +11,20 @@ async function capturedMessage(
   if (!fixtureToken) throw new Error("E2E_FIXTURE_TOKEN is required");
   const parameter = type === "mail" ? "to" : "toPhone";
   const url = `${api}/api/__e2e/messages/${type}/latest?${parameter}=${encodeURIComponent(recipient)}`;
-  await expect.poll(async () =>
-    (await request.get(url, { headers: { "X-E2E-Token": fixtureToken } })).status(),
-    { timeout: 10_000 },
-  ).toBe(200);
+  await expect
+    .poll(
+      async () => (await request.get(url, { headers: { "X-E2E-Token": fixtureToken } })).status(),
+      { timeout: 10_000 },
+    )
+    .toBe(200);
   const response = await request.get(url, { headers: { "X-E2E-Token": fixtureToken } });
   return (await response.json()) as { body: string };
 }
 
-test("signup uses actual email and phone codes from the local backend", async ({ page, request }) => {
+test("signup uses actual email and phone codes from the local backend", async ({
+  page,
+  request,
+}) => {
   const suffix = String(Date.now());
   const email = `e2e+${suffix}@example.com`;
   const phone = `010-${suffix.slice(-8, -4)}-${suffix.slice(-4)}`;
