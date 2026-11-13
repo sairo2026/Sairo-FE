@@ -52,7 +52,7 @@ describe("카카오 재인증 콜백", () => {
       expect(navigation.replace).toHaveBeenCalledWith("/settings/office/close?from=settings"),
     );
     expect(window.location.search).toBe("");
-    expect(takeStepUpReturn()).toBe("/");
+    expect(takeStepUpReturn()).toBe("/home");
   });
 
   it("인가 값을 서버 콜백에 그대로 전달한다", async () => {
@@ -63,7 +63,7 @@ describe("카카오 재인증 콜백", () => {
       }),
     );
     render(<KakaoStepUpCallback code="ok-code" state="state-1" hasError={false} />);
-    await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/"));
+    await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/home"));
     expect(query).toBe("?code=ok-code&state=state-1");
   });
 

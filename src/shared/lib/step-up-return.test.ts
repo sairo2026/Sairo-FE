@@ -10,16 +10,16 @@ describe("재인증 뒤 돌아갈 화면 기억", () => {
   it("기억한 화면을 한 번만 돌려준다", () => {
     rememberStepUpReturn("/settings/office/close?step=2", 1_000);
     expect(takeStepUpReturn(2_000)).toBe("/settings/office/close?step=2");
-    expect(takeStepUpReturn(2_000)).toBe("/");
+    expect(takeStepUpReturn(2_000)).toBe("/home");
   });
 
   it("기억한 화면이 없으면 첫 화면을 돌려준다", () => {
-    expect(takeStepUpReturn()).toBe("/");
+    expect(takeStepUpReturn()).toBe("/home");
   });
 
   it("15분이 지난 기록은 쓰지 않는다", () => {
     rememberStepUpReturn("/billing", 0);
-    expect(takeStepUpReturn(15 * 60 * 1000 + 1)).toBe("/");
+    expect(takeStepUpReturn(15 * 60 * 1000 + 1)).toBe("/home");
   });
 
   it("바깥 주소와 API 주소는 기억하지 않는다", () => {
@@ -31,17 +31,17 @@ describe("재인증 뒤 돌아갈 화면 기억", () => {
       "billing",
     ]) {
       rememberStepUpReturn(path);
-      expect(takeStepUpReturn()).toBe("/");
+      expect(takeStepUpReturn()).toBe("/home");
     }
   });
 
   it("손상된 기록은 첫 화면으로 돌린다", () => {
     window.sessionStorage.setItem("sairo-step-up-return", "{broken");
-    expect(takeStepUpReturn()).toBe("/");
+    expect(takeStepUpReturn()).toBe("/home");
     window.sessionStorage.setItem(
       "sairo-step-up-return",
       JSON.stringify({ path: "//example.com", savedAt: Date.now() }),
     );
-    expect(takeStepUpReturn()).toBe("/");
+    expect(takeStepUpReturn()).toBe("/home");
   });
 });

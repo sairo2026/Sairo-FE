@@ -1,6 +1,8 @@
+import { WORK_HOME_PATH } from "./app-paths";
+
 const STORAGE_KEY = "sairo-step-up-return";
 const VALID_FOR_MS = 15 * 60 * 1000;
-const FALLBACK_PATH = "/";
+const FALLBACK_PATH = WORK_HOME_PATH;
 
 type StoredReturn = { path: string; savedAt: number };
 
