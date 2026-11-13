@@ -27,23 +27,28 @@ export function OperatorSelect({
   onValueChange,
   error,
   disabled,
+  hint,
+  emptyLabel = "운영자를 선택해 주세요",
 }: {
   label: string;
   value: string;
   onValueChange: (value: string) => void;
   error?: string;
   disabled?: boolean;
+  hint?: string;
+  emptyLabel?: string;
 }) {
   const options = useOperatorOptions();
   const items = options.data?.items ?? [];
-  return (
+  const field = (
     <SelectField
+      className="min-w-0 max-w-full"
       label={label}
       value={value}
       disabled={disabled || options.isPending}
       error={error ?? (options.isError ? "운영자 목록을 불러오지 못했습니다." : undefined)}
       options={[
-        { value: "", label: options.isPending ? "불러오는 중" : "운영자를 선택해 주세요" },
+        { value: "", label: options.isPending ? "불러오는 중" : emptyLabel },
         ...items.map((item) => ({
           value: String(item.operatorId),
           label: `${item.name} (${roleText(item.roles)})`,
@@ -51,5 +56,12 @@ export function OperatorSelect({
       ]}
       onValueChange={onValueChange}
     />
+  );
+  if (!hint) return field;
+  return (
+    <div className="flex flex-col gap-2">
+      {field}
+      <p className="text-caption text-ink-2">{hint}</p>
+    </div>
   );
 }
