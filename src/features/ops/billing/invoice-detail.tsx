@@ -10,6 +10,7 @@ import { OpsScreen } from "../components/common/ops-screen";
 import { OpsStatusBadge } from "../components/common/ops-status-badge";
 import { useInvoiceDetail } from "./billing-api";
 import { BillingNav } from "./billing-nav";
+import { ChargeResultCard } from "./charge-result-card";
 import {
   ATTEMPT_RESULT,
   BILLING_PRIVACY_NOTICE,
@@ -36,9 +37,10 @@ export function InvoiceDetailScreen({ invoiceId }: { invoiceId: number }) {
       <BillingNav current="invoices" />
       <QueryGate query={query} loadingLabel="청구서를 불러오는 중입니다">
         {(detail) => {
-          const isVerifying =
-            detail.status === "VERIFYING" ||
-            detail.chargeAttempts.some((attempt) => attempt.result === "VERIFYING");
+          const verifyingOrderIds = detail.chargeAttempts
+            .filter((attempt) => attempt.result === "VERIFYING")
+            .map((attempt) => attempt.pgOrderId);
+          const isVerifying = detail.status === "VERIFYING" || verifyingOrderIds.length > 0;
           return (
             <>
               <p className="text-caption text-ink-2">{BILLING_PRIVACY_NOTICE}</p>
@@ -50,6 +52,15 @@ export function InvoiceDetailScreen({ invoiceId }: { invoiceId: number }) {
                   결제대행사에서 결과를 확인하는 중입니다. 결과가 확정되기 전에는 다시 청구하거나
                   환불하지 말고 대사 화면에서 확인해 주세요.
                 </p>
+              ) : null}
+              {isVerifying || detail.status === "FAILED" ? (
+                <ChargeResultCard
+                  officeId={detail.officeId}
+                  verifyingOrderIds={verifyingOrderIds}
+                  isRefreshing={query.isFetching}
+                  refreshedAt={query.dataUpdatedAt}
+                  onRefresh={() => void query.refetch()}
+                />
               ) : null}
               <Card title="청구 스냅샷">
                 <OpsDetailList

@@ -177,8 +177,13 @@ describe("시스템 작업 화면", () => {
     ).toBeTruthy();
   });
 
-  it("운영담당 역할이 없으면 화면 대신 접근 불가 안내를 보인다", () => {
+  it("결제담당도 실행 이력을 본다", async () => {
     renderJobs(["BILLING"]);
+    expect(await screen.findByText("retention-sweep")).toBeTruthy();
+  });
+
+  it("작업을 다루는 역할이 없으면 화면 대신 접근 불가 안내를 보인다", () => {
+    renderJobs(["SUPPORT"]);
     expect(screen.getByText("이 화면을 볼 수 있는 운영 역할이 아닙니다")).toBeTruthy();
   });
 
@@ -208,7 +213,7 @@ describe("시스템 작업 화면", () => {
     renderJobs();
     await screen.findByText("legal-link-log-purge");
     expect(isDisabled(screen.getByRole("button", { name: "실행 102 재실행" }))).toBe(true);
-    expect(screen.getByText("이미 성공한 실행은 다시 실행할 수 없습니다.")).toBeTruthy();
+    expect(screen.getAllByText("이미 성공한 실행은 다시 실행할 수 없습니다.").length).toBe(2);
   });
 
   it("진행 중인 실행의 재실행 버튼은 비활성이다", async () => {
@@ -229,7 +234,7 @@ describe("시스템 작업 화면", () => {
 
   it("재실행 대상이 아닌 작업에는 안내 문구를 보인다", async () => {
     renderJobs();
-    await screen.findByText("billing-reconciliation");
+    await screen.findAllByText("billing-reconciliation");
     expect(isDisabled(screen.getByRole("button", { name: "실행 106 재실행" }))).toBe(true);
     expect(screen.getByText("재실행 대상이 아닌 작업입니다.")).toBeTruthy();
   });
@@ -261,7 +266,7 @@ describe("시스템 작업 화면", () => {
     const dialog = screen.getByRole("dialog");
     expect(within(dialog).getByText(/원래 멱등키로 다시 실행합니다/)).toBeTruthy();
     await user.click(within(dialog).getByRole("button", { name: "재실행" }));
-    expect(await screen.findByText(/새 실행 번호는 108입니다/)).toBeTruthy();
+    expect(await screen.findByText(/새 실행 번호는 110입니다/)).toBeTruthy();
     await waitFor(() => expect(screen.getAllByText("2회")).toHaveLength(2));
   });
 

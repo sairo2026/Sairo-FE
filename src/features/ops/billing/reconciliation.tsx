@@ -21,6 +21,7 @@ import {
   describeBillingError,
   toOptionalNumber,
 } from "./billing-model";
+import { ReconciliationRunCard } from "./reconciliation-run-card";
 import type { OpsBillingReconciliationListResponse } from "@/lib/api/contracts/ops.schema";
 
 type Entry = OpsBillingReconciliationListResponse["items"][number];
@@ -201,6 +202,10 @@ export function ReconciliationScreen() {
           onCheckedChange={(unresolved) => setDraft({ ...draft, unresolved })}
         />
       </OpsFilterBar>
+      <ReconciliationRunCard
+        businessDate={applied.businessDate}
+        onRerunDone={() => void query.refetch()}
+      />
       <ul aria-label="대사 결과 건수" className="flex flex-wrap gap-4 text-caption text-ink-2">
         {counts.map((item) => (
           <li key={item.status}>
