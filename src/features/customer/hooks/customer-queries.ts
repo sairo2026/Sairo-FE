@@ -31,6 +31,7 @@ export function useCustomerDetail(customerId: number) {
   return useQuery({
     queryKey: customerKeys.detail(customerId),
     queryFn: () => fetchCustomer(customerId),
+    enabled: customerId > 0,
   });
 }
 
