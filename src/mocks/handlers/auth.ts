@@ -1,7 +1,7 @@
 import { http, HttpResponse } from "msw";
 import { recordMockAgreement } from "./settings";
 import type { AuthContextResponse } from "@/lib/api/contracts/common.schema";
-import { mockErrors } from "../error-responses";
+import { errorResponse, mockErrors } from "../error-responses";
 
 export const MOCK_ACTIVE_CONTEXT: AuthContextResponse = {
   accessCondition: "ACTIVE",
@@ -98,6 +98,23 @@ export const authHandlers = [
     if (!state.context) return mockErrors.unauthenticated();
     const body = (await request.json()) as { password?: string };
     if (body.password !== "mock-password-1") return mockErrors.invalidCredentials();
+    return HttpResponse.json({ stepUpValid: true, stepUpExpiresAt: "2026-11-10T09:10:00+09:00" });
+  }),
+
+  http.get("/api/auth/step-up/kakao/callback", ({ request }) => {
+    if (!state.context) return mockErrors.unauthenticated();
+    const url = new URL(request.url);
+    const code = url.searchParams.get("code");
+    if (!code || !url.searchParams.get("state") || code === "expired-code") {
+      return mockErrors.validation([]);
+    }
+    if (code === "other-account-code") {
+      return errorResponse(
+        403,
+        "STEP_UP_ACCOUNT_MISMATCH",
+        "로그인한 계정과 다른 카카오 계정입니다.",
+      );
+    }
     return HttpResponse.json({ stepUpValid: true, stepUpExpiresAt: "2026-11-10T09:10:00+09:00" });
   }),
 

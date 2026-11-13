@@ -7,6 +7,7 @@ import { ApiError } from "@/shared/api/client";
 import { Button } from "@/shared/components/ui/button";
 import { Modal } from "@/shared/components/ui/modal";
 import { TextField } from "@/shared/components/ui/text-field";
+import { rememberStepUpReturn } from "@/shared/lib/step-up-return";
 import { KAKAO_STEP_UP_START_PATH, stepUpWithPassword } from "../api/auth-context.api";
 
 const stepUpFormSchema = z.object({ password: z.string().min(1, "비밀번호를 입력해 주세요.") });
@@ -56,6 +57,8 @@ export function StepUpDialog({
       <form onSubmit={submit} noValidate className="flex flex-col gap-4">
         <p>
           중요한 작업이라 비밀번호를 다시 확인합니다. 카카오로 가입했다면 카카오로 확인해 주세요.
+          카카오로 확인하면 카카오 화면을 거쳐 이 화면으로 돌아오며 하던 작업은 돌아온 뒤 다시
+          진행합니다.
         </p>
         <Controller
           name="password"
@@ -77,7 +80,10 @@ export function StepUpDialog({
           </Button>
           <Button
             variant="outlined"
-            onClick={() => window.location.assign(KAKAO_STEP_UP_START_PATH)}
+            onClick={() => {
+              rememberStepUpReturn(window.location.pathname + window.location.search);
+              window.location.assign(KAKAO_STEP_UP_START_PATH);
+            }}
           >
             카카오로 확인
           </Button>
