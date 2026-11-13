@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { fixMockClock } from "../support/scenario";
+import { clientNavigate, fixMockClock } from "../support/scenario";
 
 test.beforeEach(async ({ page }) => {
   await fixMockClock(page);
@@ -49,7 +49,16 @@ test.describe("시나리오 9 PG 거래 대사", () => {
     });
   });
 
-  test.fixme("PG 전일 거래자료를 올리거나 PG에서 조회해 대사를 실행한다 (화면 없음: 대사 화면은 결과 조회와 해결 기록만 있고 업로드·조회 실행 동작이 없다)", async () => {});
+  test("대사 화면에서 전일 영업일의 대사 실행 결과를 확인한다", async ({ page }) => {
+    await page.goto("/ops/billing/reconciliation");
+    await expect(page.getByRole("heading", { name: "대사 실행 현황" })).toBeVisible();
+    const run = page.locator("dl").filter({ hasText: "대사 영업일" });
+    await expect(run).toContainText("2026-11-09");
+    await expect(run).toContainText("성공");
+    await expect(run).toContainText("109");
+  });
+
+  test.fixme("PG 전일 거래자료를 올리거나 운영자가 직접 대사를 실행한다 (화면 없음: 대사는 영업일마다 자동으로 실행되고 거래자료 업로드와 수동 실행 API가 없다)", async () => {});
 });
 
 // 개발플로우 4장 시나리오 10: 개인정보 권리 요청 접수 → 본인확인·책임 사무소·법정 기한 → 처리 이력 → 증빙과 함께 완료
@@ -190,7 +199,37 @@ test.describe("시나리오 11 출시 활성화 전 준비", () => {
 
   test.fixme("사무소 대표가 가격 인상 안내에 새 금액으로 동의하고 운영 콘솔의 결정별 건수에 반영된다 (모의 API 공백: 사무소 가격 변경 안내 목록이 운영 안내와 이어지지 않고 동의 결정 처리기가 없다)", async () => {});
 
-  test.fixme("모든 준비를 마친 뒤에만 운영 출시를 활성화한다 (화면 없음: 출시 활성화 전환 화면이 없다)", async () => {});
+  test("회사 정보 수신 시험을 마치기 전에는 운영 환경 연동을 활성화할 수 없고 마친 뒤 조건을 채운 연동을 활성화한다", async ({
+    page,
+  }) => {
+    await test.step("/ops/launch는 회사 정보가 준비되기 전 모든 비활성 연동을 막는다", async () => {
+      await page.goto("/ops/launch");
+      await expect(page.getByText("출시 활성화 차단").first()).toBeVisible();
+      const table = page.getByRole("table", { name: "운영 환경 연동 목록" });
+      await expect(table.getByRole("row").filter({ hasText: "NICE_SMS" })).toContainText(
+        "남은 조건",
+      );
+      await expect(page.getByRole("button", { name: "연동 6 활성화" })).toHaveCount(0);
+    });
+
+    await test.step("/ops/company-info에서 실제 문의 수신 시험 성공을 기록한다", async () => {
+      await clientNavigate(page, "/ops/company-info");
+      await page.getByRole("button", { name: "수신 시험 성공 기록" }).click();
+      await page.getByRole("dialog").getByRole("button", { name: "기록", exact: true }).click();
+      await expect(page.getByText("실제 문의 수신 시험 성공을 기록했습니다.")).toBeVisible();
+    });
+
+    await test.step("/ops/launch에서 조건을 채운 연동을 확인 뒤 활성화한다", async () => {
+      await clientNavigate(page, "/ops/launch");
+      await expect(page.getByText("출시 준비 완료").first()).toBeVisible();
+      await page.getByRole("button", { name: "연동 6 활성화" }).click();
+      await page.getByRole("dialog").getByRole("button", { name: "활성화", exact: true }).click();
+      await expect(page.getByText("연동 6을 운영 환경에서 활성화했습니다.")).toBeVisible();
+      await expect(page.getByRole("button", { name: "연동 6 활성화" })).toHaveCount(0);
+    });
+  });
+
+  test.fixme("정책 게시와 가격 동의까지 모두 마친 뒤에만 운영 출시를 활성화한다 (서버 판정 범위 밖: 활성화 판정은 회사 정보와 연동의 계약·동의·점검만 본다)", async () => {});
 });
 
 // 개발플로우 4장 시나리오 12: 파기 대상·제외분 미리보기 → 저장소별 실행 → 다른 운영자 검증 → 완료

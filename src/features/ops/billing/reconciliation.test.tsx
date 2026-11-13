@@ -6,6 +6,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest
 import { errorResponse, mockErrors } from "@/mocks/error-responses";
 import { resetMockOpsBilling } from "@/mocks/handlers/ops-billing";
 import { resetMockOpsSession, setMockOperatorRoles } from "@/mocks/handlers/ops-session";
+import { resetMockOpsSystemMonitor } from "@/mocks/handlers/ops-system-monitor";
 import { server, startMockServer } from "@/mocks/server";
 import { formatSeoulDate } from "@/shared/lib/format";
 import { renderOpsScreen } from "../home/testing/render-ops-screen";
@@ -27,6 +28,7 @@ afterEach(() => {
   server.resetHandlers();
   resetMockOpsSession();
   resetMockOpsBilling();
+  resetMockOpsSystemMonitor();
 });
 afterAll(() => stopServer());
 
@@ -309,5 +311,102 @@ describe("대사 차이 해결", () => {
     await user.click(within(dialog).getByRole("button", { name: "취소" }));
     expect(screen.queryByRole("dialog")).toBeNull();
     expect(screen.getByRole("button", { name: "항목 2 해결 기록" })).toBeTruthy();
+  });
+});
+
+function reconciliationRun(patch: Record<string, unknown>) {
+  const today = formatSeoulDate(new Date());
+  return {
+    runId: 501,
+    jobName: "billing-reconciliation",
+    jobType: "OTHER",
+    rerunRoles: [],
+    officeId: null,
+    officeName: null,
+    status: "FAILED",
+    scheduledAt: `${today}T00:00:00+09:00`,
+    startedAt: `${today}T00:00:05+09:00`,
+    finishedAt: `${today}T00:00:09+09:00`,
+    attemptCount: 1,
+    errorCode: "PG_UNAVAILABLE",
+    nextRunAt: null,
+    assignedOperatorId: null,
+    assignedOperatorName: null,
+    ...patch,
+  };
+}
+
+function stubRuns(items: unknown[]) {
+  server.use(
+    http.get("/api/ops/system-jobs", () =>
+      HttpResponse.json({ items, page: 0, size: 100, totalElements: items.length }),
+    ),
+  );
+}
+
+describe("대사 실행 현황", () => {
+  it("전일 영업일의 대사 실행 결과를 보인다", async () => {
+    renderScreen();
+    expect(await screen.findByText("대사 실행 현황")).toBeTruthy();
+    expect(await screen.findByText("실행 ID")).toBeTruthy();
+    expect(screen.getByText("109")).toBeTruthy();
+    expect(screen.getByText("성공")).toBeTruthy();
+  });
+
+  it("실행 기록이 없는 영업일은 안내를 보인다", async () => {
+    stubRuns([]);
+    renderScreen();
+    expect(await screen.findByText(/대사 실행 기록이 최근 실행 이력에 없습니다/)).toBeTruthy();
+  });
+
+  it("다른 영업일의 실행은 이 영업일의 실행으로 보지 않는다", async () => {
+    stubRuns([reconciliationRun({ scheduledAt: "2026-01-02T00:00:00+09:00" })]);
+    renderScreen();
+    expect(await screen.findByText(/대사 실행 기록이 최근 실행 이력에 없습니다/)).toBeTruthy();
+  });
+
+  it("실패한 실행이 재실행 대상이 아니면 그 사실을 알린다", async () => {
+    stubRuns([reconciliationRun({})]);
+    renderScreen();
+    expect(
+      await screen.findByText("실패한 실행입니다. 재실행 대상이 아닌 작업입니다."),
+    ).toBeTruthy();
+    expect(screen.getByText("PG_UNAVAILABLE")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "대사 다시 실행" })).toBeNull();
+  });
+
+  it("서버가 결제담당 재실행을 허용하면 확인 뒤 다시 실행한다", async () => {
+    stubRuns([reconciliationRun({ rerunRoles: ["BILLING"] })]);
+    let body: unknown = null;
+    server.use(
+      http.post("/api/ops/system-jobs/billing-reconciliation/rerun", async ({ request }) => {
+        body = await request.json();
+        return HttpResponse.json(
+          {
+            runId: 501,
+            jobName: "billing-reconciliation",
+            status: "SUCCESS",
+            startedAt: "2026-11-13T09:00:00+09:00",
+            attemptCount: 2,
+            nextRunAt: null,
+          },
+          { status: 202 },
+        );
+      }),
+    );
+    const user = userEvent.setup();
+    renderScreen();
+    await user.click(await screen.findByRole("button", { name: "대사 다시 실행" }));
+    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "다시 실행" }));
+    expect(
+      await screen.findByText(/대사를 다시 실행했습니다. 현재 결과는 성공입니다/),
+    ).toBeTruthy();
+    expect(body).toEqual({ runId: 501 });
+  });
+
+  it("실행 이력을 불러오지 못하면 다시 시도할 수 있다", async () => {
+    server.use(http.get("/api/ops/system-jobs", () => mockErrors.forbidden()));
+    renderScreen();
+    expect(await screen.findByRole("button", { name: "실행 이력 다시 시도" })).toBeTruthy();
   });
 });
