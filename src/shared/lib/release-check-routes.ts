@@ -18,6 +18,7 @@ export const RELEASE_CHECK_GROUPS: readonly ReleaseCheckGroup[] = [
       "/legal/refund-policy",
       "/legal/policies/TERMS/1.0",
       "/legal/link-notice/customer",
+      "/unsubscribe",
     ],
   },
   {
@@ -116,7 +117,6 @@ export const RELEASE_CHECK_GROUPS: readonly ReleaseCheckGroup[] = [
       "/grant/verify",
       "/return",
       "/archive",
-      "/unsubscribe",
       "/approver/token-value",
       "/approver/account/login",
       "/visit-responses/token-value",
@@ -144,5 +144,6 @@ export const RELEASE_CHECK_GROUPS: readonly ReleaseCheckGroup[] = [
 
 export const RELEASE_CHECK_APIS = {
   alwaysOpen: ["/api/public/pricing", "/api/public/company-info"],
+  alwaysOpenPost: ["/api/public/marketing-unsubscribe"],
   gated: ["/api/auth/context", "/api/me", "/api/ops/me", "/api/terms"],
 } as const;
