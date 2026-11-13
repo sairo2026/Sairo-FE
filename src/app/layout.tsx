@@ -26,7 +26,11 @@ type RootLayoutProps = Readonly<{
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="ko" className={`${pretendard.variable} h-full antialiased`} suppressHydrationWarning>
+    <html
+      lang="ko"
+      className={`${pretendard.variable} h-full antialiased`}
+      suppressHydrationWarning
+    >
       <body className="min-h-full flex flex-col">
         <Providers>{children}</Providers>
       </body>
