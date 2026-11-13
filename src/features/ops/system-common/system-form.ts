@@ -9,7 +9,31 @@ const SYSTEM_MESSAGE_BY_CODE: Record<string, string> = {
   INVALID_REQUEST: "입력값을 확인해 주세요.",
 };
 
+export const INTEGRATION_PREREQUISITE_LABELS: Record<string, string> = {
+  CONTRACT_SIGNED: "계약 체결",
+  CONSENT: "동의 완료",
+  CONTRACT_NOTICE_REVIEW: "계약·고지 점검",
+  COMPANY_INFO_PUBLISHED_VERSION: "회사 정보 게시",
+  COMPANY_INFO_INQUIRY_DELIVERY_TEST: "실제 문의 수신 시험",
+  COMPANY_INFO_REVIEW: "회사 정보 검토",
+};
+
+export function prerequisiteLabels(items: readonly string[]): string[] {
+  return items.map((item) => INTEGRATION_PREREQUISITE_LABELS[item] ?? item);
+}
+
+export function missingPrerequisites(error: unknown): string[] {
+  if (!(error instanceof ApiError) || error.code !== "INTEGRATION_PREREQUISITE_INCOMPLETE") {
+    return [];
+  }
+  return error.details.missingItems ?? [];
+}
+
 export function describeSystemError(error: unknown, fallback = "처리하지 못했습니다."): string {
+  const missing = missingPrerequisites(error);
+  if (missing.length > 0) {
+    return `${SYSTEM_MESSAGE_BY_CODE.INTEGRATION_PREREQUISITE_INCOMPLETE} 남은 조건: ${prerequisiteLabels(missing).join(", ")}.`;
+  }
   if (error instanceof ApiError) {
     const mapped = SYSTEM_MESSAGE_BY_CODE[error.code];
     if (mapped) {

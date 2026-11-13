@@ -83,7 +83,13 @@ export const OPS_MENU: readonly OpsMenuItem[] = [
   { key: "trial-events", label: "체험 이벤트", href: "/ops/trial-events", roles: ["OPS"] },
   { key: "price-schedules", label: "요금표", href: "/ops/price-schedules", roles: ["BILLING"] },
   { key: "company-info", label: "회사 정보", href: "/ops/company-info", roles: ["OPS"] },
-  { key: "system-jobs", label: "시스템 작업", href: "/ops/system-jobs", roles: ["OPS"] },
+  { key: "launch", label: "출시 활성화", href: "/ops/launch", roles: ["OPS"] },
+  {
+    key: "system-jobs",
+    label: "시스템 작업",
+    href: "/ops/system-jobs",
+    roles: ["OPS", "BILLING", "PRIVACY", "MIGRATION"],
+  },
   { key: "incidents", label: "장애·사고", href: "/ops/incidents", roles: ["OPS", "PRIVACY"] },
   {
     key: "integrations",

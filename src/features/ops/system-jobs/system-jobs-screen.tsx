@@ -220,7 +220,7 @@ export function SystemJobsScreen() {
     <OpsScreen
       title="시스템 작업"
       description="결제, 알림, 이전, 내보내기, 파기, 백업 작업의 실행 이력을 확인하고 실패한 실행을 다시 실행합니다."
-      roles={["OPS"]}
+      roles={["OPS", "BILLING", "PRIVACY", "MIGRATION"]}
     >
       <p className="text-caption text-ink-2">
         재실행은 현재 상태와 원래 멱등키, 작업 종류별 역할을 서버가 다시 검사합니다. 이미 성공했거나
