@@ -12,7 +12,7 @@ import {
 } from "@/mocks/handlers/work";
 import { server, startMockServer } from "@/mocks/server";
 import { renderOffice } from "@/shared/testing/office-render";
-import { notificationHref } from "../model/labels";
+import { notificationHref, notificationTypeLabel } from "../model/labels";
 import { NotificationListScreen } from "./notification-list-screen";
 
 vi.mock("next/navigation", () => ({
@@ -172,6 +172,10 @@ describe("알림함", () => {
 
 describe("알림 이동 경로", () => {
   it("지원 답변 알림은 문의 상세로 보낸다", () => {
+    expect(notificationHref("CONTRACT", 7)).toBe("/contracts/7");
+    expect(notificationHref("CONTRACT", null)).toBe("/contracts");
+    expect(notificationTypeLabel("TERMS_CHANGED")).toBe("약관·방침 변경");
+    expect(notificationHref("NONE", null)).toBeNull();
     expect(notificationHref("SUPPORT_TICKET", 31)).toBe("/support/31");
     expect(notificationHref("SUPPORT_TICKET", null)).toBe("/support");
   });

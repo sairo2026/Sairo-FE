@@ -171,7 +171,7 @@ function ApprovalFormModal({
           value={values.approverPhone}
           onValueChange={(value) => set("approverPhone", value)}
           error={errors.approverPhone}
-          hint="연락처가 없으면 승인자 링크를 발급할 수 없습니다."
+          hint="연락처는 선택입니다. 연락처가 없어도 승인자 링크를 발급해 직접 전달할 수 있습니다."
         />
         <RadioGroup
           legend="승인 역할"
@@ -343,15 +343,12 @@ function ApprovalRow({
               {approval.approvalRole === "CO_APPROVER" ? (
                 <p className="text-caption text-ink-2">공동 승인자 링크는 읽기 전용입니다.</p>
               ) : null}
-              {!approval.approverPhone ? (
-                <p className="text-caption text-ink-2">연락처가 없어 링크를 발급할 수 없습니다.</p>
-              ) : null}
               <div className="flex flex-wrap gap-2">
                 <Button
                   size="sm"
                   variant="outlined"
                   isLoading={issue.isPending}
-                  disabled={isReadOnly || !approval.approverPhone}
+                  disabled={isReadOnly}
                   onClick={() => issue.mutate()}
                 >
                   {hasLink ? "링크 재발급" : "링크 발급"}

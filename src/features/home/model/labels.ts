@@ -41,6 +41,7 @@ export const NOTIFICATION_TYPE_LABEL: Record<string, string> = {
   RETURN_SCHEDULED: "자료 반환 예정",
   DELETION_SCHEDULED: "삭제 예정",
   SUPPORT_REPLY: "지원 답변",
+  TERMS_CHANGED: "약관·방침 변경",
 };
 
 export function notificationHref(targetType: string, targetId: number | null | undefined) {
@@ -59,6 +60,8 @@ export function notificationHref(targetType: string, targetId: number | null | u
       return "/billing";
     case "DATA_RETURN":
       return "/billing/return-guide";
+    case "CONTRACT":
+      return targetId ? `/contracts/${targetId}` : "/contracts";
     case "SUPPORT_TICKET":
       return targetId ? `/support/${targetId}` : "/support";
     default:

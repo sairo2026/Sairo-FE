@@ -61,6 +61,18 @@ describe("홈 대시보드", () => {
     expect(within(link).getByLabelText("읽지 않은 알림 1건")).not.toBeNull();
   });
 
+  it("방문 신청 현황 건수와 읽지 않은 방문 신청 알림 수를 보여준다", async () => {
+    setMockWorkState({
+      unreadVisitRequestNoticeCount: 3,
+      visitRequestSummary: { pendingCount: 4, revalidationFailedCount: 1, timeClosedCount: 2 },
+    });
+    renderOffice(<HomeDashboard />);
+    expect(await screen.findByRole("link", { name: "신청 대기 4건" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "재검증 실패 1건" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "시간 마감 2건" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "읽지 않은 방문 신청 알림 3건" })).toBeTruthy();
+  });
+
   it("기한이 지난 미완료 업무를 오늘 업무와 따로 보여준다", async () => {
     setMockWorkState({
       tasks: [

@@ -53,12 +53,29 @@ export function validateNotice(values: NoticeFormValues): Partial<Record<string,
   return errors;
 }
 
-function ConfirmButton({ noticeId, itemId }: { noticeId: number; itemId: number }) {
+type AdditionalNotice = { text: string; at: string | null | undefined };
+
+function ConfirmButton({
+  noticeId,
+  itemId,
+  onConfirmed,
+}: {
+  noticeId: number;
+  itemId: number;
+  onConfirmed: (note: AdditionalNotice | null) => void;
+}) {
   const queryClient = useQueryClient();
   const [extra, setExtra] = useState("");
   const mutation = useMutation({
     mutationFn: () => confirmAssistantNotice(noticeId, extra.trim() === "" ? null : extra.trim()),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: followKeys.notices(itemId) }),
+    onSuccess: async (result) => {
+      onConfirmed(
+        result.supervisorAdditionalNotice
+          ? { text: result.supervisorAdditionalNotice, at: result.supervisorAdditionalNoticedAt }
+          : null,
+      );
+      await queryClient.invalidateQueries({ queryKey: followKeys.notices(itemId) });
+    },
   });
   return (
     <div className="flex flex-col gap-2">
@@ -199,6 +216,7 @@ export function AssistantNoticePanel({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
+  const [additional, setAdditional] = useState<Record<number, AdditionalNotice>>({});
   const notices = useAssistantNotices(item.itemId, isOpen);
   const canConfirm = role === "OWNER" || role === "AGENT";
   return (
@@ -255,8 +273,23 @@ export function AssistantNoticePanel({
                     {entry.followupAction ? (
                       <span className="text-ink-2">후속 조치 {entry.followupAction}</span>
                     ) : null}
+                    {additional[entry.noticeId] ? (
+                      <span className="text-ink-2">
+                        감독 확인 추가 안내 {additional[entry.noticeId]?.text}
+                        {additional[entry.noticeId]?.at
+                          ? ` (${formatSeoulDateTime(additional[entry.noticeId]?.at as string)})`
+                          : ""}
+                      </span>
+                    ) : null}
                     {canConfirm && !entry.confirmedAt && !isReadOnly ? (
-                      <ConfirmButton noticeId={entry.noticeId} itemId={item.itemId} />
+                      <ConfirmButton
+                        noticeId={entry.noticeId}
+                        itemId={item.itemId}
+                        onConfirmed={(note) => {
+                          if (note)
+                            setAdditional((current) => ({ ...current, [entry.noticeId]: note }));
+                        }}
+                      />
                     ) : null}
                   </li>
                 ))}

@@ -504,6 +504,7 @@ describe("보조원 고지와 감독", () => {
     expect(await screen.findByText(/지금 상태에서는 처리할 수 없습니다/)).not.toBeNull();
     await user.click(screen.getByRole("button", { name: "고지 내용 확인" }));
     await waitFor(() => expect(getMockVisitFollowState().notices[0]?.confirmedAt).not.toBeNull());
+    expect(await screen.findByText(/감독 확인 추가 안내 현장에서 한 번 더 안내/)).not.toBeNull();
   });
 });
 

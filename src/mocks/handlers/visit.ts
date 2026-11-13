@@ -783,7 +783,7 @@ export const visitHandlers = [
         (item) => String(item.approvalId) === params.approvalId,
       );
       if (!approval) return mockErrors.notFound();
-      if (approval.revokedAt || !approval.approverPhone)
+      if (approval.revokedAt)
         return errorResponse(409, "INVALID_TRANSITION", "링크를 발급할 수 없는 출입승인입니다.");
       const linkId = state.nextId++;
       const token = randomToken("approver-token");
