@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Checkbox, SelectField } from "@/shared/components/ui/select-field";
-import { TextField } from "@/shared/components/ui/text-field";
 import { formatKrw, formatSeoulDateTime } from "@/shared/lib/format";
+import { OperatorSelect } from "../components/common/operator-select";
 import { OpsFilterBar } from "../components/common/ops-filter-bar";
 import { OpsScreen } from "../components/common/ops-screen";
 import { OpsStatusBadge } from "../components/common/ops-status-badge";
@@ -57,11 +57,11 @@ export function LeadListScreen() {
           options={STATUS_OPTIONS}
           onValueChange={(status) => set({ status })}
         />
-        <TextField
-          label="담당 운영자 번호"
-          kind="number"
+        <OperatorSelect
+          label="담당 운영자"
           value={draft.assignedOperatorId}
           onValueChange={(assignedOperatorId) => set({ assignedOperatorId })}
+          emptyLabel="전체 담당"
         />
         <Checkbox
           label="미배정만"
