@@ -30,3 +30,16 @@ export function setStepUpHandler(handler: StepUpHandler | null): void {
 export function getStepUpHandler(): StepUpHandler | null {
   return stepUpHandler;
 }
+
+const stepUpCompletedListeners = new Set<() => void>();
+
+export function subscribeStepUpCompleted(listener: () => void): () => void {
+  stepUpCompletedListeners.add(listener);
+  return () => {
+    stepUpCompletedListeners.delete(listener);
+  };
+}
+
+export function emitStepUpCompleted(): void {
+  for (const listener of [...stepUpCompletedListeners]) listener();
+}

@@ -8,6 +8,7 @@ const TOKEN_LINK_PATHS = [
   "/unsubscribe",
   "/settings/login-methods/verify-email",
   "/settings/login-methods/kakao-callback",
+  "/account/step-up/kakao-callback",
   "/settings/contact/verify-email",
 ];
 
