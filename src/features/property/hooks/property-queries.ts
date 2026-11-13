@@ -30,6 +30,7 @@ export function usePropertyDetail(propertyId: number) {
   return useQuery({
     queryKey: propertyKeys.detail(propertyId),
     queryFn: () => fetchProperty(propertyId),
+    enabled: propertyId > 0,
   });
 }
 
