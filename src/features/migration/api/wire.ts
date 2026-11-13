@@ -1,9 +1,7 @@
 import { z } from "zod";
 import {
-  ExportAllowedTablesResponseSchema,
   ImportBatchDetailResponseSchema,
   ImportPreviewResponseSchema,
-  ImportSupportRequestDetailResponseSchema,
 } from "@/lib/api/contracts/migration.schema";
 
 const PreviewRowSchema = z.object({
@@ -60,10 +58,6 @@ export type ImportPreview = z.infer<typeof PreviewWireSchema>;
 export type PreviewRow = ImportPreview["rows"][number];
 
 export const BatchDetailWireSchema = ImportBatchDetailResponseSchema.extend({
-  sheets: z
-    .array(z.object({ name: z.string(), rowCount: z.number(), columnCount: z.number() }))
-    .nullish(),
-  selectedSheetName: z.string().nullish(),
   cancelSummary: z
     .object({
       cancelledCount: z.number(),
@@ -74,16 +68,3 @@ export const BatchDetailWireSchema = ImportBatchDetailResponseSchema.extend({
     .nullish(),
 });
 export type ImportBatchDetail = z.infer<typeof BatchDetailWireSchema>;
-
-export const SupportDetailWireSchema = ImportSupportRequestDetailResponseSchema.extend({
-  scopeNote: z.string().nullish(),
-});
-export type ImportSupportDetail = z.infer<typeof SupportDetailWireSchema>;
-
-/** 대표에게는 일곱 개 표 전체와 허용 여부를, 중개사에게는 허용된 표만 준다. */
-export const ExportTablesWireSchema = ExportAllowedTablesResponseSchema.extend({
-  tables: z.array(
-    z.object({ code: z.string(), label: z.string(), allowed: z.boolean().optional() }),
-  ),
-});
-export type ExportTables = z.infer<typeof ExportTablesWireSchema>;

@@ -325,6 +325,7 @@ describe("자료 요청 기록", () => {
             approvedByOperatorId: null,
             closedAt: null,
             retentionUntil: null,
+            closeNote: null,
           },
           { status: 201 },
         );
@@ -460,6 +461,7 @@ describe("종결", () => {
           approvedByOperatorId: 1,
           closedAt: "2026-11-10T15:10:00+09:00",
           retentionUntil: "2027-11-10",
+          closeNote: null,
         });
       }),
     );

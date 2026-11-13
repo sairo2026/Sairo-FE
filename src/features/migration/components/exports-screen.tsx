@@ -17,7 +17,7 @@ import { DataExportNotice } from "@/shared/legal/data-rights-notices";
 import { formatSeoulDateTime } from "@/shared/lib/format";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { createExport, updateExportPolicy } from "../api/export.api";
-import type { ExportTables } from "../api/wire";
+import type { ExportAllowedTablesResponse } from "@/lib/api/contracts/migration.schema";
 import {
   exportKeys,
   useAllowedExportTables,
@@ -55,7 +55,7 @@ function ExportStatusPanel({ exportId }: { exportId: number }) {
       <div className="flex items-center gap-3">
         <ExportStatusBadge status={data.status} />
         <span className="text-caption text-ink-2">
-          {COPY.fileExpires(formatSeoulDateTime(data.fileExpiresAt))}
+          {data.fileExpiresAt ? COPY.fileExpires(formatSeoulDateTime(data.fileExpiresAt)) : null}
         </span>
       </div>
       {data.status === "PENDING" || data.status === "PROCESSING" ? (
@@ -181,7 +181,7 @@ function CreateForm({
   );
 }
 
-function PolicyPanel({ tables }: { tables: ExportTables["tables"] }) {
+function PolicyPanel({ tables }: { tables: ExportAllowedTablesResponse["tables"] }) {
   const { isReadOnly } = useOfficeAccess();
   const queryClient = useQueryClient();
   const [selected, setSelected] = useState<string[]>(() =>
@@ -297,7 +297,7 @@ function History({ onSelect }: { onSelect: (exportId: number) => void }) {
           {
             key: "expires",
             header: "파일 삭제",
-            render: (row) => formatSeoulDateTime(row.fileExpiresAt),
+            render: (row) => (row.fileExpiresAt ? formatSeoulDateTime(row.fileExpiresAt) : "-"),
           },
           {
             key: "action",

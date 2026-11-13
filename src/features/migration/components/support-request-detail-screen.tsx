@@ -25,7 +25,7 @@ import {
   cancelImportSupport,
   requestImportSupportChanges,
 } from "../api/support-request.api";
-import type { ImportSupportDetail } from "../api/wire";
+import type { ImportSupportRequestDetailResponse } from "@/lib/api/contracts/migration.schema";
 import { migrationKeys } from "../hooks/migration-queries";
 import { supportRequestKeys, useImportSupportRequest } from "../hooks/support-queries";
 import { PaymentUnavailableError, tossPaymentLauncher } from "../lib/payment-launcher";
@@ -102,7 +102,7 @@ function Stepper({ status }: { status: string }) {
   );
 }
 
-type Props = { detail: ImportSupportDetail; launcher: PaymentLauncher };
+type Props = { detail: ImportSupportRequestDetailResponse; launcher: PaymentLauncher };
 
 function Actions({ detail, launcher }: Props) {
   const queryClient = useQueryClient();

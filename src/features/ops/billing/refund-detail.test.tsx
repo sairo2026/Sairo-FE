@@ -48,7 +48,7 @@ describe("환불 상세 표시", () => {
     expect(await screen.findByText("사건별 환불 권리액")).toBeTruthy();
     expect(screen.getByText("기환불 누계")).toBeTruthy();
     expect(screen.getByText("처리 중 예약액")).toBeTruthy();
-    expect(screen.getByText("CHARGE_ATTEMPT")).toBeTruthy();
+    expect(screen.getByText("INVOICE")).toBeTruthy();
     expect(screen.getByText("att-77")).toBeTruthy();
     expect(screen.getByText("중복 결제")).toBeTruthy();
   });
@@ -236,7 +236,7 @@ describe("환불 검토", () => {
           officeId: 42,
           invoiceId: 1,
           reasonCode: "POLICY_COMPENSATION",
-          reasonEventType: "POLICY_EXCEPTION",
+          reasonEventType: "POLICY_COMPENSATION",
           reasonEventId: "case-1",
           requestedAt: "2026-11-01T09:00:00+09:00",
           status: "REVIEWING",

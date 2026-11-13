@@ -43,6 +43,8 @@ export const billingKeys = {
   archiveGrant: ["billing", "archive-grant"] as const,
   returnExport: (grantId: number, exportId: number | null) =>
     ["billing", "return-export", grantId, exportId] as const,
+  archiveExport: (grantId: number, exportId: number | null) =>
+    ["billing", "archive-export", grantId, exportId] as const,
 };
 
 export function usePublicPricing() {

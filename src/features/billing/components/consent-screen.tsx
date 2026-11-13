@@ -26,13 +26,26 @@ import { CommerceNotice } from "./commerce-notice";
 
 const REFETCH_CODES = ["CONSENT_TERMS_MISMATCH", "TERMS_VERSION_CHANGED"];
 
-function consentErrorMessage(caught: unknown): string {
+function consentErrorMessage(caught: unknown, serverMessages: Record<string, string>): string {
   if (caught instanceof ApiError) {
+    const served = serverMessages[caught.code];
+    if (served) return served;
     if (caught.code === "CONSENT_TERMS_MISMATCH") return CONSENT_COPY.errors.amountIncreased;
     if (caught.code === "TERMS_VERSION_CHANGED") return CONSENT_COPY.errors.termsChanged;
     if (caught.code === "PRICE_CHANGE_NOTICE_CLOSED") return CONSENT_COPY.errors.noticeClosed;
   }
   return describeBillingError(caught, "동의를 기록하지 못했습니다. 잠시 뒤에 다시 시도해 주세요.");
+}
+
+function CheckItemText({ text }: { text: string }) {
+  const required = "[필수]";
+  if (!text.startsWith(required)) return <span>{text}</span>;
+  return (
+    <span>
+      <span className="font-semibold text-primary">{required}</span>
+      {text.slice(required.length)}
+    </span>
+  );
 }
 
 function ConsentForm({
@@ -72,7 +85,7 @@ function ConsentForm({
       await queryClient.invalidateQueries({ queryKey: billingKeys.subscription });
     },
     onError: (caught) => {
-      const message = consentErrorMessage(caught);
+      const message = consentErrorMessage(caught, preview.errorMessages);
       if (caught instanceof ApiError && REFETCH_CODES.includes(caught.code)) {
         setAutoCharge(false);
         setCancelRefund(false);
@@ -175,22 +188,12 @@ function ConsentForm({
           <Checkbox
             checked={autoCharge}
             onCheckedChange={setAutoCharge}
-            label={
-              <span>
-                <span className="font-semibold text-primary">[필수]</span>{" "}
-                {CONSENT_COPY.autoCharge(formatKrw(preview.totalAmountInclVat))}
-              </span>
-            }
+            label={<CheckItemText text={preview.checkItems[0] ?? ""} />}
           />
           <Checkbox
             checked={cancelRefund}
             onCheckedChange={setCancelRefund}
-            label={
-              <span>
-                <span className="font-semibold text-primary">[필수]</span>{" "}
-                {CONSENT_COPY.cancelRefund}
-              </span>
-            }
+            label={<CheckItemText text={preview.checkItems[1] ?? ""} />}
           />
           <div className="flex flex-wrap gap-4">
             <TextLink href="/legal/refund-policy">{CONSENT_COPY.refundLink}</TextLink>

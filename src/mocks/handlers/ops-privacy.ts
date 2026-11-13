@@ -282,8 +282,16 @@ type MockDeletion = {
   temporaryExportResult: StoreResult | null;
   backupExpiresAt: string | null;
   retryCount: number;
+  exclusionReason: string | null;
+  holdApprovedByOperatorId: number | null;
+  holdExpiresAt: string | null;
+  exclusionReviewedAt: string | null;
+  verifiedByOperatorId: number | null;
   verifiedAt: string | null;
+  verificationEvidence: string | null;
   cancelledAt: string | null;
+  cancelledByOperatorId: number | null;
+  cancelReason: string | null;
   createdAt: string;
 };
 
@@ -306,8 +314,16 @@ function deletion(queueId: number, patch: Partial<MockDeletion> = {}): MockDelet
     temporaryExportResult: "PENDING",
     backupExpiresAt: null,
     retryCount: 0,
+    exclusionReason: null,
+    holdApprovedByOperatorId: null,
+    holdExpiresAt: null,
+    exclusionReviewedAt: null,
+    verifiedByOperatorId: null,
     verifiedAt: null,
+    verificationEvidence: null,
     cancelledAt: null,
+    cancelledByOperatorId: null,
+    cancelReason: null,
     createdAt: at(-10 * DAY),
     ...patch,
   };
@@ -570,16 +586,7 @@ export const opsPrivacyHandlers: RequestHandler[] = [
     const rows = [...state.deletion]
       .filter((row) => !queueId || String(row.queueId) === queueId)
       .sort((a, b) => Date.parse(a.scheduledAt) - Date.parse(b.scheduledAt));
-    return HttpResponse.json(
-      pageOf(
-        rows.map((row) => {
-          const { executedByOperatorId, ...visible } = row;
-          void executedByOperatorId;
-          return visible;
-        }),
-        new URL(request.url),
-      ),
-    );
+    return HttpResponse.json(pageOf(rows, new URL(request.url)));
   }),
 
   http.get("/api/ops/deletion-queue/:id/preview", ({ params }) => {
@@ -627,6 +634,10 @@ export const opsPrivacyHandlers: RequestHandler[] = [
     }
     if (row.executedAt !== null || row.cancelledAt !== null) return invalid();
     state.excluded.add(row.queueId);
+    row.exclusionReason = reason;
+    row.holdExpiresAt = String(body.holdExpiresAt);
+    row.exclusionReviewedAt = String(body.exclusionReviewedAt);
+    row.holdApprovedByOperatorId = approver as number;
     return HttpResponse.json({
       queueId: row.queueId,
       result: "EXCLUDED",
@@ -647,6 +658,8 @@ export const opsPrivacyHandlers: RequestHandler[] = [
     }
     if (row.executedAt !== null || row.cancelledAt !== null) return invalid();
     row.cancelledAt = new Date().toISOString();
+    row.cancelledByOperatorId = selfId();
+    row.cancelReason = nonEmpty(body.reason);
     return HttpResponse.json({
       queueId: row.queueId,
       cancelledAt: row.cancelledAt,
@@ -724,6 +737,8 @@ export const opsPrivacyHandlers: RequestHandler[] = [
     row.temporaryExportResult = temp ?? null;
     row.backupExpiresAt = typeof body.backupExpiresAt === "string" ? body.backupExpiresAt : null;
     row.verifiedAt = new Date().toISOString();
+    row.verifiedByOperatorId = selfId();
+    row.verificationEvidence = nonEmpty(body.evidence);
     row.result = values.some((value) => value === "FAILED") ? "FAILED" : "SUCCESS";
     return HttpResponse.json({
       queueId: row.queueId,
@@ -733,7 +748,7 @@ export const opsPrivacyHandlers: RequestHandler[] = [
       fileResult: row.fileResult,
       temporaryExportResult: row.temporaryExportResult,
       backupExpiresAt: row.backupExpiresAt,
-      verifiedByOperatorId: selfId(),
+      verifiedByOperatorId: row.verifiedByOperatorId,
       verifiedAt: row.verifiedAt,
     });
   }),

@@ -219,7 +219,12 @@ export const VisitCoordinationDetailResponseSchema = z.object({
     .nullable(),
   rescheduleAlert: z
     .object({
-      triggerType: z.enum(["SCHEDULE_CHANGED", "ACCESS_REVOKED", "OCCUPANT_CHANGED"]),
+      triggerType: z.enum([
+        "SCHEDULE_CHANGED",
+        "ACCESS_REVOKED",
+        "OCCUPANT_CHANGED",
+        "ASSIGNEE_HANDOVER",
+      ]),
       reason: z.string().nullable(),
       raisedAt: z.iso.datetime({ offset: true }),
       approvalId: z.number().nullable(),
@@ -269,29 +274,6 @@ export const VisitCoordinationDetailResponseSchema = z.object({
   officeId: z.number(),
 });
 export type VisitCoordinationDetailResponse = z.infer<typeof VisitCoordinationDetailResponseSchema>;
-
-export const ApproverLinkIssueRequestSchema = z.object({ approvalId: z.number() });
-export type ApproverLinkIssueRequest = z.infer<typeof ApproverLinkIssueRequestSchema>;
-
-export const ApproverLinkIssueResponseSchema = z.object({
-  linkId: z.number(),
-  approvalId: z.number(),
-  token: z.string(),
-  publicUrl: z.string(),
-  issuedAt: z.iso.datetime({ offset: true }),
-  expiresAt: z.iso.datetime({ offset: true }),
-});
-export type ApproverLinkIssueResponse = z.infer<typeof ApproverLinkIssueResponseSchema>;
-
-export const ApproverLinkReissueResponseSchema = z.object({
-  linkId: z.number(),
-  approvalId: z.number(),
-  token: z.string(),
-  publicUrl: z.string(),
-  issuedAt: z.string(),
-  expiresAt: z.string(),
-});
-export type ApproverLinkReissueResponse = z.infer<typeof ApproverLinkReissueResponseSchema>;
 
 export const VisitCoordinationCancelRequestSchema = z.object({
   reason: z.string().nullable().optional(),
@@ -361,39 +343,6 @@ export type CandidatePropertyAddResponse = z.infer<typeof CandidatePropertyAddRe
 
 export const CandidatePropertyRemoveResponseSchema = z.object({});
 export type CandidatePropertyRemoveResponse = z.infer<typeof CandidatePropertyRemoveResponseSchema>;
-
-export const VisitCoordinationConfirmRequestSchema = z.object({
-  scheduleItems: z.array(
-    z.object({
-      candidatePropertyId: z.number(),
-      scheduledStartAt: z.iso.datetime({ offset: true }),
-      scheduledEndAt: z.iso.datetime({ offset: true }),
-      sortOrder: z.number(),
-    }),
-  ),
-});
-export type VisitCoordinationConfirmRequest = z.infer<typeof VisitCoordinationConfirmRequestSchema>;
-
-export const VisitCoordinationConfirmResponseSchema = z.object({
-  coordinationId: z.number(),
-  status: z.string(),
-  scheduleItems: z.array(
-    z.object({
-      itemId: z.number(),
-      candidatePropertyId: z.number(),
-      scheduledStartAt: z.iso.datetime({ offset: true }),
-      scheduledEndAt: z.iso.datetime({ offset: true }),
-      result: z.string(),
-    }),
-  ),
-  officeId: z.number(),
-  createdAt: z.iso.datetime({ offset: true }),
-  updatedAt: z.iso.datetime({ offset: true }),
-  version: z.number(),
-});
-export type VisitCoordinationConfirmResponse = z.infer<
-  typeof VisitCoordinationConfirmResponseSchema
->;
 
 export const ConfirmationDeliveryCreateRequestSchema = z.object({
   recipientType: z.enum(["CUSTOMER", "APPROVER"]),
@@ -616,42 +565,6 @@ export const VisitScheduleItemResultResponseSchema = z.object({
 });
 export type VisitScheduleItemResultResponse = z.infer<typeof VisitScheduleItemResultResponseSchema>;
 
-export const PublicApproverVisitLinkResponseSchema = z.object({
-  role: z.string(),
-  officeName: z.string(),
-  managerDisplayName: z.string(),
-  candidateWindow: z.object({ startDate: z.iso.date(), endDate: z.iso.date() }),
-  propertyAddress: z.string(),
-  submittedTimeSlots: z.array(z.unknown()),
-  responseVersion: z.number(),
-  coordinationStatus: z.string(),
-  managerLegalRole: z.enum(["REPRESENTATIVE_AGENT", "AFFILIATED_AGENT", "ASSISTANT"]),
-  linkExpiresAt: z.iso.datetime({ offset: true }),
-  officeContactPhone: z.string(),
-  privacyNotice: z.object({
-    purpose: z.string(),
-    collectedItems: z.array(z.string()),
-    retentionPeriod: z.string(),
-  }),
-  approvalValidFrom: z.iso.datetime({ offset: true }),
-  approvalValidUntil: z.iso.datetime({ offset: true }),
-  defaultTimeSlots: z.array(
-    z.object({
-      startsAt: z.iso.datetime({ offset: true }),
-      endsAt: z.iso.datetime({ offset: true }),
-    }),
-  ),
-  propertyVisitState: z.enum(["PENDING", "COMPLETED", "NO_SHOW", "CANCELLED"]),
-});
-export type PublicApproverVisitLinkResponse = z.infer<typeof PublicApproverVisitLinkResponseSchema>;
-
-export const ApproverAvailableTimesResponseSchema = z.object({
-  coordinationId: z.number(),
-  responseVersion: z.number(),
-  submittedAt: z.string(),
-});
-export type ApproverAvailableTimesResponse = z.infer<typeof ApproverAvailableTimesResponseSchema>;
-
 export const PublicVisitLinkResponseSchema = z.object({
   role: z.enum(["CUSTOMER", "APPROVER"]),
   officeName: z.string(),
@@ -845,20 +758,6 @@ export const AssistantNoticeSupervisionListResponseSchema = z.object({
 });
 export type AssistantNoticeSupervisionListResponse = z.infer<
   typeof AssistantNoticeSupervisionListResponseSchema
->;
-
-export const PublicApproverConfirmedVisitResponseSchema = z.object({
-  state: z.enum(["VALID", "CANCELLED", "RESCHEDULE_REQUIRED", "SUPERSEDED"]),
-  scheduleVersion: z.number(),
-  managerDisplayName: z.string(),
-  managerLegalRole: z.enum(["REPRESENTATIVE_AGENT", "AFFILIATED_AGENT", "ASSISTANT"]),
-  propertyAddress: z.string(),
-  scheduledStartAt: z.iso.datetime({ offset: true }).nullable(),
-  scheduledEndAt: z.iso.datetime({ offset: true }).nullable(),
-  officeContactPhone: z.string(),
-});
-export type PublicApproverConfirmedVisitResponse = z.infer<
-  typeof PublicApproverConfirmedVisitResponseSchema
 >;
 
 export const BrokerReceivedVisitReviewListResponseSchema = z.object({
@@ -1493,6 +1392,7 @@ export const ApproverVisitRequestCompareResponseSchema = z.object({
     z.object({
       requestId: z.number(),
       requestKind: z.enum(["NEW", "CHANGE"]),
+      version: z.number(),
       status: z.string(),
       applicantOfficeName: z.string(),
       applicantBrokerName: z.string(),
@@ -1676,7 +1576,12 @@ export const VisitManagerUpdateResponseSchema = z.object({
     .nullable(),
   rescheduleAlert: z
     .object({
-      triggerType: z.enum(["SCHEDULE_CHANGED", "ACCESS_REVOKED", "OCCUPANT_CHANGED"]),
+      triggerType: z.enum([
+        "SCHEDULE_CHANGED",
+        "ACCESS_REVOKED",
+        "OCCUPANT_CHANGED",
+        "ASSIGNEE_HANDOVER",
+      ]),
       reason: z.string().nullable(),
       raisedAt: z.iso.datetime({ offset: true }),
       approvalId: z.number().nullable(),

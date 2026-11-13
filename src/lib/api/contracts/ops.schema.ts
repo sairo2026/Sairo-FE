@@ -10,6 +10,27 @@ export type OwnerTransferOperatorApproveResponse = z.infer<
   typeof OwnerTransferOperatorApproveResponseSchema
 >;
 
+export const OpsOwnerTransferListResponseSchema = z.object({
+  items: z.array(
+    z.object({
+      transferId: z.number(),
+      officeId: z.number(),
+      officeName: z.string(),
+      fromDisplayName: z.string(),
+      toDisplayName: z.string(),
+      status: z.enum(["PENDING", "UNDER_REVIEW", "COMPLETED", "REJECTED", "WITHDRAWN", "EXPIRED"]),
+      requestedAt: z.iso.datetime({ offset: true }),
+      acceptDeadlineAt: z.iso.datetime({ offset: true }),
+      acceptedAt: z.iso.datetime({ offset: true }).nullable(),
+      completedAt: z.iso.datetime({ offset: true }).nullable(),
+    }),
+  ),
+  page: z.number(),
+  size: z.number(),
+  totalElements: z.number(),
+});
+export type OpsOwnerTransferListResponse = z.infer<typeof OpsOwnerTransferListResponseSchema>;
+
 export const OpsAnnouncementListResponseSchema = z.object({
   items: z.array(
     z.object({
@@ -293,7 +314,7 @@ export const OpsCompanyServiceInfoCreateResponseSchema = z.object({
   versionNo: z.number(),
   inquiryDeliveryTestedAt: z.string().nullable(),
   reviewedByOperatorId: z.number().nullable(),
-  publishedAt: z.string(),
+  publishedAt: z.string().nullable(),
 });
 export type OpsCompanyServiceInfoCreateResponse = z.infer<
   typeof OpsCompanyServiceInfoCreateResponseSchema
@@ -309,6 +330,7 @@ export const DeletionQueueListResponseSchema = z.object({
       reason: z.string(),
       scheduledAt: z.string(),
       executedAt: z.string().nullable(),
+      executedByOperatorId: z.number().nullable(),
       targetCount: z.number(),
       excludedCount: z.number(),
       result: z.enum(["SUCCESS", "FAILED", "EXCLUDED"]).nullable(),
@@ -318,8 +340,16 @@ export const DeletionQueueListResponseSchema = z.object({
       temporaryExportResult: z.enum(["PENDING", "SUCCESS", "FAILED", "EXCLUDED"]).nullable(),
       backupExpiresAt: z.string().nullable(),
       retryCount: z.number(),
+      exclusionReason: z.string().nullable(),
+      holdApprovedByOperatorId: z.number().nullable(),
+      holdExpiresAt: z.string().nullable(),
+      exclusionReviewedAt: z.string().nullable(),
+      verifiedByOperatorId: z.number().nullable(),
       verifiedAt: z.string().nullable(),
+      verificationEvidence: z.string().nullable(),
       cancelledAt: z.string().nullable(),
+      cancelledByOperatorId: z.number().nullable(),
+      cancelReason: z.string().nullable(),
       createdAt: z.string(),
     }),
   ),
@@ -328,6 +358,38 @@ export const DeletionQueueListResponseSchema = z.object({
   totalElements: z.number(),
 });
 export type DeletionQueueListResponse = z.infer<typeof DeletionQueueListResponseSchema>;
+
+export const DeletionQueueDetailResponseSchema = z.object({
+  queueId: z.number(),
+  targetType: z.string(),
+  targetId: z.number(),
+  officeId: z.number().nullable(),
+  reason: z.string(),
+  scheduledAt: z.iso.datetime({ offset: true }),
+  executedAt: z.iso.datetime({ offset: true }).nullable(),
+  executedByOperatorId: z.number().nullable(),
+  targetCount: z.number(),
+  excludedCount: z.number(),
+  result: z.enum(["SUCCESS", "FAILED", "EXCLUDED"]).nullable(),
+  storageResult: z.enum(["PENDING", "SUCCESS", "FAILED", "EXCLUDED"]).nullable(),
+  searchIndexResult: z.enum(["PENDING", "SUCCESS", "FAILED", "EXCLUDED"]).nullable(),
+  fileResult: z.enum(["PENDING", "SUCCESS", "FAILED", "EXCLUDED"]).nullable(),
+  temporaryExportResult: z.enum(["PENDING", "SUCCESS", "FAILED", "EXCLUDED"]).nullable(),
+  backupExpiresAt: z.iso.datetime({ offset: true }).nullable(),
+  retryCount: z.number(),
+  exclusionReason: z.string().nullable(),
+  holdApprovedByOperatorId: z.number().nullable(),
+  holdExpiresAt: z.iso.datetime({ offset: true }).nullable(),
+  exclusionReviewedAt: z.iso.datetime({ offset: true }).nullable(),
+  verifiedByOperatorId: z.number().nullable(),
+  verifiedAt: z.iso.datetime({ offset: true }).nullable(),
+  verificationEvidence: z.string().nullable(),
+  cancelledAt: z.iso.datetime({ offset: true }).nullable(),
+  cancelledByOperatorId: z.number().nullable(),
+  cancelReason: z.string().nullable(),
+  createdAt: z.iso.datetime({ offset: true }),
+});
+export type DeletionQueueDetailResponse = z.infer<typeof DeletionQueueDetailResponseSchema>;
 
 export const DeletionQueueExcludeRequestSchema = z.object({
   exclusionReason: z.string(),
@@ -635,7 +697,7 @@ export const OpsIntegrationListResponseSchema = z.object({
       lastCheckResult: z.enum(["SUCCESS", "FAILED", "NOT_TESTED"]).nullable(),
       lastSuccessAt: z.string().nullable(),
       assignedOperatorId: z.number().nullable(),
-      approvedByOperatorId: z.number(),
+      approvedByOperatorId: z.number().nullable(),
     }),
   ),
   page: z.number(),
@@ -798,6 +860,8 @@ export type OperatorRegistrationListResponse = z.infer<
 
 export const OperatorRegistrationDetailResponseSchema = z.object({
   registrationId: z.number(),
+  officeId: z.number().nullable(),
+  reviewDueAt: z.iso.datetime({ offset: true }).nullable(),
   applicantUserId: z.number(),
   businessRegistrationNumber: z.string(),
   realEstateLicenseNumber: z.string(),
@@ -945,7 +1009,7 @@ export const OperatorOfficeDetailResponseSchema = z.object({
       status: z.string(),
       plan: z.string(),
       trialEndsAt: z.iso.datetime({ offset: true }).nullable().optional(),
-      currentPeriodEnd: z.iso.datetime({ offset: true }),
+      currentPeriodEnd: z.iso.datetime({ offset: true }).nullable(),
       pastDueSince: z.iso.datetime({ offset: true }).nullable().optional(),
     })
     .nullable()
@@ -1013,6 +1077,13 @@ export const OpsOperatorListResponseSchema = z.object({
   totalElements: z.number(),
 });
 export type OpsOperatorListResponse = z.infer<typeof OpsOperatorListResponseSchema>;
+
+export const OpsOperatorOptionListResponseSchema = z.object({
+  items: z.array(
+    z.object({ operatorId: z.number(), name: z.string(), roles: z.array(z.string()) }),
+  ),
+});
+export type OpsOperatorOptionListResponse = z.infer<typeof OpsOperatorOptionListResponseSchema>;
 
 export const OperatorRoleAssignRequestSchema = z.object({ roles: z.array(z.unknown()) });
 export type OperatorRoleAssignRequest = z.infer<typeof OperatorRoleAssignRequestSchema>;
@@ -1228,6 +1299,7 @@ export const PrivacyRequestProcessRequestSchema = z.object({
   action: z.string(),
   note: z.string().nullable().optional(),
   evidenceReference: z.string().nullable().optional(),
+  identityStatus: z.string().nullable().optional(),
 });
 export type PrivacyRequestProcessRequest = z.infer<typeof PrivacyRequestProcessRequestSchema>;
 
@@ -1367,6 +1439,7 @@ export const RefundRequestReviewRequestSchema = z.object({
   decision: z.string(),
   note: z.string().nullable().optional(),
   reasonEventId: z.string().nullable().optional(),
+  amount: z.number().nullable().optional(),
 });
 export type RefundRequestReviewRequest = z.infer<typeof RefundRequestReviewRequestSchema>;
 
@@ -1482,7 +1555,7 @@ export type SupportInquiryAssignRequest = z.infer<typeof SupportInquiryAssignReq
 
 export const OpsSupportInquiryAssignResponseSchema = z.object({
   inquiryId: z.number(),
-  status: z.string(),
+  status: z.enum(["ASSIGNED", "WAITING_FOR_CUSTOMER", "ANSWERED"]),
   assigneeOperatorId: z.number(),
   officeId: z.number().nullable(),
   createdAt: z.string(),
@@ -1532,6 +1605,14 @@ export const OpsSystemJobListResponseSchema = z.object({
     z.object({
       runId: z.number(),
       jobName: z.string(),
+      jobType: z.enum([
+        "CHARGE_RETRY",
+        "ANNOUNCEMENT_PUBLISH",
+        "INTEGRATION_CHECK",
+        "LEGAL_RETENTION",
+        "OTHER",
+      ]),
+      rerunRoles: z.array(z.string()),
       officeId: z.number().nullable(),
       officeName: z.string().nullable(),
       status: z.enum(["RUNNING", "SUCCESS", "FAILED"]),
@@ -1557,7 +1638,7 @@ export type OpsSystemJobRerunRequest = z.infer<typeof OpsSystemJobRerunRequestSc
 export const OpsSystemJobRerunResponseSchema = z.object({
   runId: z.number(),
   jobName: z.string(),
-  status: z.string(),
+  status: z.enum(["RUNNING", "SUCCESS", "FAILED"]),
   startedAt: z.string(),
   attemptCount: z.number(),
   nextRunAt: z.string().nullable(),
@@ -1905,12 +1986,12 @@ export type OpsImportSupportRejectResponse = z.infer<typeof OpsImportSupportReje
 export const OpsImportSupportRequestDetailResponseSchema = z.object({
   requestId: z.number(),
   officeId: z.number(),
-  officeName: z.string(),
+  officeName: z.string().nullable(),
   importBatchId: z.number(),
   batchStatus: z.string(),
-  rowCount: z.number(),
+  rowCount: z.number().nullable(),
   sourceSystem: z.string(),
-  estimatedRowCount: z.number(),
+  estimatedRowCount: z.number().nullable(),
   quoteAmount: z.number().nullable().optional(),
   scopeNote: z.string().nullable().optional(),
   status: z.string(),
@@ -1985,7 +2066,7 @@ export type OpsImportSupportStartResponse = z.infer<typeof OpsImportSupportStart
 export const OpsImportSupportMappingRequestSchema = z.object({
   mappings: z.array(z.object({ sourceColumn: z.string(), targetField: z.string() })),
   sourceSystem: z.string(),
-  targetType: z.string(),
+  targetType: z.string().nullable().optional(),
 });
 export type OpsImportSupportMappingRequest = z.infer<typeof OpsImportSupportMappingRequestSchema>;
 
@@ -2118,6 +2199,23 @@ export type RawAccessRevokeResponse = z.infer<typeof RawAccessRevokeResponseSche
 
 export const RawAccessFileResponseSchema = z.object({});
 export type RawAccessFileResponse = z.infer<typeof RawAccessFileResponseSchema>;
+
+export const RawAccessContentResponseSchema = z.object({
+  grantId: z.number(),
+  approvalRequestId: z.number(),
+  targetType: z.enum([
+    "OFFICE",
+    "MEMBER",
+    "SUPPORT_INQUIRY",
+    "IMPORT_BATCH",
+    "OFFICE_REGISTRATION",
+  ]),
+  targetId: z.number(),
+  expiresAt: z.iso.datetime({ offset: true }),
+  readAt: z.iso.datetime({ offset: true }),
+  content: z.record(z.string(), z.unknown()),
+});
+export type RawAccessContentResponse = z.infer<typeof RawAccessContentResponseSchema>;
 
 export const OfficeRegistrationReviewChecklistRequestSchema = z.object({
   items: z.array(
@@ -2311,7 +2409,14 @@ export const OpsRefundDetailResponseSchema = z.object({
     "LATE_APPROVAL",
     "POLICY_COMPENSATION",
   ]),
-  reasonEventType: z.string(),
+  reasonEventType: z.enum([
+    "INVOICE",
+    "SUBSCRIPTION_CANCELLATION",
+    "AUTH_SUSPENSION",
+    "SERVICE_INCIDENT",
+    "LATE_APPROVAL",
+    "POLICY_COMPENSATION",
+  ]),
   reasonEventId: z.string().nullable(),
   requestedAt: z.iso.datetime({ offset: true }),
   status: z.enum([
@@ -2531,6 +2636,7 @@ export const OpsCompanyServiceInfoInquiryTestResponseSchema = z.object({
   infoId: z.number(),
   inquiryDeliveryTestedAt: z.iso.datetime({ offset: true }).nullable(),
   reviewedByOperatorId: z.number().nullable(),
+  publishedAt: z.iso.datetime({ offset: true }).nullable(),
 });
 export type OpsCompanyServiceInfoInquiryTestResponse = z.infer<
   typeof OpsCompanyServiceInfoInquiryTestResponseSchema
@@ -2848,6 +2954,7 @@ export const AuthorityRequestResponseSchema = z.object({
   approvedByOperatorId: z.number().nullable(),
   closedAt: z.iso.datetime({ offset: true }).nullable(),
   retentionUntil: z.iso.date().nullable(),
+  closeNote: z.string().nullable(),
 });
 export type AuthorityRequestResponse = z.infer<typeof AuthorityRequestResponseSchema>;
 
@@ -2874,6 +2981,26 @@ export const GuestPrivacyIntakeListResponseSchema = z.object({
   totalElements: z.number(),
 });
 export type GuestPrivacyIntakeListResponse = z.infer<typeof GuestPrivacyIntakeListResponseSchema>;
+
+export const GuestPrivacyIntakeDetailResponseSchema = z.object({
+  intakeId: z.number(),
+  officeId: z.number(),
+  officeName: z.string(),
+  linkKind: z.string(),
+  requestType: z.string(),
+  requesterRole: z.string(),
+  contactChannel: z.string(),
+  maskedContact: z.string().nullable(),
+  verificationStatus: z.string(),
+  status: z.string(),
+  receivedAt: z.iso.datetime({ offset: true }),
+  internalDueAt: z.iso.datetime({ offset: true }),
+  privacyRequestId: z.number().nullable(),
+  closedReason: z.string().nullable(),
+});
+export type GuestPrivacyIntakeDetailResponse = z.infer<
+  typeof GuestPrivacyIntakeDetailResponseSchema
+>;
 
 export const GuestPrivacyIntakeResolveRequestSchema = z.object({
   verificationResult: z.string(),

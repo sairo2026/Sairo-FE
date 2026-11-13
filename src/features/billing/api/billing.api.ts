@@ -226,6 +226,21 @@ export function fetchReturnExport(grantId: number, exportId: number) {
   });
 }
 
+export function createArchiveExport(grantId: number) {
+  return apiFetch(`/api/archive-grants/${grantId}/documents/export`, {
+    method: "POST",
+    schema: ExportWireSchema,
+    ...GRANT_REQUEST,
+  });
+}
+
+export function fetchArchiveExport(grantId: number, exportId: number) {
+  return apiFetch(`/api/archive-grants/${grantId}/documents/exports/${exportId}`, {
+    schema: ExportWireSchema,
+    ...GRANT_REQUEST,
+  });
+}
+
 export function fetchArchiveGrant() {
   return apiFetch("/api/archive-grants/current", {
     schema: ArchiveGrantStatusWireSchema,

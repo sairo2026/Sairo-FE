@@ -118,6 +118,9 @@ describe("청구서 상세와 환불 신청", () => {
             },
           ],
           supplier: null,
+          supplyAmount: null,
+          vatAmount: null,
+          vatRateBp: null,
           taxDocuments: [],
         }),
       ),
@@ -138,6 +141,9 @@ describe("청구서 상세와 환불 신청", () => {
           nextRetryAt: null,
           attempts: [],
           supplier: null,
+          supplyAmount: null,
+          vatAmount: null,
+          vatRateBp: null,
           taxDocuments: [
             {
               documentKind: "TAX_INVOICE",

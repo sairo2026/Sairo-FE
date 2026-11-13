@@ -40,6 +40,11 @@ export function buildMockBatch(overrides: Partial<ImportBatchDetail> = {}): Mock
       fileName: "고객목록.xlsx",
       targetType: "CUSTOMER",
       status: "UPLOADED",
+      sheets: [
+        { name: "고객", rowCount: 60, columnCount: 5 },
+        { name: "메모", rowCount: 10, columnCount: 2 },
+      ],
+      selectedSheetName: "고객",
       rowCount: 60,
       counts: null,
       executedAt: null,

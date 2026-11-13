@@ -35,7 +35,7 @@ export const ArchiveGrantExportResponseSchema = z.object({
   status: z.string(),
   downloadUrl: z.string().nullable().optional(),
   expiresAt: z.string().nullable().optional(),
-  fileExpiresAt: z.string(),
+  fileExpiresAt: z.string().nullable(),
 });
 export type ArchiveGrantExportResponse = z.infer<typeof ArchiveGrantExportResponseSchema>;
 
@@ -178,7 +178,7 @@ export const RefundRequestStatusResponseSchema = z.object({
   calculation: z
     .object({
       originalApprovedAmount: z.number(),
-      totalPeriodSeconds: z.number(),
+      totalPeriodSeconds: z.number().nullable(),
       remainingPeriodSeconds: z.number().nullable().optional(),
       couponExcludedAmount: z.number(),
       priorCompensationAmount: z.number(),
@@ -203,7 +203,8 @@ export const ReturnGrantExportResponseSchema = z.object({
   status: z.string(),
   downloadUrl: z.string().nullable().optional(),
   expiresAt: z.string().nullable().optional(),
-  fileExpiresAt: z.string(),
+  fileExpiresAt: z.string().nullable(),
+  failureReason: z.string().nullable().optional(),
 });
 export type ReturnGrantExportResponse = z.infer<typeof ReturnGrantExportResponseSchema>;
 
@@ -375,6 +376,8 @@ export const PurchaseConsentPreviewResponseSchema = z.object({
   autoRenewal: z.boolean(),
   cancellationTerms: z.string(),
   refundTerms: z.string(),
+  checkItems: z.array(z.string()),
+  errorMessages: z.record(z.string(), z.string()),
 });
 export type PurchaseConsentPreviewResponse = z.infer<typeof PurchaseConsentPreviewResponseSchema>;
 
@@ -456,7 +459,7 @@ export const PublicPricingResponseSchema = z.object({
       freeEndMode: z.enum(["DURATION", "FIXED_END"]),
       durationDays: z.number().nullable(),
       fixedFreeEndsAt: z.iso.datetime({ offset: true }).nullable(),
-      applicantWindowEndsAt: z.iso.datetime({ offset: true }),
+      applicantWindowEndsAt: z.iso.datetime({ offset: true }).nullable(),
     })
     .nullable(),
   links: z.object({ termsUrl: z.string(), refundUrl: z.string(), privacyUrl: z.string() }),
@@ -487,11 +490,11 @@ export type StartCustomerAgreementResponse = z.infer<typeof StartCustomerAgreeme
 export const TaxRecipientResponseSchema = z.object({
   registered: z.boolean(),
   recipientId: z.number().nullable(),
-  businessNumber: z.string(),
-  companyName: z.string(),
-  representativeName: z.string(),
+  businessNumber: z.string().nullable(),
+  companyName: z.string().nullable(),
+  representativeName: z.string().nullable(),
   receiverEmail: z.string().nullable(),
-  taxType: z.string(),
+  taxType: z.string().nullable(),
   issueRequested: z.boolean(),
   registeredAt: z.iso.datetime({ offset: true }).nullable(),
 });
@@ -512,7 +515,7 @@ export const ArchiveExportResultResponseSchema = z.object({
   status: z.string(),
   downloadUrl: z.string().nullable().optional(),
   expiresAt: z.iso.datetime({ offset: true }).nullable().optional(),
-  fileExpiresAt: z.iso.datetime({ offset: true }),
+  fileExpiresAt: z.iso.datetime({ offset: true }).nullable(),
   failureReason: z.string().nullable().optional(),
 });
 export type ArchiveExportResultResponse = z.infer<typeof ArchiveExportResultResponseSchema>;
@@ -522,7 +525,7 @@ export const ReturnExportResultResponseSchema = z.object({
   status: z.string(),
   downloadUrl: z.string().nullable().optional(),
   expiresAt: z.iso.datetime({ offset: true }).nullable().optional(),
-  fileExpiresAt: z.iso.datetime({ offset: true }),
+  fileExpiresAt: z.iso.datetime({ offset: true }).nullable(),
   failureReason: z.string().nullable().optional(),
 });
 export type ReturnExportResultResponse = z.infer<typeof ReturnExportResultResponseSchema>;

@@ -14,6 +14,8 @@ const NOW = "2026-11-10T09:00:00+09:00";
 export type MockFee = ContractFeeListResponse["items"][number];
 export type MockSchedule = ContractPaymentScheduleListResponse["items"][number];
 export type MockFollowup = ContractFollowupTaskListResponse["items"][number];
+const MASKED_COPY_NOTICE = "마스킹한 사본은 법정 원본 보존을 마친 것으로 보지 않습니다.";
+
 type MockDocument = ContractDetailResponse["documents"][number];
 
 export type ContractExtraState = {
@@ -619,6 +621,7 @@ export const contractExtraHandlers = [
     return HttpResponse.json(
       {
         ...created,
+        notice: created.piiMaskingConfirmed ? MASKED_COPY_NOTICE : null,
         contractRevisionId: created.contractRevisionId ?? 0,
         officeId: 12,
         version: contract.detail.version + 1,
@@ -658,6 +661,7 @@ export const contractExtraHandlers = [
       return HttpResponse.json(
         {
           ...created,
+          notice: created.piiMaskingConfirmed ? MASKED_COPY_NOTICE : null,
           contractRevisionId: created.contractRevisionId ?? 0,
           officeId: 12,
           version: contract.detail.version + 1,
