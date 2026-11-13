@@ -71,6 +71,15 @@ describe("증빙 발급 목록", () => {
     expect(screen.getByText(/세무사 확인 전 가정/)).toBeTruthy();
   });
 
+  it("발급 대기 행은 승인번호와 금액이 비어 있어도 보이고 기록만 열 수 있다", async () => {
+    renderScreen();
+    const open = await screen.findByRole("button", { name: "기록 61 열기" });
+    const row = within(open.closest("tr") as HTMLElement);
+    expect(row.getByText("발급 대기")).toBeTruthy();
+    expect(row.getAllByText("-").length).toBeGreaterThanOrEqual(4);
+    expect(row.queryByRole("button", { name: /수정 발급|취소 처리/ })).toBeNull();
+  });
+
   it("수정 발급과 취소 처리는 발급됨 기록에만 있다", async () => {
     renderScreen();
     await screen.findByRole("button", { name: "기록 62 수정 발급" });

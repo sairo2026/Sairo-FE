@@ -341,6 +341,17 @@ function seedDeletion(): MockDeletion[] {
   return [
     deletion(701),
     deletion(702, { targetType: "PROPERTY", reason: "계약 종료 후 보관 기한 만료" }),
+    deletion(710, {
+      targetType: "OFFICE_DATA",
+      targetId: 42,
+      reason: "사무소 종료 후 보관 기한 만료",
+    }),
+    deletion(711, {
+      targetType: "BILLING_RECORD",
+      targetId: 0,
+      officeId: null,
+      reason: "구독 종료 후 보관 기한 만료",
+    }),
     deletion(703, { ...executedResults, executedByOperatorId: SELF }),
     deletion(704, { ...executedResults, executedByOperatorId: 9 }),
     deletion(705, {
@@ -588,8 +599,10 @@ export const opsPrivacyHandlers: RequestHandler[] = [
     const rejected = requireMockOps(PRIVACY);
     if (rejected) return rejected;
     const queueId = new URL(request.url).searchParams.get("queueId");
+    const targetType = new URL(request.url).searchParams.get("targetType");
     const rows = [...state.deletion]
       .filter((row) => !queueId || String(row.queueId) === queueId)
+      .filter((row) => !targetType || row.targetType === targetType)
       .sort((a, b) => Date.parse(a.scheduledAt) - Date.parse(b.scheduledAt));
     return HttpResponse.json(pageOf(rows, new URL(request.url)));
   }),

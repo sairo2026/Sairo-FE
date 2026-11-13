@@ -134,6 +134,11 @@ describe("운영 홈 큐 카드", () => {
       within(screen.getByRole("listitem", { name: "권리요청 기한 임박" })).getByText("2건"),
     ).not.toBeNull();
     expect(
+      within(screen.getByRole("listitem", { name: "권리요청 기한 임박" })).getByText(
+        "비회원 접수 포함",
+      ),
+    ).not.toBeNull();
+    expect(
       within(screen.getByRole("listitem", { name: "파기 실패" })).getByText("0건"),
     ).not.toBeNull();
     expect(

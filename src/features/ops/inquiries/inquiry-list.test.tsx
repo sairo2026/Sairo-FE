@@ -7,6 +7,7 @@ import { errorResponse, mockErrors } from "@/mocks/error-responses";
 import { resetMockOpsSupport } from "@/mocks/handlers/ops-support";
 import { resetMockOpsSession, setMockOperatorRoles } from "@/mocks/handlers/ops-session";
 import { server, startMockServer } from "@/mocks/server";
+import { operatorOptionsHandler, pickOperator } from "../home/testing/pick-operator";
 import { renderOpsScreen } from "../home/testing/render-ops-screen";
 import type { OpsRole } from "../model/roles";
 import { InquiryListScreen } from "./inquiry-list";
@@ -136,15 +137,16 @@ describe("문의 목록", () => {
     expect(screen.queryByText("남산공인중개사")).toBeNull();
   });
 
-  it("담당 운영자 번호와 사무소 번호로 조회한다", async () => {
+  it("담당 운영자와 사무소 번호로 조회한다", async () => {
+    server.use(operatorOptionsHandler([{ operatorId: 7, name: "정담당" }]));
     const user = userEvent.setup();
     renderList();
     await screen.findByText("북악부동산");
-    await user.type(screen.getByLabelText("담당 운영자 번호"), "7");
+    await pickOperator(screen.getByLabelText("담당 운영자"), 7);
     await apply(user);
     expect(await screen.findByText("북악부동산")).toBeTruthy();
     expect(screen.queryByText("남산공인중개사")).toBeNull();
-    await user.clear(screen.getByLabelText("담당 운영자 번호"));
+    await user.selectOptions(screen.getByLabelText("담당 운영자"), "");
     await user.type(screen.getByLabelText("사무소 번호"), "9");
     await apply(user);
     expect(await screen.findByText("남산공인중개사")).toBeTruthy();
