@@ -621,6 +621,7 @@ export const billingHandlers = [
     if (!billingState.grant.signedIn) return mockErrors.unauthenticated();
     return HttpResponse.json({
       grantId: 12,
+      officeId: 12,
       expiresAt: "2027-12-31T00:00:00+09:00",
       revoked: billingState.grant.revoked,
     });
@@ -654,8 +655,47 @@ export const billingHandlers = [
       fileExpiresAt: "2026-11-11T09:00:00+09:00",
     });
   }),
+  http.post("/api/archive-grants/:grantId/documents/export", () => {
+    if (!billingState.grant.signedIn) return mockErrors.unauthenticated();
+    billingState.grant.exportPolls = 0;
+    return HttpResponse.json(
+      {
+        exportId: 901,
+        status: "PENDING",
+        downloadUrl: null,
+        expiresAt: null,
+        fileExpiresAt: "2026-11-11T09:00:00+09:00",
+      },
+      { status: 201 },
+    );
+  }),
+  http.get("/api/archive-grants/:grantId/documents/exports/:exportId", () => {
+    if (!billingState.grant.signedIn) return mockErrors.unauthenticated();
+    billingState.grant.exportPolls += 1;
+    if (billingState.grant.exportPolls < 2) {
+      return HttpResponse.json({
+        exportId: 901,
+        status: "PENDING",
+        downloadUrl: null,
+        expiresAt: null,
+        fileExpiresAt: "2026-11-11T09:00:00+09:00",
+      });
+    }
+    return HttpResponse.json({
+      exportId: 901,
+      status: "COMPLETED",
+      downloadUrl: "https://files.example.com/archive-901.zip",
+      expiresAt: "2026-11-10T09:10:00+09:00",
+      fileExpiresAt: "2026-11-11T09:00:00+09:00",
+    });
+  }),
   http.get("/api/archive-grants/current", () => {
     if (!billingState.grant.signedIn) return mockErrors.unauthenticated();
-    return HttpResponse.json({ grantId: 13, expiresAt: null, revoked: billingState.grant.revoked });
+    return HttpResponse.json({
+      grantId: 13,
+      officeId: 12,
+      expiresAt: null,
+      revoked: billingState.grant.revoked,
+    });
   }),
 ];

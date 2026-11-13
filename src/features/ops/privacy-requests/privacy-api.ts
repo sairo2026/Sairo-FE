@@ -44,6 +44,7 @@ export function usePrivacyProcess(requestId: number, version: number) {
       action: ProcessAction;
       note: string | null;
       evidenceReference: string | null;
+      identityStatus?: "VERIFIED" | "FAILED";
     }) =>
       apiFetch(`/api/ops/privacy-requests/${requestId}/process`, {
         method: "POST",

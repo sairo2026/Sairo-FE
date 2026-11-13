@@ -554,6 +554,15 @@ describe("보관권한 화면", () => {
     expect(screen.getByText(/보관 문서 열람은 고객지원으로 요청해 주세요/)).not.toBeNull();
   });
 
+  it("법정보존문서 내보내기를 진행해 완료되면 내려받을 수 있다", async () => {
+    billingState.grant.signedIn = true;
+    const user = userEvent.setup();
+    renderOffice(<ArchiveGrantScreen />);
+    await user.click(await screen.findByRole("button", { name: "자료 내보내기" }));
+    const link = await screen.findByRole("link", { name: "내려받기" }, { timeout: 8000 });
+    expect(link.getAttribute("href")).toBe("https://files.example.com/archive-901.zip");
+  }, 20000);
+
   it("종료된 권한은 안내한다", async () => {
     billingState.grant.signedIn = true;
     billingState.grant.revoked = true;

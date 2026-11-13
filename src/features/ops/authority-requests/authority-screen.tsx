@@ -281,10 +281,11 @@ function AuthorityBody() {
           onClosed={(record) => {
             setClosing(null);
             setRetention((current) => ({ ...current, [record.requestId]: record.retentionUntil }));
+            const noteText = record.closeNote ? ` 종결 메모: ${record.closeNote}` : "";
             setFeedback(
               record.retentionUntil
-                ? `요청 ${record.requestId}를 종결했습니다. 기록 삭제 예정일은 ${formatSeoulDate(record.retentionUntil)}입니다.`
-                : `요청 ${record.requestId}를 종결했습니다.`,
+                ? `요청 ${record.requestId}를 종결했습니다. 기록 삭제 예정일은 ${formatSeoulDate(record.retentionUntil)}입니다.${noteText}`
+                : `요청 ${record.requestId}를 종결했습니다.${noteText}`,
             );
           }}
         />

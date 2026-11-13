@@ -19,6 +19,7 @@ import { contractExtraHandlers } from "./contract-extra";
 import { opsSessionHandlers } from "./ops-session";
 import { opsHomeHandlers } from "./ops-home";
 import { opsRegistrationHandlers } from "./ops-registrations";
+import { opsOwnerTransferHandlers } from "./ops-owner-transfers";
 import { opsRawAccessHandlers } from "./ops-raw-access";
 import { opsOperatorHandlers } from "./ops-operators";
 import { opsSupportHandlers } from "./ops-support";
@@ -50,6 +51,7 @@ export const handlers = [
   ...opsSessionHandlers,
   ...opsHomeHandlers,
   ...opsRegistrationHandlers,
+  ...opsOwnerTransferHandlers,
   ...opsRawAccessHandlers,
   ...opsOperatorHandlers,
   ...opsSupportHandlers,

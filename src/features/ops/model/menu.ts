@@ -32,6 +32,7 @@ export const OPS_MENU: readonly OpsMenuItem[] = [
   },
   { key: "members", label: "회원", href: "/ops/members", roles: OPS_WORK_ROLES },
   { key: "registrations", label: "인증 심사", href: "/ops/registrations", roles: ["REVIEW"] },
+  { key: "owner-transfers", label: "대표 이전", href: "/ops/owner-transfers", roles: ["REVIEW"] },
   { key: "inquiries", label: "문의·티켓", href: "/ops/inquiries", roles: ["SUPPORT"] },
   {
     key: "enterprise-leads",

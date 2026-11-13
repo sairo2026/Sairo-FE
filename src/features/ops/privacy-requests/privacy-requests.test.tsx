@@ -259,6 +259,16 @@ describe("개인정보 요청 상세", () => {
     ).toBeTruthy();
   });
 
+  it("본인확인 결과를 함께 기록하면 승인을 고를 수 있고 처리에 본인확인 결과를 보낸다", async () => {
+    const user = userEvent.setup();
+    await openDetail(501);
+    await user.selectOptions(screen.getByLabelText("본인확인 결과"), "VERIFIED");
+    const option = within(screen.getByLabelText("처리 단계")).getByRole("option", {
+      name: "승인",
+    }) as HTMLOptionElement;
+    expect(option.disabled).toBe(false);
+  });
+
   it("본인확인이 끝난 요청은 승인과 제한을 고를 수 있다", async () => {
     await openDetail(502);
     const option = within(screen.getByLabelText("처리 단계")).getByRole("option", {
