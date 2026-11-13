@@ -32,6 +32,7 @@ const PUBLIC_ROOTS = [
 ];
 
 function isPublicPath(path: string): boolean {
+  if (path === "/") return true;
   return PUBLIC_ROOTS.some((root) => path === root || path.startsWith(`${root}/`));
 }
 

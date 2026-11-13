@@ -54,6 +54,8 @@
   --radius-card-flat: 16px;
 
   /* 글자 규격: 크기 / 줄 높이 */
+  --text-display: 40px;
+  --text-display--line-height: 52px;
   --text-h1: 28px;
   --text-h1--line-height: 36px;
   --text-h2: 20px;
@@ -86,11 +88,55 @@ textarea {
   outline-offset: 2px;
 }
 
+.logo-splash {
+  display: none;
+}
+
+html[data-splash="play"] .logo-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--background);
+  animation: logo-splash-out 900ms ease-out forwards;
+}
+
+html[data-splash="play"] .logo-splash-mark {
+  animation: logo-splash-in 320ms ease-out both;
+}
+
+@keyframes logo-splash-out {
+  0%,
+  72% {
+    opacity: 1;
+    visibility: visible;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes logo-splash-in {
+  from {
+    transform: scale(0.94);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+
+  html[data-splash="play"] .logo-splash {
+    display: none;
   }
 }

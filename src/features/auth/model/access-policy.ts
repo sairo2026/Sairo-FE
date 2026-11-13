@@ -52,7 +52,10 @@ export type AccessDecision =
 
 export function loginRedirect(pathname: string): AccessDecision {
   const isSafeNext = pathname.startsWith("/") && !pathname.startsWith("//");
-  const query = isSafeNext && pathname !== "/" ? `?next=${encodeURIComponent(pathname)}` : "";
+  const query =
+    isSafeNext && pathname !== "/" && pathname !== "/home"
+      ? `?next=${encodeURIComponent(pathname)}`
+      : "";
   return { kind: "redirect", to: `${AUTH_ROUTES.login}${query}` };
 }
 

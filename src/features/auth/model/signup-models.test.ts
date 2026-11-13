@@ -15,7 +15,7 @@ import type { TermsCatalogItem } from "../components/terms-agreement-section";
 
 describe("접근 상태별 이동 화면", () => {
   it.each([
-    ["ACTIVE", "/"],
+    ["ACTIVE", "/home"],
     ["PRE_VERIFICATION", "/office/start"],
     ["OFFICE_UNDER_REVIEW", "/office/review"],
     ["VERIFIED_UNPAID", "/billing"],
@@ -31,7 +31,7 @@ describe("접근 상태별 이동 화면", () => {
     expect(landingPathFor({ accessCondition: "ACTIVE", role: "OWNER" })).toBe(
       "/billing/card-guide",
     );
-    expect(landingPathFor({ accessCondition: "ACTIVE", role: "AGENT" })).toBe("/");
+    expect(landingPathFor({ accessCondition: "ACTIVE", role: "AGENT" })).toBe("/home");
   });
 });
 

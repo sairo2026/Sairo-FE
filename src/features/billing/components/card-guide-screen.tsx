@@ -40,7 +40,7 @@ export function CardGuideScreen() {
     (subscription.readiness.hasBillingKey || SKIP_STATUSES.includes(subscription.status));
 
   useEffect(() => {
-    if (query.isError || shouldSkip || readSkipped()) router.replace("/");
+    if (query.isError || shouldSkip || readSkipped()) router.replace("/home");
   }, [query.isError, shouldSkip, router]);
 
   if (query.isPending) return <PageSkeleton label="구독 상태를 확인하는 중입니다." />;
@@ -66,7 +66,7 @@ export function CardGuideScreen() {
           variant="ghost"
           onClick={() => {
             writeSkipped();
-            router.replace("/");
+            router.replace("/home");
           }}
         >
           나중에 하기

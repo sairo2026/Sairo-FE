@@ -500,6 +500,6 @@ describe("심사 상태", () => {
     const user = userEvent.setup();
     renderOffice(<OfficeReviewScreen />);
     await user.click(await screen.findByRole("button", { name: "확인" }));
-    expect(navigation.push).toHaveBeenCalledWith("/");
+    expect(navigation.push).toHaveBeenCalledWith("/home");
   });
 });
