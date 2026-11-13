@@ -2,7 +2,7 @@ import { http, HttpResponse } from "msw";
 import type { RequestHandler } from "msw";
 import { formatSeoulDate } from "@/shared/lib/format";
 import { errorResponse, mockErrors } from "../error-responses";
-import { findMockPriceSchedule } from "./ops-content";
+import { findMockPriceSchedule, listMockPriceSchedules } from "./ops-content";
 import { getMockOperator, requireMockOps, requireMockStepUp } from "./ops-session";
 
 const DAY = 86_400_000;
@@ -1013,7 +1013,8 @@ export const opsBillingHandlers: RequestHandler[] = [
   http.get("/api/ops/price-schedules", ({ request }) => {
     const rejected = requireMockOps(["BILLING"]);
     if (rejected) return rejected;
-    return HttpResponse.json(page(state.schedules, new URL(request.url)));
+    const rows = [...state.schedules, ...listMockPriceSchedules()];
+    return HttpResponse.json(page(rows, new URL(request.url)));
   }),
 
   http.get("/api/ops/price-change-notices", ({ request }) => {

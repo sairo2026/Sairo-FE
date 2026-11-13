@@ -685,6 +685,10 @@ const COMPANY_REQUIRED = [
 
 type PublicPrice = Omit<MockPrice, "createdBy">;
 
+export function listMockPriceSchedules(): PublicPrice[] {
+  return state.prices.map(publicPrice);
+}
+
 export function findMockPriceSchedule(scheduleId: number): PublicPrice | null {
   const found = state.prices.find((row) => row.scheduleId === scheduleId);
   return found ? publicPrice(found) : null;
@@ -694,7 +698,7 @@ export const opsPriceScheduleHandlers: RequestHandler[] = [
   http.get("/api/ops/price-schedules", ({ request }) => {
     const rejected = requireMockOps(BILLING);
     if (rejected) return rejected;
-    return HttpResponse.json(pageOf(state.prices.map(publicPrice), new URL(request.url)));
+    return HttpResponse.json(pageOf(listMockPriceSchedules(), new URL(request.url)));
   }),
 
   http.post("/api/ops/price-schedules", async ({ request }) => {
