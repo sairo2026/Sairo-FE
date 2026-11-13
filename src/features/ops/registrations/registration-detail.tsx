@@ -294,6 +294,10 @@ function RegistrationBody({ detail }: { detail: RegistrationDetail }) {
               value: <OpsStatusBadge status={detail.status} map={REGISTRATION_STATUS} />,
             },
             { label: "사무소명", value: detail.requestedOfficeName },
+            {
+              label: "심사 기한",
+              value: detail.reviewDueAt ? formatSeoulDateTime(detail.reviewDueAt) : null,
+            },
             { label: "대표자", value: detail.requestedRepresentativeName },
             { label: "대표 연락처", value: detail.requestedRepresentativePhone },
             { label: "주소", value: detail.requestedAddress },

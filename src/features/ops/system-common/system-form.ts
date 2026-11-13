@@ -16,6 +16,8 @@ export const INTEGRATION_PREREQUISITE_LABELS: Record<string, string> = {
   COMPANY_INFO_PUBLISHED_VERSION: "회사 정보 게시",
   COMPANY_INFO_INQUIRY_DELIVERY_TEST: "실제 문의 수신 시험",
   COMPANY_INFO_REVIEW: "회사 정보 검토",
+  POLICY_DOCUMENTS_NOT_PUBLISHED: "정책 문서 게시",
+  STANDARD_PRICE_SCHEDULE_NOT_APPROVED: "표준 요금표 승인",
 };
 
 export function prerequisiteLabels(items: readonly string[]): string[] {

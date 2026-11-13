@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   RawAccessApproveResponseSchema,
+  RawAccessContentResponseSchema,
   RawAccessCreateResponseSchema,
   RawAccessDetailResponseSchema,
   RawAccessExecuteResponseSchema,
@@ -81,6 +82,13 @@ export function useRawAccessActions(requestId: number) {
           schema: RawAccessRevokeResponseSchema,
         }),
       onSuccess: refresh,
+    }),
+    viewContent: useMutation({
+      mutationFn: (grantId: number) =>
+        apiFetch(`/api/ops/raw-access-grants/${grantId}/content`, {
+          schema: RawAccessContentResponseSchema,
+        }),
+      onSettled: refresh,
     }),
     fetchFile: useMutation({
       mutationFn: (grantId: number) => fetchGrantFile(grantId),

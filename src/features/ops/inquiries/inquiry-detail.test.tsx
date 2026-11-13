@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { http } from "msw";
+import { HttpResponse, http } from "msw";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { errorResponse, mockErrors } from "@/mocks/error-responses";
 import { resetMockOpsSession, setMockOperatorRoles } from "@/mocks/handlers/ops-session";
@@ -346,17 +346,18 @@ describe("공개 답변과 내부 메모 작성", () => {
 });
 
 describe("담당 배정과 우선순위", () => {
-  it("담당 운영자 번호로 배정하면 담당이 바뀐다", async () => {
+  it("운영자 목록에서 골라 배정하면 담당이 바뀐다", async () => {
     const user = userEvent.setup();
     renderDetail(501);
     await screen.findByText("결제가 두 번 된 것 같습니다.");
-    await user.type(screen.getByLabelText("담당 운영자 번호"), "9");
+    await screen.findByRole("option", { name: /이상담/ });
+    await user.selectOptions(screen.getByLabelText("담당 운영자"), "9");
     await user.click(screen.getByRole("button", { name: "담당 배정" }));
     expect(await screen.findByText("담당을 배정했습니다.")).toBeTruthy();
     expect(await screen.findByText("이상담", { selector: "dd" })).toBeTruthy();
   });
 
-  it("번호를 입력하지 않으면 담당 배정 버튼이 꺼져 있다", async () => {
+  it("운영자를 고르지 않으면 담당 배정 버튼이 꺼져 있다", async () => {
     renderDetail(501);
     await screen.findByText("결제가 두 번 된 것 같습니다.");
     expect(isBlocked(screen.getByRole("button", { name: "담당 배정" }))).toBe(true);
@@ -372,9 +373,15 @@ describe("담당 배정과 우선순위", () => {
 
   it("활성 지원 운영자가 아니면 배정할 수 없다고 안내한다", async () => {
     const user = userEvent.setup();
+    server.use(
+      http.get("/api/ops/operators/options", () =>
+        HttpResponse.json({ items: [{ operatorId: 99, name: "퇴사자", roles: ["OPS"] }] }),
+      ),
+    );
     renderDetail(501);
     await screen.findByText("결제가 두 번 된 것 같습니다.");
-    await user.type(screen.getByLabelText("담당 운영자 번호"), "99");
+    await screen.findByRole("option", { name: /퇴사자/ });
+    await user.selectOptions(screen.getByLabelText("담당 운영자"), "99");
     await user.click(screen.getByRole("button", { name: "담당 배정" }));
     expect(await screen.findByText("활성 지원 담당 운영자가 아닙니다.")).toBeTruthy();
   });

@@ -420,6 +420,31 @@ export const opsRawAccessHandlers: RequestHandler[] = [
     });
   }),
 
+  http.get("/api/ops/raw-access-grants/:grantId/content", ({ params }) => {
+    const rejected = requireMockOps();
+    if (rejected) return rejected;
+    const stepUp = requireMockStepUp();
+    if (stepUp) return stepUp;
+    const row = state.requests.find((item) => String(item.grant?.grantId) === params.grantId);
+    if (!row || !row.grant) return mockErrors.notFound();
+    if (row.requestType !== "RAW_VIEW") {
+      return errorResponse(409, "INVALID_TRANSITION", "열람 승인 건이 아닙니다.");
+    }
+    if (row.grant.revokedAt) return errorResponse(409, "RAW_ACCESS_REVOKED", "회수된 접근입니다.");
+    if (Date.parse(row.grant.expiresAt) <= Date.now()) {
+      return errorResponse(409, "RAW_ACCESS_EXPIRED", "접근 시간이 지났습니다.");
+    }
+    return HttpResponse.json({
+      grantId: row.grant.grantId,
+      approvalRequestId: row.requestId,
+      targetType: row.targetType,
+      targetId: row.targetId ?? 0,
+      expiresAt: row.grant.expiresAt,
+      readAt: new Date().toISOString(),
+      content: { 사무소명: "사무소 예시", 대표자: "김대표" },
+    });
+  }),
+
   http.get("/api/ops/raw-access-grants/:grantId/file", ({ params }) => {
     const rejected = requireMockOps();
     if (rejected) return rejected;

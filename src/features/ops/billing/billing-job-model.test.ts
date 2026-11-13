@@ -17,6 +17,8 @@ function run(patch: Partial<SystemJobRun>): SystemJobRun {
     nextRunAt: null,
     assignedOperatorId: null,
     assignedOperatorName: null,
+    jobType: "OTHER",
+    rerunRoles: [],
     ...patch,
   };
 }
