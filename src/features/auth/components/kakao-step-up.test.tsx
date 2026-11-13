@@ -79,6 +79,14 @@ describe("카카오 재인증 콜백", () => {
   it("세션이 끝났으면 다시 로그인하라고 안내한다", async () => {
     render(<KakaoStepUpCallback error="UNAUTHENTICATED" />);
     expect((await screen.findByRole("alert")).textContent).toContain("다시 로그인한 뒤");
+    expect(screen.queryByRole("button", { name: "하던 화면으로 돌아가기" })).toBeNull();
+  });
+
+  it("세션이 끝난 경우 로그인 화면으로 이동할 수 있다", async () => {
+    const user = userEvent.setup();
+    render(<KakaoStepUpCallback error="UNAUTHENTICATED" />);
+    await user.click(await screen.findByRole("button", { name: "로그인으로 이동" }));
+    expect(navigation.replace).toHaveBeenCalledWith("/login");
   });
 
   it("알 수 없는 오류 코드는 일반 실패 안내를 보인다", async () => {

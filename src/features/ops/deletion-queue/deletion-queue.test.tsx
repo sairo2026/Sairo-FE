@@ -11,7 +11,7 @@ import { renderOpsScreen } from "../home/testing/render-ops-screen";
 import type { OpsRole } from "../model/roles";
 import { DeletionDetailScreen } from "./deletion-detail";
 import { DeletionQueueScreen } from "./deletion-queue-list";
-import { phaseOf, toSeoulIso, validateExclude } from "./deletion-model";
+import { TARGET_TYPE_LABELS, phaseOf, toSeoulIso, validateExclude } from "./deletion-model";
 import type { DeletionItem, ExcludeInput } from "./deletion-model";
 
 vi.mock("next/navigation", () => ({
@@ -163,6 +163,25 @@ describe("파기 상태와 입력 규칙", () => {
   });
 });
 
+describe("파기 대상 종류 이름", () => {
+  it.each([
+    "OFFICE_DATA",
+    "MARKETING_NOTICE_DELIVERY",
+    "OPS_AUDIT_LOG",
+    "PRIVACY_REQUEST_RECORD",
+    "SUPPORT_INQUIRY",
+    "BILLING_RECORD",
+    "TAX_DOCUMENT",
+    "AUTHORITY_REQUEST",
+    "PROVIDER_CONTRACT_COPY",
+    "GUEST_INTAKE_RECORD",
+    "REVIEW_RECORD",
+    "TERMS_AGREEMENT_RETAINED",
+  ])("%s 는 한글 이름이 있다", (value) => {
+    expect(TARGET_TYPE_LABELS[value]).toBeTruthy();
+  });
+});
+
 describe("파기 큐", () => {
   it("로딩 뒤 대상과 근거와 예정일을 보인다", async () => {
     renderQueue();
@@ -221,6 +240,20 @@ describe("파기 큐", () => {
     expect(cancelled.getAllByText("-")).toHaveLength(1);
     const pending = rowOf("701");
     expect(pending.getAllByText("-")).toHaveLength(2);
+  });
+
+  it("새 대상 종류는 한글 이름으로 보이고 종류로 걸러 볼 수 있다", async () => {
+    renderQueue();
+    await screen.findByRole("link", { name: "710" });
+    expect(rowOf("710").getByText(/종료 사무소 업무 데이터 42/)).toBeTruthy();
+    expect(rowOf("711").getByText(/구독·결제 기록 0/)).toBeTruthy();
+    const user = userEvent.setup();
+    await user.selectOptions(screen.getByLabelText("대상 종류"), "OFFICE_DATA");
+    await user.click(screen.getByRole("button", { name: "조회" }));
+    await waitFor(() => expect(screen.queryByRole("link", { name: "701" })).toBeNull());
+    expect(screen.getByRole("link", { name: "710" })).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "초기화" }));
+    expect(await screen.findByRole("link", { name: "701" })).toBeTruthy();
   });
 
   it("검증을 마친 건은 백업 만료 시각을 보인다", async () => {

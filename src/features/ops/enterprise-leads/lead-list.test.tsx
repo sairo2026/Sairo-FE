@@ -7,6 +7,7 @@ import { mockErrors } from "@/mocks/error-responses";
 import { resetMockOpsSession, setMockOperatorRoles } from "@/mocks/handlers/ops-session";
 import { resetMockOpsSupport } from "@/mocks/handlers/ops-support";
 import { server, startMockServer } from "@/mocks/server";
+import { operatorOptionsHandler, pickOperator } from "../home/testing/pick-operator";
 import { renderOpsScreen } from "../home/testing/render-ops-screen";
 import type { OpsRole } from "../model/roles";
 import { LeadListScreen } from "./lead-list";
@@ -91,11 +92,12 @@ describe("기업 도입 문의 목록", () => {
     expect(screen.queryByText("한빛공인중개")).toBeNull();
   });
 
-  it("담당 운영자 번호로 조회한다", async () => {
+  it("담당 운영자를 골라 조회한다", async () => {
+    server.use(operatorOptionsHandler([{ operatorId: 7, name: "정담당" }]));
     const user = userEvent.setup();
     renderList();
     await screen.findByText("(주)샘플부동산");
-    await user.type(screen.getByLabelText("담당 운영자 번호"), "7");
+    await pickOperator(screen.getByLabelText("담당 운영자"), 7);
     await user.click(screen.getByRole("button", { name: "조회" }));
     expect(await screen.findByText("대한부동산그룹")).toBeTruthy();
     expect(screen.queryByText("한빛공인중개")).toBeNull();

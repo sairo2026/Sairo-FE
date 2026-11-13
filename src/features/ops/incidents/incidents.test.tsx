@@ -5,6 +5,7 @@ import { http, HttpResponse } from "msw";
 import { describe, expect, it, vi } from "vitest";
 import { errorResponse, mockErrors } from "@/mocks/error-responses";
 import { server } from "@/mocks/server";
+import { operatorOptionsHandler, pickOperator } from "../home/testing/pick-operator";
 import {
   EMPTY_PAGE,
   installSystemTestLifecycle,
@@ -304,17 +305,18 @@ describe("장애 탭", () => {
     renderWithMonitor(<IncidentsScreen />, ["OPS"]);
     await screen.findByText("결제 연동 지연");
     fillIncidentForm();
-    fireEvent.change(screen.getByLabelText("담당 운영자 번호"), { target: { value: "5" } });
+    await pickOperator(screen.getByLabelText("담당 운영자"), 2);
     await userEvent.setup().click(screen.getByRole("button", { name: "장애 등록" }));
     await screen.findByText("장애 99를 감지 단계로 등록했습니다.");
-    expect(body.assignedOperatorId).toBe(5);
+    expect(body.assignedOperatorId).toBe(2);
   });
 
   it("등록이 400이면 서버 문구를 보인다", async () => {
+    server.use(operatorOptionsHandler([{ operatorId: 999, name: "퇴사자" }]));
     renderWithMonitor(<IncidentsScreen />, ["OPS"]);
     await screen.findByText("결제 연동 지연");
     fillIncidentForm();
-    fireEvent.change(screen.getByLabelText("담당 운영자 번호"), { target: { value: "999" } });
+    await pickOperator(screen.getByLabelText("담당 운영자"), 999);
     await userEvent.setup().click(screen.getByRole("button", { name: "장애 등록" }));
     expect(await screen.findByText(/입력값을 확인해 주세요. 활성 운영자가 아닙니다./)).toBeTruthy();
   });
@@ -431,7 +433,7 @@ describe("장애 탭", () => {
     );
     renderWithMonitor(<IncidentsScreen />, ["OPS"]);
     const { user, dialog } = await openUpdate(11);
-    fireEvent.change(within(dialog).getByLabelText("담당 운영자 번호"), { target: { value: "3" } });
+    await pickOperator(within(dialog).getByLabelText("담당 운영자"), 3);
     await user.click(within(dialog).getByRole("button", { name: "저장" }));
     await screen.findByText("장애 11를 갱신했습니다.");
     expect(body.assignedOperatorId).toBe(3);
@@ -459,11 +461,10 @@ describe("장애 탭", () => {
   });
 
   it("활성 운영자가 아닌 담당자는 400 안내를 보인다", async () => {
+    server.use(operatorOptionsHandler([{ operatorId: 999, name: "퇴사자" }]));
     renderWithMonitor(<IncidentsScreen />, ["OPS"]);
     const { user, dialog } = await openUpdate(11);
-    fireEvent.change(within(dialog).getByLabelText("담당 운영자 번호"), {
-      target: { value: "999" },
-    });
+    await pickOperator(within(dialog).getByLabelText("담당 운영자"), 999);
     await user.click(within(dialog).getByRole("button", { name: "저장" }));
     expect(await within(dialog).findByText(/활성 운영자가 아닙니다/)).toBeTruthy();
   });
