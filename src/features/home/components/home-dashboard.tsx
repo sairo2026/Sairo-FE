@@ -121,6 +121,40 @@ function HomeBody({ summary }: { summary: HomeSummaryResponse }) {
           label="건"
         />
       </div>
+      <section aria-labelledby="home-visit-requests" className="flex flex-col gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 id="home-visit-requests" className="text-h2 font-semibold text-ink">
+            방문 신청 현황
+          </h2>
+          <Link
+            href="/notifications"
+            aria-label={`읽지 않은 방문 신청 알림 ${summary.unreadVisitRequestNoticeCount}건`}
+            className="text-caption font-semibold text-primary underline"
+          >
+            읽지 않은 방문 신청 알림 {summary.unreadVisitRequestNoticeCount}건
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+          <StatCard
+            href="/coordinations"
+            title="신청 대기"
+            value={summary.visitRequestSummary.pendingCount}
+            label="건"
+          />
+          <StatCard
+            href="/coordinations"
+            title="재검증 실패"
+            value={summary.visitRequestSummary.revalidationFailedCount}
+            label="건"
+          />
+          <StatCard
+            href="/coordinations"
+            title="시간 마감"
+            value={summary.visitRequestSummary.timeClosedCount}
+            label="건"
+          />
+        </div>
+      </section>
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.1fr_1fr]">
         <section
           aria-labelledby="home-tasks"

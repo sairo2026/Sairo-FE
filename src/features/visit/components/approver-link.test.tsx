@@ -271,6 +271,18 @@ describe("승인자 링크 화면 신청 비교와 선택", () => {
     expect(screen.getByText(/다른 신청을 선택해 주세요/)).not.toBeNull();
   });
 
+  it("중개보조원 한도 잠금으로 재검증에 실패해도 승인자에게는 일반 실패 안내만 보인다", async () => {
+    setMockApproverState({
+      revalidationFailure: { code: "DEPUTY_VISIT_LOCKED", detail: "" },
+    });
+    const user = userEvent.setup();
+    renderLink();
+    const dialog = await pickRequest(user, "김중개 신청 선택");
+    await user.click(within(dialog).getByRole("button", { name: "선택하기" }));
+    expect(await screen.findByText(/재검증에 실패해 신청을 확정하지 못했습니다/)).not.toBeNull();
+    expect(screen.queryByText(/중개보조원 인원 한도/)).toBeNull();
+  });
+
   it("버전이 어긋나면 안내하고 목록을 새로 불러온다", async () => {
     server.use(
       http.post("/api/public/approver-property-links/:token/visit-requests/:requestId/select", () =>

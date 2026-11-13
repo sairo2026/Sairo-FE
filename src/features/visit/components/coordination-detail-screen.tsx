@@ -30,6 +30,7 @@ import {
   GRANT_STATE_LABEL,
   GRANT_STATE_TONE,
   MAX_CANDIDATES,
+  RESCHEDULE_TRIGGER_TEXT,
   labelOf,
   statusLabel,
   statusTone,
@@ -258,6 +259,9 @@ function CustomerTimePanel({ detail, isReadOnly }: { detail: Detail; isReadOnly:
   const link = detail.customerLink;
   const isActive = link !== null && !link.revokedAt;
   const isClosed = CLOSED.includes(detail.status);
+  const [now] = useState(() => Date.now());
+  const isLive = link !== null && !link.revokedAt && Date.parse(link.expiresAt) > now;
+  const hidesReissue = detail.status === "CONFIRMED" && isLive;
 
   const issue = useMutation({
     mutationFn: () =>
@@ -308,17 +312,23 @@ function CustomerTimePanel({ detail, isReadOnly }: { detail: Detail; isReadOnly:
         <p className="text-caption text-ink-2">고객이 제출한 가능 시간이 아직 없습니다.</p>
       )}
       {error ? <FormAlert>{error}</FormAlert> : null}
-      <div>
-        <Button
-          variant="outlined"
-          size="sm"
-          disabled={isReadOnly || isClosed}
-          isLoading={issue.isPending}
-          onClick={() => issue.mutate()}
-        >
-          {isActive ? "링크 재발급" : "고객 링크 발급"}
-        </Button>
-      </div>
+      {hidesReissue ? (
+        <p className="text-caption text-ink-2">
+          확정된 방문은 살아 있는 고객 링크가 없을 때만 재발급할 수 있습니다.
+        </p>
+      ) : (
+        <div>
+          <Button
+            variant="outlined"
+            size="sm"
+            disabled={isReadOnly || isClosed}
+            isLoading={issue.isPending}
+            onClick={() => issue.mutate()}
+          >
+            {isActive ? "링크 재발급" : "고객 링크 발급"}
+          </Button>
+        </div>
+      )}
       <IssuedLinkDialog
         title="고객 링크"
         link={issued}
@@ -601,7 +611,7 @@ function DetailBody({ detail }: { detail: Detail }) {
       </header>
       {alert ? (
         <FormAlert>
-          재조율이 필요합니다. {alert.reason ?? "일정이 바뀌었습니다."} (
+          재조율이 필요합니다. {alert.reason ?? RESCHEDULE_TRIGGER_TEXT[alert.triggerType]} (
           {formatSeoulDateTime(alert.raisedAt)})
         </FormAlert>
       ) : null}

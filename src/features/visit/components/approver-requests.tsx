@@ -16,6 +16,8 @@ import { Modal } from "@/shared/components/ui/modal";
 import { formatSeoulDateTime } from "@/shared/lib/format";
 import {
   APPLICANT_RELATION_LABEL,
+  APPROVER_HIDDEN_FAILURE_CODES,
+  GENERIC_REVALIDATION_FAILURE,
   REVALIDATION_FAILURE_LABEL,
   TRUST_BAND_LABEL,
   TRUST_INDICATOR_LABEL,
@@ -138,6 +140,7 @@ function RequestCard({
 
 function failureText(result: ApproverSelectionResponse): string {
   const code = result.revalidation.failureCode;
+  if (code && APPROVER_HIDDEN_FAILURE_CODES.includes(code)) return GENERIC_REVALIDATION_FAILURE;
   const known = code ? REVALIDATION_FAILURE_LABEL[code] : undefined;
   return [known, result.revalidation.failureDetail].filter(Boolean).join(" ");
 }
@@ -265,7 +268,7 @@ export function ApproverRequestList({
       <p className="text-caption text-ink-3">
         접근 거리, 취급 적합성, 거래 실적은 아직 제공하지 않는 미확인 항목입니다. 선호 중개사로
         지정해도 신청이 자동으로 확정되지 않고 다른 신청도 똑같이 선택할 수 있으며, 지정 여부는
-        중개사에게 보이지 않습니다. 표시 순서가 위쪽인 것은 표시 편의일 뿐입니다.
+        중개사에게 보이지 않습니다. 선호 지정은 표시에만 쓰이며 신청 목록은 접수 순서로 보입니다.
       </p>
       <Modal
         isOpen={target !== undefined}

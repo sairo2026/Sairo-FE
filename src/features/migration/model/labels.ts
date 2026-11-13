@@ -9,10 +9,10 @@ export const IMPORT_ACCEPTED_EXTENSIONS = [".xls", ".xlsx", ".csv"] as const;
 export const TARGET_TYPES: ReadonlyArray<{ value: string; label: string }> = [
   { value: "CUSTOMER", label: "고객" },
   { value: "PROPERTY", label: "매물" },
-  { value: "CONTRACT", label: "계약" },
 ];
 
 export function targetTypeLabel(value: string): string {
+  if (value === "CONTRACT") return "계약";
   return TARGET_TYPES.find((item) => item.value === value)?.label ?? value;
 }
 

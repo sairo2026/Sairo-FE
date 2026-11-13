@@ -90,8 +90,9 @@ export function ApproverPreferredPanel({ base, readOnly }: { base: string; readO
   return (
     <div className="flex flex-col gap-5">
       <FormNotice>
-        선호 중개사로 지정하면 신청 목록에서 위쪽에 표시됩니다. 지정한 중개사의 신청이 자동으로
-        확정되지 않고 다른 신청도 똑같이 선택할 수 있으며, 지정 여부는 중개사에게 보이지 않습니다.
+        선호 중개사로 지정하면 신청 목록에 선호 표시가 붙습니다. 신청 목록의 순서에는 쓰이지
+        않습니다. 지정한 중개사의 신청이 자동으로 확정되지 않고 다른 신청도 똑같이 선택할 수 있으며,
+        지정 여부는 중개사에게 보이지 않습니다.
       </FormNotice>
       {error ? <FormAlert>{error}</FormAlert> : null}
       {notice ? <FormNotice>{notice}</FormNotice> : null}

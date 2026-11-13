@@ -195,6 +195,40 @@ describe("방문 조율 상세", () => {
     expect(writeText).toHaveBeenCalledWith(input.value);
   });
 
+  it("확정된 방문은 살아 있는 고객 링크가 없을 때만 재발급 버튼을 보인다", async () => {
+    const link = (expiresAt: string) => ({
+      linkId: 9001,
+      issuedAt: "2026-11-10T09:00:00+09:00",
+      expiresAt,
+      revokedAt: null,
+      responseVersion: 1,
+    });
+    setMockVisitState({
+      coordinations: [
+        buildMockCoordination({
+          coordinationId: 801,
+          status: "CONFIRMED",
+          customerLink: link("2099-01-01T00:00:00+09:00"),
+        }),
+      ],
+    });
+    renderOffice(<CoordinationDetailScreen coordinationId={801} />, { role: "OWNER" });
+    expect(await screen.findByText(/살아 있는 고객 링크가 없을 때만 재발급/)).not.toBeNull();
+    expect(screen.queryByRole("button", { name: "링크 재발급" })).toBeNull();
+    cleanup();
+    setMockVisitState({
+      coordinations: [
+        buildMockCoordination({
+          coordinationId: 801,
+          status: "CONFIRMED",
+          customerLink: link("2020-01-01T00:00:00+09:00"),
+        }),
+      ],
+    });
+    renderOffice(<CoordinationDetailScreen coordinationId={801} />, { role: "OWNER" });
+    expect(await screen.findByRole("button", { name: "링크 재발급" })).not.toBeNull();
+  });
+
   it("고객 링크가 없으면 발급하고 발급 실패를 안내한다", async () => {
     setMockVisitState({
       coordinations: [buildMockCoordination({ coordinationId: 801, status: "TIME_COLLECTING" })],
@@ -365,6 +399,25 @@ describe("방문 조율 상세", () => {
     });
     renderOffice(<CoordinationDetailScreen coordinationId={801} />, { role: "OWNER" });
     expect(await screen.findByText(/출입승인이 철회되었습니다/)).not.toBeNull();
+  });
+
+  it("담당 인계로 재조율이 필요하면 사유가 없어도 인계 안내를 보여준다", async () => {
+    setMockVisitState({
+      coordinations: [
+        buildMockCoordination({
+          coordinationId: 801,
+          status: "RESCHEDULE_REQUIRED",
+          rescheduleAlert: {
+            triggerType: "ASSIGNEE_HANDOVER",
+            reason: null,
+            raisedAt: "2026-11-10T10:00:00+09:00",
+            approvalId: null,
+          },
+        }),
+      ],
+    });
+    renderOffice(<CoordinationDetailScreen coordinationId={801} />, { role: "OWNER" });
+    expect(await screen.findByText(/담당이 바뀌어 일정을 다시 조율해야 합니다/)).not.toBeNull();
   });
 
   it("읽기 전용 상태에서는 변경 버튼이 막힌다", async () => {

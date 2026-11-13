@@ -340,7 +340,7 @@ describe("승인자 선호 중개사", () => {
         "김중개",
       ]),
     );
-    expect(screen.getAllByText(/표시 순서가 위쪽인 것은 표시 편의일 뿐입니다/).length).toBe(1);
+    expect(screen.getAllByText(/신청 목록은 접수 순서로 보입니다/).length).toBe(1);
   });
 
   it("방문 평가 화면에서 선호 중개사로 지정한다", async () => {

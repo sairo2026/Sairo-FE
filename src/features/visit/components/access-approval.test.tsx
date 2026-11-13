@@ -82,15 +82,16 @@ describe("출입승인 화면", () => {
     expect(screen.getByText(/마지막 접속 없음/)).not.toBeNull();
   });
 
-  it("연락처가 없는 출입승인은 링크를 발급할 수 없다고 안내한다", async () => {
+  it("연락처가 없는 출입승인도 링크를 발급할 수 있다", async () => {
     setMockVisitState({
       approvals: [buildMockApproval({ approvalId: 7002, propertyId: 501, approverPhone: null })],
     });
+    const user = userEvent.setup();
     renderOffice(<AccessApprovalScreen propertyId={501} />, { role: "OWNER" });
-    expect(await screen.findByText(/연락처가 없어 링크를 발급할 수 없습니다/)).not.toBeNull();
-    expect(screen.getByRole("button", { name: "링크 발급" }).getAttribute("aria-disabled")).toBe(
-      "true",
-    );
+    const issue = await screen.findByRole("button", { name: "링크 발급" });
+    expect(issue.getAttribute("aria-disabled")).not.toBe("true");
+    await user.click(issue);
+    expect(await screen.findByRole("dialog")).not.toBeNull();
   });
 
   it("공동 승인자 출입승인은 읽기 전용 링크라고 안내하고 신청 허용 진입점이 없다", async () => {

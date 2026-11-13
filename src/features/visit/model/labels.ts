@@ -128,7 +128,11 @@ export const REVALIDATION_FAILURE_LABEL: Record<string, string> = {
   GRANT_INACTIVE: "신청 허용이 회수되었거나 만료되었습니다.",
   SCHEDULE_CONFLICT: "같은 시간대에 다른 일정이 있습니다.",
   TRAVEL_INFEASIBLE: "앞뒤 방문과의 이동시간이 부족합니다.",
+  DEPUTY_VISIT_LOCKED: "신청 사무소의 중개보조원 인원 한도를 넘어 방문 업무가 잠겨 있습니다.",
 };
+
+export const APPROVER_HIDDEN_FAILURE_CODES: readonly string[] = ["DEPUTY_VISIT_LOCKED"];
+export const GENERIC_REVALIDATION_FAILURE = "재검증에 실패해 신청을 확정하지 못했습니다.";
 
 export const CANCEL_REASON_CODES = [
   "USER_CANCEL",
@@ -228,4 +232,11 @@ export const BULK_FAILURE_LABEL: Record<string, string> = {
   APPROVAL_INACTIVE: "유효하지 않은 출입승인입니다.",
   OFFICE_RESTRICTED: "사무소 상태 때문에 적용할 수 없습니다.",
   INVALID_CONDITION: "조건 값이 올바르지 않습니다.",
+};
+
+export const RESCHEDULE_TRIGGER_TEXT: Record<string, string> = {
+  SCHEDULE_CHANGED: "일정이 바뀌었습니다.",
+  ACCESS_REVOKED: "출입승인이 철회되었습니다.",
+  OCCUPANT_CHANGED: "점유자 정보가 바뀌었습니다.",
+  ASSIGNEE_HANDOVER: "담당이 바뀌어 일정을 다시 조율해야 합니다.",
 };
