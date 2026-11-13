@@ -13,6 +13,26 @@ export type SystemJobRun = OpsSystemJobListResponse["items"][number];
 /** 백엔드 작업 이름 형식(소문자로 시작하는 소문자·숫자·하이픈). */
 export const JOB_NAME_PATTERN = /^[a-z][a-z0-9-]{0,99}$/;
 
+export const JOB_NAME_LABELS: Record<string, string> = {
+  "billing-first-charge": "첫 결제",
+  "billing-renewal": "정기 결제",
+  "billing-retry": "결제 재시도",
+  "billing-reconciliation": "결제 대사",
+  "ops-announcement-publish": "공지 발행",
+  "ops-integration-check": "외부 연동 점검",
+  "retention-sweep": "보관 기간 정리",
+  "approver-anonymize": "승인자 개인정보 익명화",
+  "legal-link-log-purge": "링크 접속 기록 정리",
+  "consent-notice-send": "수신 설정 변경 통지 발송",
+  "marketing-reconfirm-scan": "광고성 수신 동의 2년 재확인",
+  "tax-document-pending-scan": "세금 증빙 발급 대기 생성",
+  "guest-intake-deadline-scan": "비회원 권리 요청 기한 점검",
+};
+
+export function jobNameLabel(jobName: string): string {
+  return JOB_NAME_LABELS[jobName] ?? "-";
+}
+
 export const JOB_STATUS: OpsStatusMap = {
   RUNNING: { label: "진행 중", tone: "blue" },
   SUCCESS: { label: "성공", tone: "green" },

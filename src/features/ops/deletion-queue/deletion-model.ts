@@ -34,7 +34,26 @@ export const TARGET_TYPE_LABELS: Record<string, string> = {
   CONTRACT: "계약",
   OFFICE: "사무소",
   MEMBER: "회원",
+  OFFICE_DATA: "종료 사무소 업무 데이터",
+  GUEST_LINK_INPUT: "비회원 링크 입력",
+  APPROVER_PERSONAL: "승인자 개인정보",
+  TERMS_AGREEMENT_RETAINED: "약관 동의·철회 기록",
+  GUEST_INTAKE_RECORD: "비회원 접수 기록",
+  REVIEW_RECORD: "평가·이의 기록",
+  MARKETING_NOTICE_DELIVERY: "수신 설정 통지 이력",
+  OPS_AUDIT_LOG: "운영자 감사 기록",
+  PRIVACY_REQUEST_RECORD: "권리 요청 기록",
+  SUPPORT_INQUIRY: "문의 기록",
+  BILLING_RECORD: "구독·결제 기록",
+  TAX_DOCUMENT: "세금 증빙 기록",
+  AUTHORITY_REQUEST: "수사기관 자료 요청 기록",
+  PROVIDER_CONTRACT_COPY: "제공사 계약 사본",
 };
+
+export const TARGET_TYPE_FILTER_OPTIONS = [
+  { value: "", label: "전체 대상" },
+  ...Object.entries(TARGET_TYPE_LABELS).map(([value, label]) => ({ value, label })),
+];
 
 export function targetTypeLabel(value: string): string {
   return TARGET_TYPE_LABELS[value] ?? value;
