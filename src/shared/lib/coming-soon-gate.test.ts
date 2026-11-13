@@ -48,6 +48,18 @@ describe("isGateOpenPath", () => {
   });
 });
 
+describe("수신 거부 링크", () => {
+  it("로그인 없이 열리는 화면과 처리 API를 연다", () => {
+    expect(isGateOpenPath("/unsubscribe", "GET")).toBe(true);
+    expect(isGateOpenPath("/api/public/marketing-unsubscribe", "POST")).toBe(true);
+  });
+
+  it("처리 API의 다른 메서드와 비슷한 경로는 열지 않는다", () => {
+    expect(isGateOpenPath("/api/public/marketing-unsubscribe", "GET")).toBe(false);
+    expect(isGateOpenPath("/unsubscribe/extra", "GET")).toBe(false);
+  });
+});
+
 describe("심사 모드", () => {
   const review = { REVIEW_MODE: "true" };
 
