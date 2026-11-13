@@ -238,8 +238,11 @@ function canApprove(row: MockRegistration): boolean {
 function detailOf(row: MockRegistration) {
   return {
     registrationId: row.registrationId,
-    officeId: null,
-    reviewDueAt: null,
+    officeId: row.officeId,
+    reviewDueAt:
+      row.status === "PENDING_REVIEW"
+        ? new Date(Date.parse(row.createdAt) + 3 * 86_400_000).toISOString()
+        : null,
     applicantUserId: 42,
     businessRegistrationNumber: row.businessRegistrationNumber,
     realEstateLicenseNumber: "11680-2024-00012",
@@ -253,7 +256,6 @@ function detailOf(row: MockRegistration) {
     registrationAuthority: "서울특별시 종로구청",
     applicantRegistrationRelation: "REPRESENTATIVE",
     currentRevisionNo: 1,
-    // 백엔드 심사 상세 응답에는 사무소 번호가 없다(OperatorRegistrationDetailResponse).
     revisions: [
       {
         revisionNo: 1,

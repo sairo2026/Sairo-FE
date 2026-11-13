@@ -537,6 +537,7 @@ function seedAuthority(): AuthorityRequest[] {
       officeNoticeStatus: "NOT_ALLOWED",
       closedAt: at(-2 * DAY),
       retentionUntil: "2027-11-09",
+      closeNote: "요청 범위가 대상과 맞지 않아 거절",
     }),
   ];
 }

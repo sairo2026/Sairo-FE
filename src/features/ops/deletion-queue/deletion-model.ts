@@ -2,12 +2,12 @@ import {
   DeletionQueueListResponseSchema,
   DeletionQueuePreviewResponseSchema,
 } from "@/lib/api/contracts/ops.schema";
-import type { DeletionQueueListResponse } from "@/lib/api/contracts/ops.schema";
+import type { DeletionQueueDetailResponse } from "@/lib/api/contracts/ops.schema";
 import type { OpsStatusMap } from "../components/common/ops-status-badge";
 
 export const DeletionListSchema = DeletionQueueListResponseSchema;
 export const DeletionPreviewSchema = DeletionQueuePreviewResponseSchema;
-export type DeletionItem = DeletionQueueListResponse["items"][number];
+export type DeletionItem = DeletionQueueDetailResponse;
 
 export const STORE_RESULT: OpsStatusMap = {
   PENDING: { label: "대기", tone: "gray" },

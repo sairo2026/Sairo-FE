@@ -10,8 +10,8 @@ import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import { RadioGroup, SelectField } from "@/shared/components/ui/select-field";
 import { TextAreaField } from "@/shared/components/ui/textarea-field";
-import { TextField } from "@/shared/components/ui/text-field";
 import { formatSeoulDateTime } from "@/shared/lib/format";
+import { OperatorSelect } from "../components/common/operator-select";
 import { OpsDetailList } from "../components/common/ops-detail-list";
 import { OpsScreen } from "../components/common/ops-screen";
 import { OpsStatusBadge } from "../components/common/ops-status-badge";
@@ -410,12 +410,7 @@ function ManageCard({ detail, refetch }: { detail: InquiryDetail; refetch: () =>
     <Card title="담당과 우선순위">
       <div className="flex flex-col gap-5">
         <div className="flex flex-wrap items-end gap-3">
-          <TextField
-            label="담당 운영자 번호"
-            kind="number"
-            value={assignee}
-            onValueChange={setAssignee}
-          />
+          <OperatorSelect label="담당 운영자" value={assignee} onValueChange={setAssignee} />
           <Button
             variant="outlined"
             disabled={!(assigneeId > 0) || actions.assign.isPending}

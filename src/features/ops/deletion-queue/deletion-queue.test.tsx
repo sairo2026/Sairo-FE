@@ -558,6 +558,12 @@ describe("파기 검증", () => {
 });
 
 describe("파기 건 상세 상태", () => {
+  it("단건 조회 응답의 검증 증빙과 보존 제외 사유를 보인다", async () => {
+    renderOpsScreen(<DeletionDetailScreen queueId={705} />, ["PRIVACY"]);
+    expect(await screen.findByText("파기 건 정보")).toBeTruthy();
+    expect(screen.getByText("저장소 점검 기록")).toBeTruthy();
+  });
+
   it("로딩 중에는 로딩 표시를 보인다", () => {
     renderOpsScreen(<DeletionDetailScreen queueId={701} />, ["PRIVACY"]);
     expect(document.querySelector('[aria-busy="true"]')).not.toBeNull();
@@ -571,7 +577,9 @@ describe("파기 건 상세 상태", () => {
   it("서버 오류는 다시 시도할 수 있다", async () => {
     const user = userEvent.setup();
     let fail = true;
-    server.use(http.get("/api/ops/deletion-queue", () => (fail ? mockErrors.server() : undefined)));
+    server.use(
+      http.get("/api/ops/deletion-queue/:id", () => (fail ? mockErrors.server() : undefined)),
+    );
     renderOpsScreen(<DeletionDetailScreen queueId={701} />, ["PRIVACY"]);
     const retry = await screen.findByRole("button", { name: "다시 시도" });
     fail = false;
@@ -580,13 +588,13 @@ describe("파기 건 상세 상태", () => {
   });
 
   it("요청 한도를 넘으면 안내한다", async () => {
-    server.use(http.get("/api/ops/deletion-queue", () => mockErrors.rateLimited(30)));
+    server.use(http.get("/api/ops/deletion-queue/:id", () => mockErrors.rateLimited(30)));
     renderOpsScreen(<DeletionDetailScreen queueId={701} />, ["PRIVACY"]);
     expect((await screen.findAllByText(/너무 많습니다/)).length).toBeGreaterThan(0);
   });
 
   it("403이면 접근 불가 화면을 보인다", async () => {
-    server.use(http.get("/api/ops/deletion-queue", () => mockErrors.forbidden()));
+    server.use(http.get("/api/ops/deletion-queue/:id", () => mockErrors.forbidden()));
     renderOpsScreen(<DeletionDetailScreen queueId={701} />, ["PRIVACY"]);
     expect(await screen.findByRole("heading", { name: /접근|권한/ })).toBeTruthy();
   });

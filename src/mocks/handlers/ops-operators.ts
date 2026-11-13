@@ -242,6 +242,17 @@ export const opsOperatorHandlers: RequestHandler[] = [
     return HttpResponse.json(pageOf(state.operators.map(publicOperator), new URL(request.url)));
   }),
 
+  http.get("/api/ops/operators/options", () => {
+    const rejected = requireMockOps();
+    if (rejected) return rejected;
+    const items = state.operators
+      .filter((row) => row.status === "ACTIVE")
+      .map((row) => ({ operatorId: row.operatorId, name: row.name, roles: row.roles }));
+    return HttpResponse.json({
+      items: [...items, { operatorId: 9, name: "이상담", roles: ["SUPPORT"] }],
+    });
+  }),
+
   http.post("/api/ops/operators/:id/roles", async ({ params, request }) => {
     const rejected = requireMockOps(ADMIN);
     if (rejected) return rejected;

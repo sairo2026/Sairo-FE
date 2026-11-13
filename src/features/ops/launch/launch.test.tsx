@@ -153,6 +153,22 @@ describe("출시 활성화 화면", () => {
     expect(alert.textContent).toContain("남은 조건: 동의 완료, 실제 문의 수신 시험.");
   });
 
+  it("정책 문서 게시와 표준 요금표 승인이 빠지면 남은 조건으로 알린다", async () => {
+    const user = userEvent.setup();
+    renderScreen();
+    server.use(
+      http.patch("/api/ops/integrations/:integrationId", () =>
+        errorResponse(409, "INTEGRATION_PREREQUISITE_INCOMPLETE", "조건이 끝나지 않았습니다.", {
+          missingItems: ["POLICY_DOCUMENTS_NOT_PUBLISHED", "STANDARD_PRICE_SCHEDULE_NOT_APPROVED"],
+        }),
+      ),
+    );
+    await user.click(await screen.findByRole("button", { name: "연동 6 활성화" }));
+    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "활성화" }));
+    const alert = await screen.findByRole("alert");
+    expect(alert.textContent).toContain("남은 조건: 정책 문서 게시, 표준 요금표 승인.");
+  });
+
   it("회사 정보가 준비되지 않으면 모든 비활성 연동을 막는다", async () => {
     renderScreen(["OPS"], ["PUBLISHED_VERSION"]);
     expect(await screen.findByText("출시 활성화 차단")).toBeTruthy();

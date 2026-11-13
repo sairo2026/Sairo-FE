@@ -10,6 +10,7 @@ import { TextAreaField } from "@/shared/components/ui/textarea-field";
 import { TextField } from "@/shared/components/ui/text-field";
 import { toSeoulIso } from "../registrations/registration-model";
 import { OpsReasonDialog } from "../components/common/ops-reason-dialog";
+import { OperatorSelect } from "../components/common/operator-select";
 import { describeOpsError } from "../model/ops-errors";
 import { useOpsSession } from "../model/ops-session";
 import { CLOSED_REASONS, LEAD_STATUS, reopenTarget } from "./lead-model";
@@ -101,14 +102,10 @@ export function AssignDialog({
         활성 지원 역할 운영자만 담당이 될 수 있습니다. 이미 배정된 문의는 상태를 유지한 채 담당만
         바뀝니다.
       </p>
-      <TextField
-        label="담당 운영자 번호"
-        kind="number"
-        value={value}
-        onValueChange={setValue}
-        actionLabel="나로 입력"
-        onAction={() => setValue(String(session.operatorId))}
-      />
+      <OperatorSelect label="담당 운영자" value={value} onValueChange={setValue} />
+      <Button variant="ghost" onClick={() => setValue(String(session.operatorId))}>
+        나로 선택
+      </Button>
     </ActionDialog>
   );
 }

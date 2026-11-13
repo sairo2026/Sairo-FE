@@ -13,7 +13,7 @@ import { server, startMockServer } from "@/mocks/server";
 import { renderOpsScreen } from "../home/testing/render-ops-screen";
 import type { OpsRole } from "../model/roles";
 import { SystemJobsScreen } from "./system-jobs-screen";
-import { jobKindRole, rerunBlock } from "./system-jobs-model";
+import { RERUN_ROLE_TABLE, rerunBlock } from "./system-jobs-model";
 import type { SystemJobRun } from "./system-jobs-model";
 
 vi.mock("next/navigation", () => ({
@@ -63,20 +63,18 @@ function run(patch: Partial<SystemJobRun>): SystemJobRun {
     nextRunAt: null,
     assignedOperatorId: null,
     assignedOperatorName: null,
+    jobType: "CHARGE_RETRY",
+    rerunRoles: ["BILLING"],
     ...patch,
   };
 }
 
 describe("시스템 작업 모델", () => {
-  it("작업 이름에서 재실행 역할을 판단한다", () => {
-    expect(jobKindRole("MIGRATION_EXECUTE")).toBe("MIGRATION");
-    expect(jobKindRole("PRIVACY_DELETION")).toBe("PRIVACY");
-    expect(jobKindRole("RAW_RETURN_DELIVERY")).toBe("PRIVACY");
-    expect(jobKindRole("BILLING_RETRY")).toBe("BILLING");
-    expect(jobKindRole("REFUND_EXECUTE")).toBe("BILLING");
-    expect(jobKindRole("NOTICE_PUBLISH")).toBe("OPS");
-    expect(jobKindRole("INTEGRATION_CHECK")).toBe("OPS");
-    expect(jobKindRole("UNKNOWN_JOB")).toBeNull();
+  it("재실행 대상 표는 청구 재시도, 공지 발행, 외부 연동 점검, 보관 기간 정리 네 종류만 둔다", () => {
+    expect(RERUN_ROLE_TABLE.map((entry) => entry.targets).join(", ")).toBe(
+      "청구 재시도, 공지 발행, 외부 연동 점검, 보관 기간 정리",
+    );
+    expect(RERUN_ROLE_TABLE.some((entry) => entry.targets.includes("환불"))).toBe(false);
   });
 
   it("성공과 진행 중인 실행은 역할이 있어도 막는다", () => {
@@ -87,7 +85,6 @@ describe("시스템 작업 모델", () => {
   it("실패한 실행은 해당 역할이 있을 때만 허용한다", () => {
     expect(rerunBlock(run({}), ["BILLING"])).toBeNull();
     expect(rerunBlock(run({}), ["OPS"])).toBe("NO_ROLE");
-    expect(rerunBlock(run({ jobName: "MIGRATION_EXECUTE" }), ["MIGRATION"])).toBeNull();
   });
 
   it("서버가 준 재실행 역할이 있으면 그 역할로 판단하고 빈 목록은 재실행 대상이 아니다", () => {
@@ -100,11 +97,6 @@ describe("시스템 작업 모델", () => {
     expect(rerunBlock(run({ jobName: "billing-reconciliation", rerunRoles: [] }), ["OPS"])).toBe(
       "NOT_RERUNNABLE",
     );
-  });
-
-  it("알 수 없는 작업은 재실행 역할이 하나라도 있으면 허용한다", () => {
-    expect(rerunBlock(run({ jobName: "ETC_JOB" }), ["OPS"])).toBeNull();
-    expect(rerunBlock(run({ jobName: "ETC_JOB" }), ["REVIEW"])).toBe("NO_ROLE");
   });
 });
 
@@ -122,9 +114,8 @@ describe("시스템 작업 화면", () => {
     renderJobs();
     await screen.findByText("retention-sweep");
     const table = screen.getByRole("table", { name: "역할별 재실행 대상 작업" });
-    expect(within(table).getByText("데이터 이전 실행")).toBeTruthy();
-    expect(within(table).getByText("파기, 원문 반환 전달")).toBeTruthy();
-    expect(within(table).getByText("청구 재시도, 환불 실행")).toBeTruthy();
+    expect(within(table).getByText("보관 기간 정리")).toBeTruthy();
+    expect(within(table).getByText("청구 재시도")).toBeTruthy();
     expect(within(table).getByText("공지 발행, 외부 연동 점검")).toBeTruthy();
   });
 

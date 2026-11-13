@@ -169,6 +169,8 @@ export const MISSING_ITEM_LABELS: Record<string, string> = {
   PUBLISHED_VERSION: "게시된 회사 정보 버전",
   INQUIRY_DELIVERY_TEST: "실제 문의 수신 시험",
   REVIEW: "검토",
+  POLICY_DOCUMENTS_NOT_PUBLISHED: "정책 문서 게시",
+  STANDARD_PRICE_SCHEDULE_NOT_APPROVED: "표준 요금표 승인",
 };
 
 export const COMPANY_NOTICE_TEXTS = [

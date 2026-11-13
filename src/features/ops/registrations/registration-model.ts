@@ -7,9 +7,7 @@ import type { OpsStatusMap } from "../components/common/ops-status-badge";
 
 export const RegistrationListSchema = OperatorRegistrationListResponseSchema;
 
-export const RegistrationDetailSchema = OperatorRegistrationDetailResponseSchema.extend({
-  officeId: z.number().nullable().optional(),
-});
+export const RegistrationDetailSchema = OperatorRegistrationDetailResponseSchema;
 export type RegistrationDetail = z.infer<typeof RegistrationDetailSchema>;
 
 export const ChecklistResponseSchema = z.object({

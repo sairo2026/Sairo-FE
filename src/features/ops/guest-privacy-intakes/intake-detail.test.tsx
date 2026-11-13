@@ -99,13 +99,15 @@ describe("접수 상세 표시", () => {
 
   it("없는 접수는 찾을 수 없다고 안내한다", async () => {
     renderDetail(999);
-    expect(await screen.findByText("접수를 찾을 수 없습니다")).toBeTruthy();
+    expect(await screen.findByText("페이지를 찾을 수 없습니다")).toBeTruthy();
   });
 
   it("조회가 서버 오류이면 다시 시도할 수 있다", async () => {
     const user = userEvent.setup();
     server.use(
-      http.get("/api/ops/guest-privacy-intakes", () => mockErrors.server(), { once: true }),
+      http.get("/api/ops/guest-privacy-intakes/:intakeId", () => mockErrors.server(), {
+        once: true,
+      }),
     );
     renderDetail(41);
     await user.click(await screen.findByRole("button", { name: /다시 시도/ }));
@@ -113,7 +115,7 @@ describe("접수 상세 표시", () => {
   });
 
   it("조회가 403이면 접근 권한 안내를 보인다", async () => {
-    server.use(http.get("/api/ops/guest-privacy-intakes", () => mockErrors.forbidden()));
+    server.use(http.get("/api/ops/guest-privacy-intakes/:intakeId", () => mockErrors.forbidden()));
     renderDetail(41);
     expect(await screen.findByText("접근 권한이 없습니다")).toBeTruthy();
   });

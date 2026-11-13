@@ -1,8 +1,7 @@
-import type { z } from "zod";
-import type { GuestPrivacyIntakeListResponseSchema } from "@/lib/api/contracts/ops.schema";
+import type { GuestPrivacyIntakeDetailResponse } from "@/lib/api/contracts/ops.schema";
 import type { OpsStatusMap } from "../components/common/ops-status-badge";
 
-export type IntakeItem = z.infer<typeof GuestPrivacyIntakeListResponseSchema>["items"][number];
+export type IntakeItem = GuestPrivacyIntakeDetailResponse;
 
 export const DRAFT_NOTICE = "변호사 검토 전 초안입니다. 법적 효력과 적합성은 검토 뒤 확정합니다.";
 

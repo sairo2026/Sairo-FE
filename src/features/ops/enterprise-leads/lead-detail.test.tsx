@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { http } from "msw";
+import { HttpResponse, http } from "msw";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { errorResponse, mockErrors } from "@/mocks/error-responses";
 import { resetMockOpsSession, setMockOperatorRoles } from "@/mocks/handlers/ops-session";
@@ -233,12 +233,13 @@ describe("지금 할 수 있는 처리만 활성", () => {
 });
 
 describe("처리 실행", () => {
-  it("담당 번호를 입력해 배정하면 담당과 단계가 바뀐다", async () => {
+  it("운영자 목록에서 골라 배정하면 담당과 단계가 바뀐다", async () => {
     const user = userEvent.setup();
     await loaded(601);
     await user.click(action("담당 배정"));
     expect(isBlocked(dialogButton("담당 배정"))).toBe(true);
-    await user.type(screen.getByLabelText("담당 운영자 번호"), "9");
+    await screen.findByRole("option", { name: /이상담/ });
+    await user.selectOptions(screen.getByLabelText("담당 운영자"), "9");
     await user.click(dialogButton("담당 배정"));
     expect(await screen.findByText("담당을 배정했습니다.")).toBeTruthy();
     expect(await screen.findByText("이상담", { selector: "dd" })).toBeTruthy();
@@ -246,19 +247,26 @@ describe("처리 실행", () => {
     expect(current.getAttribute("aria-current")).toBe("step");
   });
 
-  it("나로 입력을 누르면 로그인한 운영자 번호가 들어간다", async () => {
+  it("나로 선택을 누르면 로그인한 운영자가 선택된다", async () => {
     const user = userEvent.setup();
     await loaded(601);
     await user.click(action("담당 배정"));
-    await user.click(screen.getByRole("button", { name: "나로 입력" }));
-    expect((screen.getByLabelText("담당 운영자 번호") as HTMLInputElement).value).toBe("1");
+    await screen.findByRole("option", { name: /운영 김사이/ });
+    await user.click(screen.getByRole("button", { name: "나로 선택" }));
+    expect((screen.getByLabelText("담당 운영자") as HTMLSelectElement).value).toBe("1");
   });
 
   it("활성 지원 운영자가 아니면 배정할 수 없다고 안내한다", async () => {
     const user = userEvent.setup();
+    server.use(
+      http.get("/api/ops/operators/options", () =>
+        HttpResponse.json({ items: [{ operatorId: 99, name: "퇴사자", roles: ["OPS"] }] }),
+      ),
+    );
     await loaded(601);
     await user.click(action("담당 배정"));
-    await user.type(screen.getByLabelText("담당 운영자 번호"), "99");
+    await screen.findByRole("option", { name: /퇴사자/ });
+    await user.selectOptions(screen.getByLabelText("담당 운영자"), "99");
     await user.click(dialogButton("담당 배정"));
     expect(await within(screen.getByRole("dialog")).findByRole("alert")).toBeTruthy();
     expect(screen.getByText("활성 지원 운영자가 아닙니다.")).toBeTruthy();
@@ -474,7 +482,8 @@ describe("처리 실행", () => {
     await loaded(601);
     const before = reads;
     await user.click(action("담당 배정"));
-    await user.type(screen.getByLabelText("담당 운영자 번호"), "9");
+    await screen.findByRole("option", { name: /이상담/ });
+    await user.selectOptions(screen.getByLabelText("담당 운영자"), "9");
     await user.click(dialogButton("담당 배정"));
     expect(await screen.findByText(/다른 운영자가 먼저 수정했습니다/)).toBeTruthy();
     await waitFor(() => expect(reads).toBeGreaterThan(before));

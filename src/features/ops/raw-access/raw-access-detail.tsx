@@ -215,6 +215,19 @@ function RawAccessBody({ detail }: { detail: RawAccessDetail }) {
     setDialog(null);
   }
 
+  async function view() {
+    if (grantId === null) return;
+    setNotice(null);
+    try {
+      await actions.viewContent.mutateAsync(grantId);
+    } catch (error) {
+      setNotice({
+        tone: "error",
+        text: describeRawAccessError(error, "원문을 불러오지 못했습니다."),
+      });
+    }
+  }
+
   async function download() {
     if (grantId === null) return;
     setNotice(null);
@@ -239,6 +252,39 @@ function RawAccessBody({ detail }: { detail: RawAccessDetail }) {
         onRevoke={() => setDialog("revoke")}
         isDownloading={actions.fetchFile.isPending}
       />
+      {!isDownload && detail.grant && isExecutor ? (
+        <Card title="원문 보기">
+          <div className="flex flex-col gap-3">
+            <p className="text-caption text-ink-2">
+              접근 시간 안에서는 여러 번 읽을 수 있고 읽을 때마다 감사 로그에 남습니다. 5분 이내
+              재인증이 필요합니다.
+            </p>
+            <div>
+              <Button
+                variant="outlined"
+                isLoading={actions.viewContent.isPending}
+                onClick={() => void view()}
+              >
+                원문 보기
+              </Button>
+            </div>
+            {actions.viewContent.data ? (
+              <OpsDetailList
+                items={[
+                  {
+                    label: "읽은 시각",
+                    value: formatSeoulDateTime(actions.viewContent.data.readAt),
+                  },
+                  ...Object.entries(actions.viewContent.data.content).map(([key, value]) => ({
+                    label: key,
+                    value: typeof value === "string" ? value : JSON.stringify(value),
+                  })),
+                ]}
+              />
+            ) : null}
+          </div>
+        </Card>
+      ) : null}
       <Card title="처리">
         <div className="flex flex-col gap-3">
           {notice ? (

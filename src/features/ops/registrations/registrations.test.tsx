@@ -232,7 +232,7 @@ describe("인증 심사 상세", () => {
     await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "승인" }));
     expect(await screen.findByText("인증 신청을 승인했습니다.")).toBeTruthy();
     await waitFor(() => expect(screen.getAllByText("승인").length).toBeGreaterThan(0));
-    expect(screen.getByText("인증 회수는 고객사 상세에서 합니다.")).toBeTruthy();
+    expect(await screen.findByRole("button", { name: "사무소 인증 회수" })).toBeTruthy();
   });
 
   it("서버가 필수 확인 미완료로 막으면 안내한다", async () => {
@@ -421,11 +421,17 @@ describe("보완 요청·반려·회수", () => {
     expect(await within(dialog).findByRole("alert")).toBeTruthy();
   });
 
-  it("승인된 신청은 사무소 번호를 모르므로 고객사 상세에서 회수하도록 안내한다", async () => {
+  it("승인된 신청은 응답의 사무소 번호로 심사 화면에서 인증을 회수할 수 있다", async () => {
     renderOps(<RegistrationDetailScreen registrationId={104} />);
     await screen.findByText("청계공인중개사");
-    expect(screen.queryByRole("button", { name: "사무소 인증 회수" })).toBeNull();
-    expect(screen.getByText("인증 회수는 고객사 상세에서 합니다.")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "사무소 인증 회수" })).toBeTruthy();
+    expect(screen.queryByText("인증 회수는 고객사 상세에서 합니다.")).toBeNull();
+  });
+
+  it("심사 대기 신청은 심사 기한을 보인다", async () => {
+    renderOps(<RegistrationDetailScreen registrationId={101} />);
+    await screen.findByText("한강공인중개사사무소");
+    expect(screen.getByText("심사 기한")).toBeTruthy();
   });
 
   it("승인되지 않은 신청에는 회수 버튼이 없다", async () => {

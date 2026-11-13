@@ -1,18 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   DeletionQueueCancelResponseSchema,
+  DeletionQueueDetailResponseSchema,
   DeletionQueueExcludeResponseSchema,
   DeletionQueueExecuteResponseSchema,
   DeletionQueueVerifyResponseSchema,
 } from "@/lib/api/contracts/ops.schema";
-import { ApiError, apiFetch } from "@/shared/api/client";
+import { apiFetch } from "@/shared/api/client";
 import { opsKeys, opsPath } from "../api/ops-api";
 import { DeletionListSchema, DeletionPreviewSchema } from "./deletion-model";
 import type { VerifyKey } from "./deletion-model";
 
 const SCOPE = "deletion-queue";
 const BASE = "/api/ops/deletion-queue";
-const LOOKUP_SIZE = 100;
 
 export function useDeletionList(params: { page: number; size: number }) {
   return useQuery({
@@ -21,26 +21,10 @@ export function useDeletionList(params: { page: number; size: number }) {
   });
 }
 
-/**
- * 목록을 queueId로 걸러 한 건을 찾는다(백엔드 목록 필터). 첫 페이지에서만 찾으면 101번째 이후 건이
- * 404가 된다. 없으면 404로 다룬다.
- */
 export function useDeletionItem(queueId: number) {
   return useQuery({
     queryKey: opsKeys.scope(SCOPE, "item", queueId),
-    queryFn: async () => {
-      const page = await apiFetch(opsPath(BASE, { queueId, page: 0, size: LOOKUP_SIZE }), {
-        schema: DeletionListSchema,
-      });
-      const item = page.items.find((candidate) => candidate.queueId === queueId);
-      if (!item) {
-        throw new ApiError(404, {
-          code: "RESOURCE_NOT_FOUND",
-          message: "대상을 찾을 수 없습니다.",
-        });
-      }
-      return item;
-    },
+    queryFn: () => apiFetch(`${BASE}/${queueId}`, { schema: DeletionQueueDetailResponseSchema }),
   });
 }
 

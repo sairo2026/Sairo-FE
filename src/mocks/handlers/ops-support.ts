@@ -1500,6 +1500,13 @@ const intakeHandlers: RequestHandler[] = [
     return HttpResponse.json(pageOf(rows, url));
   }),
 
+  http.get("/api/ops/guest-privacy-intakes/:intakeId", ({ params }) => {
+    const rejected = requireMockOps(PRIVACY);
+    if (rejected) return rejected;
+    const item = intakeState.intakes.find((row) => String(row.intakeId) === params.intakeId);
+    return item ? HttpResponse.json(item) : mockErrors.notFound();
+  }),
+
   http.post("/api/ops/guest-privacy-intakes/:intakeId/resolve", async ({ params, request }) => {
     const rejected = requireMockOps(PRIVACY);
     if (rejected) return rejected;

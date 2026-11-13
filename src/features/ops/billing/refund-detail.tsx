@@ -27,6 +27,12 @@ import {
 } from "./billing-model";
 
 type Notice = { tone: "ok" | "error"; text: string };
+const AMOUNT_REASONS: readonly string[] = [
+  "SERVICE_FAILURE",
+  "LATE_APPROVAL",
+  "POLICY_COMPENSATION",
+];
+
 type Dialog = "approve" | "reject" | "execute" | null;
 
 const EXECUTE_RESULT_TEXT: Record<string, string> = {
@@ -38,28 +44,42 @@ const EXECUTE_RESULT_TEXT: Record<string, string> = {
 function ApproveDialog({
   isOpen,
   needsEventId,
+  allowsAmount,
   onSubmit,
   onClose,
 }: {
   isOpen: boolean;
   needsEventId: boolean;
-  onSubmit: (input: { note: string; reasonEventId: string }) => Promise<unknown>;
+  allowsAmount: boolean;
+  onSubmit: (input: {
+    note: string;
+    reasonEventId: string;
+    amount: number | null;
+  }) => Promise<unknown>;
   onClose: () => void;
 }) {
   const [eventId, setEventId] = useState("");
   const [note, setNote] = useState("");
+  const [amountText, setAmountText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
-  const blocked = needsEventId && eventId.trim() === "";
+  const amount = amountText.trim() === "" ? null : Number(amountText);
+  const amountInvalid = amount !== null && (!Number.isInteger(amount) || amount < 1);
+  const blocked = (needsEventId && eventId.trim() === "") || (allowsAmount && amountInvalid);
 
   async function submit() {
     if (blocked) return;
     setIsPending(true);
     setError(null);
     try {
-      await onSubmit({ note: note.trim(), reasonEventId: eventId.trim() });
+      await onSubmit({
+        note: note.trim(),
+        reasonEventId: eventId.trim(),
+        amount: allowsAmount ? amount : null,
+      });
       setEventId("");
       setNote("");
+      setAmountText("");
       onClose();
     } catch (caught) {
       setError(describeBillingError(caught, "승인하지 못했습니다."));
@@ -101,6 +121,16 @@ function ApproveDialog({
             maxLength={100}
             required
             hint="대표가 사건 ID 없이 접수한 환불입니다. 확인한 사건 ID를 입력해야 승인할 수 있습니다."
+          />
+        ) : null}
+        {allowsAmount ? (
+          <TextField
+            label="환불 금액(선택)"
+            kind="number"
+            value={amountText}
+            onValueChange={setAmountText}
+            error={allowsAmount && amountInvalid ? "1원 이상의 정수로 입력해 주세요." : undefined}
+            hint="비우면 원 승인액을 환불 가능 잔액 안에서 적용합니다. 환불 가능 잔액을 넘으면 승인되지 않습니다."
           />
         ) : null}
         <TextAreaField label="검토 메모(선택)" value={note} onValueChange={setNote} rows={3} />
@@ -260,11 +290,13 @@ function RefundBody({ detail }: { detail: OpsRefundDetailResponse }) {
         key={`approve-${dialog === "approve"}`}
         isOpen={dialog === "approve"}
         needsEventId={detail.reasonEventId === null}
+        allowsAmount={AMOUNT_REASONS.includes(detail.reasonCode)}
         onSubmit={async (input) => {
           await actions.review.mutateAsync({
             decision: "APPROVE",
             note: input.note === "" ? null : input.note,
             reasonEventId: input.reasonEventId === "" ? null : input.reasonEventId,
+            ...(input.amount === null ? {} : { amount: input.amount }),
           });
           setNotice({ tone: "ok", text: "환불 검토를 승인했습니다." });
         }}

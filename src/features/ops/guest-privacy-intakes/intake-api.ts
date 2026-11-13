@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  GuestPrivacyIntakeDetailResponseSchema,
   GuestPrivacyIntakeListResponseSchema,
   GuestPrivacyIntakeResolveResponseSchema,
 } from "@/lib/api/contracts/ops.schema";
@@ -19,18 +20,11 @@ export function useIntakeList(params: OpsListParams) {
   });
 }
 
-export const INTAKE_LOOKUP_SIZE = 100;
-
-/** 접수 상세 조회 API가 없어 큐 목록에서 같은 번호의 접수를 찾는다. */
-export function useIntakeLookup(intakeId: number) {
+export function useIntake(intakeId: number) {
   return useQuery({
-    queryKey: opsKeys.scope(SCOPE, "lookup", intakeId),
-    queryFn: async () => {
-      const result = await apiFetch(opsPath(BASE, { page: 0, size: INTAKE_LOOKUP_SIZE }), {
-        schema: GuestPrivacyIntakeListResponseSchema,
-      });
-      return result.items.find((item) => item.intakeId === intakeId) ?? null;
-    },
+    queryKey: opsKeys.scope(SCOPE, "detail", intakeId),
+    queryFn: () =>
+      apiFetch(`${BASE}/${intakeId}`, { schema: GuestPrivacyIntakeDetailResponseSchema }),
   });
 }
 

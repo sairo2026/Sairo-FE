@@ -16,7 +16,7 @@ import { OpsDetailList } from "../components/common/ops-detail-list";
 import { OpsScreen } from "../components/common/ops-screen";
 import { OpsStatusBadge } from "../components/common/ops-status-badge";
 import { describeOpsError } from "../model/ops-errors";
-import { useIntakeLookup, useResolveIntake } from "./intake-api";
+import { useIntake, useResolveIntake } from "./intake-api";
 import {
   CHANNEL_LABELS,
   CLOSE_REASONS,
@@ -255,6 +255,12 @@ function IntakeBody({ intake, refetch }: { intake: IntakeItem; refetch: () => vo
             { label: "링크 종류", value: LINK_KIND_LABELS[intake.linkKind] ?? intake.linkKind },
             { label: "접수 시각", value: formatSeoulDateTime(intake.receivedAt) },
             { label: "내부 목표 기한", value: formatSeoulDateTime(intake.internalDueAt) },
+            {
+              label: "종결 사유",
+              value: intake.closedReason
+                ? (CLOSE_REASONS[intake.closedReason] ?? intake.closedReason)
+                : null,
+            },
           ]}
         />
         <p className="mt-3 text-caption text-ink-2">
@@ -300,31 +306,11 @@ function IntakeBody({ intake, refetch }: { intake: IntakeItem; refetch: () => vo
   );
 }
 
-function ConflictRefresh({ refetch }: { refetch: () => void }) {
-  return (
-    <Button variant="ghost" size="sm" onClick={refetch}>
-      새로 고침
-    </Button>
-  );
-}
-
 function IntakeLoader({ intakeId }: { intakeId: number }) {
-  const query = useIntakeLookup(intakeId);
+  const query = useIntake(intakeId);
   return (
     <QueryGate query={query} loadingLabel="접수를 불러오는 중입니다">
-      {(intake) =>
-        intake === null ? (
-          <section role="alert" className="rounded-card-flat border border-line bg-white px-6 py-8">
-            <h2 className="text-h2 font-semibold text-ink">접수를 찾을 수 없습니다</h2>
-            <p className="mt-2 text-body text-ink-2">
-              번호가 맞는지 확인해 주세요. 목록에서 다시 선택할 수 있습니다.
-            </p>
-            <ConflictRefresh refetch={() => void query.refetch()} />
-          </section>
-        ) : (
-          <IntakeBody intake={intake} refetch={() => void query.refetch()} />
-        )
-      }
+      {(intake) => <IntakeBody intake={intake} refetch={() => void query.refetch()} />}
     </QueryGate>
   );
 }

@@ -44,16 +44,18 @@ function describeProcessError(error: unknown): string {
 
 function ProcessCard({ detail }: { detail: PrivacyDetail }) {
   const process = usePrivacyProcess(detail.requestId, detail.version);
+  const [identityChoice, setIdentityChoice] = useState<"" | "VERIFIED" | "FAILED">("");
+  const effectiveIdentity = identityChoice === "VERIFIED" ? "VERIFIED" : detail.identityStatus;
   const availableActions = PROCESS_ACTIONS.filter(
-    (action) => unavailableReason(action, detail.status, detail.identityStatus) !== "status",
+    (action) => unavailableReason(action, detail.status, effectiveIdentity) !== "status",
   );
   const [choice, setChoice] = useState<ProcessAction | "">(
     availableActions.find(
-      (candidate) => unavailableReason(candidate, detail.status, detail.identityStatus) === null,
+      (candidate) => unavailableReason(candidate, detail.status, effectiveIdentity) === null,
     ) ?? "",
   );
   const action: ProcessAction | "" =
-    choice !== "" && unavailableReason(choice, detail.status, detail.identityStatus) === null
+    choice !== "" && unavailableReason(choice, detail.status, effectiveIdentity) === null
       ? choice
       : "";
   const [note, setNote] = useState("");
@@ -82,13 +84,18 @@ function ProcessCard({ detail }: { detail: PrivacyDetail }) {
     ...availableActions.map((candidate) => ({
       value: candidate,
       label:
-        unavailableReason(candidate, detail.status, detail.identityStatus) === "identity"
+        unavailableReason(candidate, detail.status, effectiveIdentity) === "identity"
           ? `${ACTION_LABELS[candidate]} (본인확인 필요)`
           : ACTION_LABELS[candidate],
-      isDisabled: unavailableReason(candidate, detail.status, detail.identityStatus) === "identity",
+      isDisabled: unavailableReason(candidate, detail.status, effectiveIdentity) === "identity",
     })),
   ];
-  const identityBlocked = detail.identityStatus !== "VERIFIED";
+  const identityBlocked = effectiveIdentity !== "VERIFIED";
+  const identityOptions = [
+    { value: "", label: "기록하지 않음" },
+    { value: "VERIFIED", label: "본인확인 완료" },
+    { value: "FAILED", label: "본인확인 실패" },
+  ];
 
   async function send(selected: ProcessAction) {
     setNotice(null);
@@ -97,11 +104,13 @@ function ProcessCard({ detail }: { detail: PrivacyDetail }) {
         action: selected,
         note: note.trim() === "" ? null : note.trim(),
         evidenceReference: evidence.trim() === "" ? null : evidence.trim(),
+        ...(identityChoice === "" ? {} : { identityStatus: identityChoice }),
       });
       setNotice({ tone: "ok", text: `${ACTION_LABELS[selected]}을(를) 기록했습니다.` });
       setNote("");
       setEvidence("");
       setChoice("");
+      setIdentityChoice("");
     } catch (error) {
       setNotice({ tone: "error", text: describeProcessError(error) });
     }
@@ -139,6 +148,16 @@ function ProcessCard({ detail }: { detail: PrivacyDetail }) {
             setErrors({});
           }}
         />
+        {detail.identityStatus !== "VERIFIED" ? (
+          <SelectField
+            label="본인확인 결과"
+            value={identityChoice}
+            options={identityOptions}
+            onValueChange={(value) =>
+              setIdentityChoice(value === "VERIFIED" || value === "FAILED" ? value : "")
+            }
+          />
+        ) : null}
         {identityBlocked ? (
           <p className="text-caption text-ink-2">
             요청자의 본인확인이 완료되지 않아 승인과 일부 제한은 할 수 없습니다. 거절과 완료 처리는

@@ -348,6 +348,8 @@ function seedDeletion(): MockDeletion[] {
       executedByOperatorId: 9,
       result: "SUCCESS",
       verifiedAt: at(-12 * 3_600_000),
+      verifiedByOperatorId: 9,
+      verificationEvidence: "저장소 점검 기록",
       backupExpiresAt: at(30 * DAY),
     }),
     deletion(706, { cancelledAt: at(-2 * DAY) }),
@@ -459,6 +461,9 @@ export const opsPrivacyHandlers: RequestHandler[] = [
       return mockErrors.validation([
         { field: "evidenceReference", message: "완료 증빙 위치를 입력해 주세요." },
       ]);
+    }
+    if (body.identityStatus === "VERIFIED" || body.identityStatus === "FAILED") {
+      row.identityStatus = body.identityStatus;
     }
     const terminal = row.status === "COMPLETED" || row.status === "REJECTED";
     if (terminal || (rule.from !== null && !rule.from.includes(row.status))) return invalid();
@@ -587,6 +592,13 @@ export const opsPrivacyHandlers: RequestHandler[] = [
       .filter((row) => !queueId || String(row.queueId) === queueId)
       .sort((a, b) => Date.parse(a.scheduledAt) - Date.parse(b.scheduledAt));
     return HttpResponse.json(pageOf(rows, new URL(request.url)));
+  }),
+
+  http.get("/api/ops/deletion-queue/:id", ({ params }) => {
+    const rejected = requireMockOps(PRIVACY);
+    if (rejected) return rejected;
+    const row = findDeletion(params.id);
+    return row ? HttpResponse.json(row) : mockErrors.notFound();
   }),
 
   http.get("/api/ops/deletion-queue/:id/preview", ({ params }) => {

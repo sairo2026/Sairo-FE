@@ -21,6 +21,27 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
+const REVIEWING_SERVICE_FAILURE = {
+  refundId: 5,
+  officeId: 9,
+  invoiceId: 5,
+  reasonCode: "SERVICE_FAILURE",
+  reasonEventType: "SERVICE_INCIDENT",
+  reasonEventId: "inc-4",
+  requestedAt: "2026-11-01T09:00:00+09:00",
+  status: "REVIEWING",
+  entitlementAmount: 11000,
+  previousRefundAmount: 0,
+  reservedAmount: 0,
+  refundAmount: null,
+  reviewedByOperatorId: null,
+  reviewedByOperatorName: null,
+  reviewedAt: null,
+  rejectionReason: null,
+  pgRefundId: null,
+  resolvedAt: null,
+};
+
 let stopServer: () => void;
 beforeAll(() => {
   stopServer = startMockServer();
@@ -145,6 +166,44 @@ describe("환불 검토", () => {
     await screen.findByText("사건별 환불 권리액");
     await user.click(screen.getByRole("button", { name: "승인" }));
     expect(within(screen.getByRole("dialog")).queryByLabelText(/환불 사유 사건 ID/)).toBeNull();
+  });
+
+  it("보상 사유의 환불은 환불 금액을 정해 승인할 수 있고 다른 사유에는 입력이 없다", async () => {
+    const user = userEvent.setup();
+    let sent: Record<string, unknown> = {};
+    server.use(
+      http.post("/api/ops/refund-requests/5/review", async ({ request }) => {
+        sent = (await request.json()) as Record<string, unknown>;
+        return HttpResponse.json({
+          refundId: 5,
+          status: "APPROVED",
+          reviewedAt: new Date().toISOString(),
+          rejectionReason: null,
+          refundAmount: 5000,
+          entitlementAmount: 11000,
+          previousRefundAmount: 0,
+          reservedAmount: 5000,
+        });
+      }),
+    );
+    renderDetail(2);
+    await screen.findByText("사건별 환불 권리액");
+    await user.click(screen.getByRole("button", { name: "승인" }));
+    expect(within(screen.getByRole("dialog")).queryByLabelText("환불 금액(선택)")).toBeNull();
+    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "취소" }));
+    cleanup();
+    server.use(
+      http.get("/api/ops/refund-requests/5", () =>
+        HttpResponse.json({ ...REVIEWING_SERVICE_FAILURE }),
+      ),
+    );
+    renderDetail(5);
+    await screen.findByText("사건별 환불 권리액");
+    await user.click(screen.getByRole("button", { name: "승인" }));
+    await user.type(screen.getByLabelText("환불 금액(선택)"), "5000");
+    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "승인" }));
+    await screen.findByText("환불 검토를 승인했습니다.");
+    expect(sent).toMatchObject({ decision: "APPROVE", amount: 5000 });
   });
 
   it("검토 메모를 함께 보낸다", async () => {

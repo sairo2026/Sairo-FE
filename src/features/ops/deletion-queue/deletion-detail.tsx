@@ -324,10 +324,13 @@ function DeletionBody({ item }: { item: DeletionItem }) {
               label: "검증 일시",
               value: item.verifiedAt ? formatSeoulDateTime(item.verifiedAt) : "검증 전",
             },
+            { label: "검증 증빙", value: item.verificationEvidence },
+            { label: "보존 제외 사유", value: item.exclusionReason },
             {
               label: "취소 시각",
               value: item.cancelledAt ? formatSeoulDateTime(item.cancelledAt) : null,
             },
+            { label: "취소 사유", value: item.cancelReason },
           ]}
         />
       </Card>

@@ -261,6 +261,38 @@ describe("실행", () => {
   });
 });
 
+describe("원문 보기", () => {
+  it("열람 승인을 실행한 운영자는 재인증 뒤 원문을 읽는다", async () => {
+    const user = userEvent.setup();
+    markMockStepUp();
+    renderDetail(6, ["OPS"]);
+    await user.click(await screen.findByRole("button", { name: "원문 보기" }));
+    expect(await screen.findByText("사무소 예시")).toBeTruthy();
+    expect(screen.getByText("읽은 시각")).toBeTruthy();
+  });
+
+  it("재인증이 없으면 읽지 못하고 안내한다", async () => {
+    const user = userEvent.setup();
+    renderDetail(6, ["OPS"]);
+    await user.click(await screen.findByRole("button", { name: "원문 보기" }));
+    expect(await screen.findByRole("alert")).toBeTruthy();
+  });
+
+  it("회수된 접근은 원문을 읽을 수 없다고 안내한다", async () => {
+    const user = userEvent.setup();
+    markMockStepUp();
+    renderDetail(9, ["OPS"]);
+    await user.click(await screen.findByRole("button", { name: "원문 보기" }));
+    expect(await screen.findByText("회수된 접근이라 받을 수 없습니다.")).toBeTruthy();
+  });
+
+  it("다운로드 승인에는 원문 보기가 없다", async () => {
+    renderDetail(7, ["OPS"]);
+    await screen.findByText("파일 해시(SHA-256)");
+    expect(screen.queryByRole("button", { name: "원문 보기" })).toBeNull();
+  });
+});
+
 describe("파일 받기", () => {
   it("한 번 받으면 다시 받을 수 없다", async () => {
     const user = userEvent.setup();
