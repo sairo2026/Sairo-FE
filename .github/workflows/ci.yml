@@ -31,6 +31,9 @@ jobs:
       - name: Run quality checks and build
         run: npm run check
 
+      - name: Verify mock API is excluded from the production bundle
+        run: npm run check:bundle
+
   e2e:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -55,6 +58,9 @@ jobs:
         run: npm run build
         env:
           NEXT_PUBLIC_API_MOCKING: enabled
+
+      - name: Verify the bundle check detects the mock API build
+        run: npm run check:bundle -- --expect-mock
 
       - name: Run browser tests
         run: npm run e2e
