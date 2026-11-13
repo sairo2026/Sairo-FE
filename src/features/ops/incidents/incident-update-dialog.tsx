@@ -5,9 +5,9 @@ import { Button } from "@/shared/components/ui/button";
 import { Modal } from "@/shared/components/ui/modal";
 import { SelectField } from "@/shared/components/ui/select-field";
 import { TextAreaField } from "@/shared/components/ui/textarea-field";
-import { TextField } from "@/shared/components/ui/text-field";
 import { DateTimePair, FormMessage } from "../system-common/system-fields";
 import { describeSystemError } from "../system-common/system-form";
+import { OperatorSelect } from "../components/common/operator-select";
 import { useUpdateIncident } from "./incidents-api";
 import {
   INCIDENT_STAGES,
@@ -119,13 +119,13 @@ export function IncidentUpdateDialog({
           onTimeChange={(recoveredTime) => set({ recoveredTime })}
           error={errors.recoveredDate}
         />
-        <TextField
-          label="담당 운영자 번호"
-          kind="number"
+        <OperatorSelect
+          label="담당 운영자"
           value={input.assignedOperatorId}
           onValueChange={(assignedOperatorId) => set({ assignedOperatorId })}
           error={errors.assignedOperatorId}
-          hint="선택 입력입니다. 활성 운영자의 번호만 지정할 수 있습니다."
+          hint="선택 입력입니다. 활성 운영자만 지정할 수 있습니다."
+          emptyLabel="지정하지 않음"
         />
         <TextAreaField
           label="장애 원인"
