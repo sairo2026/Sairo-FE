@@ -1163,6 +1163,7 @@ const authorityHandlers: RequestHandler[] = [
         recordedByOperatorName: `운영자 ${row.recordedByOperatorId}`,
         closedAt: row.closedAt,
         retentionUntil: row.retentionUntil,
+        closeNote: row.closeNote,
       }));
     return HttpResponse.json(pageOf(rows, url));
   }),
