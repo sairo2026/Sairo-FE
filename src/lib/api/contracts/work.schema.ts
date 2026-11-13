@@ -148,6 +148,12 @@ export const HomeSummaryResponseSchema = z.object({
   ),
   activeCoordinationCount: z.number(),
   unreadNotificationCount: z.number(),
+  unreadVisitRequestNoticeCount: z.number(),
+  visitRequestSummary: z.object({
+    pendingCount: z.number(),
+    revalidationFailedCount: z.number(),
+    timeClosedCount: z.number(),
+  }),
   coordinationStatusCounts: z.array(z.object({ status: z.string(), count: z.number() })),
   leaseExpiringWithin90DaysCount: z.number(),
   calendarDays: z.array(

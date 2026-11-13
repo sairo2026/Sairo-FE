@@ -4,14 +4,14 @@ import type {
   PolicyDocumentListResponse,
   PrivacyRequestResponse,
   SupportInquiryListResponse,
+  SupportInquiryResponse,
 } from "@/lib/api/contracts/support.schema";
-import type { PrivacyRequestDetail, SupportInquiryDetail } from "@/features/support/api/wire";
 import { errorResponse, mockErrors } from "../error-responses";
 
 const NOW = "2026-11-10T09:00:00+09:00";
 
 /** 백엔드처럼 최초 문의 본문은 최상위 content·requestScope에 두고 messages에는 답글만 둔다. */
-export type MockInquiry = SupportInquiryDetail;
+export type MockInquiry = SupportInquiryResponse;
 
 export type MockSupportInquiryState = {
   inquiries: MockInquiry[];
@@ -21,15 +21,15 @@ export type MockSupportInquiryState = {
   policyBody: string | null;
   leads: Array<EnterpriseLeadStatusResponse & { trackingKey: string }>;
   nextLeadId: number;
-  privacyRequests: PrivacyRequestDetail[];
+  privacyRequests: PrivacyRequestResponse[];
   nextPrivacyRequestId: number;
   guestIntakeCount: number;
   guestNoticeVersion: string;
 };
 
 export function buildMockPrivacyRequest(
-  overrides: Partial<PrivacyRequestDetail> = {},
-): PrivacyRequestDetail {
+  overrides: Partial<PrivacyRequestResponse> = {},
+): PrivacyRequestResponse {
   return {
     requestId: 31,
     requestType: "ACCESS",

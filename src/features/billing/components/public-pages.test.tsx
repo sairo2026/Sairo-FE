@@ -6,7 +6,11 @@ import { http, HttpResponse } from "msw";
 import type { ReactNode } from "react";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { mockErrors } from "@/mocks/error-responses";
-import { MOCK_COMPANY_INFO, MOCK_PUBLIC_PRICING } from "@/mocks/handlers/billing";
+import {
+  EMPTY_COMPANY_INFO,
+  MOCK_COMPANY_INFO,
+  MOCK_PUBLIC_PRICING,
+} from "@/mocks/handlers/billing";
 import { server, startMockServer } from "@/mocks/server";
 import { createQueryClient } from "@/shared/api/query-client";
 import { LegalDocumentScreen } from "./legal-document-screen";
@@ -190,6 +194,7 @@ describe("공개 사업자 정보 하단", () => {
     server.use(
       http.get("/api/public/company-info", () =>
         HttpResponse.json({
+          ...EMPTY_COMPANY_INFO,
           businessName: "사이로(SAIRO)",
           representativeName: "김태환",
           businessNumber: "704-16-02872",

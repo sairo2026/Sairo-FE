@@ -384,7 +384,12 @@ describe("심사 상태", () => {
     expect(await screen.findByText("문제가 발생했습니다")).not.toBeNull();
     server.resetHandlers();
     setMockOfficeState({
-      registration: { registrationId: 31, status: "PENDING_REVIEW", currentRevisionNo: 1 },
+      registration: {
+        registrationId: 31,
+        status: "PENDING_REVIEW",
+        currentRevisionNo: 1,
+        entityType: "INDIVIDUAL",
+      },
     });
     await user.click(screen.getByRole("button", { name: /다시 시도/ }));
     expect(await screen.findByText("서류를 확인하고 있습니다.")).not.toBeNull();
@@ -392,7 +397,12 @@ describe("심사 상태", () => {
 
   it("작성 중이면 증빙 이어가기와 철회를 보여준다", async () => {
     setMockOfficeState({
-      registration: { registrationId: 31, status: "DRAFT", currentRevisionNo: 1 },
+      registration: {
+        registrationId: 31,
+        status: "DRAFT",
+        currentRevisionNo: 1,
+        entityType: "INDIVIDUAL",
+      },
     });
     const user = userEvent.setup();
     renderOffice(<OfficeReviewScreen />);
@@ -403,7 +413,12 @@ describe("심사 상태", () => {
 
   it("심사 중에는 2영업일 목표와 재심사 안내를 보여준다", async () => {
     setMockOfficeState({
-      registration: { registrationId: 31, status: "PENDING_REVIEW", currentRevisionNo: 1 },
+      registration: {
+        registrationId: 31,
+        status: "PENDING_REVIEW",
+        currentRevisionNo: 1,
+        entityType: "INDIVIDUAL",
+      },
     });
     renderOffice(<OfficeReviewScreen />);
     expect(
@@ -418,6 +433,7 @@ describe("심사 상태", () => {
         registrationId: 31,
         status: "SUPPLEMENT_REQUESTED",
         currentRevisionNo: 1,
+        entityType: "INDIVIDUAL",
         supplementReason: "사업자등록증을 다시 올려 주세요",
         supplementDueAt: "2026-11-20T09:00:00+09:00",
       },
@@ -432,7 +448,12 @@ describe("심사 상태", () => {
 
   it("신청을 철회하면 확인 대화상자를 거쳐 철회 안내를 보여준다", async () => {
     setMockOfficeState({
-      registration: { registrationId: 31, status: "PENDING_REVIEW", currentRevisionNo: 1 },
+      registration: {
+        registrationId: 31,
+        status: "PENDING_REVIEW",
+        currentRevisionNo: 1,
+        entityType: "INDIVIDUAL",
+      },
     });
     const user = userEvent.setup();
     renderOffice(<OfficeReviewScreen />);
@@ -447,7 +468,12 @@ describe("심사 상태", () => {
 
   it("철회가 실패하면 오류를 보여준다", async () => {
     setMockOfficeState({
-      registration: { registrationId: 31, status: "PENDING_REVIEW", currentRevisionNo: 1 },
+      registration: {
+        registrationId: 31,
+        status: "PENDING_REVIEW",
+        currentRevisionNo: 1,
+        entityType: "INDIVIDUAL",
+      },
     });
     server.use(http.post("/api/office-registrations/:id/cancel", () => mockErrors.rateLimited(60)));
     const user = userEvent.setup();
@@ -463,6 +489,7 @@ describe("심사 상태", () => {
         registrationId: 31,
         status: "REJECTED",
         currentRevisionNo: 1,
+        entityType: "INDIVIDUAL",
         rejectionReason: "서류가 흐립니다",
         resolved: false,
       },
@@ -480,6 +507,7 @@ describe("심사 상태", () => {
         registrationId: 31,
         status: "REVOKED",
         currentRevisionNo: 2,
+        entityType: "INDIVIDUAL",
         revocationReason: "허위 서류",
         revokedAt: "2026-11-09T10:00:00+09:00",
       },
@@ -495,7 +523,12 @@ describe("심사 상태", () => {
 
   it("인증이 완료되면 확인 버튼으로 홈에 간다", async () => {
     setMockOfficeState({
-      registration: { registrationId: 31, status: "APPROVED", currentRevisionNo: 1 },
+      registration: {
+        registrationId: 31,
+        status: "APPROVED",
+        currentRevisionNo: 1,
+        entityType: "INDIVIDUAL",
+      },
     });
     const user = userEvent.setup();
     renderOffice(<OfficeReviewScreen />);

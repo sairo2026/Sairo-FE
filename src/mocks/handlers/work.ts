@@ -30,6 +30,12 @@ export type WorkMockState = {
   followupTasks: HomeSummaryResponse["openFollowupTasks"];
   statusCounts: StatusCount[];
   leaseExpiringCount: number;
+  unreadVisitRequestNoticeCount: number;
+  visitRequestSummary: {
+    pendingCount: number;
+    revalidationFailedCount: number;
+    timeClosedCount: number;
+  };
   calendarDays: HomeSummaryResponse["calendarDays"];
   officeCreatedYearMonth: string;
   settlement: Partial<MonthlySettlementResponse>;
@@ -125,6 +131,8 @@ function initialState(): WorkMockState {
       count: status === "COORDINATABLE" ? 1 : 0,
     })),
     leaseExpiringCount: 2,
+    unreadVisitRequestNoticeCount: 0,
+    visitRequestSummary: { pendingCount: 0, revalidationFailedCount: 0, timeClosedCount: 0 },
     calendarDays: [{ date: todayKst(), visitCount: 1, taskCount: 1 }],
     officeCreatedYearMonth: "2026-08",
     settlement: {},
@@ -240,6 +248,8 @@ export const workHandlers = [
       unreadNotificationCount: state.notifications.filter((item) => !item.read).length,
       coordinationStatusCounts: state.statusCounts,
       leaseExpiringWithin90DaysCount: deputy ? 0 : state.leaseExpiringCount,
+      unreadVisitRequestNoticeCount: state.unreadVisitRequestNoticeCount,
+      visitRequestSummary: state.visitRequestSummary,
       calendarDays: state.calendarDays,
     } satisfies HomeSummaryResponse);
   }),

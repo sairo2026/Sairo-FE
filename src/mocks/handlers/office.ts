@@ -193,6 +193,7 @@ export const officeHandlers = [
       registrationId: 31,
       status: "DRAFT",
       currentRevisionNo: 1,
+      entityType: body.entityType === "CORPORATION" ? "CORPORATION" : "INDIVIDUAL",
     };
     state.registration = created;
     return HttpResponse.json(
@@ -224,7 +225,12 @@ export const officeHandlers = [
     if (state.evidenceMode === "invalid-transition") {
       return errorResponse(409, "INVALID_TRANSITION", "이미 심사 중입니다.");
     }
-    state.registration = { registrationId: 31, status: "PENDING_REVIEW", currentRevisionNo: 1 };
+    state.registration = {
+      registrationId: 31,
+      status: "PENDING_REVIEW",
+      currentRevisionNo: 1,
+      entityType: state.registration?.entityType ?? "INDIVIDUAL",
+    };
     // 증빙 제출로 심사가 시작되면 신청자의 접근 상태도 심사 중으로 바뀐다.
     const context = getMockAuthContext();
     if (context?.accessCondition === "PRE_VERIFICATION") {

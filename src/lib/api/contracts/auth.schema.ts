@@ -131,10 +131,7 @@ export const SignupKakaoResponseSchema = z.object({
 });
 export type SignupKakaoResponse = z.infer<typeof SignupKakaoResponseSchema>;
 
-export const KakaoStepUpCallbackResponseSchema = z.object({
-  stepUpValid: z.boolean(),
-  stepUpExpiresAt: z.string(),
-});
+export const KakaoStepUpCallbackResponseSchema = z.object({});
 export type KakaoStepUpCallbackResponse = z.infer<typeof KakaoStepUpCallbackResponseSchema>;
 
 export const KakaoStepUpAuthorizationResponseSchema = z.object({});

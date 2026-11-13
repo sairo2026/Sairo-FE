@@ -114,6 +114,9 @@ export const ContractDetailResponseSchema = z.object({
   ),
   contractId: z.number(),
   propertyId: z.number(),
+  propertyAddress: z.string(),
+  managingMembershipId: z.number(),
+  managingMemberName: z.string(),
   dealType: z.string(),
   contractStatus: z.string(),
   leasePeriodStatus: z.string().nullable().optional(),
@@ -255,6 +258,7 @@ export const ContractDocumentResponseSchema = z.object({
   retentionEndDate: z.iso.date().nullable().optional(),
   piiMaskingConfirmed: z.boolean(),
   supersedesDocumentId: z.number().nullable().optional(),
+  notice: z.string().nullable(),
   officeId: z.number(),
   version: z.number(),
 });
@@ -509,7 +513,7 @@ export const ContractRevisionListResponseSchema = z.object({
       recordedAt: z.string(),
       recordedByMembershipId: z.number(),
       reason: z.string().nullable(),
-      supersedesRevisionId: z.number(),
+      supersedesRevisionId: z.number().nullable(),
     }),
   ),
   page: z.number(),
@@ -571,6 +575,7 @@ export type ContractStatusUpdateResponse = z.infer<typeof ContractStatusUpdateRe
 export const ContractStatusHistoryResponseSchema = z.object({
   items: z.array(
     z.object({
+      historyId: z.number(),
       track: z.string(),
       fromStatus: z.string().nullable().optional(),
       toStatus: z.string(),

@@ -1,5 +1,6 @@
 import { http, HttpResponse } from "msw";
 import type { RequestHandler } from "msw";
+import type { OpsRefundDetailResponse } from "@/lib/api/contracts/ops.schema";
 import { formatSeoulDate } from "@/shared/lib/format";
 import { errorResponse, mockErrors } from "../error-responses";
 import { findMockPriceSchedule, listMockPriceSchedules } from "./ops-content";
@@ -76,7 +77,7 @@ type MockRefund = {
   officeId: number;
   invoiceId: number;
   reasonCode: string;
-  reasonEventType: string;
+  reasonEventType: OpsRefundDetailResponse["reasonEventType"];
   reasonEventId: string | null;
   requestedAt: string;
   status: RefundStatus;
@@ -262,7 +263,7 @@ function refund(id: number, patch: Partial<MockRefund>): MockRefund {
     officeId: 42,
     invoiceId: 1,
     reasonCode: "DUPLICATE_CHARGE",
-    reasonEventType: "CHARGE_ATTEMPT",
+    reasonEventType: "INVOICE",
     reasonEventId: "att-77",
     requestedAt: iso(Date.now() - 3 * DAY),
     status: "REVIEWING",
@@ -289,7 +290,7 @@ function seedRefunds(): MockRefund[] {
   return [
     refund(1, {
       reasonCode: "CANCELLATION",
-      reasonEventType: "SUBSCRIPTION_CANCEL",
+      reasonEventType: "SUBSCRIPTION_CANCELLATION",
       reasonEventId: null,
       status: "RECEIVED",
       entitlementAmount: null,
@@ -299,7 +300,7 @@ function seedRefunds(): MockRefund[] {
     refund(3, {
       invoiceId: 3,
       reasonCode: "POLICY_COMPENSATION",
-      reasonEventType: "POLICY_EXCEPTION",
+      reasonEventType: "POLICY_COMPENSATION",
       reasonEventId: "case-9",
       status: "APPROVED",
       ...reviewed(1, "운영 김사이"),
@@ -308,7 +309,7 @@ function seedRefunds(): MockRefund[] {
       officeId: 7,
       invoiceId: 2,
       reasonCode: "POLICY_COMPENSATION",
-      reasonEventType: "POLICY_EXCEPTION",
+      reasonEventType: "POLICY_COMPENSATION",
       reasonEventId: "case-10",
       status: "APPROVED",
       ...reviewed(2, "박지원"),
@@ -317,7 +318,7 @@ function seedRefunds(): MockRefund[] {
       officeId: 9,
       invoiceId: 5,
       reasonCode: "SERVICE_FAILURE",
-      reasonEventType: "INCIDENT",
+      reasonEventType: "SERVICE_INCIDENT",
       reasonEventId: "inc-4",
       status: "APPROVED",
       refundAmount: 11000,

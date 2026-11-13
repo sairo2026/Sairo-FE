@@ -193,6 +193,7 @@ type AuthorityRequest = {
   approvedByOperatorId: number | null;
   closedAt: string | null;
   retentionUntil: string | null;
+  closeNote: string | null;
 };
 
 type MonitorState = {
@@ -522,6 +523,7 @@ function authority(
     approvedByOperatorId: null,
     closedAt: null,
     retentionUntil: null,
+    closeNote: null,
     ...patch,
   };
 }
@@ -1160,6 +1162,7 @@ const authorityHandlers: RequestHandler[] = [
         recordedByOperatorName: `운영자 ${row.recordedByOperatorId}`,
         closedAt: row.closedAt,
         retentionUntil: row.retentionUntil,
+        closeNote: row.closeNote,
       }));
     return HttpResponse.json(pageOf(rows, url));
   }),
@@ -1239,6 +1242,7 @@ const authorityHandlers: RequestHandler[] = [
     target.providedAt = provides && isIso(body.providedAt) ? body.providedAt : null;
     target.approvedByOperatorId = provides ? selfId() : null;
     target.closedAt = at(0);
+    target.closeNote = text(body.closeNote);
     const until = new Date();
     until.setFullYear(until.getFullYear() + 1);
     target.retentionUntil = until.toISOString().slice(0, 10);

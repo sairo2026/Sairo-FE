@@ -12,7 +12,7 @@ export const ExportCreateResponseSchema = z.object({
   status: z.string(),
   downloadUrl: z.string().nullable().optional(),
   expiresAt: z.string().nullable().optional(),
-  fileExpiresAt: z.string(),
+  fileExpiresAt: z.string().nullable(),
 });
 export type ExportCreateResponse = z.infer<typeof ExportCreateResponseSchema>;
 
@@ -21,7 +21,7 @@ export const ExportResultResponseSchema = z.object({
   status: z.string(),
   downloadUrl: z.string().nullable().optional(),
   expiresAt: z.iso.datetime({ offset: true }).nullable().optional(),
-  fileExpiresAt: z.iso.datetime({ offset: true }),
+  fileExpiresAt: z.iso.datetime({ offset: true }).nullable(),
   failureReason: z.string().nullable().optional(),
 });
 export type ExportResultResponse = z.infer<typeof ExportResultResponseSchema>;
@@ -240,6 +240,10 @@ export const ImportSupportRequestDetailResponseSchema = z.object({
   importBatchId: z.number(),
   sourceSystem: z.string(),
   estimatedRowCount: z.number(),
+  scopeNote: z.string().nullable(),
+  paymentOrderId: z.string().nullable(),
+  paymentAmount: z.number().nullable(),
+  paidAt: z.iso.datetime({ offset: true }).nullable(),
   quoteAmount: z.number().nullable().optional(),
   status: z.string(),
   assignedOperatorName: z.string().nullable().optional(),
@@ -357,6 +361,8 @@ export const ImportBatchDetailResponseSchema = z.object({
   cancellableUntil: z.iso.datetime({ offset: true }).nullable().optional(),
   cancelledAt: z.iso.datetime({ offset: true }).nullable().optional(),
   failureReason: z.string().nullable().optional(),
+  sheets: z.array(z.object({ name: z.string(), rowCount: z.number(), columnCount: z.number() })),
+  selectedSheetName: z.string().nullable(),
   cancelSummary: z
     .object({
       cancelledCount: z.number(),
@@ -417,7 +423,7 @@ export const ExportListResponseSchema = z.object({
       scope: z.string(),
       status: z.string(),
       createdAt: z.iso.datetime({ offset: true }),
-      fileExpiresAt: z.iso.datetime({ offset: true }),
+      fileExpiresAt: z.iso.datetime({ offset: true }).nullable(),
     }),
   ),
   page: z.number(),
@@ -427,7 +433,7 @@ export const ExportListResponseSchema = z.object({
 export type ExportListResponse = z.infer<typeof ExportListResponseSchema>;
 
 export const ExportAllowedTablesResponseSchema = z.object({
-  tables: z.array(z.object({ code: z.string(), label: z.string() })),
+  tables: z.array(z.object({ code: z.string(), label: z.string(), allowed: z.boolean() })),
 });
 export type ExportAllowedTablesResponse = z.infer<typeof ExportAllowedTablesResponseSchema>;
 
@@ -435,7 +441,7 @@ export const ExportPolicyUpdateRequestSchema = z.object({ allowedTables: z.array
 export type ExportPolicyUpdateRequest = z.infer<typeof ExportPolicyUpdateRequestSchema>;
 
 export const OfficeExportPolicyUpdateResponseSchema = z.object({
-  tables: z.array(z.object({ code: z.string(), label: z.string() })),
+  tables: z.array(z.object({ code: z.string(), label: z.string(), allowed: z.boolean() })),
 });
 export type OfficeExportPolicyUpdateResponse = z.infer<
   typeof OfficeExportPolicyUpdateResponseSchema

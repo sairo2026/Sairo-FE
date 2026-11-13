@@ -4,6 +4,7 @@ import {
   ImportSupportChangeResponseSchema,
   ImportSupportPaymentConfirmResponseSchema,
   ImportSupportQuoteAcceptResponseSchema,
+  ImportSupportRequestDetailResponseSchema,
   ImportSupportRequestListResponseSchema,
   ImportSupportRequestStatusResponseSchema,
 } from "@/lib/api/contracts/migration.schema";
@@ -12,7 +13,6 @@ import type {
   ImportSupportRequestCreateRequest,
 } from "@/lib/api/contracts/migration.schema";
 import { apiFetch, withQuery } from "@/shared/api/client";
-import { SupportDetailWireSchema } from "./wire";
 
 export function listImportSupportRequests(params: { page: number; size: number; status?: string }) {
   return apiFetch(
@@ -35,7 +35,7 @@ export function createImportSupportRequest(request: ImportSupportRequestCreateRe
 
 export function fetchImportSupportRequest(requestId: number) {
   return apiFetch(`/api/import-support-requests/${requestId}`, {
-    schema: SupportDetailWireSchema,
+    schema: ImportSupportRequestDetailResponseSchema,
   });
 }
 

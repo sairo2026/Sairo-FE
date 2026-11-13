@@ -30,7 +30,6 @@ import {
 } from "../model/labels";
 import { SUPPORT_COPY as COPY, describeSupportError } from "../model/messages";
 import { toCustomerView } from "../model/public-view";
-import type { SupportInquiryDetail } from "../api/wire";
 
 function validateAttachment(file: File, currentCount: number): string | undefined {
   const lower = file.name.toLowerCase();
@@ -42,7 +41,7 @@ function validateAttachment(file: File, currentCount: number): string | undefine
   return undefined;
 }
 
-type Props = { detail: SupportInquiryDetail; justReceived: boolean };
+type Props = { detail: SupportInquiryResponse; justReceived: boolean };
 
 function Messages({ detail }: { detail: SupportInquiryResponse }) {
   const view = toCustomerView(detail);
