@@ -6,6 +6,7 @@ import { Badge } from "@/shared/components/ui/badge";
 import { Checkbox, SelectField } from "@/shared/components/ui/select-field";
 import { TextField } from "@/shared/components/ui/text-field";
 import { formatSeoulDateTime } from "@/shared/lib/format";
+import { OperatorSelect } from "../components/common/operator-select";
 import { OpsFilterBar } from "../components/common/ops-filter-bar";
 import { OpsScreen } from "../components/common/ops-screen";
 import { OpsStatusBadge } from "../components/common/ops-status-badge";
@@ -104,11 +105,11 @@ export function InquiryListScreen() {
           options={PRIORITY_OPTIONS}
           onValueChange={(priority) => set({ priority })}
         />
-        <TextField
-          label="담당 운영자 번호"
-          kind="number"
+        <OperatorSelect
+          label="담당 운영자"
           value={draft.assignedOperatorId}
           onValueChange={(assignedOperatorId) => set({ assignedOperatorId })}
+          emptyLabel="전체 담당"
         />
         <TextField
           label="사무소 번호"
