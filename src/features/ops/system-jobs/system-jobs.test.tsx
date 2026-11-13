@@ -110,6 +110,51 @@ describe("시스템 작업 화면", () => {
     expect(screen.getByText("2회")).toBeTruthy();
   });
 
+  it("새 배치 작업 이름에 설명을 붙이고 재실행 대상이 아니라고 안내한다", async () => {
+    const names = [
+      "consent-notice-send",
+      "marketing-reconfirm-scan",
+      "tax-document-pending-scan",
+      "guest-intake-deadline-scan",
+    ];
+    registerMonitorMocks();
+    server.use(
+      http.get("/api/ops/system-jobs", () =>
+        HttpResponse.json({
+          items: names.map((jobName, index) => ({
+            runId: 900 + index,
+            jobName,
+            jobType: "OTHER",
+            rerunRoles: [],
+            officeId: null,
+            officeName: null,
+            status: "FAILED",
+            scheduledAt: null,
+            startedAt: "2026-11-10T09:00:00+09:00",
+            finishedAt: "2026-11-10T09:01:00+09:00",
+            attemptCount: 1,
+            errorCode: "GUEST_INTAKE_OVERDUE",
+            nextRunAt: null,
+            assignedOperatorId: null,
+            assignedOperatorName: null,
+          })),
+          page: 0,
+          size: 25,
+          totalElements: 4,
+        }),
+      ),
+    );
+    renderOpsScreen(<SystemJobsScreen />, ["OPS", "BILLING", "PRIVACY"]);
+    await screen.findByText("consent-notice-send");
+    expect(screen.getByText("수신 설정 변경 통지 발송")).toBeTruthy();
+    expect(screen.getByText("광고성 수신 동의 2년 재확인")).toBeTruthy();
+    expect(screen.getByText("세금 증빙 발급 대기 생성")).toBeTruthy();
+    expect(screen.getByText("비회원 권리 요청 기한 점검")).toBeTruthy();
+    expect(isDisabled(screen.getByRole("button", { name: "실행 900 재실행" }))).toBe(true);
+    expect(isDisabled(screen.getByRole("button", { name: "실행 903 재실행" }))).toBe(true);
+    expect(screen.getAllByText("재실행 대상이 아닌 작업입니다.")).toHaveLength(4);
+  });
+
   it("역할별 재실행 대상 표를 안내한다", async () => {
     renderJobs();
     await screen.findByText("retention-sweep");

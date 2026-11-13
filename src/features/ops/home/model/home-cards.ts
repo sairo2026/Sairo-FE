@@ -55,6 +55,7 @@ export const HOME_QUEUE_CARDS: readonly HomeQueueCard[] = [
     href: "/ops/privacy-requests",
     roles: ["PRIVACY"],
     count: (home) => home.privacyDeadlineApproachingCount,
+    note: () => "비회원 접수 포함",
     isUrgent: true,
   },
   {

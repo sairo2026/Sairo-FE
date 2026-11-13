@@ -22,6 +22,7 @@ import {
   JOB_STATUS_OPTIONS,
   RERUN_BLOCK_MESSAGE,
   RERUN_ROLE_TABLE,
+  jobNameLabel,
   rerunBlock,
 } from "./system-jobs-model";
 import type { SystemJobRun } from "./system-jobs-model";
@@ -144,6 +145,7 @@ function JobTable({ onFeedback }: { onFeedback: (message: string, isError: boole
         columns={[
           { key: "runId", header: "작업 ID", render: (row) => row.runId },
           { key: "jobName", header: "작업 이름", render: (row) => row.jobName },
+          { key: "jobLabel", header: "작업 설명", render: (row) => jobNameLabel(row.jobName) },
           { key: "office", header: "사무소", render: (row) => row.officeName ?? "-" },
           {
             key: "scheduled",
