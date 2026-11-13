@@ -72,6 +72,14 @@ describe("운영 배포 기본값(출시 안내 켜짐, 심사 모드 꺼짐)", 
     for (const path of RELEASE_CHECK_APIS.alwaysOpen) expect(send(path, "POST").status).toBe(503);
     for (const path of RELEASE_CHECK_APIS.gated) expect(send(path).status).toBe(503);
   });
+
+  it("수신 거부 처리 API는 POST만 열고 조회는 막는다", () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    for (const path of RELEASE_CHECK_APIS.alwaysOpenPost) {
+      expect(send(path, "POST").status).not.toBe(503);
+      expect(send(path, "GET").status).toBe(503);
+    }
+  });
 });
 
 describe("심사 모드(출시 안내 켜짐, 심사 모드 켜짐)", () => {

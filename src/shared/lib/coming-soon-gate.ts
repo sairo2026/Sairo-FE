@@ -14,12 +14,14 @@ export function isComingSoonMode(env: GateEnv): boolean {
   return env.VERCEL_ENV === "production";
 }
 
-const OPEN_PAGE_PATHS: readonly string[] = ["/pricing", "/legal"];
+const OPEN_PAGE_PATHS: readonly string[] = ["/pricing", "/legal", "/unsubscribe"];
 const OPEN_PAGE_PREFIXES: readonly string[] = ["/legal/"];
 const OPEN_PUBLIC_API_PATHS: readonly string[] = [
   "/api/public/pricing",
   "/api/public/company-info",
 ];
+
+const OPEN_PUBLIC_POST_PATHS: readonly string[] = ["/api/public/marketing-unsubscribe"];
 
 export function isReviewMode(env: GateEnv): boolean {
   return env.REVIEW_MODE === "true";
@@ -55,6 +57,7 @@ export function isGateOpenPath(pathname: string, method: string, env: GateEnv = 
   if (isReviewMode(env) && (isReviewPagePath(pathname) || isApiPath(pathname))) return true;
   if (OPEN_PAGE_PATHS.includes(pathname)) return true;
   if (OPEN_PAGE_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return true;
+  if (method === "POST" && OPEN_PUBLIC_POST_PATHS.includes(pathname)) return true;
   return method === "GET" && OPEN_PUBLIC_API_PATHS.includes(pathname);
 }
 

@@ -42,9 +42,15 @@ export function KakaoStepUpCallback({ error }: { error: string | null }) {
     <AuthFrame title="본인 확인을 마치지 못했습니다" width="sm">
       <div className="flex flex-col gap-4">
         <FormAlert>{FAILURE_MESSAGES[error] ?? FALLBACK_MESSAGE}</FormAlert>
-        <Button variant="outlined" fullWidth onClick={() => router.replace(takeStepUpReturn())}>
-          하던 화면으로 돌아가기
-        </Button>
+        {error === "UNAUTHENTICATED" ? (
+          <Button variant="outlined" fullWidth onClick={() => router.replace("/login")}>
+            로그인으로 이동
+          </Button>
+        ) : (
+          <Button variant="outlined" fullWidth onClick={() => router.replace(takeStepUpReturn())}>
+            하던 화면으로 돌아가기
+          </Button>
+        )}
       </div>
     </AuthFrame>
   );

@@ -1,12 +1,21 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
+import { SelectField } from "@/shared/components/ui/select-field";
 import { formatSeoulDateTime } from "@/shared/lib/format";
+import { OpsFilterBar } from "../components/common/ops-filter-bar";
 import { OpsScreen } from "../components/common/ops-screen";
 import { OpsStatusBadge } from "../components/common/ops-status-badge";
 import { OpsTable, useOpsPaging } from "../components/common/ops-table";
 import { useDeletionList } from "./deletion-api";
-import { DELETION_PHASE, STORE_RESULT, phaseOf, targetTypeLabel } from "./deletion-model";
+import {
+  DELETION_PHASE,
+  STORE_RESULT,
+  TARGET_TYPE_FILTER_OPTIONS,
+  phaseOf,
+  targetTypeLabel,
+} from "./deletion-model";
 import type { DeletionItem } from "./deletion-model";
 
 function resultBadge(value: string | null) {
@@ -23,9 +32,30 @@ const STORE_COLUMNS: { key: string; header: string; pick: (row: DeletionItem) =>
 
 function DeletionTable() {
   const paging = useOpsPaging();
-  const query = useDeletionList({ page: paging.page, size: paging.size });
+  const [draftType, setDraftType] = useState("");
+  const [targetType, setTargetType] = useState("");
+  const query = useDeletionList({ page: paging.page, size: paging.size, targetType });
   return (
     <div className="flex flex-col gap-4">
+      <OpsFilterBar
+        label="파기 큐 조회"
+        onApply={() => {
+          setTargetType(draftType);
+          paging.resetPage();
+        }}
+        onReset={() => {
+          setDraftType("");
+          setTargetType("");
+          paging.resetPage();
+        }}
+      >
+        <SelectField
+          label="대상 종류"
+          value={draftType}
+          options={TARGET_TYPE_FILTER_OPTIONS}
+          onValueChange={setDraftType}
+        />
+      </OpsFilterBar>
       <p className="text-caption text-ink-2">
         실행을 마친 건도 실행자와 다른 운영자가 저장소별 결과를 검증하기 전에는 완료로 표시하지
         않습니다.
