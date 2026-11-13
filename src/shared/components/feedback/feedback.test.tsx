@@ -7,6 +7,7 @@ import { ApiError } from "@/shared/api/client";
 import { createQueryClient } from "@/shared/api/query-client";
 import { normalizeLinkToken } from "@/shared/lib/link-token";
 import { EmptyState } from "./empty-state";
+import { audienceForPath } from "./error-audience";
 import { ERROR_SCREEN_COPY, ErrorScreen } from "./error-screen";
 import { ListSkeleton, PageSkeleton } from "./skeleton";
 import { TokenResourceView } from "./token-resource-view";
@@ -28,6 +29,13 @@ const KINDS: ErrorScreenKind[] = [
 ];
 
 describe("ErrorScreen", () => {
+  it("운영자와 비회원 링크 경로를 각각 해당 오류 안내 대상으로 분류한다", () => {
+    expect(audienceForPath("/ops/billing")).toBe("ops");
+    expect(audienceForPath("/approver/token")).toBe("guest");
+    expect(audienceForPath("/visit-responses/token")).toBe("guest");
+    expect(audienceForPath("/home")).toBe("office");
+  });
+
   it.each(KINDS)("%s 화면은 제목과 안내 문구를 보여준다", (kind) => {
     render(<ErrorScreen kind={kind} />);
     expect(screen.getByRole("heading", { name: ERROR_SCREEN_COPY[kind].title })).not.toBeNull();
