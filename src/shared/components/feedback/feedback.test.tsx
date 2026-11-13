@@ -47,7 +47,7 @@ describe("ErrorScreen", () => {
     expect(screen.getByRole("link", { name: "로그인하기" }).getAttribute("href")).toBe("/login");
     unmount();
     render(<ErrorScreen kind="forbidden" />);
-    expect(screen.getByRole("link", { name: "홈으로" }).getAttribute("href")).toBe("/");
+    expect(screen.getByRole("link", { name: "홈으로" }).getAttribute("href")).toBe("/home");
   });
 
   it("추적 번호를 문의 번호로 보여준다", () => {

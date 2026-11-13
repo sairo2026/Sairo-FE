@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import type { ErrorScreenKind } from "@/shared/api/error-kind";
 import { Button } from "@/shared/components/ui/button";
+import { WORK_HOME_PATH } from "@/shared/lib/app-paths";
 import { useOptionalOfficeAccess } from "@/shared/session/office-access-context";
 import { useErrorAudience } from "./error-audience";
 import type { ErrorAudience } from "./error-audience";
@@ -86,7 +87,10 @@ const AUDIENCE_LINKS: Record<
   ErrorAudience,
   { login: { href: string; label: string } | null; home: { href: string; label: string } | null }
 > = {
-  office: { login: { href: "/login", label: "로그인하기" }, home: { href: "/", label: "홈으로" } },
+  office: {
+    login: { href: "/login", label: "로그인하기" },
+    home: { href: WORK_HOME_PATH, label: "홈으로" },
+  },
   ops: {
     login: { href: "/ops/login", label: "운영자 로그인" },
     home: { href: "/ops", label: "운영 홈으로" },
