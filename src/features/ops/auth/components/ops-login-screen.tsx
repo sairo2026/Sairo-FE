@@ -35,6 +35,13 @@ export function OpsLoginScreen({ errorCode, reason }: { errorCode?: string; reas
           문의해 주세요.
         </OpsNotice>
       ) : null}
+      {errorCode === "INVALID_REQUEST" || errorCode === "RATE_LIMITED" ? (
+        <OpsNotice tone="error">
+          {errorCode === "RATE_LIMITED"
+            ? "요청이 많아 잠시 멈췄습니다. 잠시 뒤 다시 시도해 주세요."
+            : "카카오 인증을 마치지 못했습니다. 인증 시간이 지났거나 취소되었을 수 있으니 다시 시작해 주세요."}
+        </OpsNotice>
+      ) : null}
       {sessionNotice ? <OpsNotice>{sessionNotice}</OpsNotice> : null}
       {me.isSuccess ? <OpsNotice>이미 로그인되어 있어 운영 홈으로 이동합니다.</OpsNotice> : null}
       <a href={OPS_AUTH_PATHS.kakaoStart} className={primaryLinkClass}>

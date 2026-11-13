@@ -61,6 +61,17 @@ describe("홈 대시보드", () => {
     expect(within(link).getByLabelText("읽지 않은 알림 1건")).not.toBeNull();
   });
 
+  it("대표 홈에는 카드 등록 안내 링크가 있고 직원 홈에는 없다", async () => {
+    renderOffice(<HomeDashboard />, { role: "OWNER" });
+    expect((await screen.findByRole("link", { name: "카드 등록 안내" })).getAttribute("href")).toBe(
+      "/billing/card-guide",
+    );
+    cleanup();
+    renderOffice(<HomeDashboard />, { role: "AGENT" });
+    await screen.findByRole("link", { name: "신청 대기 0건" });
+    expect(screen.queryByRole("link", { name: "카드 등록 안내" })).toBeNull();
+  });
+
   it("방문 신청 현황 건수와 읽지 않은 방문 신청 알림 수를 보여준다", async () => {
     setMockWorkState({
       unreadVisitRequestNoticeCount: 3,

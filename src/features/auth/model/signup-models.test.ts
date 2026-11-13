@@ -27,10 +27,8 @@ describe("접근 상태별 이동 화면", () => {
     expect(landingPathFor({ accessCondition })).toBe(path);
   });
 
-  it("활성 상태의 대표는 카드 등록 안내를 거쳐 가고 직원은 홈으로 간다", () => {
-    expect(landingPathFor({ accessCondition: "ACTIVE", role: "OWNER" })).toBe(
-      "/billing/card-guide",
-    );
+  it("활성 상태는 역할과 관계없이 홈으로 보내 카카오 로그인과 도착 경로가 같다", () => {
+    expect(landingPathFor({ accessCondition: "ACTIVE", role: "OWNER" })).toBe("/home");
     expect(landingPathFor({ accessCondition: "ACTIVE", role: "AGENT" })).toBe("/home");
   });
 });
@@ -51,6 +49,7 @@ describe("돌아갈 주소", () => {
 describe("비밀번호 규칙", () => {
   it("코드 포인트 기준 8자 이상 12자 이하를 허용하고 공백도 센다", () => {
     expect(validatePasswordInput("")).toBe("비밀번호를 입력해 주세요.");
+    expect(validatePasswordInput("        ")).toBe("비밀번호를 입력해 주세요.");
     expect(validatePasswordInput("a".repeat(7))).toContain("8자 이상");
     expect(validatePasswordInput("a".repeat(13))).toContain("12자 이하");
     expect(validatePasswordInput("ab cd ef1")).toBeNull();

@@ -52,6 +52,14 @@ describe("운영자 로그인 화면", () => {
     expect(alert.textContent).not.toMatch(/등록되지 않|비활성|존재/);
   });
 
+  it("인가 값 오류와 요청 제한 오류는 다시 시작하라고 안내한다", () => {
+    renderPublicScreen(<OpsLoginScreen errorCode="INVALID_REQUEST" />);
+    expect(screen.getByRole("alert").textContent).toContain("카카오 인증을 마치지 못했습니다");
+    cleanup();
+    renderPublicScreen(<OpsLoginScreen errorCode="RATE_LIMITED" />);
+    expect(screen.getByRole("alert").textContent).toContain("요청이 많아");
+  });
+
   it("알 수 없는 오류 코드는 안내를 만들지 않는다", () => {
     renderPublicScreen(<OpsLoginScreen errorCode="SOMETHING_ELSE" />);
     expect(screen.queryByRole("alert")).toBeNull();
