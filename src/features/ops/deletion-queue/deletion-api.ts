@@ -14,7 +14,7 @@ import type { VerifyKey } from "./deletion-model";
 const SCOPE = "deletion-queue";
 const BASE = "/api/ops/deletion-queue";
 
-export function useDeletionList(params: { page: number; size: number }) {
+export function useDeletionList(params: { page: number; size: number; targetType?: string }) {
   return useQuery({
     queryKey: opsKeys.scope(SCOPE, "list", params),
     queryFn: () => apiFetch(opsPath(BASE, params), { schema: DeletionListSchema }),
