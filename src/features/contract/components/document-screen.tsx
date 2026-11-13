@@ -187,10 +187,7 @@ function UploadDialog({
           onCheckedChange={(value) => set("piiMaskingConfirmed", value)}
         />
         {values.piiMaskingConfirmed ? (
-          <FormNotice>
-            가린 사본은 법정 원본 보존이 완료된 것으로 보지 않습니다. 저장 근거가 없으면 가린 사본만
-            올려 주세요.
-          </FormNotice>
+          <FormNotice>{CONTRACT_ENTRY_COPY.maskedCopy}</FormNotice>
         ) : null}
       </div>
     </Modal>
@@ -332,9 +329,7 @@ function DocumentBody({ detail }: { detail: ContractDetailResponse }) {
                 </p>
               ) : null}
               {document.piiMaskingConfirmed ? (
-                <p className="text-caption text-ink-3">
-                  가린 사본은 법정 원본 보존 완료로 표시하지 않습니다.
-                </p>
+                <p className="text-caption text-ink-3">{CONTRACT_ENTRY_COPY.maskedCopy}</p>
               ) : null}
               <div className="flex flex-wrap items-start gap-2">
                 <DownloadButton contractId={detail.contractId} document={document} />
