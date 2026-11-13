@@ -18,7 +18,9 @@ import { formatSeoulDateTime } from "@/shared/lib/format";
 import {
   KAKAO_GRANT_START_PATH,
   authenticateGrant,
+  createArchiveExport,
   createReturnExport,
+  fetchArchiveExport,
   fetchArchiveGrant,
   fetchReturnExport,
   fetchReturnGrant,
@@ -230,11 +232,12 @@ export function GrantVerifyScreen({
   return <PageSkeleton label="본인 확인 중입니다." />;
 }
 
-function ExportPanel({ grantId }: { grantId: number }) {
+function ExportPanel({ grantId, kind }: { grantId: number; kind: GrantKind }) {
   const [exportId, setExportId] = useState<number | null>(null);
   const [error, setError] = useState<string>();
   const create = useMutation({
-    mutationFn: () => createReturnExport(grantId),
+    mutationFn: () =>
+      kind === "return" ? createReturnExport(grantId) : createArchiveExport(grantId),
     onSuccess: (result) => {
       setError(undefined);
       setExportId(result.exportId);
@@ -242,8 +245,14 @@ function ExportPanel({ grantId }: { grantId: number }) {
     onError: (caught) => setError(describeGrantError(caught)),
   });
   const status = useQuery({
-    queryKey: billingKeys.returnExport(grantId, exportId),
-    queryFn: () => fetchReturnExport(grantId, exportId ?? 0),
+    queryKey:
+      kind === "return"
+        ? billingKeys.returnExport(grantId, exportId)
+        : billingKeys.archiveExport(grantId, exportId),
+    queryFn: () =>
+      kind === "return"
+        ? fetchReturnExport(grantId, exportId ?? 0)
+        : fetchArchiveExport(grantId, exportId ?? 0),
     enabled: exportId !== null,
     refetchInterval: (query) => {
       const state = query.state.data?.status;
@@ -320,7 +329,7 @@ export function ReturnGrantScreen() {
           <DetailList
             items={[{ label: "권한 만료", value: formatSeoulDateTime(query.data.expiresAt) }]}
           />
-          <ExportPanel grantId={query.data.grantId} />
+          <ExportPanel grantId={query.data.grantId} kind="return" />
           <MutedNote>{SESSION_NOTE}</MutedNote>
         </div>
       )}
@@ -375,6 +384,7 @@ export function ArchiveGrantScreen() {
               },
             ]}
           />
+          <ExportPanel grantId={query.data.grantId} kind="archive" />
           <MutedNote>보관 문서 열람은 고객지원으로 요청해 주세요.</MutedNote>
           <MutedNote>{SESSION_NOTE}</MutedNote>
         </div>

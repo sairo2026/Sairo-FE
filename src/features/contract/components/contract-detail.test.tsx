@@ -243,6 +243,7 @@ describe("효력시각별 이력과 정정 버전", () => {
           {
             history: [
               {
+                historyId: 1,
                 track: "CONTRACT",
                 fromStatus: null,
                 toStatus: "SIGNED",
@@ -254,6 +255,7 @@ describe("효력시각별 이력과 정정 버전", () => {
                 createdAt: "2026-10-01T10:00:00+09:00",
               },
               {
+                historyId: 2,
                 track: "LEASE_PERIOD",
                 fromStatus: "BEFORE_START",
                 toStatus: "IN_PROGRESS",
@@ -265,6 +267,7 @@ describe("효력시각별 이력과 정정 버전", () => {
                 createdAt: "2026-10-15T00:01:00+09:00",
               },
               {
+                historyId: 3,
                 track: "CONTRACT",
                 fromStatus: "ENDED",
                 toStatus: "SIGNED",

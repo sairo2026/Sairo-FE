@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { PublicCompanyInfoResponse } from "@/lib/api/contracts/public-site.schema";
 import { CookieNotice } from "@/shared/legal/cookie-notice";
 import { useCompanyInfo } from "../hooks/billing-queries";
 
@@ -17,11 +18,24 @@ function resolveHref(url: string, kind: string): string {
   return url;
 }
 
+function hasPublishedValue(data: PublicCompanyInfoResponse): boolean {
+  return [
+    data.businessName,
+    data.representativeName,
+    data.businessNumber,
+    data.ecommerceNotice,
+    data.address,
+    data.contactPhone,
+    data.supportEmail,
+  ].some((value) => Boolean(value));
+}
+
 export function PublicBusinessFooter() {
   const query = useCompanyInfo();
-  const info = query.data;
-  const links = info?.links?.length
-    ? info.links.map((item) => ({ ...item, url: resolveHref(item.url, item.kind) }))
+  const data = query.data;
+  const info = data && hasPublishedValue(data) ? data : undefined;
+  const links = data?.links?.length
+    ? data.links.map((item) => ({ ...item, url: resolveHref(item.url, item.kind) }))
     : FALLBACK_LINKS;
 
   return (

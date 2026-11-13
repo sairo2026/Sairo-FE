@@ -2,17 +2,17 @@
 import { z } from "zod";
 
 export const PublicCompanyInfoResponseSchema = z.object({
-  versionNo: z.number(),
-  publishedAt: z.iso.datetime({ offset: true }),
-  businessName: z.string(),
-  representativeName: z.string(),
-  businessNumber: z.string(),
-  address: z.string(),
-  contactPhone: z.string(),
+  versionNo: z.number().nullable(),
+  publishedAt: z.iso.datetime({ offset: true }).nullable(),
+  businessName: z.string().nullable(),
+  representativeName: z.string().nullable(),
+  businessNumber: z.string().nullable(),
+  address: z.string().nullable(),
+  contactPhone: z.string().nullable(),
   ecommerceNotice: z.string().nullable(),
-  supportEmail: z.string(),
-  privacyContact: z.string(),
-  privacyRequestPath: z.string(),
+  supportEmail: z.string().nullable(),
+  privacyContact: z.string().nullable(),
+  privacyRequestPath: z.string().nullable(),
   links: z.array(z.object({ kind: z.string(), title: z.string(), url: z.string() })),
 });
 export type PublicCompanyInfoResponse = z.infer<typeof PublicCompanyInfoResponseSchema>;

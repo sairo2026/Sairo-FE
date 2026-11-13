@@ -1,14 +1,14 @@
 import { http, HttpResponse } from "msw";
-import type { ContractRevisionList } from "@/features/contract/api/wire";
 import type {
   ContractDetailResponse,
   ContractStatusHistoryResponse,
+  ContractRevisionListResponse,
 } from "@/lib/api/contracts/contract.schema";
 import { errorResponse, mockErrors } from "../error-responses";
 
 const NOW = "2026-11-10T09:00:00+09:00";
 
-export type MockRevision = ContractRevisionList["items"][number];
+export type MockRevision = ContractRevisionListResponse["items"][number];
 export type MockHistory = ContractStatusHistoryResponse["items"][number];
 export type MockParty = ContractDetailResponse["sellerLandlordParties"][number];
 type Snapshot = MockRevision["currentSnapshot"];
@@ -37,6 +37,9 @@ export function buildMockContractDetail(
 ): ContractDetailResponse {
   return {
     propertyId: 501,
+    propertyAddress: "서울특별시 성북구 정릉로 77",
+    managingMembershipId: 2,
+    managingMemberName: "이중개",
     dealType: "JEONSE",
     contractStatus: "SIGNED",
     leasePeriodStatus: "IN_PROGRESS",
@@ -130,6 +133,7 @@ export function buildMockContract(
     history: signed
       ? [
           {
+            historyId: 1,
             track: "CONTRACT",
             fromStatus: null,
             toStatus: "SIGNED",
@@ -287,6 +291,7 @@ function sign(contract: MockContract, memberName = "이중개"): MockContract {
     ],
     history: [
       {
+        historyId: 2,
         track: "CONTRACT",
         fromStatus: null,
         toStatus: "SIGNED",
@@ -724,6 +729,7 @@ export const contractHandlers = [
       history: [
         ...found.history,
         {
+          historyId: found.history.length + 1,
           track: "CONTRACT",
           fromStatus: found.detail.contractStatus,
           toStatus: body.toStatus,
@@ -774,6 +780,7 @@ export const contractHandlers = [
       history: [
         ...found.history,
         {
+          historyId: found.history.length + 1,
           track: "SETTLEMENT",
           fromStatus: found.detail.settlementStatus,
           toStatus: body.toStatus,

@@ -4,7 +4,7 @@ import type {
   ExportListResponse,
   ExportResultResponse,
 } from "@/lib/api/contracts/migration.schema";
-import type { ImportSupportDetail } from "@/features/migration/api/wire";
+import type { ImportSupportRequestDetailResponse as ImportSupportDetail } from "@/lib/api/contracts/migration.schema";
 import { errorResponse, mockErrors } from "../error-responses";
 import { migrationState } from "./migration";
 
@@ -38,6 +38,9 @@ export function buildMockSupportRequest(
     sourceSystem: "양셀-2026",
     estimatedRowCount: 3000,
     quoteAmount: null,
+    paymentOrderId: null,
+    paymentAmount: null,
+    paidAt: null,
     status: "REQUESTED",
     assignedOperatorName: null,
     processingStartedAt: null,

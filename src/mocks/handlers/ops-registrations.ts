@@ -238,6 +238,8 @@ function canApprove(row: MockRegistration): boolean {
 function detailOf(row: MockRegistration) {
   return {
     registrationId: row.registrationId,
+    officeId: null,
+    reviewDueAt: null,
     applicantUserId: 42,
     businessRegistrationNumber: row.businessRegistrationNumber,
     realEstateLicenseNumber: "11680-2024-00012",

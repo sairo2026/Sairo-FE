@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { ContractStatusHistoryResponse } from "@/lib/api/contracts/contract.schema";
-import type { ContractRevisionList } from "../api/wire";
+import type { ContractRevisionListResponse } from "@/lib/api/contracts/contract.schema";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
 import { EmptyState } from "@/shared/components/feedback/empty-state";
 import { Badge } from "@/shared/components/ui/badge";
@@ -17,7 +17,7 @@ import {
   statusLabelFor,
 } from "../model/labels";
 
-type Revision = ContractRevisionList["items"][number];
+type Revision = ContractRevisionListResponse["items"][number];
 type Snapshot = Revision["currentSnapshot"];
 type HistoryItem = ContractStatusHistoryResponse["items"][number];
 

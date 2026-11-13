@@ -8,6 +8,8 @@ import type {
   StartCustomerAgreementResponse,
 } from "@/lib/api/contracts/billing.schema";
 import type { PublicCompanyInfoResponse } from "@/lib/api/contracts/public-site.schema";
+import { CONSENT_COPY } from "@/features/billing/model/legal-copy";
+import { formatKrw } from "@/shared/lib/format";
 import type {
   InvoiceDetail,
   PublicPricing,
@@ -88,6 +90,21 @@ export const MOCK_COMPANY_INFO: PublicCompanyInfoResponse = {
     { kind: "PRIVACY", title: "개인정보처리방침", url: "/legal/policies/PRIVACY/1.0" },
     { kind: "REFUND", title: "환불정책", url: "/legal/policies/REFUND/1.0" },
   ],
+};
+
+export const EMPTY_COMPANY_INFO: PublicCompanyInfoResponse = {
+  versionNo: null,
+  publishedAt: null,
+  businessName: null,
+  representativeName: null,
+  businessNumber: null,
+  address: null,
+  contactPhone: null,
+  ecommerceNotice: null,
+  supportEmail: null,
+  privacyContact: null,
+  privacyRequestPath: null,
+  links: [],
 };
 
 export function buildSubscription(partial: Partial<SubscriptionCurrent> = {}): SubscriptionCurrent {
@@ -310,6 +327,15 @@ function preview(noticeId: number | null): PurchaseConsentPreviewResponse {
     cancellationTerms:
       "해지는 구독 설정에서 언제든 예약할 수 있고 현재 이용 기간이 끝나면 다음 결제가 되지 않습니다.",
     refundTerms: "환불 기준은 환불정책을 따릅니다.",
+    checkItems: [
+      `[필수] ${CONSENT_COPY.autoCharge(formatKrw(amount))}`,
+      `[필수] ${CONSENT_COPY.cancelRefund}`,
+    ],
+    errorMessages: {
+      TERMS_VERSION_CHANGED: CONSENT_COPY.errors.termsChanged,
+      CONSENT_TERMS_MISMATCH: CONSENT_COPY.errors.amountIncreased,
+      PRICE_CHANGE_NOTICE_CLOSED: CONSENT_COPY.errors.noticeClosed,
+    },
   };
 }
 
@@ -376,9 +402,7 @@ function pageOf<T>(items: T[], url: URL) {
 
 export const billingHandlers = [
   http.get("/api/public/pricing", () => HttpResponse.json(MOCK_PUBLIC_PRICING)),
-  http.get("/api/public/company-info", () =>
-    errorResponse(404, "COMPANY_INFO_NOT_PUBLISHED", "게시된 회사 정보가 없습니다."),
-  ),
+  http.get("/api/public/company-info", () => HttpResponse.json(EMPTY_COMPANY_INFO)),
   http.get("/api/billing/plans", () => HttpResponse.json(plans())),
   http.get("/api/subscriptions/current", () => HttpResponse.json(billingState.subscription)),
   http.get("/api/terms", ({ request }) => {
@@ -597,6 +621,7 @@ export const billingHandlers = [
     if (!billingState.grant.signedIn) return mockErrors.unauthenticated();
     return HttpResponse.json({
       grantId: 12,
+      officeId: 12,
       expiresAt: "2027-12-31T00:00:00+09:00",
       revoked: billingState.grant.revoked,
     });
@@ -630,8 +655,47 @@ export const billingHandlers = [
       fileExpiresAt: "2026-11-11T09:00:00+09:00",
     });
   }),
+  http.post("/api/archive-grants/:grantId/documents/export", () => {
+    if (!billingState.grant.signedIn) return mockErrors.unauthenticated();
+    billingState.grant.exportPolls = 0;
+    return HttpResponse.json(
+      {
+        exportId: 901,
+        status: "PENDING",
+        downloadUrl: null,
+        expiresAt: null,
+        fileExpiresAt: "2026-11-11T09:00:00+09:00",
+      },
+      { status: 201 },
+    );
+  }),
+  http.get("/api/archive-grants/:grantId/documents/exports/:exportId", () => {
+    if (!billingState.grant.signedIn) return mockErrors.unauthenticated();
+    billingState.grant.exportPolls += 1;
+    if (billingState.grant.exportPolls < 2) {
+      return HttpResponse.json({
+        exportId: 901,
+        status: "PENDING",
+        downloadUrl: null,
+        expiresAt: null,
+        fileExpiresAt: "2026-11-11T09:00:00+09:00",
+      });
+    }
+    return HttpResponse.json({
+      exportId: 901,
+      status: "COMPLETED",
+      downloadUrl: "https://files.example.com/archive-901.zip",
+      expiresAt: "2026-11-10T09:10:00+09:00",
+      fileExpiresAt: "2026-11-11T09:00:00+09:00",
+    });
+  }),
   http.get("/api/archive-grants/current", () => {
     if (!billingState.grant.signedIn) return mockErrors.unauthenticated();
-    return HttpResponse.json({ grantId: 13, expiresAt: null, revoked: billingState.grant.revoked });
+    return HttpResponse.json({
+      grantId: 13,
+      officeId: 12,
+      expiresAt: null,
+      revoked: billingState.grant.revoked,
+    });
   }),
 ];
