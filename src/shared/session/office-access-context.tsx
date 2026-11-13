@@ -16,6 +16,10 @@ const OfficeAccessContext = createContext<OfficeAccess | null>(null);
 
 export const OfficeAccessProvider = OfficeAccessContext.Provider;
 
+export function useOptionalOfficeAccess(): OfficeAccess | null {
+  return useContext(OfficeAccessContext);
+}
+
 export function useOfficeAccess(): OfficeAccess {
   const value = useContext(OfficeAccessContext);
   if (value === null) {
