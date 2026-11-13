@@ -6,8 +6,8 @@ import { DateTimeField } from "@/shared/components/ui/date-time-field";
 import { Modal } from "@/shared/components/ui/modal";
 import { Checkbox, SelectField } from "@/shared/components/ui/select-field";
 import { TextAreaField } from "@/shared/components/ui/textarea-field";
-import { TextField } from "@/shared/components/ui/text-field";
 import { formatKrw, formatSeoulDate, formatSeoulDateTime } from "@/shared/lib/format";
+import { OperatorSelect } from "../components/common/operator-select";
 import { OpsFilterBar } from "../components/common/ops-filter-bar";
 import { OpsScreen } from "../components/common/ops-screen";
 import { OpsStatusBadge } from "../components/common/ops-status-badge";
@@ -120,13 +120,13 @@ function ResolveDialog({
           maxLength={500}
           hint="PG 조회 기록이나 정산 자료 등 확인한 근거를 적어 주세요."
         />
-        <TextField
-          label="담당 운영자 ID"
-          kind="number"
+        <OperatorSelect
+          label="담당 운영자"
           value={assignee}
           onValueChange={setAssignee}
           error={errors.assignee}
           hint="비우면 나를 담당으로 기록합니다. 활성 결제담당만 지정할 수 있습니다."
+          emptyLabel="나를 담당으로 기록"
         />
         {failure ? (
           <p role="alert" className="text-caption text-danger">
@@ -190,11 +190,11 @@ export function ReconciliationScreen() {
           options={STATUS_OPTIONS}
           onValueChange={(status) => setDraft({ ...draft, status })}
         />
-        <TextField
-          label="담당 운영자 ID"
-          kind="number"
+        <OperatorSelect
+          label="담당 운영자"
           value={draft.assigned}
           onValueChange={(assigned) => setDraft({ ...draft, assigned })}
+          emptyLabel="전체 담당"
         />
         <Checkbox
           label="미해결 차이만"

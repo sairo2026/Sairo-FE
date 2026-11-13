@@ -270,6 +270,11 @@ describe("승인자 선호 중개사", () => {
     const user = userEvent.setup();
     await openPreferred(user);
     expect(await screen.findByText(/지정 여부는 중개사에게 보이지 않습니다/)).not.toBeNull();
+    expect(
+      screen.getByText(/신청 목록에 선호 표시가 붙습니다\. 신청 목록의 순서에는 쓰이지 않습니다/),
+    ).not.toBeNull();
+    expect(screen.getByText(/지정은 5명까지 할 수 있습니다/)).not.toBeNull();
+    expect(screen.queryByText(/위쪽에 표시/)).toBeNull();
     await user.click(await screen.findByRole("button", { name: "김중개 선호 지정" }));
     expect(await screen.findByText("선호 중개사로 지정했습니다.")).not.toBeNull();
     expect(await screen.findByText(/지정한 중개사 1\/5명/)).not.toBeNull();

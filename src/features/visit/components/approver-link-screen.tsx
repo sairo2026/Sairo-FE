@@ -101,9 +101,12 @@ export function ApproverWorkspace({
   const requests = useApproverRequests(base, enabled);
   const confirmed = useApproverConfirmed(base, enabled);
   const [tab, setTab] = useState("conditions");
+  const [hasLoaded, setHasLoaded] = useState(false);
+  const isInitialLoading = conditions.isPending || requests.isPending || confirmed.isPending;
+  if (!isInitialLoading && !hasLoaded) setHasLoaded(true);
 
   if (!enabled) return <LinkProblem error={null} />;
-  if (conditions.isPending || requests.isPending || confirmed.isPending) return <PageSkeleton />;
+  if (isInitialLoading && !hasLoaded) return <PageSkeleton />;
 
   const sessionError = [conditions.error, requests.error, confirmed.error].find(
     (error) => error instanceof ApiError && error.status === 401,

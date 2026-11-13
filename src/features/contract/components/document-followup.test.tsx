@@ -181,7 +181,7 @@ describe("서류 첨부", () => {
     expect(await screen.findByText(/보존 종료일 미정\(날짜 보완 필요\)/)).not.toBeNull();
     expect(screen.getByText(/날짜 미확인 사유: 교부일 확인 중/)).not.toBeNull();
     expect(screen.getByText("가린 사본")).not.toBeNull();
-    expect(screen.getByText(/법정 원본 보존 완료로 표시하지 않습니다/)).not.toBeNull();
+    expect(screen.getByText(/법령에 따른 원본 보존을 마친 것으로 보지 않습니다/)).not.toBeNull();
   });
 
   it("가린 사본을 고르면 법정 원본 보존 완료가 아니라는 안내가 보인다", async () => {
@@ -192,7 +192,7 @@ describe("서류 첨부", () => {
       within(dialog).getByRole("checkbox", { name: "주민등록번호를 가린 사본입니다" }),
     );
     expect(
-      within(dialog).getByText(/가린 사본은 법정 원본 보존이 완료된 것으로 보지 않습니다/),
+      within(dialog).getByText(/원본은 사무소가 법령에 따라 직접 보존해 주세요/),
     ).not.toBeNull();
   });
 

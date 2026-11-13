@@ -9,6 +9,7 @@ import { resetMockOpsSession, setMockOperatorRoles } from "@/mocks/handlers/ops-
 import { resetMockOpsSystemMonitor } from "@/mocks/handlers/ops-system-monitor";
 import { server, startMockServer } from "@/mocks/server";
 import { formatSeoulDate } from "@/shared/lib/format";
+import { pickOperator } from "../home/testing/pick-operator";
 import { renderOpsScreen } from "../home/testing/render-ops-screen";
 import type { OpsRole } from "../model/roles";
 import { ReconciliationScreen } from "./reconciliation";
@@ -109,11 +110,11 @@ describe("대사 결과 목록", () => {
     await waitFor(() => expect(screen.queryByText("PG 수수료 차이")).toBeNull());
   });
 
-  it("담당 운영자 ID로 걸러낸다", async () => {
+  it("담당 운영자를 골라 걸러낸다", async () => {
     const user = userEvent.setup();
     renderScreen();
     await screen.findByText("PG 수수료 차이");
-    await user.type(screen.getByLabelText("담당 운영자 ID"), "2");
+    await pickOperator(screen.getByLabelText("담당 운영자"), 2);
     await user.click(screen.getByRole("button", { name: "조회" }));
     await waitFor(() =>
       expect(screen.queryByRole("button", { name: "항목 2 해결 기록" })).toBeNull(),
@@ -187,15 +188,6 @@ describe("대사 차이 해결", () => {
     expect(called).toBe(false);
   });
 
-  it("담당 운영자 ID가 숫자가 아니면 안내한다", async () => {
-    const user = userEvent.setup();
-    renderScreen();
-    const dialog = await openResolve(user, 2);
-    await user.type(within(dialog).getByLabelText("담당 운영자 ID"), "0");
-    await user.click(within(dialog).getByRole("button", { name: "해결 기록" }));
-    expect(within(dialog).getByText("담당 운영자 ID를 숫자로 입력해 주세요.")).toBeTruthy();
-  });
-
   it("원인과 근거를 입력해 해결하면 해결됨으로 바뀐다", async () => {
     const user = userEvent.setup();
     renderScreen();
@@ -229,7 +221,7 @@ describe("대사 차이 해결", () => {
     const dialog = await openResolve(user, 3);
     await user.type(within(dialog).getByLabelText("차이 원인"), "a");
     await user.type(within(dialog).getByLabelText("해결 근거"), "b");
-    await user.type(within(dialog).getByLabelText("담당 운영자 ID"), "2");
+    await pickOperator(within(dialog).getByLabelText("담당 운영자"), 2);
     await user.click(within(dialog).getByRole("button", { name: "해결 기록" }));
     await screen.findByText("대사 항목 3의 해결 내용을 기록했습니다.");
     expect(sent).toMatchObject({
@@ -245,7 +237,7 @@ describe("대사 차이 해결", () => {
     const dialog = await openResolve(user, 2);
     await user.type(within(dialog).getByLabelText("차이 원인"), "a");
     await user.type(within(dialog).getByLabelText("해결 근거"), "b");
-    await user.type(within(dialog).getByLabelText("담당 운영자 ID"), "99");
+    await pickOperator(within(dialog).getByLabelText("담당 운영자"), 9);
     await user.click(within(dialog).getByRole("button", { name: "해결 기록" }));
     expect(await within(dialog).findByText(/활성 결제담당 운영자만/)).toBeTruthy();
   });
