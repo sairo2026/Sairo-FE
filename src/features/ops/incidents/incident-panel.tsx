@@ -7,6 +7,7 @@ import { SelectField } from "@/shared/components/ui/select-field";
 import { TextAreaField } from "@/shared/components/ui/textarea-field";
 import { TextField } from "@/shared/components/ui/text-field";
 import { formatSeoulDateTime } from "@/shared/lib/format";
+import { OperatorSelect } from "../components/common/operator-select";
 import { OpsFilterBar } from "../components/common/ops-filter-bar";
 import { OpsStatusBadge } from "../components/common/ops-status-badge";
 import { OpsTable, useOpsPaging } from "../components/common/ops-table";
@@ -91,13 +92,13 @@ function CreateIncidentForm({ onDone }: { onDone: (message: string) => void }) {
           onTimeChange={(startedTime) => set({ startedTime })}
           error={errors.startedDate}
         />
-        <TextField
-          label="담당 운영자 번호"
-          kind="number"
+        <OperatorSelect
+          label="담당 운영자"
           value={input.assignedOperatorId}
           onValueChange={(assignedOperatorId) => set({ assignedOperatorId })}
           error={errors.assignedOperatorId}
           hint="선택 입력입니다."
+          emptyLabel="지정하지 않음"
         />
         <TextAreaField
           label="장애 원인"
