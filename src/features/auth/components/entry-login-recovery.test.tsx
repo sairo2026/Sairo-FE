@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { http } from "msw";
+import { HttpResponse, http } from "msw";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { resetMockAccountState } from "@/mocks/handlers/account";
 import { resetMockAuthState } from "@/mocks/handlers/auth";
@@ -280,15 +280,17 @@ describe("광고성 수신 거부", () => {
     render(<MarketingUnsubscribe token="valid-token-0000000000" />);
     await user.click(screen.getByRole("button", { name: "수신 거부" }));
     expect(await screen.findByText("수신 거부를 처리했습니다")).not.toBeNull();
-    expect(screen.getByRole("status").textContent).toContain("이메일로 알려드립니다");
-    expect(screen.getByText(/내 정보의 동의 내역에서/)).not.toBeNull();
+    expect(screen.getByText(/처리 시각 2026-11-10 09:00\./)).not.toBeNull();
+    expect(screen.getByText(/14일 이내에 이메일로 처리 결과를 알려 드립니다/)).not.toBeNull();
+    expect(screen.getByText(/사이로 내 정보에서 켤 수 있습니다/)).not.toBeNull();
   });
 
   it("이미 철회한 상태면 그렇게 안내한다", async () => {
     const user = userEvent.setup();
     render(<MarketingUnsubscribe token="already-token-000000" />);
     await user.click(screen.getByRole("button", { name: "수신 거부" }));
-    expect(await screen.findByText("이미 수신 거부한 상태입니다")).not.toBeNull();
+    expect(await screen.findByText("이미 수신 거부가 처리되어 있습니다")).not.toBeNull();
+    expect(screen.getByText(/처리 시각 2026-11-10 09:00/)).not.toBeNull();
   });
 
   it("링크가 올바르지 않으면 오류 안내를 보여준다", async () => {
@@ -296,6 +298,49 @@ describe("광고성 수신 거부", () => {
     render(<MarketingUnsubscribe token="invalid-token-000000" />);
     await user.click(screen.getByRole("button", { name: "수신 거부" }));
     expect(await screen.findByText("수신 거부 링크를 확인해 주세요")).not.toBeNull();
+    expect(screen.getByText(/수신 거부 링크가 올바르지 않습니다/)).not.toBeNull();
+  });
+
+  it("토큰 오류가 아닌 400은 링크 오류로 단정하지 않고 다시 시도하게 한다", async () => {
+    server.use(
+      http.post("/api/public/marketing-unsubscribe", () =>
+        mockErrors.validation([
+          { field: "other", code: "INVALID_VALUE", message: "값이 올바르지 않습니다." },
+        ]),
+      ),
+    );
+    const user = userEvent.setup();
+    render(<MarketingUnsubscribe token="valid-token-0000000000" />);
+    await user.click(screen.getByRole("button", { name: "수신 거부" }));
+    expect(await screen.findByRole("alert")).not.toBeNull();
+    expect(screen.getByRole("button", { name: "수신 거부" })).not.toBeNull();
+  });
+
+  it("네트워크 오류면 같은 화면에서 다시 시도할 수 있다", async () => {
+    server.use(http.post("/api/public/marketing-unsubscribe", () => HttpResponse.error()));
+    const user = userEvent.setup();
+    render(<MarketingUnsubscribe token="valid-token-0000000000" />);
+    await user.click(screen.getByRole("button", { name: "수신 거부" }));
+    expect(await screen.findByRole("alert")).not.toBeNull();
+    expect(screen.getByRole("button", { name: "수신 거부" })).not.toBeNull();
+  });
+
+  it("토큰은 주소창에서 지우고 요청 본문으로만 보낸다", async () => {
+    const replaceState = vi.spyOn(window.history, "replaceState");
+    let sent: unknown = null;
+    server.use(
+      http.post("/api/public/marketing-unsubscribe", async ({ request }) => {
+        sent = await request.json();
+        return mockErrors.server();
+      }),
+    );
+    const user = userEvent.setup();
+    render(<MarketingUnsubscribe token="valid-token-0000000000" />);
+    expect(replaceState).toHaveBeenCalledWith(null, "", "/unsubscribe");
+    await user.click(screen.getByRole("button", { name: "수신 거부" }));
+    await screen.findByRole("alert");
+    expect(sent).toEqual({ token: "valid-token-0000000000" });
+    replaceState.mockRestore();
   });
 
   it("토큰이 없거나 형식이 틀린 링크는 바로 오류 안내를 보여준다", () => {
