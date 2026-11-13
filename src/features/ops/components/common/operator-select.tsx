@@ -42,6 +42,7 @@ export function OperatorSelect({
   const items = options.data?.items ?? [];
   const field = (
     <SelectField
+      className="min-w-0 max-w-full"
       label={label}
       value={value}
       disabled={disabled || options.isPending}
