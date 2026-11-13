@@ -34,6 +34,7 @@ const REVIEW_PAGE_ROOTS: readonly string[] = [
   "/office",
   "/billing",
   "/account",
+  "/auth/kakao/step-up/callback",
   "/support",
   "/settings",
   "/access",

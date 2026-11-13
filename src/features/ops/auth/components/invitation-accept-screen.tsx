@@ -131,6 +131,18 @@ export function InvitationAcceptScreen({
         };
     return <OpsPublicFrame title={copy.title} description={copy.description} />;
   }
+  if (errorCode === "INVALID_REQUEST" || errorCode === "RATE_LIMITED") {
+    return (
+      <OpsPublicFrame
+        title="카카오 인증을 마치지 못했습니다"
+        description={
+          errorCode === "RATE_LIMITED"
+            ? "요청이 많아 잠시 멈췄습니다. 잠시 뒤 이메일로 받은 초대 링크를 다시 열어 주세요."
+            : "인증 시간이 지났거나 인증이 취소되었습니다. 이메일로 받은 초대 링크를 다시 열어 처음부터 진행해 주세요."
+        }
+      />
+    );
+  }
   if (!token) {
     return (
       <OpsPublicFrame

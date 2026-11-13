@@ -4,17 +4,13 @@ import { KakaoStepUpCallback } from "@/features/auth/components/kakao-step-up-ca
 
 export const metadata: Metadata = { title: "본인 확인 | 사이로", referrer: "no-referrer" };
 
-type Props = { searchParams: Promise<{ code?: string; state?: string; error?: string }> };
+type Props = { searchParams: Promise<{ error?: string }> };
 
 export default async function Page({ searchParams }: Props) {
-  const { code, state, error } = await searchParams;
+  const { error } = await searchParams;
   return (
     <AccountScreenFrame>
-      <KakaoStepUpCallback
-        code={code ?? null}
-        state={state ?? null}
-        hasError={error !== undefined}
-      />
+      <KakaoStepUpCallback error={error ?? null} />
     </AccountScreenFrame>
   );
 }

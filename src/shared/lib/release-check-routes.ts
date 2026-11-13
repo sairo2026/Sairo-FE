@@ -62,7 +62,7 @@ export const RELEASE_CHECK_GROUPS: readonly ReleaseCheckGroup[] = [
       "/account",
       "/account/consents",
       "/account/withdrawal",
-      "/account/step-up/kakao-callback",
+      "/auth/kakao/step-up/callback",
       "/settings",
       "/settings/contact",
       "/settings/login-methods",

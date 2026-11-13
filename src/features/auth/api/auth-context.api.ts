@@ -1,13 +1,12 @@
 import { z } from "zod";
 import { AuthContextResponseSchema } from "@/lib/api/contracts/common.schema";
 import {
-  KakaoStepUpCallbackResponseSchema,
   PasswordStepUpResponseSchema,
   TermsReconsentResponseSchema,
 } from "@/lib/api/contracts/auth.schema";
 import type { StepUpPasswordRequest, TermsAgreementRequest } from "@/lib/api/contracts/auth.schema";
 import { OpsMeResponseSchema } from "@/lib/api/contracts/ops-session.schema";
-import { apiFetch, withQuery } from "@/shared/api/client";
+import { apiFetch } from "@/shared/api/client";
 
 /** 접근 상태를 직접 판정하는 요청이라 만료 전역 처리 없이 호출자가 401을 해석한다. */
 export function fetchAuthContext() {
@@ -48,15 +47,6 @@ export function stepUpWithPassword(request: StepUpPasswordRequest) {
 }
 
 export const KAKAO_STEP_UP_START_PATH = "/api/auth/step-up/kakao/start";
-
-export function completeKakaoStepUp(request: { code: string; state: string }) {
-  return apiFetch(withQuery("/api/auth/step-up/kakao/callback", request), {
-    schema: KakaoStepUpCallbackResponseSchema,
-    retry: false,
-    skipStepUp: true,
-    skipAuthEvents: true,
-  });
-}
 
 export function fetchOperatorMe() {
   return apiFetch("/api/ops/me", { schema: OpsMeResponseSchema, skipAuthEvents: true });

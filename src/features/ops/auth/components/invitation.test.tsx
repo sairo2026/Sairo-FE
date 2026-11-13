@@ -120,6 +120,12 @@ describe("운영자 초대 확인 화면", () => {
     expect(screen.getByRole("heading", { name: "초대 링크가 만료되었습니다" })).not.toBeNull();
   });
 
+  it("카카오 인증의 인가 값 오류와 요청 제한은 초대 링크를 다시 열라고 안내한다", () => {
+    renderPublicScreen(<InvitationAcceptScreen errorCode="INVALID_REQUEST" />);
+    expect(screen.getByRole("heading", { name: "카카오 인증을 마치지 못했습니다" })).not.toBeNull();
+    expect(screen.getByText(/초대 링크를 다시 열어/)).not.toBeNull();
+  });
+
   it("카카오 인증 시작이 실패하면 오류를 보이고 다시 시도할 수 있다", async () => {
     server.use(
       http.post("/api/ops/auth/invitations/kakao-start", () => mockErrors.rateLimited(30)),

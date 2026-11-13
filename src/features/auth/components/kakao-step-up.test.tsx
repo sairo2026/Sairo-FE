@@ -43,10 +43,10 @@ afterEach(() => {
 afterAll(() => stopServer());
 
 describe("카카오 재인증 콜백", () => {
-  it("확인을 마치면 기억해 둔 화면으로 돌아가고 주소에서 인가 값을 지운다", async () => {
+  it("오류 없이 이동해 오면 기억해 둔 화면으로 돌아가고 주소에서 쿼리를 지운다", async () => {
     rememberStepUpReturn("/settings/office/close?from=settings");
-    window.history.replaceState(null, "", "/account/step-up/kakao-callback?code=ok&state=s1");
-    render(<KakaoStepUpCallback code="ok-code" state="state-1" hasError={false} />);
+    window.history.replaceState(null, "", "/auth/kakao/step-up/callback");
+    render(<KakaoStepUpCallback error={null} />);
     expect(screen.getByRole("status").textContent).toContain("본인 확인을 마치는 중입니다");
     await waitFor(() =>
       expect(navigation.replace).toHaveBeenCalledWith("/settings/office/close?from=settings"),
@@ -55,50 +55,35 @@ describe("카카오 재인증 콜백", () => {
     expect(takeStepUpReturn()).toBe("/home");
   });
 
-  it("인가 값을 서버 콜백에 그대로 전달한다", async () => {
-    let query = "";
-    server.use(
-      http.get("/api/auth/step-up/kakao/callback", ({ request }) => {
-        query = new URL(request.url).search;
-      }),
-    );
-    render(<KakaoStepUpCallback code="ok-code" state="state-1" hasError={false} />);
-    await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/home"));
-    expect(query).toBe("?code=ok-code&state=state-1");
-  });
-
   it("다른 카카오 계정이면 같은 계정으로 다시 확인하라고 안내한다", async () => {
-    render(<KakaoStepUpCallback code="other-account-code" state="state-1" hasError={false} />);
+    render(<KakaoStepUpCallback error="STEP_UP_ACCOUNT_MISMATCH" />);
     expect((await screen.findByRole("alert")).textContent).toContain(
       "로그인한 계정에 연결된 카카오 계정이 아닙니다",
     );
     expect(navigation.replace).not.toHaveBeenCalled();
   });
 
-  it("카카오에서 취소하고 돌아오면 서버에 묻지 않고 안내한다", async () => {
-    let calls = 0;
-    server.use(
-      http.get("/api/auth/step-up/kakao/callback", () => {
-        calls += 1;
-      }),
-    );
-    render(<KakaoStepUpCallback code={null} state="state-1" hasError />);
+  it("인가 값 오류나 취소는 취소 안내를 보인다", async () => {
+    render(<KakaoStepUpCallback error="INVALID_REQUEST" />);
     expect((await screen.findByRole("alert")).textContent).toContain("취소되었거나");
-    expect(calls).toBe(0);
   });
 
   it("실패한 뒤 돌아가기를 누르면 기억해 둔 화면으로 간다", async () => {
     rememberStepUpReturn("/billing");
     const user = userEvent.setup();
-    render(<KakaoStepUpCallback code="expired-code" state="state-1" hasError={false} />);
+    render(<KakaoStepUpCallback error="INVALID_REQUEST" />);
     await user.click(await screen.findByRole("button", { name: "하던 화면으로 돌아가기" }));
     expect(navigation.replace).toHaveBeenCalledWith("/billing");
   });
 
   it("세션이 끝났으면 다시 로그인하라고 안내한다", async () => {
-    server.use(http.get("/api/auth/step-up/kakao/callback", () => mockErrors.unauthenticated()));
-    render(<KakaoStepUpCallback code="ok-code" state="state-1" hasError={false} />);
+    render(<KakaoStepUpCallback error="UNAUTHENTICATED" />);
     expect((await screen.findByRole("alert")).textContent).toContain("다시 로그인한 뒤");
+  });
+
+  it("알 수 없는 오류 코드는 일반 실패 안내를 보인다", async () => {
+    render(<KakaoStepUpCallback error="SOMETHING_ELSE" />);
+    expect((await screen.findByRole("alert")).textContent).toContain("본인 확인을 하지 못했습니다");
   });
 });
 
@@ -130,7 +115,7 @@ describe("재인증 대화상자와 카카오 이동", () => {
     const user = userEvent.setup();
     renderWithQuery(
       <AuthEventsProvider>
-        <KakaoStepUpCallback code="ok-code" state="state-1" hasError={false} />
+        <KakaoStepUpCallback error={null} />
       </AuthEventsProvider>,
     );
     expect(

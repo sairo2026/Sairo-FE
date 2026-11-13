@@ -64,6 +64,7 @@ function TaskOpener({ taskId, onClose }: { taskId: number; onClose: () => void }
 function HomeBody({ summary }: { summary: HomeSummaryResponse }) {
   const { role, isReadOnly } = useOfficeAccess();
   const isDeputy = role === "DEPUTY";
+  const isOwner = role === "OWNER";
   const [creating, setCreating] = useState(false);
   const [openTaskId, setOpenTaskId] = useState<number | null>(null);
   const overdue = summary.openTasks.filter((task) => task.overdue);
@@ -121,6 +122,15 @@ function HomeBody({ summary }: { summary: HomeSummaryResponse }) {
           label="건"
         />
       </div>
+      {isOwner ? (
+        <p className="text-caption text-ink-2">
+          결제 카드를 아직 등록하지 않았다면{" "}
+          <Link href="/billing/card-guide" className="font-semibold text-primary underline">
+            카드 등록 안내
+          </Link>
+          를 확인해 주세요.
+        </p>
+      ) : null}
       <section aria-labelledby="home-visit-requests" className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 id="home-visit-requests" className="text-h2 font-semibold text-ink">
