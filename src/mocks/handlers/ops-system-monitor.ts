@@ -11,6 +11,11 @@ function at(offsetMs: number): string {
   return new Date(Date.now() + offsetMs).toISOString();
 }
 
+function startOfTodayKst(): string {
+  const kstNow = new Date(Date.now() + 9 * HOUR);
+  return `${kstNow.toISOString().slice(0, 10)}T00:00:00+09:00`;
+}
+
 function selfId(): number {
   return getMockOperator()?.operatorId ?? 1;
 }
@@ -268,6 +273,18 @@ function seedJobs(): JobRun[] {
     }),
     job(106, "billing-reconciliation", { errorCode: "STORAGE_UNAVAILABLE" }),
     job(107, "ops-integration-check", { errorCode: "CONNECTION_REFUSED" }),
+    job(108, "billing-renewal", {
+      officeId: 7,
+      officeName: "한빛공인중개사사무소",
+      errorCode: "PG_TIMEOUT",
+    }),
+    job(109, "billing-reconciliation", {
+      status: "SUCCESS",
+      errorCode: null,
+      scheduledAt: startOfTodayKst(),
+      startedAt: startOfTodayKst(),
+      finishedAt: startOfTodayKst(),
+    }),
   ];
 }
 
@@ -376,6 +393,14 @@ function seedIntegrations(): Integration[] {
       provider: "PRIVATE_STORAGE",
       functionCode: "STORAGE",
       processingRegion: null,
+    }),
+    integration(6, {
+      environment: "PRODUCTION",
+      provider: "NICE_SMS",
+      functionCode: "SMS",
+      enabled: false,
+      lastCheckResult: "SUCCESS",
+      approvedByOperatorId: null,
     }),
   ];
 }
@@ -593,7 +618,7 @@ function operatorError(value: unknown) {
 
 const jobHandlers: RequestHandler[] = [
   http.get("/api/ops/system-jobs", ({ request }) => {
-    const rejected = requireMockOps(OPS);
+    const rejected = requireMockOps(["OPS", "BILLING", "PRIVACY", "MIGRATION"]);
     if (rejected) return rejected;
     const url = new URL(request.url);
     const name = url.searchParams.get("jobName");
@@ -886,21 +911,24 @@ const integrationHandlers: RequestHandler[] = [
     const regionChanged =
       typeof body.processingRegion === "string" &&
       body.processingRegion !== target.processingRegion;
-    const activating = body.enabled && !target.enabled;
     const reviewed =
       body.contractNoticeReviewed === true || target.contractNoticeReviewedAt !== null;
-    const ready =
-      contract === "SIGNED" &&
-      (consent === "NOT_REQUIRED" || consent === "GRANTED") &&
-      reviewed &&
-      state.companyInfoTested;
-    if (target.environment === "PRODUCTION" && (activating || providerChanged || regionChanged)) {
-      if (!ready) {
+    const missingItems: string[] = [];
+    if (contract !== "SIGNED") missingItems.push("CONTRACT_SIGNED");
+    if (consent !== "NOT_REQUIRED" && consent !== "GRANTED") missingItems.push("CONSENT");
+    if (!reviewed) missingItems.push("CONTRACT_NOTICE_REVIEW");
+    if (!state.companyInfoTested) missingItems.push("COMPANY_INFO_INQUIRY_DELIVERY_TEST");
+    if (target.environment === "PRODUCTION" && (body.enabled || providerChanged || regionChanged)) {
+      if (missingItems.length > 0) {
         return errorResponse(
           409,
           "INTEGRATION_PREREQUISITE_INCOMPLETE",
           "계약·동의·고지 점검·승인 또는 회사 정보 게시·수신 시험이 끝나지 않았습니다.",
+          { missingItems },
         );
+      }
+      if ((body.enabled && !target.enabled) || target.approvedByOperatorId === null) {
+        target.approvedByOperatorId = selfId();
       }
     }
     target.enabled = body.enabled;

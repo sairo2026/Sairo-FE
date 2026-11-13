@@ -1,10 +1,12 @@
 // @vitest-environment jsdom
-import { cleanup, screen, within } from "@testing-library/react";
+import { cleanup, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { http } from "msw";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { mockErrors } from "@/mocks/error-responses";
 import { resetMockOpsBilling } from "@/mocks/handlers/ops-billing";
 import { resetMockOpsSession, setMockOperatorRoles } from "@/mocks/handlers/ops-session";
+import { resetMockOpsSystemMonitor } from "@/mocks/handlers/ops-system-monitor";
 import { server, startMockServer } from "@/mocks/server";
 import { renderOpsScreen } from "../home/testing/render-ops-screen";
 import type { OpsRole } from "../model/roles";
@@ -25,6 +27,7 @@ afterEach(() => {
   server.resetHandlers();
   resetMockOpsSession();
   resetMockOpsBilling();
+  resetMockOpsSystemMonitor();
 });
 afterAll(() => stopServer());
 
@@ -105,5 +108,53 @@ describe("청구서 상세", () => {
     server.use(http.get("/api/ops/billing/invoices/1", () => mockErrors.rateLimited(5)));
     renderDetail(1);
     expect(await screen.findByText("요청이 너무 많습니다")).toBeTruthy();
+  });
+
+  it("확인 중인 청구서는 확인 중인 주문 ID와 사무소의 결제 작업 실행 이력을 보인다", async () => {
+    renderDetail(2);
+    expect(await screen.findByText("PG 결과 확인")).toBeTruthy();
+    expect(screen.getByText(/^확인 중인 주문 ID: inv2-att\d/)).toBeTruthy();
+    const table = await screen.findByRole("table", { name: "이 사무소의 결제 작업 실행 이력" });
+    expect(await within(table).findByText("정기 결제")).toBeTruthy();
+    expect(within(table).getByText("PG_TIMEOUT")).toBeTruthy();
+    expect(within(table).getByRole("button", { name: "실행 108 다시 실행" })).toBeTruthy();
+  });
+
+  it("결제 완료 청구서에는 PG 결과 확인 영역이 없다", async () => {
+    renderDetail(1);
+    await screen.findByText("청구 스냅샷");
+    expect(screen.queryByText("PG 결과 확인")).toBeNull();
+  });
+
+  it("최신 결과 불러오기는 청구서를 다시 조회한다", async () => {
+    let calls = 0;
+    server.use(
+      http.get("/api/ops/billing/invoices/2", () => {
+        calls += 1;
+      }),
+    );
+    const user = userEvent.setup();
+    renderDetail(2);
+    await user.click(await screen.findByRole("button", { name: "최신 결과 불러오기" }));
+    await waitFor(() => expect(calls).toBe(2));
+  });
+
+  it("실패한 결제 작업을 확인 뒤 원래 주문으로 다시 실행한다", async () => {
+    const user = userEvent.setup();
+    renderDetail(2);
+    await user.click(await screen.findByRole("button", { name: "실행 108 다시 실행" }));
+    const dialog = screen.getByRole("dialog");
+    expect(within(dialog).getByText(/이미 성공한 결제는 다시 청구하지 않습니다/)).toBeTruthy();
+    await user.click(within(dialog).getByRole("button", { name: "다시 실행" }));
+    expect(await screen.findByText(/실행 108를 원래 주문으로 다시 실행했습니다/)).toBeTruthy();
+  });
+
+  it("다시 실행이 거절되면 사유를 알린다", async () => {
+    server.use(http.post("/api/ops/system-jobs/:jobName/rerun", () => mockErrors.forbidden()));
+    const user = userEvent.setup();
+    renderDetail(2);
+    await user.click(await screen.findByRole("button", { name: "실행 108 다시 실행" }));
+    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "다시 실행" }));
+    expect(await screen.findByText("이 처리를 할 수 있는 운영 역할이 아닙니다.")).toBeTruthy();
   });
 });

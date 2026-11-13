@@ -79,5 +79,36 @@ test.describe("시나리오 8 갱신 결제 타임아웃과 결과 확인", () =
     );
   });
 
-  test.fixme("같은 주문 ID로 PG 결과를 다시 조회해 중복 승인 없이 결제 성공 또는 확정 실패로 끝난다 (화면 없음: 청구서 상세에 PG 결과 확인 동작과 처리기가 없고 사무소 청구서는 확인 중 상태를 받지 않는다)", async () => {});
+  test("청구서 상세에서 확인 중인 주문과 사무소의 결제 작업 이력을 보고 실패한 작업을 원래 주문으로 다시 실행한다", async ({
+    page,
+  }) => {
+    await page.goto("/ops/billing/invoices/2");
+
+    await test.step("PG 결과 확인 영역에 확인 중인 주문 ID와 자동 재조회 안내가 나온다", async () => {
+      await expect(page.getByText("확인 중인 주문 ID: inv2-att2-c9d1")).toBeVisible();
+      await expect(
+        page.getByText(/같은 주문 ID로 결제대행사 결과를 자동으로 다시 조회합니다/),
+      ).toBeVisible();
+    });
+
+    await test.step("이 사무소의 실패한 정기 결제 작업을 원래 멱등키로 다시 실행한다", async () => {
+      const runs = page.getByRole("table", { name: "이 사무소의 결제 작업 실행 이력" });
+      await expect(runs.getByRole("row").filter({ hasText: "PG_TIMEOUT" })).toContainText(
+        "정기 결제",
+      );
+      await page.getByRole("button", { name: "실행 108 다시 실행" }).click();
+      await page
+        .getByRole("dialog")
+        .getByRole("button", { name: "다시 실행", exact: true })
+        .click();
+      await expect(page.getByText(/실행 108를 원래 주문으로 다시 실행했습니다/)).toBeVisible();
+    });
+
+    await test.step("최신 결과를 다시 불러와도 같은 주문이 확인 중으로 남는다", async () => {
+      await page.getByRole("button", { name: "최신 결과 불러오기" }).click();
+      await expect(page.getByText("확인 중인 주문 ID: inv2-att2-c9d1")).toBeVisible();
+    });
+  });
+
+  test.fixme("확인 중인 결제가 중복 승인 없이 결제 성공 또는 확정 실패로 끝난다 (모의 API 공백: 모의 청구서의 확인 중 상태가 바뀌지 않고 사무소 청구서는 확인 중 상태를 받지 않는다)", async () => {});
 });

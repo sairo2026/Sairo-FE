@@ -41,5 +41,6 @@ export const ApiErrorBodySchema = z.object({
   changedItems: z.array(z.record(z.string(), z.unknown())).optional(),
   violatedRules: z.array(z.string()).optional(),
   affectedItems: z.array(z.record(z.string(), z.unknown())).optional(),
+  missingItems: z.array(z.string()).optional(),
 });
 export type ApiErrorBody = z.infer<typeof ApiErrorBodySchema>;
