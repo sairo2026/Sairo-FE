@@ -17,7 +17,10 @@ export const LegalCompanyInfoSchema = PublicCompanyInfoResponseSchema.partial({
   privacyRequestPath: true,
   links: true,
   ecommerceNotice: true,
-}).extend({ ecommerceNotice: z.string().nullable().optional() });
+}).extend({
+  contactPhone: z.string().nullable().optional(),
+  ecommerceNotice: z.string().nullable().optional(),
+});
 export type LegalCompanyInfo = z.infer<typeof LegalCompanyInfoSchema>;
 
 export function fetchLegalCompanyInfo() {

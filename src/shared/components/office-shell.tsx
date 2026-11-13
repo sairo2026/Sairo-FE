@@ -7,7 +7,7 @@ export type OfficeShellProps = {
 };
 
 const navigation = [
-  { key: "home", label: "홈 (오늘 할 일)", href: "/" },
+  { key: "home", label: "홈 (오늘 할 일)", href: "/home" },
   { key: "properties", label: "매물 관리", href: "/properties" },
   { key: "coordinations", label: "임장 조율", href: "/coordinations" },
 ] as const;

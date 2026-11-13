@@ -22,7 +22,7 @@ function pickRedirectTarget(
 ): string | null {
   if (isUnauthenticated) return AUTH_ROUTES.login;
   if (isReconsentRequired) return AUTH_ROUTES.reconsent;
-  if (hasNothingToShow) return "/";
+  if (hasNothingToShow) return "/home";
   return null;
 }
 

@@ -10,25 +10,10 @@ import { Card } from "@/shared/components/ui/card";
 import { PageHeader } from "@/shared/components/ui/page-header";
 import { formatKrw } from "@/shared/lib/format";
 import { PRICING_COPY, trialNoticeText } from "../model/legal-copy";
+import { tierFormula, tierRange } from "../model/pricing-tier";
 import { describeBillingError, COPY } from "../model/messages";
 import { CommerceNotice } from "./commerce-notice";
 import { usePublicPricing } from "../hooks/billing-queries";
-import type { PublicPricing } from "../api/wire";
-
-type Tier = PublicPricing["plans"][number];
-
-function tierRange(tier: Tier): string {
-  if (tier.maxMembers === null) return `${tier.minMembers}인 이상`;
-  if (tier.minMembers === tier.maxMembers) return `${tier.minMembers}인`;
-  return `${tier.minMembers}~${tier.maxMembers}인`;
-}
-
-function tierFormula(tier: Tier): string {
-  if (tier.perSeatAmount === null || tier.perSeatAmount === undefined) {
-    return `월 ${formatKrw(tier.baseAmount)}`;
-  }
-  return `월 ${formatKrw(tier.baseAmount)} + (인원 - ${tier.includedMembers}) × ${formatKrw(tier.perSeatAmount)}`;
-}
 
 export function PublicPricingScreen() {
   const query = usePublicPricing();

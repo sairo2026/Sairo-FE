@@ -103,3 +103,57 @@ describe("심사 모드 프록시", () => {
     );
   });
 });
+
+describe("서비스 첫 화면 프록시", () => {
+  const sessionCookie = { headers: { cookie: "__Host-sairo_session=opaque" } };
+
+  it("출시 준비 모드에서는 첫 화면 경로를 안내 페이지로 연결한다", () => {
+    vi.stubEnv("COMING_SOON", "true");
+    const response = proxy(new NextRequest("https://app.sairo.agency/", sessionCookie));
+    expect(response.headers.get("x-middleware-rewrite")).toBe(
+      "https://app.sairo.agency/coming-soon",
+    );
+  });
+
+  it("출시 준비 모드를 끄면 로그인하지 않은 방문자에게 첫 화면을 그대로 보여준다", () => {
+    vi.stubEnv("COMING_SOON", "false");
+    const response = proxy(new NextRequest("https://app.sairo.agency/"));
+    expect(response.headers.get("x-middleware-next")).toBe("1");
+    expect(response.headers.get("location")).toBeNull();
+  });
+
+  it("출시 준비 모드를 끄면 로그인 세션이 있는 방문자를 업무 홈으로 보낸다", () => {
+    vi.stubEnv("COMING_SOON", "false");
+    const response = proxy(new NextRequest("https://app.sairo.agency/", sessionCookie));
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe("https://app.sairo.agency/home");
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+  });
+
+  it("로그인 세션이 있어도 첫 화면이 아닌 경로는 옮기지 않는다", () => {
+    vi.stubEnv("COMING_SOON", "false");
+    const response = proxy(new NextRequest("https://app.sairo.agency/pricing", sessionCookie));
+    expect(response.headers.get("x-middleware-next")).toBe("1");
+  });
+
+  it("운영자 세션만 있는 방문자는 첫 화면에 머문다", () => {
+    vi.stubEnv("COMING_SOON", "false");
+    const response = proxy(
+      new NextRequest("https://app.sairo.agency/", {
+        headers: { cookie: "__Host-sairo_ops_session=opaque" },
+      }),
+    );
+    expect(response.headers.get("x-middleware-next")).toBe("1");
+  });
+
+  it("심사 모드에서는 첫 화면과 업무 홈을 열고 로그인 세션이 있으면 업무 홈으로 보낸다", () => {
+    vi.stubEnv("COMING_SOON", "true");
+    vi.stubEnv("REVIEW_MODE", "true");
+    const landing = proxy(new NextRequest("https://app.sairo.agency/"));
+    expect(landing.headers.get("x-middleware-next")).toBe("1");
+    const home = proxy(new NextRequest("https://app.sairo.agency/home"));
+    expect(home.headers.get("x-middleware-next")).toBe("1");
+    const signedIn = proxy(new NextRequest("https://app.sairo.agency/", sessionCookie));
+    expect(signedIn.headers.get("location")).toBe("https://app.sairo.agency/home");
+  });
+});

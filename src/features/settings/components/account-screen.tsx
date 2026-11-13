@@ -174,7 +174,7 @@ function OfficeCard() {
     onSuccess: async () => {
       setIsLeaving(false);
       await queryClient.invalidateQueries();
-      router.replace("/");
+      router.replace("/home");
     },
     onError: (caught) => {
       setIsLeaving(false);

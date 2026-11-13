@@ -42,7 +42,7 @@ export function ReconsentNotice() {
     mutationFn: agreeToAll,
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: authContextQueryKey });
-      router.replace("/");
+      router.replace("/home");
     },
     onError: (error) => {
       if (error instanceof ApiError && error.code === "TERMS_VERSION_CHANGED") {
@@ -53,7 +53,7 @@ export function ReconsentNotice() {
 
   const isUnauthenticated = query.error instanceof ApiError && query.error.status === 401;
   const isDone = query.data !== undefined && !query.data.reconsentRequired;
-  const redirectTarget = isUnauthenticated ? AUTH_ROUTES.login : isDone ? "/" : null;
+  const redirectTarget = isUnauthenticated ? AUTH_ROUTES.login : isDone ? "/home" : null;
 
   useEffect(() => {
     if (redirectTarget !== null) router.replace(redirectTarget);
