@@ -27,6 +27,7 @@ export function submitGuestPrivacyIntake(request: {
       method: "POST",
       body: { approvalId: target.approvalId, ...common },
       schema: GuestPrivacyIntakeResponseSchema,
+      skipAuthEvents: true,
       skipStepUp: true,
     });
   }
