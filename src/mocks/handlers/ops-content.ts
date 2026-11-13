@@ -683,6 +683,13 @@ const COMPANY_REQUIRED = [
   "cancellationPath",
 ] as const;
 
+type PublicPrice = Omit<MockPrice, "createdBy">;
+
+export function findMockPriceSchedule(scheduleId: number): PublicPrice | null {
+  const found = state.prices.find((row) => row.scheduleId === scheduleId);
+  return found ? publicPrice(found) : null;
+}
+
 export const opsPriceScheduleHandlers: RequestHandler[] = [
   http.get("/api/ops/price-schedules", ({ request }) => {
     const rejected = requireMockOps(BILLING);

@@ -2,6 +2,7 @@ import { http, HttpResponse } from "msw";
 import type { RequestHandler } from "msw";
 import { formatSeoulDate } from "@/shared/lib/format";
 import { errorResponse, mockErrors } from "../error-responses";
+import { findMockPriceSchedule } from "./ops-content";
 import { getMockOperator, requireMockOps, requireMockStepUp } from "./ops-session";
 
 const DAY = 86_400_000;
@@ -550,6 +551,13 @@ function freshState(): BillingState {
 
 const state = freshState();
 
+function findSchedule(scheduleId: number): MockSchedule | null {
+  return (
+    state.schedules.find((row) => row.scheduleId === scheduleId) ??
+    findMockPriceSchedule(scheduleId)
+  );
+}
+
 export function resetMockOpsBilling(): void {
   Object.assign(state, freshState());
 }
@@ -1042,7 +1050,7 @@ export const opsBillingHandlers: RequestHandler[] = [
   http.post("/api/ops/price-schedules/:id/notices", async ({ params, request }) => {
     const rejected = requireMockOps(["BILLING"]);
     if (rejected) return rejected;
-    const schedule = state.schedules.find((item) => String(item.scheduleId) === String(params.id));
+    const schedule = findSchedule(Number(params.id));
     if (!schedule) return mockErrors.notFound();
     const body = await readBody(request);
     const ids = Array.isArray(body.officeIds) ? body.officeIds : null;
@@ -1109,7 +1117,8 @@ export const opsBillingHandlers: RequestHandler[] = [
     const event = EVENTS.find((item) => item.trialEventId === body.trialEventId);
     if (!event)
       errors.push({ field: "trialEventId", message: "시작 고객 이벤트를 확인해 주세요." });
-    const schedule = state.schedules.find((item) => item.scheduleId === body.priceScheduleId);
+    const schedule =
+      typeof body.priceScheduleId === "number" ? findSchedule(body.priceScheduleId) : null;
     if (!schedule || schedule.audience !== "START_CUSTOMER")
       errors.push({ field: "priceScheduleId", message: "시작 고객 가격 버전을 확인해 주세요." });
     const months = body.guaranteeMonths;

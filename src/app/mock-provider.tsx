@@ -11,7 +11,13 @@ export function MockProvider({ children }: { children: ReactNode }) {
     if (process.env.NEXT_PUBLIC_API_MOCKING !== "enabled") return;
     let isActive = true;
     void import("@/mocks/browser")
-      .then(({ worker }) => worker.start({ onUnhandledRequest: "bypass" }))
+      .then(({ worker }) =>
+        worker.start({
+          onUnhandledRequest(request, print) {
+            if (new URL(request.url).pathname.startsWith("/api/")) print.warning();
+          },
+        }),
+      )
       .then(() => {
         if (isActive) setIsReady(true);
       });
