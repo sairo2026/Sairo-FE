@@ -274,7 +274,7 @@ describe("AccessNoticeScreen", () => {
 
   it("활성 상태면 홈으로 보내고 로그인하지 않았으면 로그인으로 보낸다", async () => {
     const { unmount } = renderWithQuery(<AccessNoticeScreen />);
-    await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/"));
+    await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/home"));
     unmount();
     navigation.replace.mockClear();
     setMockAuthContext(null);
@@ -304,12 +304,12 @@ describe("ReconsentNotice", () => {
     );
     expect(screen.getByText("자동결제 안내 문구가 추가되었습니다")).not.toBeNull();
     await userEvent.click(screen.getByRole("button", { name: "동의하고 계속" }));
-    await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/"));
+    await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/home"));
   });
 
   it("재동의할 항목이 없으면 홈으로 보낸다", async () => {
     renderWithQuery(<ReconsentNotice />);
-    await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/"));
+    await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/home"));
   });
 
   it("그 사이 약관이 다시 바뀌면 알리고 목록을 다시 불러온다", async () => {

@@ -716,7 +716,9 @@ function MembershipStatusBody({ membership }: { membership: MembershipStatus }) 
       {error ? <FormAlert>{error}</FormAlert> : null}
 
       <ButtonRow>
-        {status === "APPROVED" ? <Button onClick={() => router.push("/")}>업무 시작</Button> : null}
+        {status === "APPROVED" ? (
+          <Button onClick={() => router.push("/home")}>업무 시작</Button>
+        ) : null}
         {status === "REJECTED" && membership.resolved !== true && !isReapplying ? (
           <Button onClick={() => setIsReapplying(true)}>재신청 시작</Button>
         ) : null}

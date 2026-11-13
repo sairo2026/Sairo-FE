@@ -1,3 +1,5 @@
+import { LANDING_PATH } from "./app-paths";
+
 type GateEnv = Readonly<Record<string, string | undefined>>;
 
 export const COMING_SOON_PATH = "/coming-soon";
@@ -24,6 +26,7 @@ export function isReviewMode(env: GateEnv): boolean {
 }
 
 const REVIEW_PAGE_ROOTS: readonly string[] = [
+  "/home",
   "/login",
   "/signup",
   "/password",
@@ -52,4 +55,10 @@ export function isGateOpenPath(pathname: string, method: string, env: GateEnv = 
   if (OPEN_PAGE_PATHS.includes(pathname)) return true;
   if (OPEN_PAGE_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return true;
   return method === "GET" && OPEN_PUBLIC_API_PATHS.includes(pathname);
+}
+
+export const MEMBER_SESSION_COOKIE = "__Host-sairo_session";
+
+export function shouldSendToWorkHome(pathname: string, hasMemberSession: boolean): boolean {
+  return pathname === LANDING_PATH && hasMemberSession;
 }

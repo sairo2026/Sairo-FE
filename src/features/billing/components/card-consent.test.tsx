@@ -299,12 +299,12 @@ describe("로그인 직후 카드 등록 안내", () => {
     const user = userEvent.setup();
     const view = renderOffice(<CardGuideScreen />, { role: "OWNER" });
     await user.click(await screen.findByRole("button", { name: "나중에 하기" }));
-    expect(router.replace).toHaveBeenCalledWith("/");
+    expect(router.replace).toHaveBeenCalledWith("/home");
     expect(window.sessionStorage.getItem(CARD_GUIDE_SKIP_KEY)).toBe("1");
     view.unmount();
     router.replace.mockClear();
     renderOffice(<CardGuideScreen />, { role: "OWNER" });
-    await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/"));
+    await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/home"));
   });
 
   it("이미 카드가 있으면 바로 홈으로 보낸다", async () => {
@@ -312,13 +312,13 @@ describe("로그인 직후 카드 등록 안내", () => {
       readiness: { hasBillingKey: true, hasValidConsent: true },
     });
     renderOffice(<CardGuideScreen />, { role: "OWNER" });
-    await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/"));
+    await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/home"));
   });
 
   it("조회가 실패해도 로그인 흐름을 막지 않고 홈으로 보낸다", async () => {
     server.use(http.get("/api/subscriptions/current", () => mockErrors.server()));
     renderOffice(<CardGuideScreen />, { role: "OWNER" });
-    await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/"));
+    await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/home"));
   });
 });
 

@@ -161,7 +161,7 @@ describe("소속 사무소", () => {
     await user.click(
       within(screen.getByRole("dialog")).getByRole("button", { name: "사무소 나가기" }),
     );
-    await waitFor(() => expect(replace).toHaveBeenCalledWith("/"));
+    await waitFor(() => expect(replace).toHaveBeenCalledWith("/home"));
     expect(settingsState.leaveCount).toBe(1);
   });
 
