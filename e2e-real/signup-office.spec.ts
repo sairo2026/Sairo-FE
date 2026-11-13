@@ -38,8 +38,8 @@ test("signup uses actual email and phone codes from the local backend", async ({
 
   const mail = await capturedMessage(request, "mail", email);
   const link = mail.body.match(/https?:\/\/\S+\/signup\/verify-email\?token=[^\s]+/)?.[0];
-  expect(link, "actual issued email link").toBeTruthy();
-  const verification = new URL(link!);
+  if (!link) throw new Error("actual issued email link is missing");
+  const verification = new URL(link);
   await page.goto(verification.pathname + verification.search);
   await expect(page.getByText("인증이 완료되었습니다.").first()).toBeVisible();
 
@@ -47,8 +47,8 @@ test("signup uses actual email and phone codes from the local backend", async ({
   await page.getByRole("button", { name: "인증번호 받기" }).click();
   const sms = await capturedMessage(request, "sms", phone);
   const code = sms.body.match(/\b\d{6}\b/)?.[0];
-  expect(code, "actual issued phone code").toBeTruthy();
-  await page.getByLabel(/^인증번호/).fill(code!);
+  if (!code) throw new Error("actual issued phone code is missing");
+  await page.getByLabel(/^인증번호/).fill(code);
   await page.getByRole("button", { name: "확인", exact: true }).click();
   await expect(page.getByText("인증이 완료되었습니다.")).toHaveCount(2);
   await page.getByLabel(/이용약관에 동의합니다/).check({ force: true });
