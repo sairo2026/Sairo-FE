@@ -95,7 +95,7 @@ test.describe("시나리오 1 이메일 가입부터 사무소 승인 뒤 로그
     await page.getByRole("button", { name: "승인", exact: true }).click();
     await page.getByRole("dialog").getByRole("button", { name: "승인", exact: true }).click();
     await expect(page.getByText("인증 신청을 승인했습니다.")).toBeVisible();
-    await expect(page.getByText("인증 회수는 고객사 상세에서 합니다.")).toBeVisible();
+    await expect(page.getByRole("button", { name: "사무소 인증 회수" })).toBeVisible();
   });
 
   test.fixme("운영자 승인이 가입자의 신청 31번과 접근 상태에 반영된다 (모의 API 공백: 사무소 신청과 운영 심사 목록이 서로 다른 모의 저장소)", async () => {});
