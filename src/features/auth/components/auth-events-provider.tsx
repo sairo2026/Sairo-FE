@@ -4,7 +4,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
-import { setStepUpHandler, subscribeApiAuthEvents } from "@/shared/api/auth-events";
+import {
+  setStepUpHandler,
+  subscribeApiAuthEvents,
+  subscribeStepUpCompleted,
+} from "@/shared/api/auth-events";
 import { OpsStepUpDialog } from "@/features/ops/components/common/ops-step-up-dialog";
 import { authContextQueryKey, operatorQueryKey } from "../hooks/use-auth-context";
 import { AUTH_ROUTES } from "../model/routes";
@@ -27,6 +31,7 @@ export function AuthEventsProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const [isSessionExpired, setIsSessionExpired] = useState(false);
   const [stepUp, setStepUp] = useState<StepUpRequest | null>(null);
+  const [hasStepUpNotice, setHasStepUpNotice] = useState(false);
   const pendingStepUp = useRef<Promise<boolean> | null>(null);
   const pathnameRef = useRef(pathname);
 
@@ -64,6 +69,8 @@ export function AuthEventsProvider({ children }: { children: ReactNode }) {
     return () => setStepUpHandler(null);
   }, []);
 
+  useEffect(() => subscribeStepUpCompleted(() => setHasStepUpNotice(true)), []);
+
   const finishStepUp = useCallback(
     (isSuccess: boolean) => {
       stepUp?.resolve(isSuccess);
@@ -82,6 +89,22 @@ export function AuthEventsProvider({ children }: { children: ReactNode }) {
     <>
       {children}
       {isSessionExpired ? <SessionExpiredDialog onConfirm={confirmSessionExpired} /> : null}
+      {hasStepUpNotice ? (
+        <div
+          role="status"
+          className="fixed right-4 bottom-4 left-4 z-[60] flex items-center justify-between gap-3 rounded-control border border-tag-green bg-tag-green px-4 py-3 text-caption font-medium text-tag-green-ink shadow-popup sm:left-auto"
+        >
+          <span>카카오로 본인 확인을 마쳤습니다. 10분 안에 하던 작업을 다시 진행해 주세요.</span>
+          <button
+            type="button"
+            aria-label="본인 확인 알림 닫기"
+            onClick={() => setHasStepUpNotice(false)}
+            className="flex size-6 shrink-0 items-center justify-center text-current"
+          >
+            ×
+          </button>
+        </div>
+      ) : null}
       {stepUp && isOpsPath(pathname) ? (
         <OpsStepUpDialog
           onSuccess={() => finishStepUp(true)}

@@ -62,7 +62,7 @@ export function MarketingUnsubscribe({ token }: { token: string | null }) {
               ? `${formatSeoulDate(result.expressedAt)}에 광고성 이메일 수신을 이미 철회했습니다.`
               : `${formatSeoulDateTime(result.processedAt)}에 처리했습니다. 이제 광고성 이메일을 보내지 않습니다.`}
           </p>
-          {!isAlready ? (
+          {!isAlready && result.emailNoticeScheduled ? (
             <FormNotice>
               처리 결과는 {formatSeoulDate(result.resultNoticeDueAt)}까지 이메일로 알려드립니다.
             </FormNotice>

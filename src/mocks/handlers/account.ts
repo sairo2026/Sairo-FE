@@ -391,7 +391,7 @@ export const accountHandlers = [
       expressedAt: NOW,
       processedAt: NOW,
       resultNoticeDueAt: "2026-11-24T09:00:00+09:00",
-      emailNoticeScheduled: true,
+      emailNoticeScheduled: status === "UNSUBSCRIBED" && body.token !== "no-email-token-000000",
     });
   }),
 
