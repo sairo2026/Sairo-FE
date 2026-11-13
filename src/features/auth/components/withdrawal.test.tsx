@@ -19,6 +19,7 @@ const navigation = vi.hoisted(() => ({ replace: vi.fn(), back: vi.fn() }));
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: navigation.replace, back: navigation.back }),
+  usePathname: () => "/account/withdrawal",
 }));
 
 let stopServer: () => void;
