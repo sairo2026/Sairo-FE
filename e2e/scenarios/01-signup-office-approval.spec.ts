@@ -107,6 +107,6 @@ test.describe("시나리오 1 이메일 가입부터 사무소 승인 뒤 로그
     await page.getByLabel(/^이메일/).fill("agent@example.com");
     await page.getByLabel(/^비밀번호/).fill("mock-password-1");
     await page.getByRole("button", { name: "로그인", exact: true }).click();
-    await expect(page).toHaveURL((url) => url.pathname === "/");
+    await expect(page).toHaveURL((url) => url.pathname === "/home");
   });
 });

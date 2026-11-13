@@ -3,7 +3,7 @@ type AccessInfo = { accessCondition: string; role?: string | null };
 export function landingPathFor(context: AccessInfo): string {
   switch (context.accessCondition) {
     case "ACTIVE":
-      return context.role === "OWNER" ? "/billing/card-guide" : "/";
+      return context.role === "OWNER" ? "/billing/card-guide" : "/home";
     case "PRE_VERIFICATION":
       return "/office/start";
     case "OFFICE_UNDER_REVIEW":

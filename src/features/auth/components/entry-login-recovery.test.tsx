@@ -103,7 +103,7 @@ describe("이메일 로그인", () => {
     await user.type(screen.getByLabelText("이메일"), "agent@example.com");
     await user.type(screen.getByLabelText("비밀번호"), "mock-password-1");
     await user.click(screen.getByRole("button", { name: "로그인" }));
-    await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/"));
+    await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/home"));
   });
 
   it("돌아갈 주소가 안전하면 그곳으로 이동한다", async () => {
@@ -121,7 +121,7 @@ describe("이메일 로그인", () => {
     await user.type(screen.getByLabelText("이메일"), "agent@example.com");
     await user.type(screen.getByLabelText("비밀번호"), "mock-password-1");
     await user.click(screen.getByRole("button", { name: "로그인" }));
-    await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/"));
+    await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/home"));
   });
 
   it("미가입과 비밀번호 오류는 같은 문구로 안내한다", async () => {

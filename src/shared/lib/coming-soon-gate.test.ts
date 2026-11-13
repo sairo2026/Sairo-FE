@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { isComingSoonMode, isGateOpenPath, isReviewMode } from "./coming-soon-gate";
+import {
+  isComingSoonMode,
+  isGateOpenPath,
+  isReviewMode,
+  shouldSendToWorkHome,
+} from "./coming-soon-gate";
 
 describe("isComingSoonMode", () => {
   it("운영 배포에서는 플래그가 없어도 켜진다", () => {
@@ -91,4 +96,13 @@ describe("심사 모드", () => {
       expect(isGateOpenPath(pathname, "GET", review)).toBe(false);
     },
   );
+});
+
+describe("첫 화면에서 업무 홈으로 보내는 조건", () => {
+  it("첫 화면 경로이고 회원 세션이 있을 때만 참이다", () => {
+    expect(shouldSendToWorkHome("/", true)).toBe(true);
+    expect(shouldSendToWorkHome("/", false)).toBe(false);
+    expect(shouldSendToWorkHome("/home", true)).toBe(false);
+    expect(shouldSendToWorkHome("/pricing", true)).toBe(false);
+  });
 });

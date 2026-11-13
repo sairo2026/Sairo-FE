@@ -79,7 +79,7 @@ export function OfficeLayout({ children, activeKey, officeName, navItems }: Offi
     <ToastProvider>
       <div className="min-h-screen bg-white text-ink lg:grid lg:grid-cols-[260px_1fr]">
         <aside className="border-b border-line bg-surface px-6 py-6 lg:min-h-screen lg:border-r lg:border-b-0 lg:px-8 lg:pt-8">
-          <Link href="/" aria-label="사이로 홈" className="mb-6 block lg:mb-16">
+          <Link href="/home" aria-label="사이로 홈" className="mb-6 block lg:mb-16">
             <BrandLogo className="w-32" />
           </Link>
           <nav aria-label="주요 메뉴" className="flex gap-5 overflow-x-auto lg:flex-col lg:gap-8">

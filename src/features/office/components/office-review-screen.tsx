@@ -149,7 +149,7 @@ function StatusBody({ registration }: { registration: OfficeRegistrationStatusRe
         {status === "REVOKED" || status === "CANCELLED" ? (
           <Button onClick={() => router.push("/office/start")}>새 신청 시작</Button>
         ) : null}
-        {status === "APPROVED" ? <Button onClick={() => router.push("/")}>확인</Button> : null}
+        {status === "APPROVED" ? <Button onClick={() => router.push("/home")}>확인</Button> : null}
         {CANCELLABLE.includes(status) ? (
           <Button variant="cancel" onClick={() => setConfirmingCancel(true)}>
             신청 철회

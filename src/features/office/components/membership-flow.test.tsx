@@ -347,6 +347,6 @@ describe("승인 대기와 초대 수락", () => {
     const user = userEvent.setup();
     renderOffice(<MembershipStatusScreen />);
     await user.click(await screen.findByRole("button", { name: "업무 시작" }));
-    expect(navigation.push).toHaveBeenCalledWith("/");
+    expect(navigation.push).toHaveBeenCalledWith("/home");
   });
 });
