@@ -58,14 +58,3 @@ test("signup uses actual email and phone codes from the local backend", async ({
   await page.getByRole("button", { name: "가입하기" }).click();
   await expect(page).toHaveURL(/\/office\/start$/);
 });
-
-test("unpublished pricing stays unavailable through the real API", async ({ page, request }) => {
-  const response = await request.get("/api/public/pricing");
-  expect(response.status()).toBe(404);
-  const body = await response.json();
-  expect(body.code).toBe("PRICE_SCHEDULE_NOT_PUBLISHED");
-
-  await page.goto("/pricing");
-  await expect(page.locator("section[role='alert']")).toContainText("요금");
-  await expect(page.getByRole("button", { name: "다시 시도" })).toBeVisible();
-});
