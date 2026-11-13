@@ -22,8 +22,8 @@ import { errorResponse, mockErrors } from "../error-responses";
 const NOW = "2026-11-10T09:00:00+09:00";
 
 export const MOCK_PUBLIC_PRICING: PublicPricing = {
-  priceVersion: "2026-11",
-  effectiveAt: NOW,
+  priceVersion: "2026-STANDARD",
+  effectiveAt: "2026-11-01T00:00:00+09:00",
   currency: "KRW",
   vatIncluded: true,
   billingCycle: "MONTHLY",

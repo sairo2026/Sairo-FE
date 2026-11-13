@@ -174,6 +174,44 @@ describe("공개 요금 페이지", () => {
   });
 });
 
+describe("게시된 표준 요금표", () => {
+  it("모의 요금표는 게시된 표준 요금표 시드와 같은 버전과 금액이다", () => {
+    expect(MOCK_PUBLIC_PRICING.priceVersion).toBe("2026-STANDARD");
+    expect(MOCK_PUBLIC_PRICING.effectiveAt).toBe("2026-11-01T00:00:00+09:00");
+    const [solo, team, large] = MOCK_PUBLIC_PRICING.plans;
+    expect(solo?.baseAmount).toBe(39900);
+    expect(team?.baseAmount).toBe(39900);
+    expect(team?.perSeatAmount).toBe(10000);
+    expect(large?.perSeatAmount).toBe(8000);
+  });
+
+  it("예시 금액은 구간식으로 계산한 값과 같다", () => {
+    const expected = Array.from({ length: 10 }, (_, index) => {
+      const members = index + 1;
+      if (members === 1) return 39900;
+      if (members <= 4) return 39900 + (members - 1) * 10000;
+      return 69900 + (members - 4) * 8000;
+    });
+    expect(MOCK_PUBLIC_PRICING.examples.map((item) => item.monthlyAmount)).toEqual(expected);
+  });
+
+  it("로그인 없이 서버가 게시한 요금표 구간과 금액을 그대로 보여준다", async () => {
+    server.use(
+      http.get("/api/public/pricing", () =>
+        HttpResponse.json({
+          ...MOCK_PUBLIC_PRICING,
+          plans: MOCK_PUBLIC_PRICING.plans.map((plan) =>
+            plan.planCode === "SOLO" ? { ...plan, baseAmount: 41900 } : plan,
+          ),
+        }),
+      ),
+    );
+    renderPublic(<PublicPricingScreen />);
+    expect(await screen.findByText(/월 41,900원 \(VAT 포함\)/)).not.toBeNull();
+    expect(screen.queryByText(/월 39,900원 \(VAT 포함\)/)).toBeNull();
+  });
+});
+
 describe("공개 사업자 정보 하단", () => {
   it("게시된 회사 정보를 보여주고 신고번호가 비어 있으면 그 줄을 숨긴다", async () => {
     server.use(http.get("/api/public/company-info", () => HttpResponse.json(MOCK_COMPANY_INFO)));
