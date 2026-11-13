@@ -24,7 +24,7 @@ export function SideNavItem({ href, label, isActive = false }: SideNavItemProps)
 }
 
 export const OFFICE_NAV_ITEMS = [
-  { key: "home", label: "홈 (오늘 할 일)", href: "/" },
+  { key: "home", label: "홈 (오늘 할 일)", href: "/home" },
   { key: "properties", label: "매물 관리", href: "/properties" },
   { key: "customers", label: "고객 관리", href: "/customers" },
   { key: "coordinations", label: "방문 조율", href: "/coordinations" },

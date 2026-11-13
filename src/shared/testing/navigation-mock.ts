@@ -27,6 +27,7 @@ export const navigationMock = {
   usePathname: () => navigationState.pathname,
   useSearchParams: () => new URLSearchParams(navigationState.search),
   useParams: () => navigationState.params,
+  useServerInsertedHTML: () => undefined,
   notFound: () => {
     throw new RouteInterrupt("notFound");
   },

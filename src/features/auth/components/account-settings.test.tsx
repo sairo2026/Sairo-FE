@@ -397,7 +397,7 @@ describe("약관 개정 재동의", () => {
     const user = userEvent.setup();
     renderWithQuery(<ReconsentNotice />);
     await user.click(await screen.findByRole("button", { name: "동의하고 계속" }));
-    await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/"));
+    await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/home"));
   });
 
   it("그 사이 약관이 또 바뀌면 안내하고 다시 불러온다", async () => {
