@@ -12,8 +12,8 @@ type LayoutProps = { children: ReactNode };
 export function CustomerSiteLayout({ children, footer }: LayoutProps & { footer?: ReactNode }) {
   return (
     <ToastProvider>
-      <div className="flex min-h-screen flex-col bg-white text-ink">
-        <header className="border-b border-line px-4 py-4 sm:px-8">
+      <div className="flex min-h-screen flex-col bg-surface text-ink">
+        <header className="border-b border-line bg-white px-4 py-4 sm:px-8">
           <BrandLogo className="w-28" />
         </header>
         <main className="mx-auto w-full max-w-xl flex-1 px-4 py-8 sm:px-6">{children}</main>

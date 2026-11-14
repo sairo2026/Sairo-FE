@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { http } from "msw";
-import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { errorResponse, mockErrors } from "@/mocks/error-responses";
 import {
   MOCK_CUSTOMER_EXPIRED_TOKEN,
@@ -17,9 +17,14 @@ import { createQueryClient } from "@/shared/api/query-client";
 import { CustomerLinkScreen } from "./customer-link-screen";
 import {
   acceptsCustomerResponse,
+  blocksToDrafts,
+  listWindowDates,
   parseSubmittedSlots,
+  rangesToBlocks,
+  summarizeDrafts,
   toSubmitSlots,
   validateSlots,
+  weekdayLabel,
 } from "../model/customer-times";
 
 let stopServer: () => void;
@@ -87,7 +92,43 @@ describe("고객 시간 입력 모델", () => {
   });
 });
 
+describe("고객 시간 칸 변환", () => {
+  it("이어진 30분 칸은 하나의 시간대로 합치고 떨어진 칸은 나눈다", () => {
+    const drafts = blocksToDrafts({ "2026-11-12": [600, 630, 660, 690, 840] });
+    expect(drafts.map((d) => `${d.date} ${d.start}~${d.end}`)).toEqual([
+      "2026-11-12 10:00~12:00",
+      "2026-11-12 14:00~14:30",
+    ]);
+    expect(summarizeDrafts(drafts)).toBe("11월 12일 10:00~12:00, 14:00~14:30");
+  });
+
+  it("서버 구간을 칸으로 나누고 칸에 맞지 않는 시각은 바깥으로 넓힌다", () => {
+    expect(rangesToBlocks([{ date: "2026-11-12", start: "10:00", end: "11:00" }])).toEqual({
+      "2026-11-12": [600, 630],
+    });
+    expect(rangesToBlocks([{ date: "2026-11-12", start: "10:10", end: "10:40" }])).toEqual({
+      "2026-11-12": [600, 630],
+    });
+    expect(rangesToBlocks([{ date: "2026-11-12", start: "07:00", end: "08:00" }])).toEqual({});
+  });
+
+  it("방문 가능 기간의 날짜를 모두 나열하고 요일을 계산한다", () => {
+    expect(listWindowDates(WINDOW)).toHaveLength(10);
+    expect(listWindowDates(WINDOW)[0]).toBe("2026-11-11");
+    expect(weekdayLabel("2026-11-12")).toBe("목");
+  });
+});
+
 describe("고객 공개 링크 화면", () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-11-10T00:00:00+09:00"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("불러오는 동안 로딩을 보이고 사무소·담당자·후보 매물·개인정보 안내를 보여준다", async () => {
     renderLink();
     expect(document.querySelector('[role="status"], [aria-busy="true"]')).not.toBeNull();
@@ -98,7 +139,9 @@ describe("고객 공개 링크 화면", () => {
     expect(screen.getByText("받는 항목: 방문 가능한 시간")).not.toBeNull();
     expect(screen.getByText("제출하면 위 안내를 확인한 것으로 처리됩니다.")).not.toBeNull();
     expect(screen.queryByLabelText("개인정보 수집 안내를 확인했습니다")).toBeNull();
-    expect(screen.getByText(/방문 가능 기간은 2026-11-11 ~ 2026-11-20/)).not.toBeNull();
+    expect(screen.getByText("방문 가능 기간")).not.toBeNull();
+    expect(screen.getByText("11.11 ~ 11.20")).not.toBeNull();
+    expect(screen.getByText("응답 마감")).not.toBeNull();
   });
 
   it("담당자가 중개보조원이면 신분 고지 문구를 보여준다", async () => {
@@ -107,35 +150,87 @@ describe("고객 공개 링크 화면", () => {
     });
     renderLink();
     expect(await screen.findByText(/중개보조원은 공인중개사가 아니며/)).not.toBeNull();
+    expect(screen.getByText("중개보조원 신분 안내")).not.toBeNull();
   });
 
-  it("시간을 추가하고 안내를 확인한 뒤 제출하면 저장된다", async () => {
+  it("날짜 칩은 방문 가능 기간 안의 날짜만 보여준다", async () => {
+    renderLink();
+    const group = await screen.findByRole("group", { name: "날짜 선택" });
+    expect(within(group).getAllByRole("button")).toHaveLength(10);
+    expect(within(group).getByRole("button", { name: "11월 11일 (수)" })).not.toBeNull();
+    expect(within(group).getByRole("button", { name: "11월 20일 (금)" })).not.toBeNull();
+    expect(within(group).queryByRole("button", { name: "11월 21일 (토)" })).toBeNull();
+  });
+
+  it("날짜와 시간 칩을 눌러 고르면 요약이 보이고 제출하면 저장된다", async () => {
     const user = userEvent.setup();
     renderLink();
-    await user.click(await screen.findByRole("button", { name: "가능한 시간 추가" }));
-    fireEvent.change(screen.getByLabelText("1번째 날짜"), { target: { value: "2099-01-01" } });
-    fireEvent.change(screen.getByLabelText("1번째 시작"), { target: { value: "10:00" } });
-    fireEvent.change(screen.getByLabelText("1번째 종료"), { target: { value: "11:00" } });
-    await user.click(screen.getByRole("button", { name: "가능한 시간 제출" }));
-    expect(
-      await screen.findByText(/방문 가능 기간\(2026-11-11 ~ 2026-11-20\) 안에서 골라 주세요/),
-    ).not.toBeNull();
-    fireEvent.change(screen.getByLabelText("1번째 날짜"), { target: { value: "2026-11-19" } });
+    await user.click(await screen.findByRole("button", { name: "11월 19일 (목)" }));
+    expect(screen.getByText("선택한 시간이 없습니다.")).not.toBeNull();
+    await user.click(screen.getByRole("button", { name: "10:00" }));
+    await user.click(screen.getByRole("button", { name: "10:30" }));
+    await user.click(screen.getByRole("button", { name: "14:00" }));
+    expect(screen.getByRole("button", { name: "10:00" }).getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByText(/선택한 시간 · 11월 19일 10:00~11:00, 14:00~14:30/)).not.toBeNull();
     await user.click(screen.getByRole("button", { name: "가능한 시간 제출" }));
     expect(await screen.findByText("가능한 시간을 제출했습니다.")).not.toBeNull();
-    expect(getMockVisitFollowState().customerSubmitted).toHaveLength(1);
+    expect(getMockVisitFollowState().customerSubmitted).toEqual([
+      { startsAt: "2026-11-19T10:00:00+09:00", endsAt: "2026-11-19T11:00:00+09:00" },
+      { startsAt: "2026-11-19T14:00:00+09:00", endsAt: "2026-11-19T14:30:00+09:00" },
+    ]);
   });
 
-  it("시간이 없으면 제출하지 않고 안내한다", async () => {
+  it("다른 날짜의 선택은 날짜 칩을 바꿔도 유지되고 다시 누르면 해제된다", async () => {
+    const user = userEvent.setup();
+    renderLink();
+    await user.click(await screen.findByRole("button", { name: "11월 12일 (목)" }));
+    await user.click(screen.getByRole("button", { name: "09:00" }));
+    await user.click(screen.getByRole("button", { name: "11월 13일 (금)" }));
+    expect(screen.getByRole("button", { name: "09:00" }).getAttribute("aria-pressed")).toBe(
+      "false",
+    );
+    await user.click(screen.getByRole("button", { name: "11월 12일 (목)" }));
+    expect(screen.getByRole("button", { name: "09:00" }).getAttribute("aria-pressed")).toBe("true");
+    await user.click(screen.getByRole("button", { name: "09:00" }));
+    expect(screen.getByText("선택한 시간이 없습니다.")).not.toBeNull();
+  });
+
+  it("이미 지난 시간 칩은 고를 수 없다", async () => {
+    vi.setSystemTime(new Date("2026-11-19T10:15:00+09:00"));
+    const user = userEvent.setup();
+    renderLink();
+    await user.click(await screen.findByRole("button", { name: "11월 19일 (목)" }));
+    expect((screen.getByRole("button", { name: "10:00" }) as HTMLButtonElement).disabled).toBe(
+      true,
+    );
+    expect((screen.getByRole("button", { name: "10:30" }) as HTMLButtonElement).disabled).toBe(
+      false,
+    );
+  });
+
+  it("방향키로 시간 칩 사이를 옮긴다", async () => {
+    const user = userEvent.setup();
+    renderLink();
+    await user.click(await screen.findByRole("button", { name: "11월 19일 (목)" }));
+    screen.getByRole("button", { name: "09:00" }).focus();
+    await user.keyboard("{ArrowRight}");
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "09:30" }));
+    await user.keyboard("{ArrowDown}");
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "11:30" }));
+    await user.keyboard("{ArrowUp}{ArrowLeft}");
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "09:00" }));
+  });
+
+  it("시간을 고르지 않으면 제출하지 않고 안내한다", async () => {
     const user = userEvent.setup();
     renderLink();
     await screen.findByRole("button", { name: "가능한 시간 제출" });
     await user.click(screen.getByRole("button", { name: "가능한 시간 제출" }));
-    expect(await screen.findByText("가능한 시간을 한 개 이상 추가해 주세요.")).not.toBeNull();
+    expect(await screen.findByText("가능한 시간을 한 개 이상 선택해 주세요.")).not.toBeNull();
     expect(getMockVisitFollowState().customerSubmitted).toHaveLength(0);
   });
 
-  it("이미 낸 시간은 채워 보이고 수정해 다시 제출할 수 있다", async () => {
+  it("이미 낸 시간은 골라진 칩으로 보이고 수정해 다시 제출할 수 있다", async () => {
     setMockVisitFollowState({
       customerSubmitted: [
         { startsAt: "2026-11-19T10:00:00+09:00", endsAt: "2026-11-19T11:00:00+09:00" },
@@ -143,12 +238,15 @@ describe("고객 공개 링크 화면", () => {
     });
     const user = userEvent.setup();
     renderLink();
-    expect(await screen.findByDisplayValue("2026-11-19")).not.toBeNull();
+    expect(
+      (await screen.findByRole("button", { name: "10:30" })).getAttribute("aria-pressed"),
+    ).toBe("true");
+    expect(screen.getByText(/선택한 시간 · 11월 19일 10:00~11:00/)).not.toBeNull();
     await user.click(screen.getByRole("button", { name: "가능한 시간 수정 제출" }));
     expect(await screen.findByText("가능한 시간을 제출했습니다.")).not.toBeNull();
   });
 
-  it("이미 낸 시간을 모두 지우고 제출하면 제출 취소로 보낸다", async () => {
+  it("이미 낸 시간을 모두 해제하고 제출하면 제출 취소로 보낸다", async () => {
     setMockVisitFollowState({
       customerSubmitted: [
         { startsAt: "2026-11-19T10:00:00+09:00", endsAt: "2026-11-19T11:00:00+09:00" },
@@ -156,8 +254,8 @@ describe("고객 공개 링크 화면", () => {
     });
     const user = userEvent.setup();
     renderLink();
-    await screen.findByDisplayValue("2026-11-19");
-    await user.click(screen.getByRole("button", { name: "1번째 시간 삭제" }));
+    await user.click(await screen.findByRole("button", { name: "10:00" }));
+    await user.click(screen.getByRole("button", { name: "10:30" }));
     expect(screen.getByText(/앞서 보낸 가능한 시간이 모두 취소됩니다/)).not.toBeNull();
     await user.click(screen.getByRole("button", { name: "제출한 시간 모두 취소" }));
     expect(await screen.findByText("가능한 시간을 제출했습니다.")).not.toBeNull();
@@ -172,14 +270,9 @@ describe("고객 공개 링크 화면", () => {
     const button = await screen.findByRole("button", { name: "가능한 시간 제출" });
     expect((button as HTMLButtonElement).disabled).toBe(true);
     expect(screen.getByText("지금은 가능한 시간을 제출하거나 고칠 수 없습니다.")).not.toBeNull();
-  });
-
-  it("시간을 삭제할 수 있다", async () => {
-    const user = userEvent.setup();
-    renderLink();
-    await user.click(await screen.findByRole("button", { name: "가능한 시간 추가" }));
-    await user.click(screen.getByRole("button", { name: "1번째 시간 삭제" }));
-    expect(screen.queryByLabelText("1번째 날짜")).toBeNull();
+    expect((screen.getByRole("button", { name: "10:00" }) as HTMLButtonElement).disabled).toBe(
+      true,
+    );
   });
 
   it("개인정보 안내 버전이 바뀌면 새로 고치라고 안내한다", async () => {
@@ -195,7 +288,7 @@ describe("고객 공개 링크 화면", () => {
     });
     const user = userEvent.setup();
     renderLink();
-    await screen.findByDisplayValue("2026-11-19");
+    await screen.findByRole("button", { name: "10:30" });
     await user.click(screen.getByRole("button", { name: "가능한 시간 수정 제출" }));
     expect(
       await screen.findByText(/개인정보 안내가 바뀌었습니다. 내용을 확인한 뒤 다시 제출해 주세요/),
@@ -215,7 +308,7 @@ describe("고객 공개 링크 화면", () => {
     });
     const user = userEvent.setup();
     renderLink();
-    await screen.findByDisplayValue("2026-11-19");
+    await screen.findByRole("button", { name: "10:30" });
     await user.click(screen.getByRole("button", { name: "가능한 시간 수정 제출" }));
     expect(await screen.findByText(/20초/)).not.toBeNull();
   });
