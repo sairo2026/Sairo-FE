@@ -45,7 +45,10 @@ export function PricingSummary() {
           <Button variant="outlined" onClick={() => void query.refetch()}>
             다시 시도
           </Button>
-          <Link href="/pricing" className="text-body font-semibold text-primary underline">
+          <Link
+            href="/pricing"
+            className="text-body font-semibold text-primary underline hover:text-primary-hover active:text-primary-pressed"
+          >
             요금 안내로 이동
           </Link>
         </div>

@@ -65,7 +65,7 @@ export function ExistingAccountNotice({
               {availableLoginMethods.includes("KAKAO") ? (
                 <a
                   href="/api/auth/kakao/start"
-                  className="inline-flex h-12 items-center justify-center rounded-control bg-[#FEE500] px-10 font-semibold text-ink"
+                  className="inline-flex h-12 items-center justify-center rounded-control bg-[#FEE500] px-10 font-semibold text-ink transition hover:brightness-95 active:brightness-90"
                 >
                   카카오로 로그인
                 </a>

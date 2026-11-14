@@ -66,7 +66,7 @@ function ExportStatusPanel({ exportId }: { exportId: number }) {
           <p className="text-caption font-semibold text-primary">{COPY.completed}</p>
           <a
             href={data.downloadUrl}
-            className="w-fit rounded-control bg-primary px-4 py-2 text-caption font-bold text-white"
+            className="w-fit rounded-control bg-primary px-4 py-2 text-caption font-bold text-white hover:bg-primary-hover active:bg-primary-pressed"
           >
             {COPY.download}
           </a>
