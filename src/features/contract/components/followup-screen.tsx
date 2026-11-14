@@ -36,7 +36,7 @@ function FollowupList({ contractId }: { contractId: number }) {
     <div className="flex flex-col gap-4">
       <FormNotice>
         이 화면에는 서류·신고 후속업무만 보입니다. 잔금일과 만기일에 맞춰 만들어진 할 일은{" "}
-        <Link href="/tasks" className="font-semibold underline">
+        <Link href="/tasks" className="font-semibold underline hover:opacity-70 active:opacity-50">
           업무 목록
         </Link>
         에서 확인합니다. 제출 여부만 기록하며 자동 신고는 하지 않습니다.

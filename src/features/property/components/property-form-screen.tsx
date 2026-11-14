@@ -664,7 +664,11 @@ export function PropertyForm(props: FormProps) {
         ) : definitions.isError ? (
           <FormAlert>
             전용 입력 항목을 불러오지 못했습니다.{" "}
-            <button type="button" className="underline" onClick={() => void definitions.refetch()}>
+            <button
+              type="button"
+              className="underline hover:opacity-70 active:opacity-50"
+              onClick={() => void definitions.refetch()}
+            >
               다시 시도
             </button>
           </FormAlert>
