@@ -11,7 +11,7 @@ import { DataTable } from "@/shared/components/ui/data-table";
 import type { PageSize } from "@/shared/components/ui/data-table";
 import { PageHeader } from "@/shared/components/ui/page-header";
 import { SearchField } from "@/shared/components/ui/search-field";
-import { SelectField, Toggle } from "@/shared/components/ui/select-field";
+import { Checkbox, SelectField, Toggle } from "@/shared/components/ui/select-field";
 import { formatSeoulDate } from "@/shared/lib/format";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { useCustomerList } from "../hooks/customer-queries";
@@ -61,16 +61,14 @@ export function CustomerListScreen() {
             key: "select",
             header: "선택",
             render: (row: Row) => (
-              <input
-                type="checkbox"
-                aria-label={`${row.name} 선택`}
+              <Checkbox
+                ariaLabel={`${row.name} 선택`}
                 checked={selected.includes(row.customerId)}
                 disabled={
                   Boolean(row.deletedAt) ||
                   (!selected.includes(row.customerId) && selected.length >= MAX_MERGE_SELECTION)
                 }
-                onChange={() => toggleSelected(row.customerId)}
-                className="h-5 w-5 accent-primary"
+                onCheckedChange={() => toggleSelected(row.customerId)}
               />
             ),
           },

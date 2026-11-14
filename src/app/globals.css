@@ -11,6 +11,8 @@
   --primary-line: #dedeff;
   --surface: #f8f9fe;
   --border: #e5e7eb;
+  /* 선택 컨트롤 테두리·꺼진 토글 바탕. 비텍스트 대비 3:1을 맞추려고 따로 둔 값이다. */
+  --control-border: #6b7280;
   --text-secondary: #3d4959;
   --text-disabled: #9ca3af;
   --danger: #ff2c2c;
@@ -26,6 +28,7 @@
   --color-primary-line: var(--primary-line);
   --color-surface: var(--surface);
   --color-line: var(--border);
+  --color-control: var(--control-border);
   --color-ink: var(--foreground);
   --color-ink-2: var(--text-secondary);
   --color-ink-3: var(--text-disabled);

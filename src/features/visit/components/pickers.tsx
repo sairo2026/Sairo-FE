@@ -5,6 +5,7 @@ import { useCustomerList } from "@/features/customer/hooks/customer-queries";
 import { usePropertyList } from "@/features/property/hooks/property-queries";
 import { Badge } from "@/shared/components/ui/badge";
 import { SearchField } from "@/shared/components/ui/search-field";
+import { Checkbox, Radio } from "@/shared/components/ui/select-field";
 import { useReceivedGrants } from "../hooks/visit-queries";
 
 export type CandidateChoice = { propertyId: number; name: string; officeName?: string };
@@ -73,17 +74,18 @@ export function CustomerPicker({
       <ul className="flex max-h-56 flex-col gap-1 overflow-auto">
         {items.map((item) => (
           <li key={item.customerId}>
-            <label className="flex items-center gap-3 rounded-control px-3 py-2 text-body text-ink hover:bg-surface">
-              <input
-                type="radio"
-                name="visit-customer"
-                checked={value?.customerId === item.customerId}
-                onChange={() => onChange({ customerId: item.customerId, name: item.name })}
-                className="h-5 w-5 accent-primary"
-              />
-              <span className="font-semibold">{item.name}</span>
-              <span className="text-caption text-ink-2">{item.phone ?? "-"}</span>
-            </label>
+            <Radio
+              name="visit-customer"
+              checked={value?.customerId === item.customerId}
+              onSelect={() => onChange({ customerId: item.customerId, name: item.name })}
+              className="w-full rounded-control px-3 hover:bg-surface"
+              label={
+                <>
+                  <span className="font-semibold">{item.name}</span>
+                  <span className="text-caption text-ink-2">{item.phone ?? "-"}</span>
+                </>
+              }
+            />
           </li>
         ))}
       </ul>
@@ -125,20 +127,21 @@ export function CandidatePicker({
     const isAdded = excludedIds.includes(choice.propertyId);
     return (
       <li key={`${choice.officeName ?? "own"}-${choice.propertyId}`}>
-        <label className="flex flex-wrap items-center gap-3 rounded-control px-3 py-2 text-body text-ink hover:bg-surface">
-          <input
-            type="checkbox"
-            aria-label={`${choice.name} 선택`}
-            checked={checked || isAdded}
-            disabled={isAdded || (!checked && isFull)}
-            onChange={() => onToggle(choice)}
-            className="h-5 w-5 accent-primary"
-          />
-          <span className="font-semibold">{choice.name}</span>
-          {choice.officeName ? <Badge tone="teal">{choice.officeName}</Badge> : null}
-          {isAdded ? <span className="text-caption text-ink-2">이미 담김</span> : null}
-          <span className="text-caption text-ink-2">{sub}</span>
-        </label>
+        <Checkbox
+          ariaLabel={`${choice.name} 선택`}
+          checked={checked || isAdded}
+          disabled={isAdded || (!checked && isFull)}
+          onCheckedChange={() => onToggle(choice)}
+          className="w-full flex-wrap rounded-control px-3 hover:bg-surface"
+          label={
+            <>
+              <span className="font-semibold">{choice.name}</span>
+              {choice.officeName ? <Badge tone="teal">{choice.officeName}</Badge> : null}
+              {isAdded ? <span className="text-caption text-ink-2">이미 담김</span> : null}
+              <span className="text-caption text-ink-2">{sub}</span>
+            </>
+          }
+        />
       </li>
     );
   }

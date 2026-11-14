@@ -8,6 +8,7 @@ import { Badge } from "@/shared/components/ui/badge";
 import type { BadgeTone } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Modal } from "@/shared/components/ui/modal";
+import { Checkbox } from "@/shared/components/ui/select-field";
 import { cn } from "@/shared/lib/cn";
 
 export function FlowFrame({
@@ -91,17 +92,13 @@ export function Checklist({
 }) {
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={id} className="inline-flex items-center gap-2 text-body text-ink">
-        <input
-          id={id}
-          type="checkbox"
-          checked={checked}
-          onChange={(event) => onChange(event.target.checked)}
-          aria-invalid={error ? true : undefined}
-          className="h-5 w-5 accent-primary"
-        />
-        {label}
-      </label>
+      <Checkbox
+        id={id}
+        label={label}
+        checked={checked}
+        onCheckedChange={onChange}
+        isInvalid={Boolean(error)}
+      />
       {error ? (
         <p role="alert" className="text-caption text-danger">
           {error}
