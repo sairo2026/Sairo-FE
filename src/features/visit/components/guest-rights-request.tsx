@@ -205,7 +205,7 @@ export function GuestRightsRequestButton({
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="font-semibold text-primary underline"
+        className="font-semibold text-primary underline hover:text-primary-hover active:text-primary-pressed"
       >
         {LINK_COMMON_COPY.rightsRequestLabel}
       </button>

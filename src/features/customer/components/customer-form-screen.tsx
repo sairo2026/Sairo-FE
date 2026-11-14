@@ -418,7 +418,10 @@ export function CustomerEditScreen({ customerId }: { customerId: number }) {
           <FormAlert>
             병합된 고객은 수정할 수 없습니다.{" "}
             {detail.mergedIntoCustomerId ? (
-              <Link href={`/customers/${detail.mergedIntoCustomerId}`} className="underline">
+              <Link
+                href={`/customers/${detail.mergedIntoCustomerId}`}
+                className="underline hover:opacity-70 active:opacity-50"
+              >
                 남은 고객으로 이동
               </Link>
             ) : null}

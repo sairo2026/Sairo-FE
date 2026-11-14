@@ -149,7 +149,7 @@ function FullTextLink({
         type="button"
         onClick={() => onOpen(item)}
         aria-label={`${fullTextName(item)} 전문 보기`}
-        className="shrink-0 text-caption text-ink-2 underline"
+        className="shrink-0 text-caption text-ink-2 underline hover:opacity-70 active:opacity-50"
       >
         전문 보기
       </button>
@@ -160,7 +160,7 @@ function FullTextLink({
       href={item.documentUrl}
       target="_blank"
       rel="noreferrer"
-      className="shrink-0 text-caption text-ink-2 underline"
+      className="shrink-0 text-caption text-ink-2 underline hover:opacity-70 active:opacity-50"
     >
       전문 보기
     </a>

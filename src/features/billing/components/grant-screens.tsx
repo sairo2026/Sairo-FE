@@ -284,7 +284,10 @@ function ExportPanel({ grantId, kind }: { grantId: number; kind: GrantKind }) {
       {result?.status === "COMPLETED" && result.downloadUrl ? (
         <div className="flex flex-col gap-1">
           <FormNotice>내보내기가 완료됐습니다. 다운로드 주소는 10분 동안 유효합니다.</FormNotice>
-          <a href={result.downloadUrl} className="text-body font-semibold text-primary underline">
+          <a
+            href={result.downloadUrl}
+            className="text-body font-semibold text-primary underline hover:text-primary-hover active:text-primary-pressed"
+          >
             내려받기
           </a>
         </div>

@@ -7,7 +7,7 @@ test.describe("시나리오 1 이메일 가입부터 사무소 승인 뒤 로그
     await useMockOfficeRole(page, "OWNER");
     await test.step("/signup/email에서 이름과 이메일을 넣고 인증 링크를 받는다", async () => {
       await page.goto("/signup");
-      await page.getByRole("link", { name: "이메일로 계속하기" }).click();
+      await page.getByRole("link", { name: "이메일로 시작하기" }).click();
       await expect(page.getByText("기본 가입 정보 입력")).toBeVisible();
       await page.getByLabel(/^이름/).fill("김중개");
       await page.getByLabel(/^이메일 인증/).fill("new@example.com");
@@ -99,7 +99,7 @@ test.describe("시나리오 1 이메일 가입부터 사무소 승인 뒤 로그
 
   test("승인 뒤 이메일로 로그인하면 업무 홈으로 들어간다", async ({ page }) => {
     await page.goto("/login");
-    await page.getByRole("link", { name: "이메일로 계속하기" }).click();
+    await page.getByRole("link", { name: "이메일로 시작하기" }).click();
     await expect(page.getByRole("heading", { name: "이메일로 로그인" })).toBeVisible();
     await page.getByLabel(/^이메일/).fill("agent@example.com");
     await page.getByLabel(/^비밀번호/).fill("mock-password-1");

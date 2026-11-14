@@ -162,6 +162,7 @@ export function PropertyListScreen() {
     {
       key: "address",
       header: "주소",
+      truncate: true,
       render: (row: Row) =>
         row.address ? `${row.address}${row.addressDetail ? ` ${row.addressDetail}` : ""}` : "-",
     },
@@ -356,6 +357,7 @@ export function PropertyListScreen() {
         columns={columns}
         rows={query.data?.items ?? []}
         getRowId={(row) => String(row.propertyId)}
+        getRowHref={(row) => `/properties/${row.propertyId}`}
         totalCount={query.data?.totalElements ?? 0}
         page={page}
         pageSize={size}

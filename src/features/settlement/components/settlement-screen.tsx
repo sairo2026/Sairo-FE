@@ -85,7 +85,10 @@ function SettlementBody({ yearMonth }: { yearMonth: string }) {
             <FormNotice>
               잔금 예정일이 없어 잔금 기준 약정보수에서 빠진 계약이 {data.agreedFeeUndatedCount}건
               있습니다.{" "}
-              <Link href={detailHref("agreedFeeUndatedCount")} className="font-semibold underline">
+              <Link
+                href={detailHref("agreedFeeUndatedCount")}
+                className="font-semibold underline hover:opacity-70 active:opacity-50"
+              >
                 빠진 계약 보기
               </Link>
             </FormNotice>
@@ -119,14 +122,14 @@ function SettlementBody({ yearMonth }: { yearMonth: string }) {
                       데이터 이전으로 등록: 매물{" "}
                       <Link
                         href={detailHref("propertyCountNewMigrated")}
-                        className="font-semibold underline"
+                        className="font-semibold underline hover:opacity-70 active:opacity-50"
                       >
                         {data.propertyCountNewMigrated}건
                       </Link>
                       , 고객{" "}
                       <Link
                         href={detailHref("customerCountNewMigrated")}
-                        className="font-semibold underline"
+                        className="font-semibold underline hover:opacity-70 active:opacity-50"
                       >
                         {data.customerCountNewMigrated}명
                       </Link>
