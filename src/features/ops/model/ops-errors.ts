@@ -20,6 +20,8 @@ const OPS_MESSAGE_BY_CODE: Record<string, string> = {
   TAX_DOCUMENT_ALREADY_ISSUED: "이미 발급 기록이 있는 청구서입니다.",
   TAX_INVOICE_NOT_ELIGIBLE: "증빙을 발급할 수 없는 청구서입니다.",
   PRICE_NOTICE_PERIOD_TOO_SHORT: "효력 시각이 안내 시각 30일 뒤보다 앞서 안내를 만들 수 없습니다.",
+  ATTACHMENT_NOT_READY: "검사가 끝나면 내려받을 수 있습니다. 잠시 뒤에 다시 시도해 주세요.",
+  ATTACHMENT_REJECTED: "보안 검사에서 차단된 파일입니다. 다른 파일을 올려 주세요.",
   RESOURCE_NOT_FOUND: "대상을 찾을 수 없습니다.",
   FORBIDDEN: "이 처리를 할 수 있는 운영 역할이 아닙니다.",
 };

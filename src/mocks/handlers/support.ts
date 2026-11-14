@@ -251,6 +251,9 @@ export const supportHandlers = [
       (entry) => String(entry.attachmentId) === String(params.attachmentId),
     );
     if (!attachment) return mockErrors.notFound();
+    if (attachment.scanStatus === "REJECTED") {
+      return errorResponse(409, "ATTACHMENT_REJECTED", "보안 검사에서 차단된 파일입니다.");
+    }
     if (attachment.scanStatus !== "CLEAN") {
       return errorResponse(409, "ATTACHMENT_NOT_READY", "검사 전");
     }
