@@ -130,14 +130,14 @@ describe("승인자 번호 인증", () => {
     expect(await screen.findByText("휴대폰 번호를 숫자로 정확히 입력해 주세요.")).not.toBeNull();
   });
 
-  it("문자 수단이 없으면 준비 중 안내로 바꾸고 번호 입력을 막는다", async () => {
+  it("문자 인증이 없으면 추후 제공 안내로 바꾸고 번호 입력을 막는다", async () => {
     setMockVisitReviewState({ smsUnavailable: true });
     const user = userEvent.setup();
     renderPage(<ApproverLoginScreen />);
     await user.type(screen.getByLabelText("휴대폰 번호"), "01012345678");
     await user.click(screen.getByRole("button", { name: "인증번호 받기" }));
     expect(
-      await screen.findByText(/문자 인증을 준비 중이라 아직 이용할 수 없습니다/),
+      await screen.findByText(/문자 인증이 추후 제공될 예정이라 아직 이용할 수 없습니다/),
     ).not.toBeNull();
     expect(screen.queryByLabelText("휴대폰 번호")).toBeNull();
   });

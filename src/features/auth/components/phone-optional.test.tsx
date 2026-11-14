@@ -69,7 +69,7 @@ describe("문자 인증이 필수가 아닐 때 이메일 가입", () => {
     renderWithQuery(<SignupEmailFlow token={VALID_TOKEN} />);
     await screen.findByText("기본 가입 정보 입력");
     expect(screen.queryByRole("button", { name: "인증번호 받기" })).toBeNull();
-    expect(screen.getByText(/문자 인증은 준비 중이라/)).not.toBeNull();
+    expect(screen.getByText(/문자 인증은 추후 제공됩니다/)).not.toBeNull();
     await user.type(screen.getByLabelText(/^이름/), "김중개");
     await user.type(screen.getByLabelText(/^휴대폰 번호/), "01012345678");
     await user.click(screen.getByLabelText(/이용약관에 동의합니다/));
