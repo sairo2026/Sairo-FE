@@ -15,6 +15,7 @@ export const SETTINGS_COPY = {
   none: "등록되지 않음",
   verified: "인증됨",
   unverified: "인증 전",
+  phoneUnverified: "인증되지 않은 번호",
   contactChange: "이메일·휴대폰 변경",
   loginMethods: "로그인 방식 관리",
   loginMethodsLabel: "연결된 로그인 방식",

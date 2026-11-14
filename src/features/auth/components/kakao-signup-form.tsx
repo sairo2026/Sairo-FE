@@ -18,7 +18,7 @@ import { describeAuthError } from "@/shared/lib/api-messages";
 import { landingPathFor } from "../model/landing";
 import { AuthFrame, FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { ExistingAccountNotice } from "./existing-account-notice";
-import { PhoneVerificationField } from "./phone-verification-field";
+import { PHONE_PATTERN, PhoneVerificationField } from "./phone-verification-field";
 import {
   CollectionNoticeTable,
   TermsAgreementSection,
@@ -105,6 +105,7 @@ export function KakaoSignupForm() {
     );
   }
 
+  const phoneRequired = termsQuery.data.phoneVerificationRequired;
   const terms = visibleTerms([...termsQuery.data.items], false);
   if (terms.length === 0) {
     return (
@@ -130,22 +131,26 @@ export function KakaoSignupForm() {
       setEmailError("이메일 주소를 올바르게 입력해 주세요.");
       isValid = false;
     }
-    if (!phoneTicket) {
-      setPhoneError("휴대폰 번호 인증을 완료해 주세요.");
+    if (phoneRequired ? !phoneTicket : !PHONE_PATTERN.test(phone)) {
+      setPhoneError(
+        phoneRequired
+          ? "휴대폰 번호 인증을 완료해 주세요."
+          : "휴대폰 번호를 010-0000-0000 형식으로 입력해 주세요.",
+      );
       isValid = false;
     }
     if (!areRequiredTermsAgreed(terms, selection)) {
       setTermsError(SIGNUP_TERMS_COPY.requiredError);
       isValid = false;
     }
-    if (!isValid || !phoneTicket) return;
+    if (!isValid || (phoneRequired && !phoneTicket)) return;
 
     setIsBusy(true);
     setSubmitError(undefined);
     try {
       const result = await signupWithKakao({
         displayName: trimmed,
-        verifiedPhoneTicket: phoneTicket,
+        ...(phoneRequired ? { verifiedPhoneTicket: phoneTicket ?? undefined } : { phone }),
         kakaoReferenceEmail: referenceEmail.trim() === "" ? null : referenceEmail.trim(),
         agreedTerms: terms
           .filter((item) => selection[item.termsCode])
@@ -218,6 +223,7 @@ export function KakaoSignupForm() {
           />
           <div className="flex flex-col gap-2">
             <PhoneVerificationField
+              verificationRequired={phoneRequired}
               purpose="SIGNUP"
               phone={phone}
               onPhoneChange={(next) => {
@@ -236,7 +242,9 @@ export function KakaoSignupForm() {
                 {phoneError}
               </p>
             ) : null}
-            <p className="text-caption text-ink-2">{PHONE_VERIFICATION_NOTICE}</p>
+            {phoneRequired ? (
+              <p className="text-caption text-ink-2">{PHONE_VERIFICATION_NOTICE}</p>
+            ) : null}
           </div>
           <TextField
             label="참고 이메일 (선택)"

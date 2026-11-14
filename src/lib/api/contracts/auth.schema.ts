@@ -73,7 +73,8 @@ export type RecoveryOptionsResponse = z.infer<typeof RecoveryOptionsResponseSche
 
 export const SignupEmailRequestSchema = z.object({
   verifiedEmailTicket: z.string(),
-  verifiedPhoneTicket: z.string(),
+  verifiedPhoneTicket: z.string().optional(),
+  phone: z.string().optional(),
   password: z.string(),
   displayName: z.string(),
   agreedTerms: z.array(z.object({ termsCode: z.string(), version: z.string() })),
@@ -111,7 +112,8 @@ export type EmailVerifyResponse = z.infer<typeof EmailVerifyResponseSchema>;
 
 export const SignupKakaoRequestSchema = z.object({
   displayName: z.string(),
-  verifiedPhoneTicket: z.string(),
+  verifiedPhoneTicket: z.string().optional(),
+  phone: z.string().optional(),
   kakaoReferenceEmail: z.string().nullable().optional(),
   agreedTerms: z.array(z.object({ termsCode: z.string(), version: z.string() })),
 });
@@ -150,7 +152,7 @@ export type PasswordStepUpResponse = z.infer<typeof PasswordStepUpResponseSchema
 
 export const ContactChangeRequestSchema = z.object({
   email: z.string().optional(),
-  verifiedTicket: z.string(),
+  verifiedTicket: z.string().optional(),
   phone: z.string().optional(),
 });
 export type ContactChangeRequest = z.infer<typeof ContactChangeRequestSchema>;
@@ -218,6 +220,7 @@ export const TermsCatalogResponseSchema = z.object({
       changeSummary: z.string().nullable(),
     }),
   ),
+  phoneVerificationRequired: z.boolean().default(true),
 });
 export type TermsCatalogResponse = z.infer<typeof TermsCatalogResponseSchema>;
 

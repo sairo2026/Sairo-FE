@@ -13,6 +13,7 @@ import { TextField } from "@/shared/components/ui/text-field";
 import {
   changeContact,
   fetchMe,
+  fetchSignupTerms,
   sendContactEmailVerification,
   verifyContactEmail,
 } from "../api/account.api";
@@ -20,7 +21,7 @@ import { useCountdown } from "../hooks/use-countdown";
 import { describeAuthError } from "@/shared/lib/api-messages";
 import { savePendingContactEmail, usePendingContactEmail } from "../model/signup-draft";
 import { AuthFrame, FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
-import { PhoneVerificationField } from "./phone-verification-field";
+import { PHONE_PATTERN, PhoneVerificationField } from "./phone-verification-field";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const meQueryKey = ["auth", "me"] as const;
@@ -30,6 +31,13 @@ type ContactTab = "email" | "phone";
 export function ContactChangeScreen() {
   const queryClient = useQueryClient();
   const meQuery = useQuery({ queryKey: meQueryKey, queryFn: fetchMe });
+  const termsQuery = useQuery({
+    queryKey: ["auth", "terms", "SIGNUP"],
+    queryFn: fetchSignupTerms,
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+  });
+  const phoneRequired = termsQuery.data?.phoneVerificationRequired ?? true;
   const [tab, setTab] = useState<ContactTab>("email");
   const [newEmail, setNewEmail] = useState("");
   const [emailError, setEmailError] = useState<string>();
@@ -81,11 +89,13 @@ export function ContactChangeScreen() {
   }
 
   async function changePhone() {
-    if (!phoneTicket) return;
+    if (phoneRequired ? !phoneTicket : !PHONE_PATTERN.test(phone)) return;
     setIsPhoneBusy(true);
     setPhoneError(undefined);
     try {
-      await changeContact({ phone, verifiedTicket: phoneTicket });
+      await changeContact(
+        phoneRequired ? { phone, verifiedTicket: phoneTicket ?? undefined } : { phone },
+      );
       setPhoneDone(true);
       setPhoneTicket(null);
       await queryClient.invalidateQueries({ queryKey: meQueryKey });
@@ -166,6 +176,7 @@ export function ContactChangeScreen() {
                   </p>
                   <PhoneVerificationField
                     label="새 휴대폰 번호"
+                    verificationRequired={phoneRequired}
                     purpose="CHANGE"
                     phone={phone}
                     onPhoneChange={(next) => {
@@ -180,7 +191,7 @@ export function ContactChangeScreen() {
                   {phoneDone ? <FormNotice>휴대폰 번호를 바꿨습니다.</FormNotice> : null}
                   <div className="flex justify-center">
                     <Button
-                      disabled={phoneTicket === null}
+                      disabled={phoneRequired ? phoneTicket === null : !PHONE_PATTERN.test(phone)}
                       isLoading={isPhoneBusy}
                       onClick={() => void changePhone()}
                     >
