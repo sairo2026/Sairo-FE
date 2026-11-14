@@ -53,8 +53,8 @@ async function openSuspendDialog() {
 }
 
 function fillReview(dialog: HTMLElement, date = "2031-01-15", time = "10:30") {
-  fireEvent.change(within(dialog).getByLabelText("재검토 예정 날짜"), { target: { value: date } });
-  fireEvent.change(within(dialog).getByLabelText("재검토 예정 시각"), { target: { value: time } });
+  fireEvent.change(within(dialog).getByLabelText(/^재검토 예정 날짜/), { target: { value: date } });
+  fireEvent.change(within(dialog).getByLabelText(/^재검토 예정 시각/), { target: { value: time } });
 }
 
 describe("회원 목록", () => {
@@ -269,7 +269,7 @@ describe("긴급 접근 중단", () => {
     expect(within(dialog).getByText(/감사 로그에 남으며 되돌릴 수 없습니다/)).not.toBeNull();
     const confirm = within(dialog).getByRole("button", { name: "접근 중단 실행" });
     expect(confirm.getAttribute("aria-disabled")).toBe("true");
-    await userEvent.type(within(dialog).getByLabelText("중단 사유"), "계정 탈취 의심");
+    await userEvent.type(within(dialog).getByLabelText(/^중단 사유/), "계정 탈취 의심");
     expect(confirm.getAttribute("aria-disabled")).toBe("true");
     fillReview(dialog);
     expect(confirm.getAttribute("aria-disabled")).toBeNull();
@@ -278,7 +278,7 @@ describe("긴급 접근 중단", () => {
   it("사유가 공백뿐이면 실행할 수 없다", async () => {
     renderDetail(["SECURITY_ADMIN"]);
     const dialog = await openSuspendDialog();
-    await userEvent.type(within(dialog).getByLabelText("중단 사유"), "   ");
+    await userEvent.type(within(dialog).getByLabelText(/^중단 사유/), "   ");
     fillReview(dialog);
     expect(
       within(dialog).getByRole("button", { name: "접근 중단 실행" }).getAttribute("aria-disabled"),
@@ -288,7 +288,7 @@ describe("긴급 접근 중단", () => {
   it("재검토 예정 시각이 과거이면 안내하고 실행할 수 없다", async () => {
     renderDetail(["SECURITY_ADMIN"]);
     const dialog = await openSuspendDialog();
-    await userEvent.type(within(dialog).getByLabelText("중단 사유"), "사유");
+    await userEvent.type(within(dialog).getByLabelText(/^중단 사유/), "사유");
     fillReview(dialog, "2020-01-01", "09:00");
     expect(within(dialog).getByText("재검토 예정 시각은 지금보다 뒤여야 합니다.")).not.toBeNull();
     expect(
@@ -299,7 +299,7 @@ describe("긴급 접근 중단", () => {
   it("전체 세션 중단을 실행하면 통지 안내와 갱신된 기록을 보인다", async () => {
     renderDetail(["SECURITY_ADMIN"]);
     const dialog = await openSuspendDialog();
-    await userEvent.type(within(dialog).getByLabelText("중단 사유"), "계정 탈취 의심 정황");
+    await userEvent.type(within(dialog).getByLabelText(/^중단 사유/), "계정 탈취 의심 정황");
     fillReview(dialog);
     await userEvent.click(within(dialog).getByRole("button", { name: "접근 중단 실행" }));
     expect((await screen.findByRole("status")).textContent).toContain("대표에게 통지가 나갑니다");
@@ -315,7 +315,7 @@ describe("긴급 접근 중단", () => {
     renderDetail(["SECURITY_ADMIN"]);
     const dialog = await openSuspendDialog();
     await userEvent.click(within(dialog).getByRole("radio", { name: "특정 세션" }));
-    await userEvent.type(within(dialog).getByLabelText("중단 사유"), "의심 기기 차단");
+    await userEvent.type(within(dialog).getByLabelText(/^중단 사유/), "의심 기기 차단");
     fillReview(dialog);
     const confirm = within(dialog).getByRole("button", { name: "접근 중단 실행" });
     expect(confirm.getAttribute("aria-disabled")).toBe("true");
@@ -358,7 +358,7 @@ describe("긴급 접근 중단", () => {
     );
     renderDetail(["SECURITY_ADMIN"]);
     const dialog = await openSuspendDialog();
-    await userEvent.type(within(dialog).getByLabelText("중단 사유"), "사유");
+    await userEvent.type(within(dialog).getByLabelText(/^중단 사유/), "사유");
     fillReview(dialog);
     await userEvent.click(within(dialog).getByRole("button", { name: "접근 중단 실행" }));
     expect((await within(dialog).findByRole("alert")).textContent).toContain(
@@ -373,7 +373,7 @@ describe("긴급 접근 중단", () => {
     );
     renderDetail(["SECURITY_ADMIN"]);
     const dialog = await openSuspendDialog();
-    await userEvent.type(within(dialog).getByLabelText("중단 사유"), "사유");
+    await userEvent.type(within(dialog).getByLabelText(/^중단 사유/), "사유");
     fillReview(dialog);
     await userEvent.click(within(dialog).getByRole("button", { name: "접근 중단 실행" }));
     expect((await within(dialog).findByRole("alert")).textContent).toContain(
@@ -388,7 +388,7 @@ describe("긴급 접근 중단", () => {
     );
     renderDetail(["SECURITY_ADMIN"]);
     const dialog = await openSuspendDialog();
-    await userEvent.type(within(dialog).getByLabelText("중단 사유"), "사유");
+    await userEvent.type(within(dialog).getByLabelText(/^중단 사유/), "사유");
     fillReview(dialog);
     await userEvent.click(within(dialog).getByRole("button", { name: "접근 중단 실행" }));
     expect((await within(dialog).findByRole("alert")).textContent).toContain(
@@ -406,7 +406,7 @@ describe("긴급 접근 중단", () => {
     );
     renderDetail(["SECURITY_ADMIN"]);
     const dialog = await openSuspendDialog();
-    await userEvent.type(within(dialog).getByLabelText("중단 사유"), "사유");
+    await userEvent.type(within(dialog).getByLabelText(/^중단 사유/), "사유");
     fillReview(dialog);
     const confirm = within(dialog).getByRole("button", { name: "접근 중단 실행" });
     await userEvent.click(confirm);
@@ -418,11 +418,11 @@ describe("긴급 접근 중단", () => {
   it("취소하면 아무 것도 바뀌지 않고 다시 열면 입력이 비어 있다", async () => {
     renderDetail(["SECURITY_ADMIN"]);
     let dialog = await openSuspendDialog();
-    await userEvent.type(within(dialog).getByLabelText("중단 사유"), "임시 사유");
+    await userEvent.type(within(dialog).getByLabelText(/^중단 사유/), "임시 사유");
     await userEvent.click(within(dialog).getByRole("button", { name: "취소" }));
     expect(screen.queryByRole("dialog")).toBeNull();
     dialog = await openSuspendDialog();
-    expect((within(dialog).getByLabelText("중단 사유") as HTMLTextAreaElement).value).toBe("");
+    expect((within(dialog).getByLabelText(/^중단 사유/) as HTMLTextAreaElement).value).toBe("");
     expect(record(42).detail.securityEvents).toHaveLength(0);
   });
 });

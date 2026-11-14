@@ -4,6 +4,7 @@ import { useId } from "react";
 import type { InputHTMLAttributes, ReactNode } from "react";
 import { cn } from "@/shared/lib/cn";
 import { formatPhone } from "@/shared/lib/format";
+import { FIELD_GAP_CLASS, FieldLabel } from "./field-label";
 
 export type TextFieldKind = "text" | "number" | "tel" | "password";
 
@@ -65,15 +66,10 @@ export function TextField({
   }
 
   return (
-    <div className={cn("flex min-w-0 flex-col gap-2", className)}>
-      <label htmlFor={inputId} className="text-caption font-semibold text-ink">
+    <div className={cn("flex min-w-0 flex-col", FIELD_GAP_CLASS, className)}>
+      <FieldLabel htmlFor={inputId} required={required}>
         {label}
-        {required ? (
-          <span aria-hidden="true" className="ml-0.5 text-primary">
-            *
-          </span>
-        ) : null}
-      </label>
+      </FieldLabel>
       <div
         className={cn(
           "flex h-14 items-center gap-2 rounded-control border bg-surface px-4 focus-within:border-primary focus-within:bg-white",

@@ -52,7 +52,7 @@ function seedSchedules(...items: ReturnType<typeof buildMockSchedule>[]) {
 }
 
 function setDate(root: HTMLElement, label: string, value: string) {
-  fireEvent.change(within(root).getByLabelText(label), { target: { value } });
+  fireEvent.change(within(root).getByLabelText(new RegExp(`^${label}`)), { target: { value } });
 }
 
 async function fillAmounts(user: User, dialog: HTMLElement, total = "1000000") {

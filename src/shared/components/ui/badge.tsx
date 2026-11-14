@@ -37,7 +37,7 @@ const tradeLabel: Record<TradeType, string> = { monthly: "월세", jeonse: "전�
 
 export function TradeTypeTag({ type }: { type: TradeType }) {
   return (
-    <span className="inline-flex h-10 min-w-[60px] items-center justify-center rounded-control bg-surface px-3 text-caption font-semibold text-ink">
+    <span className="inline-flex min-w-[60px] items-center justify-center rounded-control bg-surface px-4 py-2 text-body font-medium text-ink">
       {tradeLabel[type]}
     </span>
   );
@@ -47,7 +47,7 @@ export function TradeTypeTag({ type }: { type: TradeType }) {
 export function DDayTag({ daysLeft }: { daysLeft: number | null }) {
   if (daysLeft === null) {
     return (
-      <span className="inline-flex h-10 min-w-[100px] items-center justify-center rounded-control border border-line bg-white px-3 text-caption text-ink-3">
+      <span className="inline-flex h-10 min-w-[100px] items-center justify-center rounded-control border border-line bg-white px-3 text-body font-medium text-ink-3">
         없음
       </span>
     );
@@ -56,11 +56,40 @@ export function DDayTag({ daysLeft }: { daysLeft: number | null }) {
   return (
     <span
       className={cn(
-        "inline-flex h-10 min-w-[100px] items-center justify-center rounded-control border px-3 text-caption font-medium",
-        isUnder90 ? "border-primary bg-primary-soft text-primary" : "border-line bg-white text-ink",
+        "inline-flex h-10 min-w-[100px] items-center justify-center rounded-control border px-3 text-body",
+        isUnder90
+          ? "border-primary bg-primary-soft font-semibold text-primary"
+          : "border-line bg-white font-medium text-ink-2",
       )}
     >
       D-{Math.max(0, daysLeft)}
+    </span>
+  );
+}
+
+export type ScheduleTagProps = {
+  tone: BadgeTone;
+  label: string;
+  count: number;
+  className?: string;
+};
+
+/** 홈의 조율 현황 칸. 상태 이름과 건수를 한 덩어리로 보여준다. 색만으로 뜻을 전하지 않도록 이름을 함께 쓴다. */
+export function ScheduleTag({ tone, label, count, className }: ScheduleTagProps) {
+  return (
+    <span
+      data-tone={tone}
+      className={cn(
+        "flex min-h-[92px] min-w-[132px] flex-col justify-between rounded-control px-4 py-3",
+        toneClass[tone],
+        className,
+      )}
+    >
+      <span className="text-body font-medium">{label}</span>
+      <span className="text-h2 font-bold">
+        {count}
+        <span className="text-caption font-medium">건</span>
+      </span>
     </span>
   );
 }

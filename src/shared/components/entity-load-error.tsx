@@ -23,7 +23,7 @@ export function EntityLoadError({
     return (
       <div role="alert">
         <p className="mb-4 text-red-600">로그인이 필요합니다.</p>
-        <Link href="/login" className="font-semibold text-[#3937b8] hover:underline">
+        <Link href="/login" className="font-semibold text-primary hover:underline">
           로그인하러 가기
         </Link>
       </div>
@@ -35,7 +35,7 @@ export function EntityLoadError({
         <p className="mb-4 text-red-600">
           {kind === "forbidden" ? forbiddenMessage : notFoundMessage}
         </p>
-        <Link href={backHref} className="font-semibold text-[#3937b8] hover:underline">
+        <Link href={backHref} className="font-semibold text-primary hover:underline">
           {backLabel}
         </Link>
       </div>
@@ -47,7 +47,7 @@ export function EntityLoadError({
       <button
         type="button"
         onClick={onRetry}
-        className="font-semibold text-[#3937b8] hover:underline"
+        className="font-semibold text-primary hover:underline"
       >
         다시 시도
       </button>

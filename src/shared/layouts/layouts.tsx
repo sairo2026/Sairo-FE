@@ -4,6 +4,7 @@ import { BrandLogo } from "@/shared/components/ui/brand-logo";
 import { OFFICE_NAV_ITEMS, SideNavItem } from "@/shared/components/ui/side-nav-item";
 import { ToastProvider } from "@/shared/components/ui/toast";
 import { CookieNotice } from "@/shared/legal/cookie-notice";
+import { cn } from "@/shared/lib/cn";
 
 type LayoutProps = { children: ReactNode };
 
@@ -70,19 +71,32 @@ export type OfficeLayoutProps = LayoutProps & {
   officeName?: string;
   /** 역할별 메뉴. 생략하면 기본 6개 메뉴를 보여준다. */
   navItems?: readonly OfficeNavItem[];
+  /** board는 홈처럼 흰 카드를 올리는 화면의 연한 바탕이다. */
+  tone?: "white" | "board";
 };
 
 /** 사무소 화면: 좌측 메뉴와 상단 사무소 표시. */
-export function OfficeLayout({ children, activeKey, officeName, navItems }: OfficeLayoutProps) {
+export function OfficeLayout({
+  children,
+  activeKey,
+  officeName,
+  navItems,
+  tone = "white",
+}: OfficeLayoutProps) {
   const items = navItems ?? OFFICE_NAV_ITEMS;
   return (
     <ToastProvider>
-      <div className="min-h-screen bg-white text-ink lg:grid lg:grid-cols-[260px_1fr]">
-        <aside className="border-b border-line bg-surface px-6 py-6 lg:min-h-screen lg:border-r lg:border-b-0 lg:px-8 lg:pt-8">
+      <div
+        className={cn(
+          "min-h-screen text-ink lg:grid lg:grid-cols-[220px_minmax(0,1fr)]",
+          tone === "board" ? "bg-surface" : "bg-white",
+        )}
+      >
+        <aside className="border-b border-line bg-surface px-6 py-6 lg:min-h-screen lg:border-r lg:border-b-0 lg:px-5 lg:pt-8">
           <Link href="/home" aria-label="사이로 홈" className="mb-6 block lg:mb-16">
             <BrandLogo className="w-32" />
           </Link>
-          <nav aria-label="주요 메뉴" className="flex gap-5 overflow-x-auto lg:flex-col lg:gap-8">
+          <nav aria-label="주요 메뉴" className="flex gap-5 overflow-x-auto lg:flex-col lg:gap-5">
             {items.map((item) => (
               <SideNavItem
                 key={item.key}
@@ -93,7 +107,7 @@ export function OfficeLayout({ children, activeKey, officeName, navItems }: Offi
             ))}
           </nav>
         </aside>
-        <div>
+        <div className="min-w-0">
           <header className="flex h-[88px] items-center border-b border-line px-8 text-caption font-semibold text-ink-2 lg:px-16">
             {officeName ?? "사무소"}
           </header>
@@ -135,6 +149,7 @@ export function OpsLayout({
                 key={item.key}
                 href={item.href}
                 label={item.label}
+                size="md"
                 isActive={activeKey === item.key}
               />
             ))}
