@@ -30,7 +30,7 @@ test("signup uses actual email and phone codes from the local backend", async ({
   const phone = `010-${suffix.slice(-8, -4)}-${suffix.slice(-4)}`;
 
   await page.goto("/signup");
-  await page.getByRole("link", { name: "이메일로 계속하기" }).click();
+  await page.getByRole("link", { name: "이메일로 시작하기" }).click();
   await page.getByLabel(/^이름/).fill("실API검증");
   await page.getByLabel(/^이메일 인증/).fill(email);
   await page.getByRole("button", { name: "인증 링크 받기" }).click();
