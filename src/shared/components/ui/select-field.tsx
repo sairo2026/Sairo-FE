@@ -3,6 +3,7 @@
 import { useId } from "react";
 import type { ReactNode, SelectHTMLAttributes } from "react";
 import { cn } from "@/shared/lib/cn";
+import { FIELD_GAP_CLASS, FieldLabel } from "./field-label";
 
 export type SelectOption = { value: string; label: string; isDisabled?: boolean };
 
@@ -35,10 +36,10 @@ export function SelectField({
   const selectId = id ?? generatedId;
   const errorId = `${selectId}-error`;
   return (
-    <div className={cn("flex flex-col gap-2", className)}>
-      <label htmlFor={selectId} className="text-caption font-semibold text-ink">
+    <div className={cn("flex flex-col", FIELD_GAP_CLASS, className)}>
+      <FieldLabel htmlFor={selectId} required={required}>
         {label}
-      </label>
+      </FieldLabel>
       <select
         {...rest}
         id={selectId}
@@ -158,8 +159,8 @@ export function RadioGroup({
   error,
 }: RadioGroupProps) {
   return (
-    <fieldset className="min-w-0 flex flex-col gap-2" aria-invalid={error ? true : undefined}>
-      <legend className="mb-2 text-caption font-semibold text-ink">{legend}</legend>
+    <fieldset className="flex min-w-0 flex-col gap-2" aria-invalid={error ? true : undefined}>
+      <FieldLabel as="legend">{legend}</FieldLabel>
       <div className="flex flex-wrap gap-x-6 gap-y-1">
         {options.map((option) => (
           <Radio
@@ -213,7 +214,7 @@ export function Checkbox({
     <label
       htmlFor={inputId}
       className={cn(
-        "group inline-flex min-h-11 items-center gap-3 text-caption text-ink",
+        "group inline-flex min-h-11 items-center gap-3 text-body text-ink",
         disabled ? "cursor-not-allowed text-ink-3" : "cursor-pointer",
         className,
       )}
@@ -282,7 +283,7 @@ export function Toggle({ label, checked, onCheckedChange, disabled, isInvalid }:
       disabled={disabled}
       onClick={() => onCheckedChange(!checked)}
       className={cn(
-        "relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors after:absolute after:-inset-x-2 after:-inset-y-2.5 after:content-[''] disabled:cursor-not-allowed",
+        "relative inline-flex h-9 w-[66px] shrink-0 cursor-pointer items-center rounded-full transition-colors after:absolute after:-inset-x-2 after:-inset-y-1 after:content-[''] disabled:cursor-not-allowed",
         disabled
           ? checked
             ? "bg-ink-3"
@@ -296,8 +297,8 @@ export function Toggle({ label, checked, onCheckedChange, disabled, isInvalid }:
       <span
         aria-hidden="true"
         className={cn(
-          "inline-block h-[18px] w-[18px] rounded-full bg-white transition-transform",
-          checked ? "translate-x-[23px]" : "translate-x-[3px]",
+          "inline-block h-7 w-7 rounded-full bg-white transition-transform",
+          checked ? "translate-x-[34px]" : "translate-x-1",
         )}
       />
     </button>
@@ -329,10 +330,11 @@ export function TermsItem({
       <Checkbox
         checked={checked}
         onCheckedChange={onCheckedChange}
+        className="font-medium"
         label={
           <span>
             {label}{" "}
-            <span className="font-semibold text-primary">({isRequired ? "필수" : "선택"})</span>
+            <span className="font-medium text-primary">({isRequired ? "필수" : "선택"})</span>
           </span>
         }
       />
@@ -341,14 +343,14 @@ export function TermsItem({
           type="button"
           onClick={onViewFull}
           aria-label={viewFullLabel}
-          className="shrink-0 text-caption text-ink-2 underline"
+          className="shrink-0 text-caption text-ink-2 underline hover:text-primary active:text-primary-pressed"
         >
           전문 보기
         </button>
       ) : href ? (
         <a
           href={href}
-          className="text-caption text-ink-2 underline"
+          className="text-caption text-ink-2 underline hover:text-primary active:text-primary-pressed"
           target="_blank"
           rel="noreferrer"
         >

@@ -127,12 +127,12 @@ describe("토글 상태", () => {
     const off = screen.getByRole("switch", { name: "알림" });
     expect(off.getAttribute("aria-checked")).toBe("false");
     expect(off.className).toContain("bg-control");
-    expect(off.firstElementChild?.className).toContain("translate-x-[3px]");
+    expect(off.firstElementChild?.className).toContain("translate-x-1");
     rerender(<Toggle label="알림" checked onCheckedChange={() => {}} />);
     const on = screen.getByRole("switch", { name: "알림" });
     expect(on.getAttribute("aria-checked")).toBe("true");
     expect(on.className).toContain("bg-primary");
-    expect(on.firstElementChild?.className).toContain("translate-x-[23px]");
+    expect(on.firstElementChild?.className).toContain("translate-x-[34px]");
   });
 
   it("비활성은 클릭을 막고 오류는 aria-invalid로 알린다", async () => {

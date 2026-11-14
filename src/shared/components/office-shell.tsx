@@ -14,8 +14,8 @@ const navigation = [
 
 export function OfficeShell({ children, active }: OfficeShellProps) {
   return (
-    <div className="min-h-screen bg-white text-[#182033] lg:grid lg:grid-cols-[240px_1fr]">
-      <aside className="border-b border-[#dfe3ec] bg-[#f7f8fc] px-6 py-6 lg:min-h-screen lg:border-r lg:border-b-0 lg:px-8 lg:pt-36">
+    <div className="min-h-screen bg-white text-ink lg:grid lg:grid-cols-[240px_1fr]">
+      <aside className="border-b border-line bg-surface px-6 py-6 lg:min-h-screen lg:border-r lg:border-b-0 lg:px-8 lg:pt-36">
         <nav aria-label="주요 메뉴" className="flex gap-5 overflow-x-auto lg:flex-col lg:gap-9">
           {navigation.map((item) => (
             <Link
@@ -23,8 +23,8 @@ export function OfficeShell({ children, active }: OfficeShellProps) {
               href={item.href}
               className={`shrink-0 border-b-2 pb-3 text-lg font-semibold transition-colors lg:w-fit lg:text-2xl ${
                 active === item.key
-                  ? "border-[#3937b8] text-[#3937b8]"
-                  : "border-transparent text-[#182033] hover:text-[#3937b8]"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-ink hover:text-primary"
               }`}
             >
               {item.label}
@@ -33,16 +33,16 @@ export function OfficeShell({ children, active }: OfficeShellProps) {
           <button
             type="button"
             disabled
-            className="shrink-0 text-left text-lg font-semibold text-slate-400 lg:text-2xl"
+            className="shrink-0 text-left text-lg font-semibold text-ink-3 lg:text-2xl"
           >
             계약 관리
           </button>
         </nav>
       </aside>
       <div>
-        <header className="flex h-[88px] items-center gap-12 border-b border-[#dfe3ec] px-8 text-sm font-semibold text-slate-600 lg:px-16">
+        <header className="flex h-[88px] items-center gap-12 border-b border-line px-8 text-sm font-semibold text-ink-2 lg:px-16">
           <span>사이로중개사무소</span>
-          <button type="button" disabled className="text-slate-400">
+          <button type="button" disabled className="text-ink-3">
             설정
           </button>
         </header>

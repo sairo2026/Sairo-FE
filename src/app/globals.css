@@ -16,6 +16,8 @@
   --text-secondary: #3d4959;
   --text-disabled: #9ca3af;
   --danger: #ff2c2c;
+  /* 필수 입력 별표. 글자가 아닌 장식이라 3:1 대비 요구 대상이 아니며 필수 여부는 required 속성이 알린다. */
+  --required: #ff5050;
 }
 
 @theme inline {
@@ -33,6 +35,7 @@
   --color-ink-2: var(--text-secondary);
   --color-ink-3: var(--text-disabled);
   --color-danger: var(--danger);
+  --color-required: var(--required);
 
   /* 상태 태그 채움색과 글자색 */
   --color-tag-blue: #cee3ff;
@@ -44,9 +47,9 @@
   --color-tag-green: #8dff9e;
   --color-tag-green-ink: #003608;
   --color-tag-amber: #ffe993;
-  --color-tag-amber-ink: #5c4300;
+  --color-tag-amber-ink: #4e3f00;
   --color-tag-teal: #cefff4;
-  --color-tag-teal-ink: #0b5d4d;
+  --color-tag-teal-ink: #00382c;
 
   --font-sans:
     var(--font-pretendard), "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
@@ -63,12 +66,17 @@
   --text-h1--line-height: 36px;
   --text-h2: 20px;
   --text-h2--line-height: 28px;
+  --text-h3: 24px;
+  --text-h3--line-height: 36px;
   --text-body: 16px;
   --text-body--line-height: 24px;
   --text-caption: 14px;
   --text-caption--line-height: 20px;
 
   --shadow-popup: 0 8px 24px rgb(17 24 39 / 0.12);
+  --shadow-modal: 0 0 25.45px rgb(27 28 93 / 0.06);
+  --shadow-auth: 0 0 50.9px 23px rgb(27 28 93 / 0.04);
+  --shadow-panel: -1px 0 19.6px rgb(48 49 80 / 0.17);
 }
 
 body {
@@ -76,6 +84,44 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
   letter-spacing: -0.02em;
+  /* 한글은 단어 단위로 줄을 바꾸고, 너비를 넘는 긴 영문·주소·URL은 마지막 수단으로 끊는다. */
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+@layer base {
+  p,
+  li,
+  dd,
+  dt,
+  h1,
+  h2,
+  h3,
+  h4,
+  legend,
+  label {
+    overflow-wrap: anywhere;
+  }
+
+  input,
+  textarea,
+  select,
+  code,
+  pre {
+    word-break: normal;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  summary,
+  select:not(:disabled) {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
 }
 
 button,
@@ -89,6 +135,17 @@ textarea {
 :focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
+}
+
+@layer components {
+  /* 한 줄로 줄이고 넘치는 글은 말줄임으로 표시한다. 전체 글은 title로 보여준다. */
+  .truncate-text {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 .logo-splash {
