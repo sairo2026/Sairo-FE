@@ -121,7 +121,7 @@ src
 - 검색·필터·페이지처럼 공유·복원되어야 하는 상태는 URL을 우선한다.
 - 폼은 폼 내부에, 단일 컴포넌트 상태는 가장 가까운 컴포넌트에 둔다.
 - 전역 상태는 로그인 사용자 표시, 전역 modal처럼 실제로 여러 feature가 공유하는 client 상태에만 사용한다.
-- 상태 관리 라이브러리는 요구가 생긴 뒤 선택한다. 현재 문서는 특정 라이브러리를 선제 설치하지 않는다.
+- 서버 상태는 TanStack Query, 폼 상태와 입력 검증은 React Hook Form과 zod로 관리한다. 그 밖의 전역 상태 라이브러리는 요구가 생긴 뒤 선택한다.
 
 ## 9. 오류 처리와 사용자 경험
 
@@ -190,3 +190,60 @@ PR에서는 다음을 확인한다.
 | feature별 API 계층 분리                                   | §6        | Bulletproof React의 API 계층 분리 패턴                            |
 
 참고 저장소의 규칙을 그대로 복사하지 않고 SAIRO의 Next.js 16·React 19·App Router 구조에 맞게 이 문서로 확정한다. 충돌 시 이 문서가 저장소의 기준이다.
+
+## 15. 관행 기준(용어·접근성·데이터)
+
+새로 만지는 파일부터 점진 적용하며 기존 디렉터리는 옮기지 않는다.
+
+### 15-1 구조
+
+- Next.js는 폴더 구성에 의견이 없고 팀이 정한 전략을 일관되게 쓰라고 한다. `page`나 `route` 파일이 있어야 경로가 공개되고 나머지는 라우팅되지 않는다. 현재 구조(`src/app`은 라우팅, `src/features`는 업무, `src/shared`는 공통)를 유지한다. 출처: https://nextjs.org/docs/app/getting-started/project-structure
+- 업무 코드는 `features/<도메인>/{api,components,hooks,model}`에 둔다. 도메인 간 직접 import 대신 `shared`로 올린다.
+
+### 15-2 서버 상태와 쿼리 키
+
+- 쿼리 키는 feature마다 팩토리 객체 하나(`xxxKeys`)로 정의하고 `hooks/*-queries.ts`에 함께 둔다. 키 배열을 컴포넌트에 직접 쓰지 않는다.
+- 키는 일반에서 구체로 배치하고(`all`, 목록, 상세) 무효화는 상위 키로 한다. 쿼리 함수가 쓰는 변수는 모두 키에 넣는다. 출처: https://tkdodo.eu/blog/effective-react-query-keys, https://tanstack.com/query/latest/docs/framework/react/guides/query-keys
+- 다른 feature의 캐시를 무효화해야 하면 문자열 접두어(`["home"]`)를 쓰되 해당 feature의 `all` 키와 같은 값으로 맞춘다.
+- 낙관적 업데이트는 한 화면에서만 보이면 `variables`로 UI에만 반영하고, 여러 곳이 동기화돼야 할 때만 `onMutate`에서 `cancelQueries`, 스냅샷, `setQueryData`, `onError` 롤백, `onSettled` 무효화 순서로 캐시를 고친다. 출처: https://tanstack.com/query/latest/docs/framework/react/guides/optimistic-updates
+
+### 15-3 폼과 오류 매핑
+
+- 검증 규칙은 zod 스키마에 두고 `zodResolver`로 연결한다. 리졸버를 쓰면 `register`의 내장 규칙은 쓰지 않는다. 출처: https://react-hook-form.com/docs/useform#resolver
+- 서버 필드 오류는 `fieldErrors[].field`를 `setError(field, ...)`로 매핑하고 첫 필드에 `shouldFocus`를 준다. 필드에 속하지 않는 오류는 `root.serverError`에 둔다. 출처: https://react-hook-form.com/docs/useform/seterror
+- 오류는 텍스트로 해당 입력 옆에 보이고(`aria-invalid`, `aria-describedby`로 연결) 색만으로 알리지 않는다. 출처: https://www.w3.org/WAI/WCAG22/Understanding/error-identification.html
+
+### 15-4 접근성
+
+- 모달 대화상자는 `Modal`을 쓴다. `role="dialog"`, `aria-modal="true"`, 제목에 `aria-labelledby`, 열 때 대화상자 안으로 포커스, Tab 순환, ESC 닫기, 닫을 때 호출 요소로 포커스 복귀를 지원한다. 출처: https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/
+- `role="alertdialog"`는 이름(`aria-label`)과 경고 문구를 가리키는 `aria-describedby`를 모두 가진다. 화면 안에 펼쳐지는 경고 대화상자는 `useInlineAlertDialog`로 포커스 이동, ESC 닫기, 포커스 복귀를 붙인다. 출처: https://www.w3.org/WAI/ARIA/apg/patterns/alertdialog/
+- `src/app/*.a11y.test.tsx`가 모든 `page.tsx`를 모의 API로 렌더링해 axe-core 규칙을 검사한다. 새 라우트는 자동으로 포함되며 위반은 해당 화면에서 고친다. 대비(색상)는 jsdom에서 계산하지 못해 토큰 값으로 따로 확인한다.
+- 표는 `caption`과 열 머리글 `th scope="col"`을 둔다. 클릭 동작은 `button`이나 `a`로 만든다.
+- 포인터 대상은 24x24 CSS px 이상이다(WCAG 2.2 SC 2.5.8). 출처: https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html
+- 새 패턴(combobox, tabs 등)은 APG 패턴 목록의 키보드 규칙을 따른다. 출처: https://www.w3.org/WAI/ARIA/apg/patterns/
+
+### 15-5 반응형
+
+- 기준 폭은 모바일 360px, 데스크톱 1280px이다. 사무소·공개·승인자 화면은 두 폭 모두에서 가로 넘침이 없어야 하고 운영 콘솔은 데스크톱 우선이되 넘침은 없어야 한다.
+- 목록 표는 카드로 바꾸지 않고 `DataTable`의 가로 스크롤 컨테이너(`TableScroll`)로 처리한다. 4열 이상인 표는 최소 폭 40rem을 유지해 좁은 화면에서 열이 뭉개지지 않게 한다. 직접 쓰는 `table`도 `TableScroll`과 `min-w-*`를 함께 둔다.
+- 버튼 묶음은 `flex-wrap`을 두어 좁은 폭에서 줄바꿈되게 한다. 고정 폭(`w-*`, `grid-cols-[...]`)은 `sm:` 이상 접두어로만 쓰고 기본 폭에서는 한 단이나 `flex-wrap`으로 둔다.
+- `e2e/responsive.spec.ts`가 모든 `page.tsx`를 두 폭에서 열어 문서 가로 스크롤, 화면 밖으로 나간 요소, 24px 미만 포인터 대상(WCAG 2.2 SC 2.5.8의 간격 예외 적용)을 검사한다. CI의 `e2e` 작업에서 실행된다.
+
+### 15-6 용어
+
+같은 개념은 한 이름만 쓴다.
+
+| 개념           | 이름                                                 | 비고                                                                                                                                            |
+| -------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| 모달           | `Modal`, 확인용은 `ConfirmDialog`                    | shadcn/ui도 Dialog를 루트로 Trigger, Content, Header, Title, Description, Footer로 합성한다. 출처: https://ui.shadcn.com/docs/components/dialog |
+| 쿼리 키 팩토리 | `xxxKeys`                                            | `xxxQueryKey` 단일 상수는 `xxxKeys`로 옮긴다                                                                                                    |
+| 로딩           | `Skeleton`, 빈 화면 `EmptyState`, 오류 `ErrorScreen` | `shared/components/feedback`                                                                                                                    |
+| 표             | `DataTable`                                          | `shared/components/ui`                                                                                                                          |
+| 개수           | `formatCount`                                        | 직접 `toLocaleString` 호출 금지                                                                                                                 |
+| 금액           | `formatKrw`, 억·만 표기는 `formatWonCompact`         | 숫자는 `ko-KR` 천 단위 쉼표, 단위는 원                                                                                                          |
+
+### 15-7 한국어 표기
+
+- 금액은 `1,234,000원`, 큰 금액은 `1억 2,000만원`. 숫자 서식은 `Intl`의 `ko-KR` 로케일을 쓴다. 출처: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat
+- 날짜와 시각은 서울 시간대로 `formatSeoulDate`, `formatSeoulDateTime`을 쓴다. 전화번호는 `formatPhone`으로 하이픈을 넣는다.
+- 토스·당근·카카오 공개 디자인 시스템의 표기 규칙은 이번 조사에서 직접 근거를 확인하지 못해 규칙으로 넣지 않았다.

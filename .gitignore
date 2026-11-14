@@ -48,3 +48,7 @@ CLAUDE.md
 .vscode/
 .idea/
 Thumbs.db
+
+# playwright
+/playwright-report
+/test-results

@@ -1,29 +1,142 @@
 @import "tailwindcss";
 
+/* 디자인 토큰: 값은 디자인 파일의 색상·글자 스타일 정의를 옮긴 것이다. */
 :root {
   --background: #ffffff;
-  --foreground: #182033;
-  --primary: #3937b8;
-  --primary-soft: #f0f0ff;
-  --surface: #f8f9fd;
-  --border: #dfe3ec;
+  --foreground: #111827;
+  --primary: #3335a6;
+  --primary-hover: #252782;
+  --primary-pressed: #1b1c5d;
+  --primary-soft: #eeeefb;
+  --primary-line: #dedeff;
+  --surface: #f8f9fe;
+  --border: #e5e7eb;
+  --text-secondary: #3d4959;
+  --text-disabled: #9ca3af;
+  --danger: #ff2c2c;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-pressed: var(--primary-pressed);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-line: var(--primary-line);
+  --color-surface: var(--surface);
+  --color-line: var(--border);
+  --color-ink: var(--foreground);
+  --color-ink-2: var(--text-secondary);
+  --color-ink-3: var(--text-disabled);
+  --color-danger: var(--danger);
+
+  /* 상태 태그 채움색과 글자색 */
+  --color-tag-blue: #cee3ff;
+  --color-tag-blue-ink: #002c89;
+  --color-tag-red: #ffcece;
+  --color-tag-red-ink: #690000;
+  --color-tag-yellow: #e9ff89;
+  --color-tag-yellow-ink: #3c4a00;
+  --color-tag-green: #8dff9e;
+  --color-tag-green-ink: #003608;
+  --color-tag-amber: #ffe993;
+  --color-tag-amber-ink: #5c4300;
+  --color-tag-teal: #cefff4;
+  --color-tag-teal-ink: #0b5d4d;
+
+  --font-sans:
+    var(--font-pretendard), "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+
+  --radius-control: 8px;
+  --radius-small: 4px;
+  --radius-card: 24px;
+  --radius-card-flat: 16px;
+
+  /* 글자 규격: 크기 / 줄 높이 */
+  --text-display: 40px;
+  --text-display--line-height: 52px;
+  --text-h1: 28px;
+  --text-h1--line-height: 36px;
+  --text-h2: 20px;
+  --text-h2--line-height: 28px;
+  --text-body: 16px;
+  --text-body--line-height: 24px;
+  --text-caption: 14px;
+  --text-caption--line-height: 20px;
+
+  --shadow-popup: 0 8px 24px rgb(17 24 39 / 0.12);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  letter-spacing: -0.02em;
 }
 
 button,
 a,
-input {
+input,
+select,
+textarea {
   outline-color: var(--primary);
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.logo-splash {
+  display: none;
+}
+
+html[data-splash="play"] .logo-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--background);
+  animation: logo-splash-out 900ms ease-out forwards;
+}
+
+html[data-splash="play"] .logo-splash-mark {
+  animation: logo-splash-in 320ms ease-out both;
+}
+
+@keyframes logo-splash-out {
+  0%,
+  72% {
+    opacity: 1;
+    visibility: visible;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes logo-splash-in {
+  from {
+    transform: scale(0.94);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  html[data-splash="play"] .logo-splash {
+    display: none;
+  }
 }
