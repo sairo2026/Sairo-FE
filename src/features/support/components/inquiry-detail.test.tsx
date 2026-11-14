@@ -10,7 +10,9 @@ import {
   supportInquiryState,
 } from "@/mocks/handlers/support";
 import { server, startMockServer } from "@/mocks/server";
+import { ApiError } from "@/shared/api/client";
 import { renderOffice } from "@/shared/testing/office-render";
+import { describeSupportError } from "../model/messages";
 import { toCustomerView } from "../model/public-view";
 import { InquiryDetailScreen } from "./inquiry-detail-screen";
 
@@ -257,7 +259,23 @@ describe("첨부", () => {
     cleanup();
     seed({ attachments: attachments("REJECTED") });
     open();
-    expect(await screen.findByText("검사에서 거부된 파일입니다.")).not.toBeNull();
+    expect(
+      await screen.findByText("보안 검사에서 차단된 파일입니다. 다른 파일을 올려 주세요."),
+    ).not.toBeNull();
+  });
+
+  it("차단된 파일 오류는 재시도 안내 없이 다른 파일을 안내하고 검사 중 오류는 재시도를 안내한다", () => {
+    const rejected = describeSupportError(
+      new ApiError(409, { code: "ATTACHMENT_REJECTED", message: "x" }),
+      "실패",
+    );
+    expect(rejected).toBe("보안 검사에서 차단된 파일입니다. 다른 파일을 올려 주세요.");
+    expect(rejected).not.toContain("다시 시도");
+    const notReady = describeSupportError(
+      new ApiError(409, { code: "ATTACHMENT_NOT_READY", message: "x" }),
+      "실패",
+    );
+    expect(notReady).toContain("다시 시도");
   });
 
   it("첨부가 없으면 빈 안내와 가림 안내를 보여준다", async () => {

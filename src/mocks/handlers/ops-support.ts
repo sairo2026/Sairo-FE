@@ -576,8 +576,11 @@ const inquiryHandlers: RequestHandler[] = [
       (entry) => String(entry.attachmentId) === String(params.attachmentId),
     );
     if (!attachment) return mockErrors.notFound();
+    if (attachment.scanStatus === "REJECTED") {
+      return errorResponse(409, "ATTACHMENT_REJECTED", "보안 검사에서 차단된 파일입니다.");
+    }
     if (attachment.scanStatus !== "CLEAN") {
-      return errorResponse(409, "INVALID_TRANSITION", "검사가 끝난 첨부만 내려받을 수 있습니다.");
+      return errorResponse(409, "ATTACHMENT_NOT_READY", "검사가 끝나지 않은 첨부입니다.");
     }
     return new HttpResponse("file", {
       status: 200,
