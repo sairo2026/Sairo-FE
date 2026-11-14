@@ -56,9 +56,10 @@ describe("출시 안내 해제 점검 라우트 목록", () => {
   });
 });
 
-describe("운영 배포 기본값(출시 안내 켜짐, 심사 모드 꺼짐)", () => {
+describe("COMING_SOON=true(출시 안내 켜짐, 심사 모드 꺼짐)", () => {
   it("공개 안내 경로만 열고 나머지 화면은 모두 출시 안내로 보낸다", () => {
     vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("COMING_SOON", "true");
     for (const route of routesOf("always-open"))
       expect([route, isPassed(route)]).toEqual([route, true]);
     for (const route of routesOf("review-open", "blocked")) {
@@ -68,6 +69,7 @@ describe("운영 배포 기본값(출시 안내 켜짐, 심사 모드 꺼짐)", 
 
   it("공개 조회 API 두 개만 열고 나머지 API는 503으로 막는다", () => {
     vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("COMING_SOON", "true");
     for (const path of RELEASE_CHECK_APIS.alwaysOpen) expect(send(path).status).not.toBe(503);
     for (const path of RELEASE_CHECK_APIS.alwaysOpen) expect(send(path, "POST").status).toBe(503);
     for (const path of RELEASE_CHECK_APIS.gated) expect(send(path).status).toBe(503);
@@ -75,6 +77,7 @@ describe("운영 배포 기본값(출시 안내 켜짐, 심사 모드 꺼짐)", 
 
   it("수신 거부 처리 API는 POST만 열고 조회는 막는다", () => {
     vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("COMING_SOON", "true");
     for (const path of RELEASE_CHECK_APIS.alwaysOpenPost) {
       expect(send(path, "POST").status).not.toBe(503);
       expect(send(path, "GET").status).toBe(503);
@@ -85,6 +88,7 @@ describe("운영 배포 기본값(출시 안내 켜짐, 심사 모드 꺼짐)", 
 describe("심사 모드(출시 안내 켜짐, 심사 모드 켜짐)", () => {
   it("가입·결제·설정 화면까지만 열고 업무 화면과 운영 콘솔은 계속 막는다", () => {
     vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("COMING_SOON", "true");
     vi.stubEnv("REVIEW_MODE", "true");
     for (const route of routesOf("always-open", "review-open")) {
       expect([route, isPassed(route)]).toEqual([route, true]);
@@ -96,6 +100,7 @@ describe("심사 모드(출시 안내 켜짐, 심사 모드 켜짐)", () => {
 
   it("API는 모두 서버로 넘긴다", () => {
     vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("COMING_SOON", "true");
     vi.stubEnv("REVIEW_MODE", "true");
     for (const path of [...RELEASE_CHECK_APIS.alwaysOpen, ...RELEASE_CHECK_APIS.gated]) {
       expect(send(path).status).not.toBe(503);
