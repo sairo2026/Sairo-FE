@@ -169,7 +169,7 @@ const state: AccountState = {
   me: MOCK_ME,
   unsubscribed: false,
   emailLinkCount: 0,
-  phoneVerificationRequired: true,
+  phoneVerificationRequired: false,
 };
 
 export function setMockTermsVersion(version: string): void {
@@ -207,7 +207,7 @@ export function resetMockAccountState(): void {
   state.me = MOCK_ME;
   state.unsubscribed = false;
   state.emailLinkCount = 0;
-  state.phoneVerificationRequired = true;
+  state.phoneVerificationRequired = false;
 }
 
 const NEW_ACCOUNT_CONTEXT = {

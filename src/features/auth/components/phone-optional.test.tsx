@@ -27,7 +27,6 @@ beforeAll(() => {
 beforeEach(() => {
   window.localStorage.clear();
   window.history.replaceState(null, "", "/");
-  setMockPhoneVerificationRequired(false);
 });
 
 afterEach(() => {
@@ -62,14 +61,14 @@ function captureBody(path: string) {
   return captured;
 }
 
-describe("문자 인증이 필수가 아닐 때 이메일 가입", () => {
+describe("휴대폰 번호를 인증 없이 저장할 때 이메일 가입", () => {
   it("인증번호 입력 없이 번호만 받고 미인증 안내를 작은 글씨로 보여준다", async () => {
     const user = userEvent.setup();
     const captured = captureBody("/api/auth/signup/email");
     renderWithQuery(<SignupEmailFlow token={VALID_TOKEN} />);
     await screen.findByText("기본 가입 정보 입력");
     expect(screen.queryByRole("button", { name: "인증번호 받기" })).toBeNull();
-    expect(screen.getByText(/문자 인증은 추후 제공됩니다/)).not.toBeNull();
+    expect(screen.getByText(/이메일로 본인을 확인하며/)).not.toBeNull();
     await user.type(screen.getByLabelText(/^이름/), "김중개");
     await user.type(screen.getByLabelText(/^휴대폰 번호/), "01012345678");
     await user.click(screen.getByLabelText(/이용약관에 동의합니다/));
@@ -95,7 +94,7 @@ describe("문자 인증이 필수가 아닐 때 이메일 가입", () => {
   });
 });
 
-describe("문자 인증이 필수가 아닐 때 카카오 가입", () => {
+describe("휴대폰 번호를 인증 없이 저장할 때 카카오 가입", () => {
   it("번호만 보내 가입한다", async () => {
     const user = userEvent.setup();
     const captured = captureBody("/api/auth/signup/kakao");
@@ -111,7 +110,7 @@ describe("문자 인증이 필수가 아닐 때 카카오 가입", () => {
   });
 });
 
-describe("문자 인증이 필수가 아닐 때 휴대폰 변경", () => {
+describe("휴대폰 번호를 인증 없이 저장할 때 휴대폰 변경", () => {
   it("티켓 없이 번호만 보내 바꾼다", async () => {
     const user = userEvent.setup();
     const captured: { body?: Record<string, unknown> } = {};

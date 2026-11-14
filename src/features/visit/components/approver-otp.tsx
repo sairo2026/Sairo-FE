@@ -15,8 +15,8 @@ import { describeVisitError, fieldErrorMap } from "../model/messages";
 
 export const OTP_LENGTH = 6;
 export const OTP_MAX_ATTEMPTS = 5;
-export const PHONE_ACCOUNT_LATER_NOTICE =
-  "번호 인증 계정은 문자 인증이 추후 제공될 예정이라 아직 이용할 수 없습니다. 승인자 링크로 조건 입력, 신청 비교와 선택, 확정 일정 확인은 그대로 할 수 있습니다.";
+export const APPROVER_PHONE_ACCOUNT_UNAVAILABLE_NOTICE =
+  "번호 인증 계정은 현재 제공하지 않는 기능입니다. 승인자 링크로 조건 입력, 신청 비교와 선택, 확정 일정 확인은 그대로 할 수 있습니다.";
 
 function formatRemaining(seconds: number): string {
   const minutes = Math.floor(seconds / 60);
@@ -136,7 +136,7 @@ export function ApproverOtpForm({
   }
 
   if (smsUnavailable) {
-    return <FormNotice>{PHONE_ACCOUNT_LATER_NOTICE}</FormNotice>;
+    return <FormNotice>{APPROVER_PHONE_ACCOUNT_UNAVAILABLE_NOTICE}</FormNotice>;
   }
 
   const blocked = attemptsLeft <= 0 || (rateLimit !== undefined && rateLimit > 0);
