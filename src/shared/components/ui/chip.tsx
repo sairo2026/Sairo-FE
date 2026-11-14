@@ -6,20 +6,31 @@ import { formatTimeSlot } from "@/shared/lib/format";
 
 export type ChipProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   isSelected: boolean;
+  isInvalid?: boolean;
 };
 
 /** 거래유형 선택 버튼, 날짜 숫자 칩처럼 눌러서 선택하는 칩. */
-export function Chip({ isSelected, className, type = "button", children, ...rest }: ChipProps) {
+export function Chip({
+  isSelected,
+  isInvalid,
+  className,
+  type = "button",
+  children,
+  ...rest
+}: ChipProps) {
   return (
     <button
       {...rest}
       type={type}
       aria-pressed={isSelected}
       className={cn(
-        "inline-flex h-10 items-center justify-center rounded-control border px-4 text-caption font-medium transition-colors disabled:cursor-not-allowed disabled:text-ink-3",
+        "inline-flex min-h-11 items-center justify-center rounded-control border px-4 text-caption font-medium transition-colors disabled:cursor-not-allowed disabled:border-line disabled:bg-surface disabled:text-ink-3",
         isSelected
-          ? "border-primary bg-primary-soft font-semibold text-primary"
-          : "border-line bg-white text-ink hover:border-primary",
+          ? "border-primary bg-primary font-semibold text-white enabled:hover:border-primary-hover enabled:hover:bg-primary-hover"
+          : cn(
+              "bg-white text-ink enabled:cursor-pointer enabled:hover:border-primary enabled:hover:bg-primary-soft enabled:hover:text-primary",
+              isInvalid ? "border-danger" : "border-control",
+            ),
         className,
       )}
     >

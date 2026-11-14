@@ -11,6 +11,7 @@ import { Badge } from "@/shared/components/ui/badge";
 import { DataTable } from "@/shared/components/ui/data-table";
 import type { PageSize } from "@/shared/components/ui/data-table";
 import { PageHeader } from "@/shared/components/ui/page-header";
+import { SelectableCard } from "@/shared/components/ui/selectable-card";
 import { formatSeoulDate } from "@/shared/lib/format";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { useCoordinationList } from "../hooks/visit-queries";
@@ -99,19 +100,14 @@ export function CoordinationListScreen() {
       <ul aria-label="상태별 건수" className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {COORDINATION_STATUSES.map((key) => (
           <li key={key}>
-            <button
-              type="button"
-              aria-pressed={status === key}
+            <SelectableCard
+              isSelected={status === key}
               onClick={() => select(key)}
-              className={`flex w-full flex-col items-start gap-1 rounded-card-flat border px-4 py-3 text-left ${
-                status === key
-                  ? "border-primary bg-primary-soft"
-                  : "border-line bg-white hover:border-primary"
-              }`}
+              className="flex w-full flex-col items-start gap-1 rounded-card-flat px-4 py-3 text-left"
             >
               <span className="text-caption text-ink-2">{COORDINATION_STATUS_LABEL[key]}</span>
               <span className="text-h2 font-bold text-ink">{counts ? counts[key] : "-"}</span>
-            </button>
+            </SelectableCard>
           </li>
         ))}
       </ul>

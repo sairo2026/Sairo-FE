@@ -12,6 +12,7 @@ import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
 import { Button } from "@/shared/components/ui/button";
 import { ConfirmDialog } from "@/shared/components/ui/modal";
+import { SelectableCard } from "@/shared/components/ui/selectable-card";
 import { TextField } from "@/shared/components/ui/text-field";
 import { formatSeoulDateTime } from "@/shared/lib/format";
 import {
@@ -148,21 +149,18 @@ export function OfficeSearchScreen() {
               ["name", "사무소명과 지역"],
             ] as const
           ).map(([key, label]) => (
-            <button
+            <SelectableCard
               key={key}
-              type="button"
-              role="radio"
-              aria-checked={mode === key}
+              selectionRole="radio"
+              isSelected={mode === key}
               onClick={() => setMode(key)}
               className={cn(
-                "h-12 rounded-control border text-body",
-                mode === key
-                  ? "border-primary bg-primary-soft font-semibold text-primary"
-                  : "border-line bg-surface text-ink-2 hover:border-primary",
+                "h-12 rounded-control text-body",
+                mode === key ? "font-semibold text-primary" : "text-ink",
               )}
             >
               {label}
-            </button>
+            </SelectableCard>
           ))}
         </div>
         <form
@@ -498,24 +496,21 @@ export function MembershipRequestForm({ officeId }: { officeId: number }) {
             className="grid grid-cols-2 gap-2"
           >
             {ROLE_CHOICES.map((choice) => (
-              <button
+              <SelectableCard
                 key={choice.role}
-                type="button"
-                role="radio"
-                aria-checked={role === choice.role}
+                selectionRole="radio"
+                isSelected={role === choice.role}
                 onClick={() => {
                   setRole(choice.role);
                   setErrors({});
                 }}
                 className={cn(
-                  "h-12 rounded-control border text-body",
-                  role === choice.role
-                    ? "border-primary bg-primary-soft font-semibold text-primary"
-                    : "border-line bg-surface text-ink-2 hover:border-primary",
+                  "h-12 rounded-control text-body",
+                  role === choice.role ? "font-semibold text-primary" : "text-ink",
                 )}
               >
                 {choice.label}
-              </button>
+              </SelectableCard>
             ))}
           </div>
         </div>
@@ -829,24 +824,21 @@ function ReapplicationForm({
           className="grid grid-cols-2 gap-2"
         >
           {ROLE_CHOICES.map((choice) => (
-            <button
+            <SelectableCard
               key={choice.role}
-              type="button"
-              role="radio"
-              aria-checked={role === choice.role}
+              selectionRole="radio"
+              isSelected={role === choice.role}
               onClick={() => {
                 setRole(choice.role);
                 setErrors({});
               }}
               className={cn(
-                "h-12 rounded-control border text-body",
-                role === choice.role
-                  ? "border-primary bg-primary-soft font-semibold text-primary"
-                  : "border-line bg-surface text-ink-2 hover:border-primary",
+                "h-12 rounded-control text-body",
+                role === choice.role ? "font-semibold text-primary" : "text-ink",
               )}
             >
               {choice.label}
-            </button>
+            </SelectableCard>
           ))}
         </div>
       </div>

@@ -72,6 +72,74 @@ export function SelectField({
   );
 }
 
+const CHECK_PATH = "M3 8.5l3.2 3L13 4.5";
+
+export type RadioProps = {
+  label?: ReactNode;
+  ariaLabel?: string;
+  name: string;
+  value?: string;
+  checked: boolean;
+  onSelect: () => void;
+  disabled?: boolean;
+  isInvalid?: boolean;
+  id?: string;
+  className?: string;
+};
+
+/** 선택 전·호버·선택·포커스·비활성·오류 상태를 표시하는 라디오. 라벨 전체가 클릭 영역이다. */
+export function Radio({
+  label,
+  ariaLabel,
+  name,
+  value,
+  checked,
+  onSelect,
+  disabled,
+  isInvalid,
+  id,
+  className,
+}: RadioProps) {
+  return (
+    <label
+      className={cn(
+        "group inline-flex min-h-11 items-center gap-3 text-body text-ink",
+        disabled ? "cursor-not-allowed text-ink-3" : "cursor-pointer",
+        className,
+      )}
+    >
+      <input
+        id={id}
+        type="radio"
+        name={name}
+        value={value}
+        checked={checked}
+        disabled={disabled}
+        aria-label={ariaLabel}
+        onChange={onSelect}
+        className="peer sr-only"
+      />
+      <span
+        aria-hidden="true"
+        className={cn(
+          "box-border h-[18px] w-[18px] shrink-0 rounded-full bg-white peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary",
+          disabled
+            ? checked
+              ? "border-[5px] border-ink-3"
+              : "border-[1.5px] border-line bg-surface"
+            : checked
+              ? "border-[5px] border-primary group-hover:border-primary-hover"
+              : cn(
+                  "border-[1.5px] group-hover:border-primary group-hover:bg-primary-soft",
+                  isInvalid ? "border-danger" : "border-control",
+                ),
+        )}
+      />
+      {label}
+    </label>
+  );
+}
+
 export type RadioGroupProps = {
   legend: string;
   name: string;
@@ -92,26 +160,18 @@ export function RadioGroup({
   return (
     <fieldset className="min-w-0 flex flex-col gap-2" aria-invalid={error ? true : undefined}>
       <legend className="mb-2 text-caption font-semibold text-ink">{legend}</legend>
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-wrap gap-x-6 gap-y-1">
         {options.map((option) => (
-          <label
+          <Radio
             key={option.value}
-            className={cn(
-              "inline-flex items-center gap-2 text-body text-ink",
-              option.isDisabled && "cursor-not-allowed text-ink-3",
-            )}
-          >
-            <input
-              type="radio"
-              name={name}
-              value={option.value}
-              checked={value === option.value}
-              disabled={option.isDisabled}
-              onChange={() => onValueChange(option.value)}
-              className="h-5 w-5 accent-primary"
-            />
-            {option.label}
-          </label>
+            name={name}
+            value={option.value}
+            label={option.label}
+            checked={value === option.value}
+            disabled={option.isDisabled}
+            isInvalid={Boolean(error)}
+            onSelect={() => onValueChange(option.value)}
+          />
         ))}
       </div>
       {error ? (
@@ -124,24 +184,38 @@ export function RadioGroup({
 }
 
 export type CheckboxProps = {
-  label: ReactNode;
+  label?: ReactNode;
+  ariaLabel?: string;
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
   disabled?: boolean;
+  isInvalid?: boolean;
   name?: string;
   id?: string;
+  className?: string;
 };
 
-/** 선택 전·선택·비활성 상태와 키보드 포커스를 표시하는 체크박스. */
-export function Checkbox({ label, checked, onCheckedChange, disabled, name, id }: CheckboxProps) {
+/** 선택 전·호버·선택·포커스·비활성·오류 상태를 표시하는 체크박스. 라벨 전체가 클릭 영역이다. */
+export function Checkbox({
+  label,
+  ariaLabel,
+  checked,
+  onCheckedChange,
+  disabled,
+  isInvalid,
+  name,
+  id,
+  className,
+}: CheckboxProps) {
   const generatedId = useId();
   const inputId = id ?? generatedId;
   return (
     <label
       htmlFor={inputId}
       className={cn(
-        "inline-flex items-center gap-2 text-caption text-ink",
-        disabled && "cursor-not-allowed text-ink-3",
+        "group inline-flex min-h-11 items-center gap-3 text-caption text-ink",
+        disabled ? "cursor-not-allowed text-ink-3" : "cursor-pointer",
+        className,
       )}
     >
       <input
@@ -150,21 +224,31 @@ export function Checkbox({ label, checked, onCheckedChange, disabled, name, id }
         type="checkbox"
         checked={checked}
         disabled={disabled}
+        aria-label={ariaLabel}
+        aria-invalid={isInvalid ? true : undefined}
         onChange={(event) => onCheckedChange(event.target.checked)}
         className="peer sr-only"
       />
       <span
         aria-hidden="true"
         className={cn(
-          "flex h-7 w-7 items-center justify-center rounded-control border border-line bg-surface text-white peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary",
-          checked && "border-primary bg-primary",
-          disabled && !checked && "opacity-60",
+          "flex h-7 w-7 shrink-0 items-center justify-center rounded-small border-[1.5px] text-white peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary",
+          disabled
+            ? checked
+              ? "border-ink-3 bg-ink-3"
+              : "border-line bg-surface"
+            : checked
+              ? "border-primary bg-primary group-hover:border-primary-hover group-hover:bg-primary-hover"
+              : cn(
+                  "bg-white group-hover:border-primary group-hover:bg-primary-soft",
+                  isInvalid ? "border-danger" : "border-control",
+                ),
         )}
       >
         {checked ? (
-          <svg viewBox="0 0 16 16" width="16" height="16" fill="none">
+          <svg viewBox="0 0 16 16" width="20" height="20" fill="none">
             <path
-              d="M3 8.5l3.2 3L13 4.5"
+              d={CHECK_PATH}
               stroke="currentColor"
               strokeWidth="2"
               strokeLinecap="round"
@@ -183,27 +267,37 @@ export type ToggleProps = {
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
   disabled?: boolean;
+  isInvalid?: boolean;
 };
 
-export function Toggle({ label, checked, onCheckedChange, disabled }: ToggleProps) {
+/** 켜짐은 브랜드 색과 오른쪽 손잡이, 꺼짐은 회색과 왼쪽 손잡이로 구분하는 스위치. */
+export function Toggle({ label, checked, onCheckedChange, disabled, isInvalid }: ToggleProps) {
   return (
     <button
       type="button"
       role="switch"
       aria-checked={checked}
       aria-label={label}
+      aria-invalid={isInvalid ? true : undefined}
       disabled={disabled}
       onClick={() => onCheckedChange(!checked)}
       className={cn(
-        "relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50",
-        checked ? "bg-primary" : "bg-ink-3",
+        "relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors after:absolute after:-inset-x-2 after:-inset-y-2.5 after:content-[''] disabled:cursor-not-allowed",
+        disabled
+          ? checked
+            ? "bg-ink-3"
+            : "bg-line"
+          : checked
+            ? "bg-primary hover:bg-primary-hover"
+            : "bg-control hover:bg-ink-2",
+        isInvalid && "ring-2 ring-danger ring-offset-2",
       )}
     >
       <span
         aria-hidden="true"
         className={cn(
-          "inline-block h-5 w-5 rounded-full bg-white transition-transform",
-          checked ? "translate-x-6" : "translate-x-1",
+          "inline-block h-[18px] w-[18px] rounded-full bg-white transition-transform",
+          checked ? "translate-x-[23px]" : "translate-x-[3px]",
         )}
       />
     </button>
