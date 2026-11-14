@@ -180,6 +180,35 @@ describe("문의 상세 표시", () => {
     expect(await screen.findByText("대상을 찾을 수 없습니다.")).toBeTruthy();
   });
 
+  it("보안 검사에서 차단된 첨부는 재시도 안내 없이 다른 파일을 안내한다", async () => {
+    const user = userEvent.setup();
+    server.use(
+      http.get("/api/ops/support-inquiries/:id/attachments/:attachmentId", () =>
+        errorResponse(409, "ATTACHMENT_REJECTED", "차단"),
+      ),
+    );
+    renderDetail(502);
+    await user.click(await screen.findByRole("button", { name: "내부증빙.pdf 내려받기" }));
+    expect(
+      await screen.findByText("보안 검사에서 차단된 파일입니다. 다른 파일을 올려 주세요."),
+    ).toBeTruthy();
+    expect(screen.queryByText(/다시 시도/)).toBeNull();
+  });
+
+  it("검사 중인 첨부 오류는 잠시 뒤 다시 시도하라고 안내한다", async () => {
+    const user = userEvent.setup();
+    server.use(
+      http.get("/api/ops/support-inquiries/:id/attachments/:attachmentId", () =>
+        errorResponse(409, "ATTACHMENT_NOT_READY", "검사 전"),
+      ),
+    );
+    renderDetail(502);
+    await user.click(await screen.findByRole("button", { name: "내부증빙.pdf 내려받기" }));
+    expect(
+      await screen.findByText("검사가 끝나면 내려받을 수 있습니다. 잠시 뒤에 다시 시도해 주세요."),
+    ).toBeTruthy();
+  });
+
   it("조회가 감사 로그에 남는다는 안내를 보인다", async () => {
     renderDetail(502);
     expect(await screen.findByText(/감사 로그에 남습니다/)).toBeTruthy();
