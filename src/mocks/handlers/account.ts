@@ -159,6 +159,7 @@ type AccountState = {
   me: MeResponse;
   unsubscribed: boolean;
   emailLinkCount: number;
+  phoneVerificationRequired: boolean;
 };
 
 const state: AccountState = {
@@ -168,10 +169,15 @@ const state: AccountState = {
   me: MOCK_ME,
   unsubscribed: false,
   emailLinkCount: 0,
+  phoneVerificationRequired: false,
 };
 
 export function setMockTermsVersion(version: string): void {
   state.termsVersion = version;
+}
+
+export function setMockPhoneVerificationRequired(required: boolean): void {
+  state.phoneVerificationRequired = required;
 }
 
 export function getMockMe(): MeResponse {
@@ -201,6 +207,7 @@ export function resetMockAccountState(): void {
   state.me = MOCK_ME;
   state.unsubscribed = false;
   state.emailLinkCount = 0;
+  state.phoneVerificationRequired = false;
 }
 
 const NEW_ACCOUNT_CONTEXT = {
@@ -242,7 +249,12 @@ function unprocessable(code: string, message: string, extra?: Record<string, unk
 }
 
 export const accountHandlers = [
-  http.get("/api/terms", () => HttpResponse.json({ items: currentTerms() })),
+  http.get("/api/terms", () =>
+    HttpResponse.json({
+      items: currentTerms(),
+      phoneVerificationRequired: state.phoneVerificationRequired,
+    }),
+  ),
 
   http.get("/api/me/withdrawal-preview", () => HttpResponse.json(state.withdrawalPreview)),
 
@@ -276,6 +288,9 @@ export const accountHandlers = [
 
   http.post("/api/auth/phone-verification", async ({ request }) => {
     const body = (await request.json()) as { phone?: string };
+    if (!state.phoneVerificationRequired) {
+      return errorResponse(503, "SMS_UNAVAILABLE", "문자 발송 수단이 구성되지 않았습니다.");
+    }
     if (body.phone === "010-9999-9999") return mockErrors.rateLimited(30);
     return HttpResponse.json({ accepted: true, resendAfterSeconds: 60 }, { status: 202 });
   }),
@@ -304,10 +319,20 @@ export const accountHandlers = [
     const body = (await request.json()) as {
       verifiedEmailTicket?: string;
       verifiedPhoneTicket?: string;
+      phone?: string;
       password?: string;
       displayName?: string;
       agreedTerms?: AgreedTerm[];
     };
+    if (!state.phoneVerificationRequired && !/^01\d-\d{3,4}-\d{4}$/.test(body.phone ?? "")) {
+      return mockErrors.validation([
+        {
+          field: "phone",
+          code: "INVALID_FORMAT",
+          message: "휴대폰 번호 형식이 올바르지 않습니다.",
+        },
+      ]);
+    }
     if (body.verifiedPhoneTicket === "phone-ticket:010-1111-1111") {
       return errorResponse(409, "PHONE_ALREADY_REGISTERED", "이미 가입된 휴대폰 번호입니다.");
     }
@@ -330,8 +355,18 @@ export const accountHandlers = [
   http.post("/api/auth/signup/kakao", async ({ request }) => {
     const body = (await request.json()) as {
       verifiedPhoneTicket?: string;
+      phone?: string;
       agreedTerms?: AgreedTerm[];
     };
+    if (!state.phoneVerificationRequired && !/^01\d-\d{3,4}-\d{4}$/.test(body.phone ?? "")) {
+      return mockErrors.validation([
+        {
+          field: "phone",
+          code: "INVALID_FORMAT",
+          message: "휴대폰 번호 형식이 올바르지 않습니다.",
+        },
+      ]);
+    }
     if (body.verifiedPhoneTicket === "phone-ticket:010-1111-1111") {
       return errorResponse(409, "PHONE_ALREADY_REGISTERED", "이미 가입된 휴대폰 번호입니다.");
     }
@@ -446,6 +481,9 @@ export const accountHandlers = [
   http.patch("/api/me/contact", async ({ request }) => {
     const body = (await request.json()) as { email?: string; phone?: string };
     const field = body.email ? "email" : "phone";
+    if (field === "phone" && !state.phoneVerificationRequired) {
+      state.me = { ...state.me, phone: body.phone ?? null, phoneVerified: false };
+    }
     return HttpResponse.json({ field, value: body.email ?? body.phone ?? "", verifiedAt: NOW });
   }),
 ];

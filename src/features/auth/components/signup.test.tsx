@@ -6,6 +6,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 import {
   MOCK_ME,
   resetMockAccountState,
+  setMockPhoneVerificationRequired,
   setMockMe,
   setMockTermsVersion,
 } from "@/mocks/handlers/account";
@@ -32,6 +33,7 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
+  setMockPhoneVerificationRequired(true);
   window.localStorage.clear();
   window.history.replaceState(null, "", "/");
 });

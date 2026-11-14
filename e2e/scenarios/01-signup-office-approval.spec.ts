@@ -22,12 +22,9 @@ test.describe("시나리오 1 이메일 가입부터 사무소 승인 뒤 로그
       await expect(page.getByLabel(/^이름/)).toHaveValue("김중개");
     });
 
-    await test.step("휴대폰 인증과 필수 약관 동의 뒤 비밀번호를 정해 가입한다", async () => {
+    await test.step("휴대폰 번호 입력과 필수 약관 동의 뒤 비밀번호를 정해 가입한다", async () => {
       await page.getByLabel(/^휴대폰 번호/).fill("01012345678");
-      await page.getByRole("button", { name: "인증번호 받기" }).click();
-      await page.getByLabel(/^인증번호/).fill("123456");
-      await page.getByRole("button", { name: "확인", exact: true }).click();
-      await expect(page.getByText("인증이 완료되었습니다.")).toHaveCount(2);
+      await expect(page.getByText(/이메일로 본인을 확인하며/)).toBeVisible();
       await page.getByLabel(/이용약관에 동의합니다/).check({ force: true });
       await page.getByRole("button", { name: "다음" }).click();
       await expect(page.getByText("비밀번호 설정").first()).toBeVisible();

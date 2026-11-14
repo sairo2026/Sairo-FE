@@ -39,6 +39,7 @@ export type ReviewMockState = {
   claimPhone: string;
   validCode: string;
   otpExpired: boolean;
+  smsUnavailable: boolean;
   profilePhone: string;
   reauthDone: boolean;
   bulkImpactIds: number[];
@@ -113,6 +114,7 @@ function initialState(): ReviewMockState {
     claimPhone: "01012345678",
     validCode: "123456",
     otpExpired: false,
+    smsUnavailable: false,
     profilePhone: "010-****-5678",
     reauthDone: false,
     bulkImpactIds: [],
@@ -494,6 +496,9 @@ export const visitReviewHandlers = [
 
   http.post("/api/public/approver-auth/otp", async ({ request }) => {
     const body = (await request.json()) as { purpose: string; phone: string; linkToken?: string };
+    if (state.smsUnavailable) {
+      return errorResponse(503, "SMS_UNAVAILABLE", "문자 발송 수단이 구성되지 않았습니다.");
+    }
     const digits = body.phone.replace(/-/g, "");
     if (!/^01\d{8,9}$/.test(digits)) {
       return mockErrors.validation([{ field: "phone", message: "휴대폰 번호 형식이 아닙니다." }]);
