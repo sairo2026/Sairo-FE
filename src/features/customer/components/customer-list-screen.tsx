@@ -200,6 +200,7 @@ export function CustomerListScreen() {
         columns={columns}
         rows={query.data?.items ?? []}
         getRowId={(row) => String(row.customerId)}
+        getRowHref={(row) => `/customers/${row.customerId}`}
         totalCount={query.data?.totalElements ?? 0}
         page={page}
         pageSize={size}

@@ -96,6 +96,7 @@ function ContractTable({ tab }: { tab: string }) {
         caption="계약 목록"
         rows={query.data?.items ?? []}
         getRowId={(row) => String(row.contractId)}
+        getRowHref={(row) => `/contracts/${row.contractId}`}
         totalCount={query.data?.totalElements ?? 0}
         page={page}
         pageSize={size}
