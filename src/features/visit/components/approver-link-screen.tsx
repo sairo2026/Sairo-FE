@@ -54,7 +54,10 @@ function SessionExpired() {
       title="로그인이 만료되었습니다"
       description="번호 인증으로 다시 로그인해 주세요."
       actions={
-        <Link href="/approver/account/login" className="font-semibold text-primary underline">
+        <Link
+          href="/approver/account/login"
+          className="font-semibold text-primary underline hover:text-primary-hover active:text-primary-pressed"
+        >
           로그인으로 이동
         </Link>
       }
@@ -187,7 +190,7 @@ export function ApproverWorkspace({
                 ? `/approver/account/login?token=${encodeURIComponent(linkToken)}`
                 : "/approver/account/login"
             }
-            className="font-semibold text-primary underline"
+            className="font-semibold text-primary underline hover:text-primary-hover active:text-primary-pressed"
           >
             번호 인증 계정 만들기·로그인
           </Link>
@@ -195,7 +198,7 @@ export function ApproverWorkspace({
       ) : (
         <Link
           href="/approver/account"
-          className="text-caption font-semibold text-primary underline"
+          className="text-caption font-semibold text-primary underline hover:text-primary-hover active:text-primary-pressed"
         >
           내 매물 모아보기로 돌아가기
         </Link>

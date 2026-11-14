@@ -33,7 +33,10 @@ export function ApproverConfirmed({
           확정된 일정을 바꿔야 하면 이 화면에서 요청을 받지 않으니 아래 번호로 사무소에 문의해
           주세요.
         </p>
-        <a href={`tel:${data.officeContactPhone}`} className="text-body font-semibold text-primary">
+        <a
+          href={`tel:${data.officeContactPhone}`}
+          className="text-body font-semibold text-primary underline hover:text-primary-hover active:text-primary-pressed"
+        >
           {data.officeContactPhone}
         </a>
       </section>
