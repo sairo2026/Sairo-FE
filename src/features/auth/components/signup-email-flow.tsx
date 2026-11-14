@@ -30,7 +30,7 @@ import {
 import { clearSignupDraft, saveSignupDraft, useSignupDraft } from "../model/signup-draft";
 import { AuthFrame, FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { ExistingAccountNotice } from "./existing-account-notice";
-import { PhoneVerificationField } from "./phone-verification-field";
+import { PHONE_PATTERN, PhoneVerificationField } from "./phone-verification-field";
 import {
   CollectionNoticeTable,
   TermsAgreementSection,
@@ -159,6 +159,7 @@ export function SignupEmailFlow({ token }: { token?: string }) {
     );
   }
 
+  const phoneRequired = termsQuery.data.phoneVerificationRequired;
   const terms = visibleTerms([...termsQuery.data.items], true);
   if (terms.length === 0) {
     return (
@@ -209,15 +210,20 @@ export function SignupEmailFlow({ token }: { token?: string }) {
       setEmailError("이메일 인증을 완료해 주세요.");
       isValid = false;
     }
-    if (!phoneTicket) isValid = false;
+    const isPhoneReady = phoneRequired ? phoneTicket !== null : PHONE_PATTERN.test(phone);
+    if (!isPhoneReady) isValid = false;
     if (!areRequiredTermsAgreed(terms, selection)) {
       setTermsError(SIGNUP_TERMS_COPY.requiredError);
       isValid = false;
     } else {
       setTermsError(undefined);
     }
-    if (!phoneTicket && isValid === false && emailTicket) {
-      setSubmitError("휴대폰 번호 인증을 완료해 주세요.");
+    if (!isPhoneReady && emailTicket) {
+      setSubmitError(
+        phoneRequired
+          ? "휴대폰 번호 인증을 완료해 주세요."
+          : "휴대폰 번호를 010-0000-0000 형식으로 입력해 주세요.",
+      );
     } else {
       setSubmitError(undefined);
     }
@@ -229,7 +235,8 @@ export function SignupEmailFlow({ token }: { token?: string }) {
     setPasswordError(passwordProblem ?? undefined);
     const mismatch = password !== confirm ? "비밀번호가 일치하지 않습니다." : undefined;
     setConfirmError(mismatch);
-    if (passwordProblem || mismatch || !emailTicket || !phoneTicket) return;
+    if (passwordProblem || mismatch || !emailTicket) return;
+    if (phoneRequired && !phoneTicket) return;
 
     setIsBusy(true);
     setSubmitError(undefined);
@@ -239,7 +246,7 @@ export function SignupEmailFlow({ token }: { token?: string }) {
         .map((item) => ({ termsCode: item.termsCode, version: item.version }));
       const result = await signupWithEmail({
         verifiedEmailTicket: emailTicket,
-        verifiedPhoneTicket: phoneTicket,
+        ...(phoneRequired ? { verifiedPhoneTicket: phoneTicket ?? undefined } : { phone }),
         password,
         displayName: name.trim(),
         agreedTerms,
@@ -371,6 +378,7 @@ export function SignupEmailFlow({ token }: { token?: string }) {
               ) : null}
             </div>
             <PhoneVerificationField
+              verificationRequired={phoneRequired}
               purpose="SIGNUP"
               phone={phone}
               onPhoneChange={setPhone}
@@ -378,7 +386,9 @@ export function SignupEmailFlow({ token }: { token?: string }) {
               onVerified={setPhoneTicket}
               onReset={() => setPhoneTicket(null)}
             />
-            <p className="text-caption text-ink-2">{PHONE_VERIFICATION_NOTICE}</p>
+            {phoneRequired ? (
+              <p className="text-caption text-ink-2">{PHONE_VERIFICATION_NOTICE}</p>
+            ) : null}
             <TermsAgreementSection
               items={terms}
               selection={selection}

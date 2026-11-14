@@ -140,7 +140,7 @@ function ContactCard({ me }: { me: MeResponse }) {
                   {me.phone}
                   <StatusBadge
                     tone={me.phoneVerified ? "green" : "amber"}
-                    label={me.phoneVerified ? COPY.verified : COPY.unverified}
+                    label={me.phoneVerified ? COPY.verified : COPY.phoneUnverified}
                   />
                 </span>
               ) : (

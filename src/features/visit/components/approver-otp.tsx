@@ -15,6 +15,8 @@ import { describeVisitError, fieldErrorMap } from "../model/messages";
 
 export const OTP_LENGTH = 6;
 export const OTP_MAX_ATTEMPTS = 5;
+export const SMS_UNAVAILABLE_NOTICE =
+  "번호 인증 계정은 문자 인증을 준비 중이라 아직 이용할 수 없습니다. 승인자 링크로 조건 입력, 신청 비교와 선택, 확정 일정 확인은 그대로 할 수 있습니다.";
 
 function formatRemaining(seconds: number): string {
   const minutes = Math.floor(seconds / 60);
@@ -45,6 +47,7 @@ export function ApproverOtpForm({
   const [codeError, setCodeError] = useState<string>();
   const [formError, setFormError] = useState<string>();
   const [rateLimit, setRateLimit] = useState<number>();
+  const [smsUnavailable, setSmsUnavailable] = useState(false);
 
   useEffect(() => {
     if (!sent) return;
@@ -80,6 +83,10 @@ export function ApproverOtpForm({
       setRateLimit(undefined);
     },
     onError: (caught) => {
+      if (caught instanceof ApiError && caught.code === "SMS_UNAVAILABLE") {
+        setSmsUnavailable(true);
+        return;
+      }
       const mapped = fieldErrorMap(caught);
       if (mapped.phone) setPhoneError(mapped.phone);
       setFormError(failure(caught, "인증번호를 보내지 못했습니다. 다시 시도해 주세요."));
@@ -126,6 +133,10 @@ export function ApproverOtpForm({
       return;
     }
     verify.mutate();
+  }
+
+  if (smsUnavailable) {
+    return <FormNotice>{SMS_UNAVAILABLE_NOTICE}</FormNotice>;
   }
 
   const blocked = attemptsLeft <= 0 || (rateLimit !== undefined && rateLimit > 0);
