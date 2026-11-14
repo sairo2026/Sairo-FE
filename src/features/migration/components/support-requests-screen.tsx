@@ -185,6 +185,7 @@ function RequestsTable() {
         caption={COPY.listTitle}
         rows={query.data?.items ?? []}
         getRowId={(row) => String(row.requestId)}
+        getRowHref={(row) => `/import/support/${row.requestId}`}
         totalCount={query.data?.totalElements ?? 0}
         page={page}
         pageSize={size}
@@ -227,6 +228,7 @@ function RequestsTable() {
           {
             key: "quote",
             header: "견적",
+            align: "right",
             render: (row) => (row.quoteAmount ? formatKrw(row.quoteAmount) : "-"),
           },
           { key: "updated", header: "갱신", render: (row) => formatSeoulDateTime(row.updatedAt) },

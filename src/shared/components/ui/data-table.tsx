@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { cn } from "@/shared/lib/cn";
 import { Button } from "./button";
 import { formatCount } from "@/shared/lib/format";
+import { Pagination } from "./pagination";
 import { TableScroll } from "./table-scroll";
 
 export const PAGE_SIZE_OPTIONS = [25, 50, 100] as const;
@@ -19,6 +21,10 @@ export type DataTableColumn<Row> = {
   render: (row: Row) => ReactNode;
   isSortable?: boolean;
   className?: string;
+  /** 숫자·금액 열은 오른쪽 정렬과 같은 폭 숫자를 쓴다. */
+  align?: "left" | "right";
+  /** 한 줄로 줄이고 넘치는 글은 말줄임으로 표시하며 전체 글은 title로 보여준다. */
+  truncate?: boolean;
 };
 
 export type DataTableProps<Row> = {
@@ -38,7 +44,23 @@ export type DataTableProps<Row> = {
   errorMessage?: string;
   onRetry?: () => void;
   emptyMessage?: string;
+  /** 주면 행 전체가 그 주소로 들어가는 눌림 영역이 되고 호버 배경과 오른쪽 화살표가 붙는다. */
+  getRowHref?: (row: Row) => string | undefined;
 };
+
+const TRUNCATE_WIDTH_CLASS = "max-w-[16rem]";
+
+function cellContent<Row>(column: DataTableColumn<Row>, row: Row): ReactNode {
+  const content = column.render(row);
+  if (!column.truncate) return content;
+  const title =
+    typeof content === "string" || typeof content === "number" ? String(content) : undefined;
+  return (
+    <span title={title} className={cn("truncate-text", TRUNCATE_WIDTH_CLASS)}>
+      {content}
+    </span>
+  );
+}
 
 export function DataTable<Row>({
   caption,
@@ -56,6 +78,7 @@ export function DataTable<Row>({
   errorMessage,
   onRetry,
   emptyMessage = "표시할 내용이 없습니다.",
+  getRowHref,
 }: DataTableProps<Row>) {
   const pageCount = Math.max(1, Math.ceil(totalCount / pageSize));
 
@@ -72,7 +95,10 @@ export function DataTable<Row>({
 
   return (
     <div className="flex flex-col gap-4" aria-busy={isLoading || undefined}>
-      <TableScroll label={caption} className="rounded-card-flat border border-line bg-white">
+      <TableScroll
+        label={caption}
+        className="max-h-[70vh] rounded-card-flat border border-line bg-white"
+      >
         <table
           className={cn(
             "w-full border-collapse text-left",
@@ -87,7 +113,10 @@ export function DataTable<Row>({
                   key={column.key}
                   scope="col"
                   aria-sort={column.isSortable ? ariaSort(column.key) : undefined}
-                  className="border-b border-line bg-surface px-4 py-3.5 text-caption font-semibold text-ink-2"
+                  className={cn(
+                    "sticky top-0 z-20 border-b border-line bg-surface px-4 py-3.5 text-caption font-semibold text-ink-2",
+                    column.align === "right" && "text-right",
+                  )}
                 >
                   {column.isSortable ? (
                     <button
@@ -120,20 +149,70 @@ export function DataTable<Row>({
                       ))}
                     </tr>
                   ))
-                : rows.map((row) => (
-                    <tr key={getRowId(row)} className="border-b border-line last:border-b-0">
-                      {columns.map((column) => (
-                        <td
-                          key={column.key}
-                          className={cn("px-4 py-4 text-body text-ink", column.className)}
-                        >
-                          {column.render(row)}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
+                : rows.map((row) => {
+                    const href = getRowHref?.(row);
+                    return (
+                      <tr
+                        key={getRowId(row)}
+                        className={cn(
+                          "border-b border-line last:border-b-0",
+                          href &&
+                            "group relative transition-colors hover:bg-primary-soft active:bg-primary-line",
+                        )}
+                      >
+                        {columns.map((column, columnIndex) => (
+                          <td
+                            key={column.key}
+                            className={cn(
+                              "px-4 py-4 text-body text-ink",
+                              column.align === "right" && "text-right tabular-nums",
+                              column.className,
+                            )}
+                          >
+                            {href && columnIndex === 0 ? (
+                              <Link
+                                href={href}
+                                aria-hidden="true"
+                                tabIndex={-1}
+                                className="absolute inset-0 z-0"
+                              />
+                            ) : null}
+                            <div
+                              className={cn(
+                                "flex items-center justify-between gap-3",
+                                href &&
+                                  "pointer-events-none relative z-10 [&_a]:pointer-events-auto [&_button]:pointer-events-auto [&_input]:pointer-events-auto [&_label]:pointer-events-auto [&_select]:pointer-events-auto",
+                              )}
+                            >
+                              <div
+                                className={cn(
+                                  "min-w-0",
+                                  column.align === "right" && "flex-1 text-right",
+                                )}
+                              >
+                                {cellContent(column, row)}
+                              </div>
+                              {href && columnIndex === columns.length - 1 ? (
+                                <span
+                                  aria-hidden="true"
+                                  className="text-ink-3 group-hover:text-primary"
+                                >
+                                  ›
+                                </span>
+                              ) : null}
+                            </div>
+                          </td>
+                        ))}
+                      </tr>
+                    );
+                  })}
           </tbody>
         </table>
+        {isLoading ? (
+          <p role="status" className="sr-only">
+            불러오는 중입니다.
+          </p>
+        ) : null}
         {errorMessage ? (
           <div role="alert" className="flex flex-col items-center gap-3 px-4 py-12 text-center">
             <p className="text-body text-ink">{errorMessage}</p>
@@ -166,27 +245,12 @@ export function DataTable<Row>({
               ))}
             </select>
           </label>
-          <nav aria-label={`${caption} 페이지 이동`} className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              disabled={page <= 1}
-              onClick={() => onPageChange(page - 1)}
-            >
-              이전
-            </Button>
-            <span aria-live="polite">
-              {page} / {pageCount}
-            </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              disabled={page >= pageCount}
-              onClick={() => onPageChange(page + 1)}
-            >
-              다음
-            </Button>
-          </nav>
+          <Pagination
+            label={`${caption} 페이지 이동`}
+            page={page}
+            pageCount={pageCount}
+            onPageChange={onPageChange}
+          />
         </div>
       </div>
     </div>
