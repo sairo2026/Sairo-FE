@@ -130,6 +130,16 @@ describe("승인자 번호 인증", () => {
     expect(await screen.findByText("휴대폰 번호를 숫자로 정확히 입력해 주세요.")).not.toBeNull();
   });
 
+  it("문자 수단이 없으면 제공하지 않는 기능 안내로 바꾸고 번호 입력을 막는다", async () => {
+    setMockVisitReviewState({ smsUnavailable: true });
+    const user = userEvent.setup();
+    renderPage(<ApproverLoginScreen />);
+    await user.type(screen.getByLabelText("휴대폰 번호"), "01012345678");
+    await user.click(screen.getByRole("button", { name: "인증번호 받기" }));
+    expect(await screen.findByText(/현재 제공하지 않는 기능입니다/)).not.toBeNull();
+    expect(screen.queryByLabelText("휴대폰 번호")).toBeNull();
+  });
+
   it("만료된 인증번호는 다시 받으라고 안내한다", async () => {
     setMockVisitReviewState({ otpExpired: true });
     const user = userEvent.setup();

@@ -6,13 +6,15 @@ import { TextField } from "@/shared/components/ui/text-field";
 import { sendPhoneVerification, verifyPhone } from "../api/account.api";
 import { formatClock, useCountdown } from "../hooks/use-countdown";
 import { describeAuthError } from "@/shared/lib/api-messages";
+import { PHONE_UNVERIFIED_NOTICE } from "../model/legal-copy";
 
-const PHONE_PATTERN = /^01\d-\d{3,4}-\d{4}$/;
+export const PHONE_PATTERN = /^01\d-\d{3,4}-\d{4}$/;
 const CODE_LENGTH = 6;
 const CODE_VALID_SECONDS = 300;
 
 export type PhoneVerificationFieldProps = {
   label?: string;
+  verificationRequired?: boolean;
   purpose: "SIGNUP" | "CHANGE";
   phone: string;
   onPhoneChange: (phone: string) => void;
@@ -22,7 +24,8 @@ export type PhoneVerificationFieldProps = {
 };
 
 export function PhoneVerificationField({
-  label = "휴대폰 번호 인증",
+  label,
+  verificationRequired = true,
   purpose,
   phone,
   onPhoneChange,
@@ -117,6 +120,33 @@ export function PhoneVerificationField({
     }
   }
 
+  if (!verificationRequired) {
+    return (
+      <div className="flex flex-col gap-2">
+        <TextField
+          label={label ?? "휴대폰 번호"}
+          kind="tel"
+          value={phone}
+          onValueChange={(next) => {
+            onPhoneChange(next);
+            setPhoneError(undefined);
+          }}
+          onBlur={() => {
+            if (phone !== "" && !PHONE_PATTERN.test(phone)) {
+              setPhoneError("휴대폰 번호를 010-0000-0000 형식으로 입력해 주세요.");
+            }
+          }}
+          placeholder="010-0000-0000"
+          autoComplete="tel"
+          maxLength={13}
+          error={phoneError}
+          required
+        />
+        <p className="text-caption text-ink-2">{PHONE_UNVERIFIED_NOTICE}</p>
+      </div>
+    );
+  }
+
   const sendLabel = isSent ? "재발송" : "인증번호 받기";
   const resendNote =
     resend.remaining > 0 ? `${resend.remaining}초 뒤 재발송할 수 있습니다.` : undefined;
@@ -124,7 +154,7 @@ export function PhoneVerificationField({
   return (
     <div className="flex flex-col gap-3">
       <TextField
-        label={label}
+        label={label ?? "휴대폰 번호 인증"}
         kind="tel"
         value={phone}
         onValueChange={changePhone}

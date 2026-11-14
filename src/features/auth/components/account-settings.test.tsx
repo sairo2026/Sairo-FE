@@ -3,7 +3,12 @@ import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http } from "msw";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { MOCK_ME, resetMockAccountState, setMockMe } from "@/mocks/handlers/account";
+import {
+  MOCK_ME,
+  resetMockAccountState,
+  setMockMe,
+  setMockPhoneVerificationRequired,
+} from "@/mocks/handlers/account";
 import { resetMockAuthState, setMockAuthContext } from "@/mocks/handlers/auth";
 import { mockErrors } from "@/mocks/error-responses";
 import { server, startMockServer } from "@/mocks/server";
@@ -32,6 +37,7 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
+  setMockPhoneVerificationRequired(true);
   window.localStorage.clear();
   window.history.replaceState(null, "", "/");
 });
