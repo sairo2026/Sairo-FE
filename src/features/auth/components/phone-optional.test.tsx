@@ -3,7 +3,7 @@ import { cleanup, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { resetMockAccountState, setMockPhoneVerificationRequired } from "@/mocks/handlers/account";
+import { resetMockAccountState } from "@/mocks/handlers/account";
 import { resetMockAuthState } from "@/mocks/handlers/auth";
 import { server, startMockServer } from "@/mocks/server";
 import { ContactChangeScreen } from "./contact-change-screen";
