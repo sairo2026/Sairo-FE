@@ -7,8 +7,8 @@ import {
 } from "./coming-soon-gate";
 
 describe("isComingSoonMode", () => {
-  it("운영 배포에서는 플래그가 없어도 켜진다", () => {
-    expect(isComingSoonMode({ VERCEL_ENV: "production" })).toBe(true);
+  it("출시 후 운영 배포에서는 플래그가 없으면 열린다", () => {
+    expect(isComingSoonMode({ VERCEL_ENV: "production" })).toBe(false);
   });
 
   it("미리보기 배포와 로컬에서는 꺼진다", () => {

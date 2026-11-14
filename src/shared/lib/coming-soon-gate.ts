@@ -11,7 +11,7 @@ export function isComingSoonMode(env: GateEnv): boolean {
   if (env.COMING_SOON === "false") {
     return false;
   }
-  return env.VERCEL_ENV === "production";
+  return false;
 }
 
 const OPEN_PAGE_PATHS: readonly string[] = ["/pricing", "/legal", "/unsubscribe"];
