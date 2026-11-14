@@ -83,7 +83,11 @@ function TaskOpener({ taskId, onClose }: { taskId: number; onClose: () => void }
     return (
       <FormAlert>
         업무 정보를 불러오지 못했습니다.{" "}
-        <button type="button" className="underline" onClick={onClose}>
+        <button
+          type="button"
+          className="underline hover:opacity-70 active:opacity-50"
+          onClick={onClose}
+        >
           닫기
         </button>
       </FormAlert>
@@ -159,7 +163,10 @@ function HomeBody({ summary }: { summary: HomeSummaryResponse }) {
       {isOwner ? (
         <p className="text-caption text-ink-2">
           결제 카드를 아직 등록하지 않았다면{" "}
-          <Link href="/billing/card-guide" className="font-semibold text-primary underline">
+          <Link
+            href="/billing/card-guide"
+            className="font-semibold text-primary underline hover:text-primary-hover active:text-primary-pressed"
+          >
             카드 등록 안내
           </Link>
           를 확인해 주세요.
