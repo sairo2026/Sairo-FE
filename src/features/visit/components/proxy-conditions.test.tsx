@@ -151,6 +151,26 @@ describe("승인자 조건 대리 입력 화면", () => {
     expect(screen.queryByText(/서버:/)).toBeNull();
   });
 
+  it("서버가 가능한 시간대 없음(windows REQUIRED)으로 거절하면 시간대 입력 아래에 안내한다", async () => {
+    proxyOnly();
+    server.use(
+      http.put(
+        "/api/properties/:propertyId/access-approvals/:approvalId/approver-conditions/proxy",
+        () =>
+          mockErrors.validation([
+            { field: "windows", code: "REQUIRED", message: "서버: windows 필수" },
+          ]),
+      ),
+    );
+    const user = userEvent.setup();
+    renderOffice(<ProxyConditionsScreen propertyId={501} approvalId={7001} />, { role: "OWNER" });
+    await user.click(await screen.findByRole("button", { name: "대리 입력으로 저장" }));
+    expect(
+      await screen.findByText(/가능한 시간대를 1개 이상 입력해 주세요. 요일별 시간대나 날짜별/),
+    ).not.toBeNull();
+    expect(screen.queryByText(/서버:/)).toBeNull();
+  });
+
   it("이력을 불러오지 못하면 오류 화면을 보여준다", async () => {
     server.use(
       http.get("/api/properties/:propertyId/access-approvals/:approvalId/approver-conditions", () =>

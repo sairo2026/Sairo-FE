@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { listRequestNotices, readRequestNotice } from "@/features/visit/api/request.api";
 import { NOTICE_TYPE_DESCRIPTION, NOTICE_TYPE_LABEL } from "@/features/visit/model/request-labels";
+import { ApiError } from "@/shared/api/client";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
 import { EmptyState } from "@/shared/components/feedback/empty-state";
 import { FormAlert } from "@/shared/components/feedback/form-frame";
@@ -18,9 +19,12 @@ import { PAGE_SIZE_OPTIONS } from "@/shared/components/ui/data-table";
 import type { PageSize } from "@/shared/components/ui/data-table";
 import { markNotificationRead } from "../api/home.api";
 import { homeKeys, useNotifications } from "../hooks/home-queries";
-import { notificationHref, notificationTypeLabel, visitRequestNoticeHref } from "../model/labels";
+import { notificationLink, notificationTypeLabel, visitRequestNoticeHref } from "../model/labels";
 import type { NotificationTab } from "../model/labels";
 import { describeWorkError } from "../model/messages";
+
+const SUSPENDED_NOTIFICATION_COPY =
+  "지금은 알림함을 열 수 없습니다. 사무소 접근이 정지된 경우 정지가 풀릴 때까지 알림을 볼 수 없습니다.";
 
 function GeneralNotifications() {
   const queryClient = useQueryClient();
@@ -35,6 +39,17 @@ function GeneralNotifications() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: homeKeys.all }),
     onError: (error) => setActionError(describeWorkError(error, "읽음 처리하지 못했습니다.")),
   });
+
+  if (query.error instanceof ApiError && query.error.status === 403) {
+    return (
+      <FormAlert>
+        {SUSPENDED_NOTIFICATION_COPY}{" "}
+        <Link href="/access" className="underline clickable-link">
+          접근 상태 확인
+        </Link>
+      </FormAlert>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -77,7 +92,7 @@ function GeneralNotifications() {
             <>
               <ul className="flex flex-col gap-2">
                 {data.items.map((item) => {
-                  const href = notificationHref(item.targetType, item.targetId);
+                  const href = notificationLink(item.type, item.targetType, item.targetId);
                   return (
                     <li
                       key={item.notificationId}

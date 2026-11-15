@@ -11,6 +11,7 @@ import { ErrorScreen } from "@/shared/components/feedback/error-screen";
 import { PageSkeleton } from "@/shared/components/feedback/skeleton";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
+import { RequirementMark } from "@/shared/components/ui/requirement-mark";
 import { formatSeoulDate } from "@/shared/lib/format";
 import { findLegalDocumentByTermsCode } from "@/shared/legal/registry";
 import { fetchTermsReconsent, logout, recordTermsAgreement } from "../api/auth-context.api";
@@ -99,7 +100,7 @@ export function ReconsentNotice() {
             >
               <p className="text-body font-semibold text-ink">
                 {findLegalDocumentByTermsCode(item.termsCode)?.title ?? item.termsCode}{" "}
-                <span className="text-primary">({item.required ? "필수" : "선택"})</span>
+                <RequirementMark requirement={item.required ? "required" : "optional"} />
               </p>
               <p className="mt-1 text-caption text-ink-2">
                 이전 버전 {item.previousVersion ?? "없음"}, 새 버전 {item.version}

@@ -123,6 +123,7 @@ function ApplyForm({ initialBatchId }: { initialBatchId: string }) {
             <p className="text-caption text-ink-2">{MIGRATION_SOURCE_CONSENT_COPY.scope}</p>
             <Checkbox
               label={MIGRATION_SOURCE_CONSENT_COPY.viewConfirm}
+              requirement="required"
               checked={viewConfirmed}
               disabled={isReadOnly}
               onCheckedChange={(value) => {
@@ -132,6 +133,7 @@ function ApplyForm({ initialBatchId }: { initialBatchId: string }) {
             />
             <Checkbox
               label={MIGRATION_SOURCE_CONSENT_COPY.noticeConfirm}
+              requirement="required"
               checked={noticeConfirmed}
               disabled={isReadOnly}
               onCheckedChange={(value) => {

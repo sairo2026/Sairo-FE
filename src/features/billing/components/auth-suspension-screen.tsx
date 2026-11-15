@@ -9,6 +9,7 @@ import { formatSeoulDateTime } from "@/shared/lib/format";
 import { useAuthStatus } from "../hooks/billing-queries";
 import { isMissing } from "../model/labels";
 import { RETURN_COPY, SUSPENSION_COPY } from "../model/legal-copy";
+import { breakSentences } from "@/shared/lib/sentences";
 
 export function formatRemaining(totalSeconds: number): string {
   const seconds = Math.max(0, Math.floor(totalSeconds));
@@ -33,7 +34,9 @@ export function AuthSuspensionScreen() {
           status.authSuspended ? (
             <div className="flex flex-col gap-6">
               <Card title={SUSPENSION_COPY.title}>
-                <p className="text-body text-ink">{SUSPENSION_COPY.body}</p>
+                <p className="whitespace-pre-line text-body text-ink">
+                  {breakSentences(SUSPENSION_COPY.body)}
+                </p>
                 <dl className="mt-4 grid grid-cols-1 gap-2 text-body sm:grid-cols-[160px_1fr]">
                   {status.suspendedAt ? (
                     <>
@@ -96,10 +99,12 @@ export function ReturnGuideScreen() {
         actions={<TextLink href="/billing">구독 현황으로</TextLink>}
       />
       <Card title={RETURN_COPY.title}>
-        <p className="text-body text-ink">{RETURN_COPY.body}</p>
+        <p className="whitespace-pre-line text-body text-ink">{breakSentences(RETURN_COPY.body)}</p>
       </Card>
       <Card title={RETURN_COPY.reauthTitle}>
-        <p className="text-body text-ink">{RETURN_COPY.reauth}</p>
+        <p className="whitespace-pre-line text-body text-ink">
+          {breakSentences(RETURN_COPY.reauth)}
+        </p>
       </Card>
       <Card title={RETURN_COPY.archiveTitle}>
         <p className="text-body text-ink">{RETURN_COPY.archive}</p>

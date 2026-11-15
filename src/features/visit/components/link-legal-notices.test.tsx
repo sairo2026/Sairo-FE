@@ -50,7 +50,7 @@ describe("승인자 링크 개인정보 안내", () => {
       />,
     );
     expect(
-      screen.getByText("새봄공인중개사사무소이 방문 일정을 조율하기 위해 아래 조건을 받습니다."),
+      screen.getByText("새봄공인중개사사무소가 방문 일정을 조율하기 위해 아래 조건을 받습니다."),
     ).not.toBeNull();
     expect(
       screen.getByText("이용 목적: 방문 신청을 받을지 판단하고 방문 일정을 확정하는 일"),

@@ -8,6 +8,7 @@ import type {
 import { TEXT_LIMITS, countCodePoints } from "@/shared/lib/format";
 import { isLease } from "./labels";
 import type { ContractCorrectionRequest } from "../api/contract.api";
+import { topicParticle } from "@/shared/lib/korean";
 
 export type PartyInput = {
   key: string;
@@ -144,7 +145,7 @@ export function validateContractForm(
   for (const [field, label] of amountFields) {
     const raw = values[field];
     if (raw.trim() !== "" && (Number.isNaN(parseAmount(raw)) || parseAmount(raw) <= 0)) {
-      errors[field] = `${label}은 0보다 큰 숫자로 입력해 주세요.`;
+      errors[field] = `${topicParticle(label)} 0보다 큰 숫자로 입력해 주세요.`;
     }
   }
   if (values.leaseStartDate && values.leaseEndDate && values.leaseEndDate < values.leaseStartDate) {

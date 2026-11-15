@@ -480,7 +480,7 @@ export const billingHandlers = [
   }),
   http.post("/api/subscriptions/first-payment", () => {
     billingState.subscription = { ...billingState.subscription, status: "ACTIVE" };
-    return HttpResponse.json({ status: "ACTIVE" });
+    return HttpResponse.json({ status: "ACTIVE", invoiceId: 501, paymentStatus: "PAID" });
   }),
   http.post("/api/subscriptions/retry-payment", () => {
     billingState.subscription = {
@@ -488,7 +488,7 @@ export const billingHandlers = [
       status: "ACTIVE",
       canRetryPayment: false,
     };
-    return HttpResponse.json({ status: "ACTIVE" });
+    return HttpResponse.json({ status: "ACTIVE", invoiceId: 501, paymentStatus: "PAID" });
   }),
   http.post("/api/subscriptions/cancel", () => {
     const effectiveAt = billingState.subscription.currentPeriodEnd;
@@ -576,11 +576,14 @@ export const billingHandlers = [
   http.get("/api/billing/tax-recipient", () => HttpResponse.json(billingState.taxRecipient)),
   http.put("/api/billing/tax-recipient", async ({ request }) => {
     const body = (await request.json()) as Partial<TaxRecipient>;
-    if (!/^\d{10}$/.test(body.businessNumber ?? "")) {
+    if (!/^\d{3}-?\d{2}-?\d{5}$/.test(body.businessNumber ?? "")) {
       return errorResponse(
         422,
         "TAX_RECIPIENT_INVALID",
         "사업자등록번호 형식이 올바르지 않습니다.",
+        {
+          fieldErrors: [{ field: "businessNumber", code: "INVALID_FORMAT", message: "형식 오류" }],
+        },
       );
     }
     billingState.taxRecipient = {

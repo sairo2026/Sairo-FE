@@ -40,7 +40,7 @@ describe("공개 요금 페이지", () => {
     expect(document.querySelector('[aria-busy="true"]')).not.toBeNull();
   });
 
-  it("확정 구간식과 VAT 포함 표시, 1명부터 10명까지 예시를 보여준다", async () => {
+  it("확정 구간식과 부가세 포함 표시, 1명부터 10명까지 예시를 보여준다", async () => {
     renderPublic(<PublicPricingScreen />);
     expect(await screen.findByRole("heading", { name: "사무소 단위 월 구독 요금" })).not.toBeNull();
     expect(screen.getByText("1인")).not.toBeNull();
@@ -48,9 +48,9 @@ describe("공개 요금 페이지", () => {
     expect(screen.getByText("5인 이상")).not.toBeNull();
     expect(screen.getByText("기업")).not.toBeNull();
     expect(screen.getByText("별도 견적")).not.toBeNull();
-    expect(screen.getByText(/월 39,900원 \(VAT 포함\)/)).not.toBeNull();
-    expect(screen.getByText(/월 39,900원 \+ \(인원 - 1\) × 10,000원/)).not.toBeNull();
-    expect(screen.getByText(/월 69,900원 \+ \(인원 - 4\) × 8,000원/)).not.toBeNull();
+    expect(screen.getByText(/월 39,900원 \(부가세 포함\)/)).not.toBeNull();
+    expect(screen.getByText(/월 39,900원\(1명 포함\), 추가 1명당 10,000원/)).not.toBeNull();
+    expect(screen.getByText(/월 69,900원\(4명 포함\), 추가 1명당 8,000원/)).not.toBeNull();
     const table = screen.getByRole("table");
     expect(within(table).getAllByRole("row")).toHaveLength(11);
     expect(within(table).getByText("117,900원")).not.toBeNull();
@@ -207,8 +207,8 @@ describe("게시된 표준 요금표", () => {
       ),
     );
     renderPublic(<PublicPricingScreen />);
-    expect(await screen.findByText(/월 41,900원 \(VAT 포함\)/)).not.toBeNull();
-    expect(screen.queryByText(/월 39,900원 \(VAT 포함\)/)).toBeNull();
+    expect(await screen.findByText(/월 41,900원 \(부가세 포함\)/)).not.toBeNull();
+    expect(screen.queryByText(/월 39,900원 \(부가세 포함\)/)).toBeNull();
   });
 });
 

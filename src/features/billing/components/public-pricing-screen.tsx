@@ -14,6 +14,7 @@ import { tierFormula, tierRange } from "../model/pricing-tier";
 import { describeBillingError, COPY } from "../model/messages";
 import { CommerceNotice } from "./commerce-notice";
 import { usePublicPricing } from "../hooks/billing-queries";
+import { breakSentences } from "@/shared/lib/sentences";
 
 export function PublicPricingScreen() {
   const query = usePublicPricing();
@@ -60,7 +61,7 @@ export function PublicPricingScreen() {
             >
               <span className="text-body font-semibold text-ink">{tierRange(tier)}</span>
               <span className="flex flex-col text-body text-ink-2 sm:items-end">
-                <span>{tierFormula(tier)} (VAT 포함)</span>
+                <span>{tierFormula(tier)} (부가세 포함)</span>
                 <span className="text-caption">
                   {PRICING_COPY.planFooter(formatKrw(tier.baseAmount))}
                 </span>
@@ -91,7 +92,7 @@ export function PublicPricingScreen() {
                 이용 인원
               </th>
               <th scope="col" className="py-2">
-                월 금액 (VAT 포함)
+                월 금액 (부가세 포함)
               </th>
             </tr>
           </thead>
@@ -116,8 +117,8 @@ export function PublicPricingScreen() {
 
       <Card title={PRICING_COPY.paymentTitle}>
         <p className="text-body text-ink">{PRICING_COPY.payment}</p>
-        <p className="mt-3 text-body text-ink">
-          {COPY.pricingRefundSummary}{" "}
+        <p className="mt-3 whitespace-pre-line text-body text-ink">
+          {breakSentences(COPY.pricingRefundSummary)}{" "}
           <Link
             href="/legal/refund-policy"
             className="font-semibold text-primary underline clickable-link"

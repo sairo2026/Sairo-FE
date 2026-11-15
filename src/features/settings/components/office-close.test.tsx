@@ -64,7 +64,7 @@ describe("사무소 종료 확인", () => {
     const user = userEvent.setup();
     renderOffice(<OfficeCloseScreen />, { role: "OWNER" });
     await user.click(screen.getByLabelText("신청하지 않습니다"));
-    await user.click(screen.getByLabelText("위 내용을 확인했고 사무소를 종료합니다."));
+    await user.click(screen.getByLabelText(/^위 내용을 확인했고 사무소를 종료합니다\./));
     await user.click(screen.getByRole("button", { name: "사무소 종료" }));
     expect(await screen.findByText("사무소가 종료되었습니다")).not.toBeNull();
     expect(screen.getByText("반환 권한 만료일은 2026-12-10 09:00입니다.")).not.toBeNull();
@@ -78,7 +78,7 @@ describe("사무소 종료 확인", () => {
     const user = userEvent.setup();
     renderOffice(<OfficeCloseScreen />, { role: "OWNER" });
     await user.click(screen.getByLabelText("신청합니다"));
-    await user.click(screen.getByLabelText("위 내용을 확인했고 사무소를 종료합니다."));
+    await user.click(screen.getByLabelText(/^위 내용을 확인했고 사무소를 종료합니다\./));
     await user.click(screen.getByRole("button", { name: "사무소 종료" }));
     expect(
       await screen.findByText(/보관계약 신청이 접수되었습니다. 운영자 승인 뒤/),
@@ -94,7 +94,7 @@ describe("사무소 종료 확인", () => {
     const user = userEvent.setup();
     renderOffice(<OfficeCloseScreen />, { role: "OWNER" });
     await user.click(screen.getByLabelText("신청하지 않습니다"));
-    await user.click(screen.getByLabelText("위 내용을 확인했고 사무소를 종료합니다."));
+    await user.click(screen.getByLabelText(/^위 내용을 확인했고 사무소를 종료합니다\./));
     await user.click(screen.getByRole("button", { name: "사무소 종료" }));
     expect(await screen.findByText(/본인 확인이 필요합니다/)).not.toBeNull();
   });
@@ -104,7 +104,7 @@ describe("사무소 종료 확인", () => {
     const user = userEvent.setup();
     renderOffice(<OfficeCloseScreen />, { role: "OWNER" });
     await user.click(screen.getByLabelText("신청하지 않습니다"));
-    await user.click(screen.getByLabelText("위 내용을 확인했고 사무소를 종료합니다."));
+    await user.click(screen.getByLabelText(/^위 내용을 확인했고 사무소를 종료합니다\./));
     await user.click(screen.getByRole("button", { name: "사무소 종료" }));
     expect(await screen.findByText("이 작업을 할 권한이 없습니다.")).not.toBeNull();
   });

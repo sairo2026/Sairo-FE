@@ -1,3 +1,5 @@
+import { objectParticle } from "@/shared/lib/korean";
+
 export const SUPPORT_REQUEST_COPY = {
   title: "유료 이전 지원",
   description:
@@ -36,14 +38,14 @@ export const SUPPORT_REQUEST_COPY = {
     "제출된 열 대응과 미리보기 요약을 확인해 승인하거나 수정을 요청해 주세요. 승인한 매핑 버전으로만 실행됩니다.",
   approve: "승인",
   approveConfirm: (version: number) =>
-    `매핑 버전 ${version}을 승인합니다. 승인한 뒤에는 매핑을 바꿀 수 없고 이 버전으로만 실행됩니다.`,
+    `매핑 버전 ${objectParticle(String(version))} 승인합니다. 승인한 뒤에는 매핑을 바꿀 수 없고 이 버전으로만 실행됩니다.`,
   requestChanges: "수정 요청",
   changeLimit: "표준 범위의 수정 요청 1회를 이미 사용했습니다.",
   changeReason: "수정을 요청하는 내용",
   changeReasonRequired: "수정을 요청하는 내용을 입력해 주세요.",
   rowPreviewLink: "행 단위 미리보기 보기",
   approvedNotice: (version: number | null | undefined) =>
-    `매핑 버전 ${version ?? "-"}을 승인했습니다. 승인한 뒤에는 매핑을 바꿀 수 없습니다.`,
+    `매핑 버전 ${objectParticle(String(version ?? "-"))} 승인했습니다. 승인한 뒤에는 매핑을 바꿀 수 없습니다.`,
   deliveredNotice: "이전이 완료되어 납품되었습니다.",
   cancelButton: "신청 취소",
   cancelConfirm:

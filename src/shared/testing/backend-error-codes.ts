@@ -1,6 +1,6 @@
 /**
  * 백엔드 ErrorCode.java와 FieldErrorCode.java의 코드 목록 사본이다. 사전 누락을 막는 시험이 쓴다.
- * 출처: sairo-be origin/main src/main/java/com/sairo/be/global/error/ (2026-11-15 기준). 백엔드가 코드를 바꾸면 이 목록도 같이 고친다.
+ * 출처: sairo-be origin/dev src/main/java/com/sairo/be/global/error/ (2026-11-15 기준, 커밋 6b7c391 대조). 백엔드가 코드를 바꾸면 이 목록도 같이 고친다.
  */
 export const BACKEND_ERROR_CODES: ReadonlyArray<readonly [code: string, status: number]> = [
   ["INVALID_REQUEST", 400],

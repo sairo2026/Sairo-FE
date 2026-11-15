@@ -145,6 +145,7 @@ export function OfficeCloseScreen() {
           <div className="flex flex-col gap-1">
             <Checkbox
               label={COPY.closeConfirmLabel}
+              requirement="required"
               checked={isConfirmed}
               onCheckedChange={(checked) => {
                 setIsConfirmed(checked);

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { BrandLogo } from "@/shared/components/ui/brand-logo";
 import { Card } from "@/shared/components/ui/card";
+import { breakSentencesIn } from "@/shared/lib/sentences";
 
 export function AuthFrame({
   title,
@@ -35,8 +36,11 @@ export function FormAlert({ children }: { children: ReactNode }) {
 
 export function FormNotice({ children }: { children: ReactNode }) {
   return (
-    <p role="status" className="rounded-control bg-primary-soft px-4 py-3 text-caption text-ink-2">
-      {children}
+    <p
+      role="status"
+      className="whitespace-pre-line rounded-control bg-primary-soft px-4 py-3 text-caption text-ink-2"
+    >
+      {breakSentencesIn(children)}
     </p>
   );
 }

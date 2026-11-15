@@ -107,7 +107,7 @@ describe("동의 내역", () => {
     const user = userEvent.setup();
     open();
     await user.click(await screen.findByRole("switch", { name: "이메일로 공지·혜택 안내 받기" }));
-    await user.click(screen.getByLabelText("공지·혜택 안내 수신에 동의합니다."));
+    await user.click(screen.getByLabelText(/^공지·혜택 안내 수신에 동의합니다\./));
     await user.click(screen.getByRole("button", { name: "동의하고 켜기" }));
     expect(await screen.findByText(/공지·혜택 안내 수신에 동의했습니다/)).not.toBeNull();
     const history = screen.getByRole("table", { name: "동의·철회 이력" });

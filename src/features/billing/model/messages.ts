@@ -67,6 +67,22 @@ export const COPY = {
   stepUpAlt: "이 작업에는 본인 확인이 다시 필요합니다. 확인 후 이어서 진행해 주세요.",
 } as const;
 
+/**
+ * 결제 요청 응답을 안내 문구로 바꾼다. 결제가 끝났다는 확인(PAID)일 때만 완료로 안내하고
+ * 처리 중이거나 결제사 확인 중이면 확인 중으로 안내한다. 결과 값이 없는 응답은 구독 상태로 판단한다.
+ */
+export function describePaymentResult(
+  result: { status?: string; paymentStatus?: string | null } | null | undefined,
+  isCheckingNow: boolean,
+): string {
+  if (result?.paymentStatus === "PAID") return COPY.payDone;
+  if (result?.paymentStatus === "PROCESSING" || result?.paymentStatus === "VERIFYING") {
+    return COPY.payVerifying;
+  }
+  if (isCheckingNow) return COPY.payVerifying;
+  return result?.status === "ACTIVE" ? COPY.payDone : COPY.payAccepted;
+}
+
 export const ERROR_BY_CODE: Record<string, string> = {
   BILLING_KEY_ISSUE_FAILED:
     "카드사에서 결제수단 등록을 승인하지 않았습니다. 결제된 금액은 없습니다. 다른 카드로 다시 시도하거나 카드사에 문의해 주세요.",

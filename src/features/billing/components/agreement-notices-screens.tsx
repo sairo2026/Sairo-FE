@@ -58,7 +58,7 @@ function AgreementView({ agreement }: { agreement: StartCustomerAgreementRespons
             },
             {
               label: "현재 인원 기준 월 금액",
-              value: `${agreement.monthlyAmountPreview.memberCount}명 · ${formatKrw(agreement.monthlyAmountPreview.amountInclVat)} (VAT 포함)`,
+              value: `${agreement.monthlyAmountPreview.memberCount}명 · ${formatKrw(agreement.monthlyAmountPreview.amountInclVat)} (부가세 포함)`,
             },
             { label: "합의서 문안 버전", value: agreement.agreementTextVersion },
             { label: "체결일", value: formatSeoulDate(agreement.contractedOn) },
@@ -152,7 +152,7 @@ function NoticeCard({ notice }: { notice: Notice }) {
             label: "현재 금액",
             value: `${notice.memberCount}명 · ${formatKrw(notice.currentAmountInclVat)}`,
           },
-          { label: "새 금액", value: `${formatKrw(notice.newAmountInclVat)} (VAT 포함)` },
+          { label: "새 금액", value: `${formatKrw(notice.newAmountInclVat)} (부가세 포함)` },
           { label: "안내 시각", value: formatSeoulDateTime(notice.notifiedAt) },
           { label: "효력 시각", value: formatSeoulDateTime(notice.effectiveAt) },
           { label: "새 가격 첫 적용", value: formatSeoulDateTime(notice.appliesFromPeriodStart) },

@@ -78,6 +78,7 @@ export function buildMockContractDetail(
     duplicateOfContractId: null,
     duplicateExcludedAt: null,
     duplicateExclusionReason: null,
+    openFollowupTaskCount: 0,
     officeId: 12,
     createdAt: NOW,
     updatedAt: NOW,

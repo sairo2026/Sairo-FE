@@ -18,7 +18,7 @@ import { billingKeys, useInvoice } from "../hooks/billing-queries";
 import {
   ATTEMPT_RESULT,
   FAILURE_CATEGORY,
-  REFUND_REASONS,
+  REFUND_REQUEST_REASONS,
   TAX_DOCUMENT_STATUS,
   isMissing,
 } from "../model/labels";
@@ -93,7 +93,7 @@ function RefundDialog({ invoice, onClose }: { invoice: InvoiceDetail; onClose: (
           label="환불 사유"
           value={reason}
           placeholder="선택해 주세요"
-          options={REFUND_REASONS.map((item) => ({ value: item.value, label: item.label }))}
+          options={REFUND_REQUEST_REASONS.map((item) => ({ value: item.value, label: item.label }))}
           onValueChange={(next) => {
             setReason(next);
             setFieldError(undefined);
@@ -121,7 +121,7 @@ function InvoiceView({ invoice }: { invoice: InvoiceDetail }) {
             },
             { label: "상태", value: <InvoiceStatusBadge status={invoice.status} /> },
             { label: "이용 인원", value: `${invoice.memberCount}명` },
-            { label: "금액", value: `${formatKrw(invoice.amount)} (VAT 포함)` },
+            { label: "금액", value: `${formatKrw(invoice.amount)} (부가세 포함)` },
             {
               label: "공급가액",
               value: isMissing(invoice.supplyAmount) ? "-" : formatKrw(invoice.supplyAmount),

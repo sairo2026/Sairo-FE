@@ -10,6 +10,7 @@ import { Button } from "@/shared/components/ui/button";
 import { Modal } from "@/shared/components/ui/modal";
 import { Checkbox } from "@/shared/components/ui/select-field";
 import { cn } from "@/shared/lib/cn";
+import { breakSentencesIn } from "@/shared/lib/sentences";
 
 export function FlowFrame({
   title,
@@ -74,7 +75,9 @@ export function TextLink({ href, children }: { href: string; children: ReactNode
 }
 
 export function MutedNote({ children }: { children: ReactNode }) {
-  return <p className="text-caption text-ink-2">{children}</p>;
+  return (
+    <p className="whitespace-pre-line text-caption text-ink-2">{breakSentencesIn(children)}</p>
+  );
 }
 
 export function Checklist({
@@ -83,12 +86,14 @@ export function Checklist({
   checked,
   onChange,
   error,
+  requirement,
 }: {
   id: string;
   label: string;
   checked: boolean;
   onChange: (value: boolean) => void;
   error?: string;
+  requirement?: "required" | "optional";
 }) {
   return (
     <div className="flex flex-col gap-1">
@@ -98,6 +103,7 @@ export function Checklist({
         checked={checked}
         onCheckedChange={onChange}
         isInvalid={Boolean(error)}
+        requirement={requirement}
       />
       {error ? (
         <p role="alert" className="text-caption text-danger">

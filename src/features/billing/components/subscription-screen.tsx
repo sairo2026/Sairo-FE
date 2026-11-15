@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
-import type { SubscriptionCurrent } from "../api/wire";
+import type { PaymentAttempt, SubscriptionCurrent } from "../api/wire";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import {
   DetailList,
@@ -30,7 +30,7 @@ import {
   useSubscription,
 } from "../hooks/billing-queries";
 import { SUBSCRIPTION_STATUS, labelOf, PLAN_LABEL } from "../model/labels";
-import { COPY, describeBillingError } from "../model/messages";
+import { COPY, describeBillingError, describePaymentResult } from "../model/messages";
 
 const DAY_MS = 86_400_000;
 const REMINDER_DAYS = [30, 14, 7, 1];
@@ -134,7 +134,7 @@ function StatusBody({
               value:
                 chargeAmount === null
                   ? "금액을 불러오지 못했습니다. 구독 구매 동의 화면에서 확인해 주세요."
-                  : `${formatKrw(chargeAmount)} (VAT 포함)`,
+                  : `${formatKrw(chargeAmount)} (부가세 포함)`,
             },
             { label: "결제 카드", value: cardText(subscription) ?? "등록 전" },
             {
@@ -243,7 +243,7 @@ function StatusBody({
       ) : (
         <p className="text-body text-ink">
           {subscription.nextChargeAt
-            ? `다음 결제일 ${formatSeoulDate(subscription.nextChargeAt)} · 예정 금액 ${formatKrw(subscription.nextChargeAmount)}(VAT 포함)`
+            ? `다음 결제일 ${formatSeoulDate(subscription.nextChargeAt)} · 예정 금액 ${formatKrw(subscription.nextChargeAmount)}(부가세 포함)`
             : "다음 결제 정보가 없습니다."}
         </p>
       )}
@@ -286,14 +286,12 @@ function SubscriptionActions({
     setError(describeBillingError(caught, "처리하지 못했습니다. 잠시 뒤에 다시 시도해 주세요."));
     await refresh();
   };
-  const onPaid = async (result: unknown) => {
+  const onPaid = async (result: PaymentAttempt) => {
     setDialog(null);
     setError(undefined);
     await refresh();
     const latest = queryClient.getQueryData<SubscriptionCurrent>(billingKeys.subscription);
-    const paidStatus = (result as { status?: string } | null)?.status;
-    if (isPaymentInFlight(latest)) setNotice(COPY.payVerifying);
-    else setNotice(paidStatus === "ACTIVE" ? COPY.payDone : COPY.payAccepted);
+    setNotice(describePaymentResult(result, isPaymentInFlight(latest)));
   };
 
   const firstPayment = useMutation({
@@ -438,7 +436,7 @@ function SubscriptionActions({
 function SubscriptionView({ subscription }: { subscription: SubscriptionCurrent }) {
   const status = labelOf(SUBSCRIPTION_STATUS, subscription.status);
   const preview = useConsentPreview(undefined, undefined, subscription.status === "PRE_PAYMENT");
-  const chargeAmount = preview.data?.totalAmountInclVat ?? null;
+  const chargeAmount = subscription.nextChargeAmount ?? preview.data?.totalAmountInclVat ?? null;
   return (
     <div className="flex flex-col gap-6">
       <Card title="구독 현황">

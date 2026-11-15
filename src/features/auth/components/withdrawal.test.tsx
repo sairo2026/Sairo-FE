@@ -91,7 +91,7 @@ describe("회원 탈퇴 화면", () => {
     await user.click(await screen.findByRole("button", { name: "탈퇴하기" }));
     expect((await screen.findByRole("alert")).textContent).toBe("탈퇴 안내를 확인해 주세요.");
     expect(isMockWithdrawn()).toBe(false);
-    await user.click(screen.getByLabelText("위 내용을 확인했습니다."));
+    await user.click(screen.getByLabelText(/^위 내용을 확인했습니다\./));
     await user.click(screen.getByRole("button", { name: "탈퇴하기" }));
     await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/login"));
     expect(isMockWithdrawn()).toBe(true);
@@ -118,7 +118,7 @@ describe("회원 탈퇴 화면", () => {
     const user = userEvent.setup();
     server.use(http.delete("/api/me", () => errorResponse(409, "LAST_OWNER", "유일한 대표")));
     renderWithQuery(<WithdrawalScreen />);
-    await user.click(await screen.findByLabelText("위 내용을 확인했습니다."));
+    await user.click(await screen.findByLabelText(/^위 내용을 확인했습니다\./));
     await user.click(screen.getByRole("button", { name: "탈퇴하기" }));
     const alert = await screen.findByRole("alert");
     expect(alert.textContent).toContain("유일한 대표라서 바로 탈퇴할 수 없습니다");
@@ -133,7 +133,7 @@ describe("회원 탈퇴 화면", () => {
     const user = userEvent.setup();
     server.use(http.delete("/api/me", () => errorResponse(401, "STEP_UP_REQUIRED", "재인증")));
     renderWithQuery(<WithdrawalScreen />);
-    await user.click(await screen.findByLabelText("위 내용을 확인했습니다."));
+    await user.click(await screen.findByLabelText(/^위 내용을 확인했습니다\./));
     await user.click(screen.getByRole("button", { name: "탈퇴하기" }));
     await waitFor(() =>
       expect(screen.getByRole("alert").textContent).toBe(

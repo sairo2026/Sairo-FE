@@ -78,7 +78,7 @@ describe("카드 등록", () => {
     const launcher = fakeLauncher();
     const user = userEvent.setup();
     renderOffice(<CardScreen launcher={launcher} />, { role: "OWNER" });
-    await user.click(await screen.findByRole("checkbox", { name: "위 안내를 확인했습니다." }));
+    await user.click(await screen.findByRole("checkbox", { name: /^위 안내를 확인했습니다\./ }));
     await waitFor(() =>
       expect(
         screen.getByRole("button", { name: "카드 등록" }).getAttribute("aria-disabled"),
@@ -368,7 +368,7 @@ describe("구독 구매 동의", () => {
   it("불러오는 동안 로딩을 보여주고 조건 요약을 서버 값 그대로 보여준다", async () => {
     renderOffice(<ConsentScreen />, { role: "OWNER" });
     expect(document.querySelector('[aria-busy="true"]')).not.toBeNull();
-    expect(await screen.findByText("59,900원 (VAT 포함, 부가세 5,445원)")).not.toBeNull();
+    expect(await screen.findByText("59,900원 (부가세 5,445원 포함)")).not.toBeNull();
     expect(screen.getByText("사이로 월 구독 (다인)")).not.toBeNull();
     expect(screen.getByText("3명")).not.toBeNull();
     expect(screen.getByText("2027-01-09 ~ 2027-02-09")).not.toBeNull();
@@ -476,7 +476,7 @@ describe("구독 구매 동의", () => {
     );
     const user = userEvent.setup();
     renderOffice(<ConsentScreen noticeId={31} />, { role: "OWNER" });
-    expect(await screen.findByText("64,900원 (VAT 포함, 부가세 5,900원)")).not.toBeNull();
+    expect(await screen.findByText("64,900원 (부가세 5,900원 포함)")).not.toBeNull();
     expect(screen.getByText("2027-03")).not.toBeNull();
     expect(screen.getByText(/가격 변경 안내에 대한 동의입니다/)).not.toBeNull();
     for (const box of screen.getAllByRole("checkbox")) await user.click(box);

@@ -270,7 +270,7 @@ describe("알림 수신 설정", () => {
     const panel = screen.getByRole("region", { name: "공지·혜택 안내 수신 동의" });
     await user.click(within(panel).getByRole("button", { name: "동의하고 켜기" }));
     expect(within(panel).getByText("동의에 체크해야 켤 수 있습니다.")).not.toBeNull();
-    await user.click(within(panel).getByLabelText("공지·혜택 안내 수신에 동의합니다."));
+    await user.click(within(panel).getByLabelText(/^공지·혜택 안내 수신에 동의합니다\./));
     await user.click(within(panel).getByRole("button", { name: "동의하고 켜기" }));
     expect(await screen.findByText(/공지·혜택 안내 수신에 동의했습니다. 처리 시각/)).not.toBeNull();
     await waitFor(() => expect(getMockMe().notificationPreferences.channels.MARKETING).toBe(true));
@@ -321,7 +321,7 @@ describe("알림 수신 설정", () => {
     const user = userEvent.setup();
     open();
     await user.click(await screen.findByRole("switch", { name: "이메일로 공지·혜택 안내 받기" }));
-    await user.click(screen.getByLabelText("공지·혜택 안내 수신에 동의합니다."));
+    await user.click(screen.getByLabelText(/^공지·혜택 안내 수신에 동의합니다\./));
     await user.click(screen.getByRole("button", { name: "동의하고 켜기" }));
     expect(
       (await screen.findAllByText("이메일을 연결하면 공지·혜택 안내 수신을 선택할 수 있습니다."))
@@ -336,7 +336,7 @@ describe("알림 수신 설정", () => {
     open();
     expect(await screen.findByText(/공지·혜택 안내 수신 동의 내용이 바뀌었습니다/)).not.toBeNull();
     await user.click(screen.getByRole("button", { name: "바뀐 내용 확인하고 다시 동의" }));
-    await user.click(screen.getByLabelText("공지·혜택 안내 수신에 동의합니다."));
+    await user.click(screen.getByLabelText(/^공지·혜택 안내 수신에 동의합니다\./));
     await user.click(screen.getByRole("button", { name: "동의하고 켜기" }));
     expect(await screen.findByText(/공지·혜택 안내 수신에 동의했습니다/)).not.toBeNull();
     await waitFor(() => expect(settingsState.termsHistory[0]?.version).toBe("2.0"));
@@ -357,7 +357,7 @@ describe("알림 수신 설정", () => {
     const user = userEvent.setup();
     open();
     await user.click(await screen.findByRole("switch", { name: "이메일로 공지·혜택 안내 받기" }));
-    await user.click(screen.getByLabelText("공지·혜택 안내 수신에 동의합니다."));
+    await user.click(screen.getByLabelText(/^공지·혜택 안내 수신에 동의합니다\./));
     await user.click(screen.getByRole("button", { name: "동의하고 켜기" }));
     expect(await screen.findByText(/약관 내용이 바뀌었습니다/)).not.toBeNull();
   });

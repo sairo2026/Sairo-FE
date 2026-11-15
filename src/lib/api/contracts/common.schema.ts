@@ -13,6 +13,7 @@ export const AuthContextResponseSchema = z.object({
     "RETURN_EXPIRED",
   ]),
   officeId: z.number().nullable().optional(),
+  officeName: z.string().nullable().optional(),
   role: z.enum(["OWNER", "AGENT", "DEPUTY"]).nullable().optional(),
   pendingRegistrationId: z.number().nullable().optional(),
   pendingMembershipId: z.number().nullable().optional(),

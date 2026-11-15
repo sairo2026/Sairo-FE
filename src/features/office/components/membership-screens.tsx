@@ -384,6 +384,7 @@ function QualificationFields({
       {role === "AGENT" ? (
         <TextField
           label="자격증 번호"
+          required
           value={qualificationNumber}
           onValueChange={(next) => onChange({ qualificationNumber: next })}
           error={errors.qualificationNumber}
@@ -393,6 +394,7 @@ function QualificationFields({
       <Checklist
         id="employment-report"
         label="고용신고를 확인했습니다"
+        requirement="required"
         checked={employmentReportConfirmed}
         onChange={(value) => onChange({ employmentReportConfirmed: value })}
         error={errors.employmentReportConfirmed}
@@ -400,6 +402,7 @@ function QualificationFields({
       <Checklist
         id="training-confirmed"
         label={role === "AGENT" ? "필요한 교육을 이수했습니다" : "직무교육을 이수했습니다"}
+        requirement="required"
         checked={trainingConfirmed}
         onChange={(value) => onChange({ trainingConfirmed: value })}
         error={errors.trainingConfirmed}

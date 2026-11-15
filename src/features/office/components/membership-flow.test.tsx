@@ -178,7 +178,7 @@ describe("참여 요청", () => {
     const user = userEvent.setup();
     renderOffice(<MembershipRequestForm officeId={5} />);
     await user.click(screen.getByRole("radio", { name: "중개보조원" }));
-    expect(screen.queryByLabelText("자격증 번호")).toBeNull();
+    expect(screen.queryByLabelText(/^자격증 번호/)).toBeNull();
     await user.click(screen.getByRole("button", { name: "참여 요청" }));
     expect(screen.getByText("직무교육 이수 확인에 체크해 주세요.")).not.toBeNull();
   });
@@ -193,9 +193,9 @@ describe("참여 요청", () => {
     );
     const user = userEvent.setup();
     renderOffice(<MembershipRequestForm officeId={5} />);
-    await user.type(screen.getByLabelText("자격증 번호"), "A-1234");
-    await user.click(screen.getByLabelText("고용신고를 확인했습니다"));
-    await user.click(screen.getByLabelText("필요한 교육을 이수했습니다"));
+    await user.type(screen.getByLabelText(/^자격증 번호/), "A-1234");
+    await user.click(screen.getByLabelText(/^고용신고를 확인했습니다/));
+    await user.click(screen.getByLabelText(/^필요한 교육을 이수했습니다/));
     await user.click(screen.getByRole("button", { name: "참여 요청" }));
     expect((await screen.findByRole("alert")).textContent).toContain("진행 중인 참여 요청");
     expect(sent).toEqual({
@@ -213,8 +213,8 @@ describe("참여 요청", () => {
     const user = userEvent.setup();
     renderOffice(<MembershipRequestForm officeId={99} />);
     await user.click(screen.getByRole("radio", { name: "중개보조원" }));
-    await user.click(screen.getByLabelText("고용신고를 확인했습니다"));
-    await user.click(screen.getByLabelText("직무교육을 이수했습니다"));
+    await user.click(screen.getByLabelText(/^고용신고를 확인했습니다/));
+    await user.click(screen.getByLabelText(/^직무교육을 이수했습니다/));
     await user.click(screen.getByRole("button", { name: "참여 요청" }));
     expect((await screen.findByRole("alert")).textContent).toContain("대상을 찾을 수 없습니다");
   });
@@ -222,9 +222,9 @@ describe("참여 요청", () => {
   it("서버 필드 오류를 자격번호 아래에 보여준다", async () => {
     const user = userEvent.setup();
     renderOffice(<MembershipRequestForm officeId={5} />);
-    await user.type(screen.getByLabelText("자격증 번호"), "형식오류");
-    await user.click(screen.getByLabelText("고용신고를 확인했습니다"));
-    await user.click(screen.getByLabelText("필요한 교육을 이수했습니다"));
+    await user.type(screen.getByLabelText(/^자격증 번호/), "형식오류");
+    await user.click(screen.getByLabelText(/^고용신고를 확인했습니다/));
+    await user.click(screen.getByLabelText(/^필요한 교육을 이수했습니다/));
     await user.click(screen.getByRole("button", { name: "참여 요청" }));
     expect(
       await screen.findByText("올바르지 않은 값입니다. 입력한 내용을 확인해 주세요."),
@@ -300,9 +300,9 @@ describe("승인 대기와 초대 수락", () => {
     const form = await screen.findByRole("form", { name: "재신청" });
     await user.click(within(form).getByRole("button", { name: "재신청" }));
     expect(await within(form).findByText("고용신고 확인에 체크해 주세요.")).not.toBeNull();
-    await user.type(within(form).getByLabelText("자격증 번호"), "A-1");
-    await user.click(within(form).getByLabelText("고용신고를 확인했습니다"));
-    await user.click(within(form).getByLabelText("필요한 교육을 이수했습니다"));
+    await user.type(within(form).getByLabelText(/^자격증 번호/), "A-1");
+    await user.click(within(form).getByLabelText(/^고용신고를 확인했습니다/));
+    await user.click(within(form).getByLabelText(/^필요한 교육을 이수했습니다/));
     await user.click(within(form).getByRole("button", { name: "재신청" }));
     expect(await screen.findByText("대표의 승인을 기다리고 있습니다.")).not.toBeNull();
   });
@@ -315,9 +315,9 @@ describe("승인 대기와 초대 수락", () => {
     const form = screen.getByRole("form", { name: "초대 수락" });
     await user.click(within(form).getByRole("button", { name: "초대 수락" }));
     expect(within(form).getByText("자격증 번호를 입력해 주세요.")).not.toBeNull();
-    await user.type(within(form).getByLabelText("자격증 번호"), "A-1");
-    await user.click(within(form).getByLabelText("고용신고를 확인했습니다"));
-    await user.click(within(form).getByLabelText("필요한 교육을 이수했습니다"));
+    await user.type(within(form).getByLabelText(/^자격증 번호/), "A-1");
+    await user.click(within(form).getByLabelText(/^고용신고를 확인했습니다/));
+    await user.click(within(form).getByLabelText(/^필요한 교육을 이수했습니다/));
     await user.click(within(form).getByRole("button", { name: "초대 수락" }));
     expect(
       await screen.findByText(
@@ -337,9 +337,9 @@ describe("승인 대기와 초대 수락", () => {
     const user = userEvent.setup();
     renderOffice(<MembershipStatusScreen />);
     const form = await screen.findByRole("form", { name: "초대 수락" });
-    expect(within(form).queryByLabelText("자격증 번호")).toBeNull();
-    await user.click(within(form).getByLabelText("고용신고를 확인했습니다"));
-    await user.click(within(form).getByLabelText("직무교육을 이수했습니다"));
+    expect(within(form).queryByLabelText(/^자격증 번호/)).toBeNull();
+    await user.click(within(form).getByLabelText(/^고용신고를 확인했습니다/));
+    await user.click(within(form).getByLabelText(/^직무교육을 이수했습니다/));
     await user.click(within(form).getByRole("button", { name: "초대 수락" }));
     expect((await screen.findByRole("alert")).textContent).toContain("이미 처리되었거나");
   });

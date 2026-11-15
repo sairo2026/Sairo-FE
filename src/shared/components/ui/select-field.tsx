@@ -4,6 +4,7 @@ import { useId } from "react";
 import type { ReactNode, SelectHTMLAttributes } from "react";
 import { cn } from "@/shared/lib/cn";
 import { FIELD_GAP_CLASS, FieldLabel } from "./field-label";
+import { RequirementMark } from "./requirement-mark";
 
 export type SelectOption = { value: string; label: string; isDisabled?: boolean };
 
@@ -201,6 +202,8 @@ export type CheckboxProps = {
   name?: string;
   id?: string;
   className?: string;
+  /** 동의·확인 항목이면 라벨 뒤에 필수·선택 표시를 붙인다. */
+  requirement?: "required" | "optional";
 };
 
 /** 선택 전·호버·선택·포커스·비활성·오류 상태를 표시하는 체크박스. 라벨 전체가 클릭 영역이다. */
@@ -214,6 +217,7 @@ export function Checkbox({
   name,
   id,
   className,
+  requirement,
 }: CheckboxProps) {
   const generatedId = useId();
   const inputId = id ?? generatedId;
@@ -265,7 +269,13 @@ export function Checkbox({
           </svg>
         ) : null}
       </span>
-      {label}
+      {requirement ? (
+        <span>
+          {label} <RequirementMark requirement={requirement} />
+        </span>
+      ) : (
+        label
+      )}
     </label>
   );
 }
@@ -338,12 +348,8 @@ export function TermsItem({
         checked={checked}
         onCheckedChange={onCheckedChange}
         className="font-medium"
-        label={
-          <span>
-            {label}{" "}
-            <span className="font-medium text-primary">({isRequired ? "필수" : "선택"})</span>
-          </span>
-        }
+        requirement={isRequired ? "required" : "optional"}
+        label={label}
       />
       {onViewFull ? (
         <button

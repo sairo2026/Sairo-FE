@@ -162,6 +162,7 @@ function CloseSection() {
         </p>
         <Checkbox
           label="위 내용을 확인했고 계정을 해지합니다"
+          requirement="required"
           checked={confirmed}
           onCheckedChange={setConfirmed}
         />
