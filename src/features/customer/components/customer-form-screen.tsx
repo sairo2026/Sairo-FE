@@ -12,7 +12,7 @@ import { QueryGate } from "@/shared/components/feedback/query-gate";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { DateTimeField } from "@/shared/components/ui/date-time-field";
-import { FieldLabel } from "@/shared/components/ui/field-label";
+import { FieldLabel, OfficeFieldScope } from "@/shared/components/ui/field-label";
 import { Modal } from "@/shared/components/ui/modal";
 import { PageHeader } from "@/shared/components/ui/page-header";
 import { RadioGroup, SelectField } from "@/shared/components/ui/select-field";
@@ -48,11 +48,11 @@ type DuplicateItem = {
 };
 
 const FORM_GRID_CLASS =
-  "grid grid-cols-1 gap-x-[45px] gap-y-[22px] lg:grid-cols-[repeat(2,minmax(0,510px))]";
+  "grid grid-cols-1 gap-x-[45px] gap-y-[30px] lg:grid-cols-[repeat(2,minmax(0,510px))]";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="flex max-w-[1075px] flex-col gap-5 pt-4">
+    <section className="flex max-w-[1065px] flex-col gap-5 pt-4">
       <h2 className="text-h2 font-semibold text-ink">{title}</h2>
       {children}
     </section>
@@ -62,30 +62,33 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 function TextAreaField({
   label,
   hint,
+  placeholder,
   value,
   onValueChange,
   error,
 }: {
   label: string;
   hint?: string;
+  placeholder?: string;
   value: string;
   onValueChange: (value: string) => void;
   error?: string;
 }) {
   const id = useId();
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2">
       <div className="flex flex-col gap-1">
         <FieldLabel htmlFor={id}>{label}</FieldLabel>
         {hint ? <p className="text-caption text-ink-2">{hint}</p> : null}
       </div>
       <textarea
         id={id}
-        rows={4}
+        rows={1}
+        placeholder={placeholder}
         value={value}
         aria-invalid={error ? true : undefined}
         onChange={(event) => onValueChange(event.target.value)}
-        className="rounded-control border border-line bg-surface px-5 py-4 text-body font-medium text-ink focus:border-primary focus:bg-white"
+        className="min-h-[58px] rounded-control border border-line bg-surface px-5 py-4 text-body font-medium text-ink focus:border-primary focus:bg-white"
       />
       {error ? (
         <p role="alert" className="text-caption text-danger">
@@ -255,173 +258,180 @@ export function CustomerForm(props: FormProps) {
   const nameLabel = values.isCorporation ? "법인명" : "이름";
 
   return (
-    <form
-      noValidate
-      className="flex max-w-[1075px] flex-col gap-6"
-      onSubmit={(event) => {
-        event.preventDefault();
-        void submit();
-      }}
-    >
-      <PageHeader title={isEdit ? "고객 수정" : "고객 등록"} />
-      {isReadOnly ? (
-        <FormNotice>
-          결제가 지연되어 읽기만 가능합니다. 저장하려면 결제를 먼저 마쳐 주세요.
-        </FormNotice>
-      ) : null}
-      {formError ? <FormAlert>{formError}</FormAlert> : null}
-      {isConflict && props.mode === "edit" ? (
-        <div>
-          <Button variant="outlined" size="sm" onClick={props.onReload}>
-            최신 내용 불러오기
+    <OfficeFieldScope>
+      <form
+        noValidate
+        className="flex max-w-[1065px] flex-col gap-6"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void submit();
+        }}
+      >
+        <PageHeader title={isEdit ? "고객 수정" : "고객 등록"} />
+        {isReadOnly ? (
+          <FormNotice>
+            결제가 지연되어 읽기만 가능합니다. 저장하려면 결제를 먼저 마쳐 주세요.
+          </FormNotice>
+        ) : null}
+        {formError ? <FormAlert>{formError}</FormAlert> : null}
+        {isConflict && props.mode === "edit" ? (
+          <div>
+            <Button variant="outlined" size="sm" onClick={props.onReload}>
+              최신 내용 불러오기
+            </Button>
+          </div>
+        ) : null}
+        <div className="flex max-w-[762px] flex-col gap-2 rounded-card-flat bg-surface px-6 py-5">
+          <p className="text-body font-semibold text-ink">고객 정보 입력 안내</p>
+          <p className="text-caption text-ink-2">
+            주민등록번호와 전체 금융계좌번호는 입력할 수 없습니다. 입력하면 저장되지 않습니다.
+          </p>
+        </div>
+
+        <div className={FORM_GRID_CLASS}>
+          <RadioGroup
+            variant="segmented"
+            legend="고객 구분"
+            name="customer-kind"
+            value={values.isCorporation ? "corporation" : "individual"}
+            options={[
+              { value: "individual", label: "개인" },
+              { value: "corporation", label: "법인" },
+            ]}
+            onValueChange={(value) => setField("isCorporation", value === "corporation")}
+          />
+          <SelectField
+            label="담당 공인중개사"
+            required
+            value={values.managingMembershipId}
+            placeholder="담당자를 선택해 주세요."
+            options={(members.data ?? []).map((item) => ({
+              value: String(item.membershipId),
+              label: item.displayName,
+            }))}
+            onValueChange={(value) => setField("managingMembershipId", value)}
+            error={errors.managingMembershipId}
+          />
+          <TextField
+            label={nameLabel}
+            placeholder="고객의 이름을 입력해 주세요."
+            required
+            value={values.name}
+            maxLength={100}
+            onValueChange={(value) => setField("name", value)}
+            error={errors.name}
+          />
+          <TextField
+            label="연락처"
+            placeholder="고객의 연락처를 입력해 주세요."
+            kind="tel"
+            value={values.phone}
+            onValueChange={(value) => setField("phone", value)}
+            error={errors.phone}
+          />
+          <TextField
+            label="이메일"
+            placeholder="고객의 이메일 주소를 입력해 주세요."
+            value={values.email}
+            onValueChange={(value) => setField("email", value)}
+            error={errors.email}
+          />
+          <TextField
+            label="보조 연락처"
+            placeholder="숫자만 입력해 주세요."
+            kind="tel"
+            value={values.secondaryPhone}
+            hint="대리 연락자를 쓰는 경우 번호를 넣고 업무 메모에 대리인 정보를 적어 주세요."
+            onValueChange={(value) => setField("secondaryPhone", value)}
+            error={errors.secondaryPhone}
+          />
+          <div className="lg:col-span-2">
+            <TextAreaField
+              label="업무 메모"
+              placeholder="업무에 필요한 내용을 적어 주세요."
+              hint={CUSTOMER_COLLECTION_COPY.memoGuide}
+              value={values.memo}
+              onValueChange={(value) => setField("memo", value)}
+              error={errors.memo}
+            />
+          </div>
+        </div>
+
+        <Section title="개인정보 수집 안내">
+          <p className="text-caption text-ink-2">
+            고객 정보를 왜 모으는지, 어떤 근거로 처리하는지, 언제까지 보관하는지 기록합니다.
+          </p>
+          <div className={FORM_GRID_CLASS}>
+            <TextField
+              label="수집 경로"
+              required
+              value={values.dataSource}
+              hint={CUSTOMER_COLLECTION_COPY.sourceHint}
+              onValueChange={(value) => setField("dataSource", value)}
+              error={errors.dataSource}
+            />
+            <TextField
+              label="수집 목적"
+              required
+              value={values.dataPurpose}
+              onValueChange={(value) => setField("dataPurpose", value)}
+              error={errors.dataPurpose}
+            />
+            <div className="flex flex-col gap-3">
+              <SelectField
+                label="처리 근거"
+                required={!isEdit}
+                value={values.processingBasis}
+                placeholder="처리 근거를 선택해 주세요."
+                options={PROCESSING_BASES.map((value) => ({
+                  value,
+                  label: PROCESSING_BASIS_LABEL[value] ?? value,
+                }))}
+                onValueChange={(value) => setField("processingBasis", value)}
+                error={errors.processingBasis}
+              />
+              <p className="text-caption text-ink-2">{CUSTOMER_COLLECTION_COPY.basisHint}</p>
+            </div>
+            <div className="flex flex-col gap-3">
+              <DateTimeField
+                label="보유 기한"
+                kind="date"
+                required
+                value={values.retentionUntil}
+                onValueChange={(value) => setField("retentionUntil", value)}
+                error={errors.retentionUntil}
+              />
+              <p className="text-caption text-ink-2">{CUSTOMER_COLLECTION_COPY.retentionHint}</p>
+            </div>
+          </div>
+        </Section>
+
+        <div className="flex flex-wrap gap-4">
+          <Link
+            href={detail ? `/customers/${detail.customerId}` : "/customers"}
+            className="inline-flex h-12 min-w-[120px] items-center justify-center rounded-control bg-primary-soft px-10 text-body font-medium text-ink-2 hover:bg-primary-line"
+          >
+            취소
+          </Link>
+          <Button type="submit" isLoading={saveMutation.isPending} disabled={isReadOnly}>
+            {isEdit ? "저장" : "등록"}
           </Button>
         </div>
-      ) : null}
-      <div className="flex max-w-[1075px] flex-col gap-2 rounded-card-flat bg-surface px-6 py-5">
-        <p className="text-body font-semibold text-ink">고객 정보 입력 안내</p>
-        <p className="text-caption text-ink-2">
-          주민등록번호와 전체 금융계좌번호는 입력할 수 없습니다. 입력하면 저장되지 않습니다.
-        </p>
-      </div>
 
-      <div className={FORM_GRID_CLASS}>
-        <RadioGroup
-          variant="segmented"
-          legend="고객 구분"
-          name="customer-kind"
-          value={values.isCorporation ? "corporation" : "individual"}
-          options={[
-            { value: "individual", label: "개인" },
-            { value: "corporation", label: "법인" },
-          ]}
-          onValueChange={(value) => setField("isCorporation", value === "corporation")}
-        />
-        <SelectField
-          label="담당 공인중개사"
-          required
-          value={values.managingMembershipId}
-          placeholder="담당자를 선택해 주세요."
-          options={(members.data ?? []).map((item) => ({
-            value: String(item.membershipId),
-            label: item.displayName,
-          }))}
-          onValueChange={(value) => setField("managingMembershipId", value)}
-          error={errors.managingMembershipId}
-        />
-        <TextField
-          label={nameLabel}
-          required
-          value={values.name}
-          maxLength={100}
-          onValueChange={(value) => setField("name", value)}
-          error={errors.name}
-        />
-        <TextField
-          label="연락처"
-          kind="tel"
-          value={values.phone}
-          onValueChange={(value) => setField("phone", value)}
-          error={errors.phone}
-        />
-        <TextField
-          label="이메일"
-          value={values.email}
-          onValueChange={(value) => setField("email", value)}
-          error={errors.email}
-        />
-        <TextField
-          label="보조 연락처"
-          kind="tel"
-          value={values.secondaryPhone}
-          hint="대리 연락자를 쓰는 경우 번호를 넣고 업무 메모에 대리인 정보를 적어 주세요."
-          onValueChange={(value) => setField("secondaryPhone", value)}
-          error={errors.secondaryPhone}
-        />
-        <div className="lg:col-span-2">
-          <TextAreaField
-            label="업무 메모"
-            hint={CUSTOMER_COLLECTION_COPY.memoGuide}
-            value={values.memo}
-            onValueChange={(value) => setField("memo", value)}
-            error={errors.memo}
+        {duplicates ? (
+          <DuplicateDialog
+            items={duplicates}
+            isPending={saveMutation.isPending}
+            onUseExisting={(customerId) => router.push(`/customers/${customerId}`)}
+            onCreateNew={() => {
+              setDuplicates(null);
+              saveMutation.mutate();
+            }}
+            onClose={() => setDuplicates(null)}
           />
-        </div>
-      </div>
-
-      <Section title="개인정보 수집 안내">
-        <p className="text-caption text-ink-2">
-          고객 정보를 왜 모으는지, 어떤 근거로 처리하는지, 언제까지 보관하는지 기록합니다.
-        </p>
-        <div className={FORM_GRID_CLASS}>
-          <TextField
-            label="수집 경로"
-            required
-            value={values.dataSource}
-            hint={CUSTOMER_COLLECTION_COPY.sourceHint}
-            onValueChange={(value) => setField("dataSource", value)}
-            error={errors.dataSource}
-          />
-          <TextField
-            label="수집 목적"
-            required
-            value={values.dataPurpose}
-            onValueChange={(value) => setField("dataPurpose", value)}
-            error={errors.dataPurpose}
-          />
-          <div className="flex flex-col gap-3">
-            <SelectField
-              label="처리 근거"
-              required={!isEdit}
-              value={values.processingBasis}
-              placeholder="처리 근거를 선택해 주세요."
-              options={PROCESSING_BASES.map((value) => ({
-                value,
-                label: PROCESSING_BASIS_LABEL[value] ?? value,
-              }))}
-              onValueChange={(value) => setField("processingBasis", value)}
-              error={errors.processingBasis}
-            />
-            <p className="text-caption text-ink-2">{CUSTOMER_COLLECTION_COPY.basisHint}</p>
-          </div>
-          <div className="flex flex-col gap-3">
-            <DateTimeField
-              label="보유 기한"
-              kind="date"
-              required
-              value={values.retentionUntil}
-              onValueChange={(value) => setField("retentionUntil", value)}
-              error={errors.retentionUntil}
-            />
-            <p className="text-caption text-ink-2">{CUSTOMER_COLLECTION_COPY.retentionHint}</p>
-          </div>
-        </div>
-      </Section>
-
-      <div className="flex flex-wrap gap-4">
-        <Link
-          href={detail ? `/customers/${detail.customerId}` : "/customers"}
-          className="inline-flex h-12 min-w-[120px] items-center justify-center rounded-control bg-primary-soft px-10 text-body font-medium text-ink-2 hover:bg-primary-line"
-        >
-          취소
-        </Link>
-        <Button type="submit" isLoading={saveMutation.isPending} disabled={isReadOnly}>
-          {isEdit ? "저장" : "등록"}
-        </Button>
-      </div>
-
-      {duplicates ? (
-        <DuplicateDialog
-          items={duplicates}
-          isPending={saveMutation.isPending}
-          onUseExisting={(customerId) => router.push(`/customers/${customerId}`)}
-          onCreateNew={() => {
-            setDuplicates(null);
-            saveMutation.mutate();
-          }}
-          onClose={() => setDuplicates(null)}
-        />
-      ) : null}
-    </form>
+        ) : null}
+      </form>
+    </OfficeFieldScope>
   );
 }
 

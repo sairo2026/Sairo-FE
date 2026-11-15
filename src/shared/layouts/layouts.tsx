@@ -35,7 +35,7 @@ export function PublicSiteLayout({ children, footer }: LayoutProps & { footer?: 
           <Link href="/" aria-label="사이로 홈">
             <BrandLogo className="w-28" />
           </Link>
-          <nav aria-label="공개 메뉴" className="flex gap-5 text-caption font-semibold text-ink-2">
+          <nav aria-label="공개 메뉴" className="flex gap-5 text-body font-medium text-ink-2">
             <Link href="/pricing" className="clickable-link px-1">
               요금 안내
             </Link>
@@ -106,7 +106,10 @@ export function OfficeLayout({
           <Link href="/home" aria-label="사이로 홈" className="mb-6 block lg:mb-[60px]">
             <BrandLogo className="w-[127px]" />
           </Link>
-          <nav aria-label="주요 메뉴" className="flex gap-5 overflow-x-auto lg:flex-col lg:gap-5">
+          <nav
+            aria-label="주요 메뉴"
+            className="flex gap-5 overflow-x-auto lg:flex-col lg:gap-[18px]"
+          >
             {items.map((item) => (
               <SideNavItem
                 key={item.key}
@@ -124,8 +127,8 @@ export function OfficeLayout({
           </header>
           <main
             className={cn(
-              "px-5 pt-10 pb-28 sm:px-8 lg:pt-7",
-              tone === "board" ? "lg:pr-8 lg:pl-2" : "lg:px-8",
+              "px-5 pt-10 pb-28 sm:px-8",
+              tone === "board" ? "lg:pt-7 lg:pr-8 lg:pl-7" : "lg:pt-10 lg:pr-8 lg:pl-11",
             )}
           >
             {children}

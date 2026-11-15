@@ -1,8 +1,29 @@
+"use client";
+
+import { createContext, useContext } from "react";
 import type { ReactNode } from "react";
 import { cn } from "@/shared/lib/cn";
 
 export const FIELD_GAP_CLASS = "gap-5";
 export const FIELD_LABEL_CLASS = "text-h2 font-semibold text-ink";
+
+export const OFFICE_FIELD_GAP_CLASS = "gap-2";
+export const OFFICE_FIELD_LABEL_CLASS = "text-body font-bold text-ink";
+
+const OfficeFieldContext = createContext(false);
+
+/** 사무소 업무 폼 안에서 라벨을 14 Bold, 라벨과 입력창 간격을 8px로 바꾼다. 인증 화면은 감싸지 않으므로 20 SemiBold, 간격 20px 그대로다. */
+export function OfficeFieldScope({ children }: { children: ReactNode }) {
+  return <OfficeFieldContext.Provider value>{children}</OfficeFieldContext.Provider>;
+}
+
+export function useIsOfficeField() {
+  return useContext(OfficeFieldContext);
+}
+
+export function useFieldGapClass() {
+  return useContext(OfficeFieldContext) ? OFFICE_FIELD_GAP_CLASS : FIELD_GAP_CLASS;
+}
 
 const OPTIONAL_SUFFIX = /^(.*?)(\s*)\(선택\)$/;
 
@@ -37,6 +58,8 @@ export function FieldLabel({
   className,
   children,
 }: FieldLabelProps) {
+  const isOffice = useContext(OfficeFieldContext);
+  const labelClass = isOffice ? OFFICE_FIELD_LABEL_CLASS : FIELD_LABEL_CLASS;
   const star = required ? (
     <span aria-hidden="true" className="ml-1 text-required">
       *
@@ -44,14 +67,14 @@ export function FieldLabel({
   ) : null;
   if (as === "legend") {
     return (
-      <legend className={cn(FIELD_LABEL_CLASS, "mb-3", className)}>
+      <legend className={cn(labelClass, isOffice ? "mb-2" : "mb-3", className)}>
         {withOptionalMark(children)}
         {star}
       </legend>
     );
   }
   return (
-    <label htmlFor={htmlFor} className={cn(FIELD_LABEL_CLASS, className)}>
+    <label htmlFor={htmlFor} className={cn(labelClass, isOffice && "leading-5", className)}>
       {withOptionalMark(children)}
       {star}
     </label>

@@ -125,7 +125,7 @@ export function DataTable<Row>({
                     scope="col"
                     aria-sort={column.isSortable ? ariaSort(column.key) : undefined}
                     className={cn(
-                      "sticky top-0 z-20 h-[60px] border-b border-line bg-white py-0 pr-5 text-body font-bold text-ink",
+                      "sticky top-0 z-20 h-[60px] border-b border-brand-border bg-white py-0 pr-5 text-body font-bold text-ink",
                       column.widthClass,
                       column.align === "right" && "text-right",
                     )}
@@ -167,7 +167,7 @@ export function DataTable<Row>({
                         <tr
                           key={getRowId(row)}
                           className={cn(
-                            "border-b border-line last:border-b-0",
+                            "border-b border-primary-line last:border-b-0",
                             href && "clickable-table-row group relative",
                           )}
                         >
@@ -175,7 +175,7 @@ export function DataTable<Row>({
                             <td
                               key={column.key}
                               className={cn(
-                                "py-4 pr-5 text-body font-medium text-ink",
+                                "h-[72px] py-0 pr-5 text-body leading-none font-medium text-ink",
                                 column.widthClass,
                                 column.align === "right" && "text-right tabular-nums",
                                 column.className,

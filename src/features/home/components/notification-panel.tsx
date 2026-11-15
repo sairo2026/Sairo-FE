@@ -64,8 +64,8 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
           <svg
             aria-hidden="true"
             viewBox="0 0 24 24"
-            width="36"
-            height="36"
+            width="30"
+            height="30"
             fill="none"
             stroke="currentColor"
             strokeWidth="1.6"
@@ -80,13 +80,13 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
             type="button"
             aria-label="알림 닫기"
             onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-control text-ink clickable-control"
+            className="flex h-[30px] w-[30px] items-center justify-center rounded-control text-ink clickable-control"
           >
             <svg
               aria-hidden="true"
               viewBox="0 0 24 24"
-              width="36"
-              height="36"
+              width="30"
+              height="30"
               fill="none"
               stroke="currentColor"
               strokeWidth="1.6"
@@ -96,7 +96,7 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
             </svg>
           </button>
         </div>
-        <h2 className="text-h3 font-semibold text-ink">알림</h2>
+        <h2 className="text-h2 font-semibold text-ink">알림</h2>
       </div>
       {query.isPending ? (
         <p role="status" className="text-caption text-ink-2">
@@ -129,18 +129,18 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
                 <span className="flex flex-col gap-1">
                   <span
                     className={cn(
-                      "flex items-center justify-between gap-2 text-h2 font-semibold",
+                      "flex items-center justify-between gap-2 text-body font-semibold",
                       item.read ? "text-ink" : "text-primary",
                     )}
                   >
                     {notificationTypeLabel(item.type)}
                     {href ? <Chevron /> : null}
                   </span>
-                  <span className="text-caption text-ink-3">
+                  <span className="text-[12px] text-ink-3">
                     {formatSeoulDateTime(item.createdAt)}
                   </span>
                 </span>
-                <span className="text-body text-ink-2">{item.message}</span>
+                <span className="text-caption text-ink-2">{item.message}</span>
               </>
             );
             return (

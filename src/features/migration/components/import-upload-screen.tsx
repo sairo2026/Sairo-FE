@@ -3,16 +3,18 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ImportBatchListResponse } from "@/lib/api/contracts/migration.schema";
-import { EmptyState } from "@/shared/components/feedback/empty-state";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { StatusBadge, TextLink } from "@/shared/components/feedback/page-parts";
 import { ErrorScreen } from "@/shared/components/feedback/error-screen";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
 import { Button } from "@/shared/components/ui/button";
-import { Card } from "@/shared/components/ui/card";
+import { DataTable } from "@/shared/components/ui/data-table";
+import type { PageSize } from "@/shared/components/ui/data-table";
+import { FileField } from "@/shared/components/ui/file-field";
 import { PageHeader } from "@/shared/components/ui/page-header";
+import { SecondaryLink } from "@/shared/components/ui/secondary-link";
 import { SelectField } from "@/shared/components/ui/select-field";
 import { formatSeoulDateTime } from "@/shared/lib/format";
 import { DataMigrationUploadNotice } from "@/shared/legal/data-rights-notices";
@@ -47,7 +49,6 @@ function UploadForm({ remaining }: { remaining: number }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { isReadOnly } = useOfficeAccess();
-  const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [targetType, setTargetType] = useState("");
   const [fileError, setFileError] = useState<string>();
@@ -75,60 +76,48 @@ function UploadForm({ remaining }: { remaining: number }) {
   }
 
   return (
-    <Card title="파일 올리기">
-      <div className="flex flex-col gap-5">
-        <p className="text-caption text-ink-2" role="status">
-          {IMPORT_COPY.quota(remaining, IMPORT_MONTHLY_LIMIT)}
+    <section aria-labelledby="import-upload-title" className="flex max-w-[1075px] flex-col gap-6">
+      <h2 id="import-upload-title" className="text-h2 font-semibold text-ink">
+        파일 올리기
+      </h2>
+      {remaining <= 0 ? <FormNotice>{IMPORT_COPY.quotaExhausted}</FormNotice> : null}
+      <SelectField
+        label="이전할 자료"
+        value={targetType}
+        placeholder="자료 종류를 선택해 주세요"
+        options={TARGET_TYPES.map((item) => ({ value: item.value, label: item.label }))}
+        onValueChange={(value) => {
+          setTargetType(value);
+          setTargetError(undefined);
+        }}
+        error={targetError}
+        disabled={isReadOnly}
+      />
+      <FileField
+        id="import-file"
+        label="파일 (XLS, XLSX, CSV · 최대 20MB)"
+        hint={<span role="status">{IMPORT_COPY.quota(remaining, IMPORT_MONTHLY_LIMIT)}</span>}
+        accept={IMPORT_ACCEPTED_EXTENSIONS.join(",")}
+        file={file}
+        onFileChange={(next) => {
+          setFile(next);
+          setFileError(undefined);
+        }}
+        disabled={isReadOnly}
+        error={fileError}
+      />
+      {error ? <FormAlert>{error}</FormAlert> : null}
+      {isReadOnly ? (
+        <p className="text-caption text-ink-2">
+          결제가 지연되어 읽기만 가능한 동안에는 파일을 올릴 수 없습니다.
         </p>
-        {remaining <= 0 ? <FormNotice>{IMPORT_COPY.quotaExhausted}</FormNotice> : null}
-        <SelectField
-          label="이전할 자료"
-          value={targetType}
-          placeholder="자료 종류를 선택해 주세요"
-          options={TARGET_TYPES.map((item) => ({ value: item.value, label: item.label }))}
-          onValueChange={(value) => {
-            setTargetType(value);
-            setTargetError(undefined);
-          }}
-          error={targetError}
-          disabled={isReadOnly}
-        />
-        <div className="flex flex-col gap-2">
-          <label htmlFor="import-file" className="text-caption font-semibold text-ink">
-            파일 (XLS, XLSX, CSV · 최대 20MB)
-          </label>
-          <input
-            ref={inputRef}
-            id="import-file"
-            type="file"
-            accept={IMPORT_ACCEPTED_EXTENSIONS.join(",")}
-            disabled={isReadOnly}
-            aria-invalid={fileError ? true : undefined}
-            onChange={(event) => {
-              setFile(event.target.files?.[0] ?? null);
-              setFileError(undefined);
-            }}
-            className="text-caption text-ink"
-          />
-          {fileError ? (
-            <p role="alert" className="text-caption text-danger">
-              {fileError}
-            </p>
-          ) : null}
-        </div>
-        {error ? <FormAlert>{error}</FormAlert> : null}
-        {isReadOnly ? (
-          <p className="text-caption text-ink-2">
-            결제가 지연되어 읽기만 가능한 동안에는 파일을 올릴 수 없습니다.
-          </p>
-        ) : null}
-        <div>
-          <Button isLoading={mutation.isPending} disabled={isReadOnly} onClick={submit}>
-            올리고 매핑하러 가기
-          </Button>
-        </div>
+      ) : null}
+      <div>
+        <Button isLoading={mutation.isPending} disabled={isReadOnly} onClick={submit}>
+          올리고 매핑하러 가기
+        </Button>
       </div>
-    </Card>
+    </section>
   );
 }
 
@@ -159,44 +148,52 @@ function SupportLink({ item }: { item: Item }) {
 }
 
 function History({ items }: { items: Item[] }) {
-  if (items.length === 0) return <EmptyState title={IMPORT_COPY.historyEmpty} />;
+  const [page, setPage] = useState(1);
+  const [size, setSize] = useState<PageSize>(25);
+  const rows = items.slice((page - 1) * size, page * size);
   return (
-    <div className="overflow-x-auto rounded-control border border-line">
-      <table className="w-full min-w-[40rem] border-collapse text-left text-caption">
-        <caption className="sr-only">{IMPORT_COPY.historyTitle}</caption>
-        <thead className="bg-surface">
-          <tr>
-            {["파일", "종류", "상태", "올린 시각", "유료 지원"].map((column) => (
-              <th key={column} scope="col" className="px-3 py-2 font-semibold text-ink">
-                {column}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((item) => (
-            <tr key={item.batchId} className="border-t border-line align-top">
-              <td className="px-3 py-2">
-                <Link
-                  href={`/import/${item.batchId}`}
-                  className="font-semibold text-primary hover:underline"
-                >
-                  {item.fileName}
-                </Link>
-              </td>
-              <td className="px-3 py-2 text-ink-2">{targetTypeLabel(item.targetType)}</td>
-              <td className="px-3 py-2">
-                <BatchStatusBadge status={item.status} />
-              </td>
-              <td className="px-3 py-2 text-ink-2">{formatSeoulDateTime(item.createdAt)}</td>
-              <td className="px-3 py-2 text-ink-2">
-                <SupportLink item={item} />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <DataTable
+      caption={IMPORT_COPY.historyTitle}
+      rows={rows}
+      getRowId={(row) => String(row.batchId)}
+      getRowHref={(row) => `/import/${row.batchId}`}
+      totalCount={items.length}
+      page={page}
+      pageSize={size}
+      onPageChange={setPage}
+      onPageSizeChange={(next) => {
+        setSize(next);
+        setPage(1);
+      }}
+      emptyMessage={IMPORT_COPY.historyEmpty}
+      columns={[
+        {
+          key: "file",
+          header: "파일",
+          truncate: true,
+          render: (row) => (
+            <Link
+              href={`/import/${row.batchId}`}
+              className="font-semibold text-ink hover:text-primary hover:underline"
+            >
+              {row.fileName}
+            </Link>
+          ),
+        },
+        { key: "type", header: "종류", render: (row) => targetTypeLabel(row.targetType) },
+        {
+          key: "status",
+          header: "상태",
+          render: (row) => <BatchStatusBadge status={row.status} />,
+        },
+        {
+          key: "createdAt",
+          header: "올린 시각",
+          render: (row) => formatSeoulDateTime(row.createdAt),
+        },
+        { key: "support", header: "유료 지원", render: (row) => <SupportLink item={row} /> },
+      ]}
+    />
   );
 }
 
@@ -210,21 +207,19 @@ export function ImportUploadScreen() {
       <PageHeader
         title={IMPORT_COPY.uploadTitle}
         description={IMPORT_COPY.uploadDescription}
-        actions={
-          <>
-            <TextLink href="/import/support">유료 이전 지원</TextLink>
-            <TextLink href="/exports">데이터 내보내기</TextLink>
-          </>
-        }
+        actions={<SecondaryLink href="/import/support">유료 이전 지원</SecondaryLink>}
       />
       <DataMigrationUploadNotice />
       <QueryGate query={query} loadingLabel="이전 이력을 불러오는 중입니다.">
         {(data) => (
           <>
             <UploadForm remaining={data.remainingThisMonth} />
-            <Card title={IMPORT_COPY.historyTitle}>
+            <section aria-labelledby="import-history-title" className="flex flex-col gap-4">
+              <h2 id="import-history-title" className="text-h2 font-semibold text-ink">
+                {IMPORT_COPY.historyTitle}
+              </h2>
               <History items={data.items} />
-            </Card>
+            </section>
           </>
         )}
       </QueryGate>

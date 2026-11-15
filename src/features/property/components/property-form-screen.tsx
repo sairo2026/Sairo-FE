@@ -13,7 +13,13 @@ import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { Button } from "@/shared/components/ui/button";
 import { DateTimeField } from "@/shared/components/ui/date-time-field";
 import { Checkbox, SelectField } from "@/shared/components/ui/select-field";
-import { FIELD_GAP_CLASS, FIELD_LABEL_CLASS, FieldLabel } from "@/shared/components/ui/field-label";
+import {
+  FieldLabel,
+  OFFICE_FIELD_GAP_CLASS,
+  OFFICE_FIELD_LABEL_CLASS,
+  OfficeFieldScope,
+  useFieldGapClass,
+} from "@/shared/components/ui/field-label";
 import { Modal } from "@/shared/components/ui/modal";
 import { PageHeader } from "@/shared/components/ui/page-header";
 import { TextField } from "@/shared/components/ui/text-field";
@@ -69,7 +75,7 @@ type DuplicateMatch = {
 };
 
 const FORM_GRID_CLASS =
-  "grid grid-cols-1 gap-x-[45px] gap-y-[22px] lg:grid-cols-[repeat(2,minmax(0,510px))]";
+  "grid grid-cols-1 gap-x-[45px] gap-y-[30px] lg:grid-cols-[repeat(2,minmax(0,510px))]";
 const DETAIL_SECTION_ID = "property-detail-fields";
 
 function Section({ id, title, children }: { id?: string; title: string; children: ReactNode }) {
@@ -519,314 +525,319 @@ export function PropertyForm(props: FormProps) {
   const isDraft = !isEdit || current?.registrationStage === "DRAFT";
 
   return (
-    <form
-      noValidate
-      className="flex max-w-[1075px] flex-col gap-6"
-      onSubmit={(event) => {
-        event.preventDefault();
-        void submit(false);
-      }}
-    >
-      <PageHeader
-        title={title}
-        actions={
-          <button
-            type="button"
-            onClick={() =>
-              document
-                .getElementById(DETAIL_SECTION_ID)
-                ?.scrollIntoView({ behavior: "smooth", block: "start" })
-            }
-            className="inline-flex items-center justify-center gap-2 rounded-control bg-primary-soft px-5 py-3 text-body font-bold text-primary hover:bg-primary-line"
-          >
-            <svg aria-hidden="true" viewBox="0 0 20 20" width="20" height="20" fill="none">
-              <path
-                d="M3 17l1-4 9.5-9.5a1.4 1.4 0 012 0l1 1a1.4 1.4 0 010 2L7 16l-4 1z"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinejoin="round"
-              />
-            </svg>
-            상세 정보 입력
-          </button>
-        }
-      />
-      <FormNotice>{PROPERTY_ENTRY_COPY.responsibility}</FormNotice>
-      {isReadOnly ? (
-        <FormNotice>
-          결제가 지연되어 읽기만 가능합니다. 저장하려면 결제를 먼저 마쳐 주세요.
-        </FormNotice>
-      ) : null}
-      {formError ? <FormAlert>{formError}</FormAlert> : null}
-      {isConflict && props.mode === "edit" ? (
-        <div>
-          <Button variant="outlined" size="sm" onClick={() => props.onReload()}>
-            최신 내용 불러오기
-          </Button>
-        </div>
-      ) : null}
-      {notice ? <FormNotice>{notice}</FormNotice> : null}
-
-      <div className="flex flex-wrap items-start gap-x-10 gap-y-6">
-        {renderPhotos("picker")}
-        <div className="flex w-full max-w-[510px] flex-col gap-[22px]">
-          <TextField
-            label="매물 주소"
-            value={values.address}
-            onValueChange={(value) => {
-              setField("address", value);
-              setField("duplicateOverrideReason", "");
-            }}
-            error={errors.address}
-          />
-          <TextField
-            label="매물 상세 주소 (선택)"
-            value={values.addressDetail}
-            onValueChange={(value) => setField("addressDetail", value)}
-            error={errors.addressDetail}
-          />
-        </div>
-      </div>
-
-      <div className={FORM_GRID_CLASS}>
-        <TextField
-          label="매물명"
-          required
-          value={values.name}
-          maxLength={100}
-          onValueChange={(value) => setField("name", value)}
-          error={errors.name}
-        />
-        {isEdit ? (
-          <div className={cn("flex flex-col", FIELD_GAP_CLASS)}>
-            <p className={FIELD_LABEL_CLASS}>카테고리</p>
-            <div className="flex items-center gap-3">
-              <span className="text-body font-medium text-ink">{current?.categoryName}</span>
-              <Button
-                variant="outlined"
-                size="sm"
-                disabled={isReadOnly}
-                onClick={() => setIsCategoryDialogOpen(true)}
-              >
-                카테고리 변경
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <SelectField
-            label="카테고리"
-            required
-            value={values.categoryId}
-            placeholder="카테고리를 선택해 주세요."
-            options={(categories.data?.items ?? [])
-              .filter((item) => item.active)
-              .map((item) => ({ value: String(item.categoryId), label: item.name }))}
-            onValueChange={(value) => {
-              setField("categoryId", value);
-              setFieldRaw({});
-              setFieldErrors({});
-            }}
-            error={errors.categoryId}
-          />
-        )}
-        <SelectField
-          label="담당 공인중개사"
-          value={values.managingMembershipId}
-          options={[
-            { value: "", label: "선택 안 함" },
-            ...(members.data ?? []).map((item) => ({
-              value: String(item.membershipId),
-              label: item.displayName,
-            })),
-          ]}
-          onValueChange={(value) => setField("managingMembershipId", value)}
-          error={errors.managingMembershipId}
-        />
-        <SelectField
-          label="점유상태"
-          value={values.occupancyStatus}
-          options={OCCUPANCY_STATUSES.map((value) => ({ value, label: OCCUPANCY_LABEL[value] }))}
-          onValueChange={(value) => setField("occupancyStatus", value)}
-        />
-      </div>
-
-      <Section title="면적·입주">
-        <div className={FORM_GRID_CLASS}>
-          <TextField
-            label="전용면적 (㎡)"
-            inputMode="decimal"
-            value={values.exclusiveAreaSqm}
-            onValueChange={(value) => setField("exclusiveAreaSqm", value)}
-            error={errors.exclusiveAreaSqm}
-          />
-          <TextField
-            label="공급면적 (㎡)"
-            inputMode="decimal"
-            value={values.supplyAreaSqm}
-            onValueChange={(value) => setField("supplyAreaSqm", value)}
-            error={errors.supplyAreaSqm}
-          />
-          <TextField
-            label="대지면적 (㎡)"
-            inputMode="decimal"
-            value={values.landAreaSqm}
-            onValueChange={(value) => setField("landAreaSqm", value)}
-            error={errors.landAreaSqm}
-          />
-          <TextField
-            label="연면적 (㎡)"
-            inputMode="decimal"
-            value={values.grossFloorAreaSqm}
-            onValueChange={(value) => setField("grossFloorAreaSqm", value)}
-            error={errors.grossFloorAreaSqm}
-          />
-          <DateTimeField
-            label="입주 가능일"
-            kind="date"
-            value={values.moveInDate}
-            onValueChange={(value) => setField("moveInDate", value)}
-            error={errors.moveInDate}
-          />
-          <div className="flex items-end pb-3">
-            <Checkbox
-              label="입주 가능일 협의"
-              checked={values.moveInNegotiable}
-              onCheckedChange={(value) => setField("moveInNegotiable", value)}
-            />
-          </div>
-          <TextField
-            label="관리비 (원)"
-            kind="number"
-            value={values.maintenanceFeeAmount}
-            onValueChange={(value) => setField("maintenanceFeeAmount", value)}
-            error={errors.maintenanceFeeAmount}
-          />
-          <TextField
-            label="관리비 포함 항목"
-            value={values.maintenanceFeeItems}
-            onValueChange={(value) => setField("maintenanceFeeItems", value)}
-            error={errors.maintenanceFeeItems}
-          />
-          <DateTimeField
-            label="참고 임대 만기일"
-            kind="date"
-            value={values.referenceLeaseEndDate}
-            onValueChange={(value) => setField("referenceLeaseEndDate", value)}
-            error={errors.referenceLeaseEndDate}
-          />
-          <TextField
-            label="만기일 확인 출처"
-            value={values.referenceLeaseEndSource}
-            onValueChange={(value) => setField("referenceLeaseEndSource", value)}
-            error={errors.referenceLeaseEndSource}
-          />
-        </div>
-      </Section>
-
-      <Section title="설명·메모">
-        <TextAreaField
-          label="설명"
-          value={values.description}
-          onValueChange={(value) => setField("description", value)}
-          error={errors.description}
-        />
-        <TextAreaField
-          label="사무소 내부 메모"
-          value={values.memo}
-          onValueChange={(value) => setField("memo", value)}
-          error={errors.memo}
-        />
-      </Section>
-
-      <Section id={DETAIL_SECTION_ID} title="카테고리 전용 정보">
-        {categoryId === null ? (
-          <p className="text-caption text-ink-2">
-            카테고리를 선택하면 전용 입력 항목이 나타납니다.
-          </p>
-        ) : definitions.isPending ? (
-          <p role="status" className="text-caption text-ink-2">
-            입력 항목을 불러오는 중입니다.
-          </p>
-        ) : definitions.isError ? (
-          <FormAlert>
-            전용 입력 항목을 불러오지 못했습니다.{" "}
+    <OfficeFieldScope>
+      <form
+        noValidate
+        className="flex max-w-[1065px] flex-col gap-6"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void submit(false);
+        }}
+      >
+        <PageHeader
+          title={title}
+          actions={
             <button
               type="button"
-              className="underline clickable-link"
-              onClick={() => void definitions.refetch()}
+              onClick={() =>
+                document
+                  .getElementById(DETAIL_SECTION_ID)
+                  ?.scrollIntoView({ behavior: "smooth", block: "start" })
+              }
+              className="inline-flex items-center justify-center gap-2 rounded-control bg-primary-soft px-5 py-3 text-body font-bold text-primary hover:bg-primary-line"
             >
-              다시 시도
+              <svg aria-hidden="true" viewBox="0 0 20 20" width="20" height="20" fill="none">
+                <path
+                  d="M3 17l1-4 9.5-9.5a1.4 1.4 0 012 0l1 1a1.4 1.4 0 010 2L7 16l-4 1z"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              상세 정보 입력
             </button>
-          </FormAlert>
-        ) : (
-          <CustomFieldsSection
-            definitions={definitions.data.items}
-            values={displayedValues}
-            errors={fieldErrors}
+          }
+        />
+        <FormNotice>{PROPERTY_ENTRY_COPY.responsibility}</FormNotice>
+        {isReadOnly ? (
+          <FormNotice>
+            결제가 지연되어 읽기만 가능합니다. 저장하려면 결제를 먼저 마쳐 주세요.
+          </FormNotice>
+        ) : null}
+        {formError ? <FormAlert>{formError}</FormAlert> : null}
+        {isConflict && props.mode === "edit" ? (
+          <div>
+            <Button variant="outlined" size="sm" onClick={() => props.onReload()}>
+              최신 내용 불러오기
+            </Button>
+          </div>
+        ) : null}
+        {notice ? <FormNotice>{notice}</FormNotice> : null}
+
+        <div className="flex flex-wrap items-start gap-x-10 gap-y-6">
+          {renderPhotos("picker")}
+          <div className="flex w-full max-w-[510px] flex-col gap-[30px]">
+            <TextField
+              label="매물 주소"
+              placeholder="매물의 주소를 입력해 주세요."
+              value={values.address}
+              onValueChange={(value) => {
+                setField("address", value);
+                setField("duplicateOverrideReason", "");
+              }}
+              error={errors.address}
+            />
+            <TextField
+              label="매물 상세 주소 (선택)"
+              placeholder="호수 등 상세 주소를 입력해 주세요."
+              value={values.addressDetail}
+              onValueChange={(value) => setField("addressDetail", value)}
+              error={errors.addressDetail}
+            />
+          </div>
+        </div>
+
+        <div className={FORM_GRID_CLASS}>
+          <TextField
+            label="매물명"
+            placeholder="매물을 간단하게 저장할 이름을 입력해 주세요."
+            required
+            value={values.name}
+            maxLength={100}
+            onValueChange={(value) => setField("name", value)}
+            error={errors.name}
+          />
+          {isEdit ? (
+            <div className={cn("flex flex-col", OFFICE_FIELD_GAP_CLASS)}>
+              <p className={OFFICE_FIELD_LABEL_CLASS}>카테고리</p>
+              <div className="flex items-center gap-3">
+                <span className="text-body font-medium text-ink">{current?.categoryName}</span>
+                <Button
+                  variant="outlined"
+                  size="sm"
+                  disabled={isReadOnly}
+                  onClick={() => setIsCategoryDialogOpen(true)}
+                >
+                  카테고리 변경
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <SelectField
+              label="카테고리"
+              required
+              value={values.categoryId}
+              placeholder="카테고리를 선택해 주세요."
+              options={(categories.data?.items ?? [])
+                .filter((item) => item.active)
+                .map((item) => ({ value: String(item.categoryId), label: item.name }))}
+              onValueChange={(value) => {
+                setField("categoryId", value);
+                setFieldRaw({});
+                setFieldErrors({});
+              }}
+              error={errors.categoryId}
+            />
+          )}
+          <SelectField
+            label="담당 공인중개사"
+            value={values.managingMembershipId}
+            options={[
+              { value: "", label: "선택 안 함" },
+              ...(members.data ?? []).map((item) => ({
+                value: String(item.membershipId),
+                label: item.displayName,
+              })),
+            ]}
+            onValueChange={(value) => setField("managingMembershipId", value)}
+            error={errors.managingMembershipId}
+          />
+          <SelectField
+            label="점유상태"
+            value={values.occupancyStatus}
+            options={OCCUPANCY_STATUSES.map((value) => ({ value, label: OCCUPANCY_LABEL[value] }))}
+            onValueChange={(value) => setField("occupancyStatus", value)}
+          />
+        </div>
+
+        <Section title="면적·입주">
+          <div className={FORM_GRID_CLASS}>
+            <TextField
+              label="전용면적 (㎡)"
+              inputMode="decimal"
+              value={values.exclusiveAreaSqm}
+              onValueChange={(value) => setField("exclusiveAreaSqm", value)}
+              error={errors.exclusiveAreaSqm}
+            />
+            <TextField
+              label="공급면적 (㎡)"
+              inputMode="decimal"
+              value={values.supplyAreaSqm}
+              onValueChange={(value) => setField("supplyAreaSqm", value)}
+              error={errors.supplyAreaSqm}
+            />
+            <TextField
+              label="대지면적 (㎡)"
+              inputMode="decimal"
+              value={values.landAreaSqm}
+              onValueChange={(value) => setField("landAreaSqm", value)}
+              error={errors.landAreaSqm}
+            />
+            <TextField
+              label="연면적 (㎡)"
+              inputMode="decimal"
+              value={values.grossFloorAreaSqm}
+              onValueChange={(value) => setField("grossFloorAreaSqm", value)}
+              error={errors.grossFloorAreaSqm}
+            />
+            <DateTimeField
+              label="입주 가능일"
+              kind="date"
+              value={values.moveInDate}
+              onValueChange={(value) => setField("moveInDate", value)}
+              error={errors.moveInDate}
+            />
+            <div className="flex items-end pb-3">
+              <Checkbox
+                label="입주 가능일 협의"
+                checked={values.moveInNegotiable}
+                onCheckedChange={(value) => setField("moveInNegotiable", value)}
+              />
+            </div>
+            <TextField
+              label="관리비 (원)"
+              kind="number"
+              value={values.maintenanceFeeAmount}
+              onValueChange={(value) => setField("maintenanceFeeAmount", value)}
+              error={errors.maintenanceFeeAmount}
+            />
+            <TextField
+              label="관리비 포함 항목"
+              value={values.maintenanceFeeItems}
+              onValueChange={(value) => setField("maintenanceFeeItems", value)}
+              error={errors.maintenanceFeeItems}
+            />
+            <DateTimeField
+              label="참고 임대 만기일"
+              kind="date"
+              value={values.referenceLeaseEndDate}
+              onValueChange={(value) => setField("referenceLeaseEndDate", value)}
+              error={errors.referenceLeaseEndDate}
+            />
+            <TextField
+              label="만기일 확인 출처"
+              value={values.referenceLeaseEndSource}
+              onValueChange={(value) => setField("referenceLeaseEndSource", value)}
+              error={errors.referenceLeaseEndSource}
+            />
+          </div>
+        </Section>
+
+        <Section title="설명·메모">
+          <TextAreaField
+            label="설명"
+            value={values.description}
+            onValueChange={(value) => setField("description", value)}
+            error={errors.description}
+          />
+          <TextAreaField
+            label="사무소 내부 메모"
+            value={values.memo}
+            onValueChange={(value) => setField("memo", value)}
+            error={errors.memo}
+          />
+        </Section>
+
+        <Section id={DETAIL_SECTION_ID} title="카테고리 전용 정보">
+          {categoryId === null ? (
+            <p className="text-caption text-ink-2">
+              카테고리를 선택하면 전용 입력 항목이 나타납니다.
+            </p>
+          ) : definitions.isPending ? (
+            <p role="status" className="text-caption text-ink-2">
+              입력 항목을 불러오는 중입니다.
+            </p>
+          ) : definitions.isError ? (
+            <FormAlert>
+              전용 입력 항목을 불러오지 못했습니다.{" "}
+              <button
+                type="button"
+                className="underline clickable-link"
+                onClick={() => void definitions.refetch()}
+              >
+                다시 시도
+              </button>
+            </FormAlert>
+          ) : (
+            <CustomFieldsSection
+              definitions={definitions.data.items}
+              values={displayedValues}
+              errors={fieldErrors}
+              disabled={isReadOnly}
+              onChange={(id, raw) => {
+                setFieldRaw((existing) => ({ ...existing, [id]: raw }));
+                setFieldErrors((existing) => ({ ...existing, [id]: undefined }));
+              }}
+            />
+          )}
+        </Section>
+
+        <Section title="사진">{renderPhotos("list")}</Section>
+
+        <div className="flex flex-wrap gap-4">
+          <Link
+            href={detail ? `/properties/${detail.propertyId}` : "/properties"}
+            className="inline-flex h-12 min-w-[120px] items-center justify-center rounded-control bg-primary-soft px-10 text-body font-medium text-ink-2 hover:bg-primary-line"
+          >
+            취소
+          </Link>
+          <Button
+            type="submit"
+            variant={isDraft ? "outlined" : "submit"}
+            isLoading={isBusy}
             disabled={isReadOnly}
-            onChange={(id, raw) => {
-              setFieldRaw((existing) => ({ ...existing, [id]: raw }));
-              setFieldErrors((existing) => ({ ...existing, [id]: undefined }));
+          >
+            {isEdit ? "저장" : "임시저장"}
+          </Button>
+          {isDraft ? (
+            <Button isLoading={isBusy} disabled={isReadOnly} onClick={() => void submit(true)}>
+              {isEdit ? "활성 등록으로 전환" : "활성 등록"}
+            </Button>
+          ) : null}
+        </div>
+
+        {duplicates ? (
+          <DuplicateDialog
+            matches={duplicates}
+            reason={values.duplicateOverrideReason}
+            error={duplicateError}
+            isPending={saveMutation.isPending}
+            onReasonChange={(value) => {
+              setField("duplicateOverrideReason", value);
+              setDuplicateError(undefined);
+            }}
+            onConfirm={confirmDuplicate}
+            onClose={() => setDuplicates(null)}
+          />
+        ) : null}
+        {isCategoryDialogOpen && detail ? (
+          <CategoryChangeDialog
+            propertyId={detail.propertyId}
+            currentCategoryId={current?.categoryId ?? detail.categoryId}
+            version={current?.version ?? detail.version}
+            onClose={() => setIsCategoryDialogOpen(false)}
+            onChanged={() => {
+              setIsCategoryDialogOpen(false);
+              setFieldRaw({});
+              setFieldErrors({});
+              if (props.mode === "edit") {
+                props.onReload("카테고리를 바꿨습니다. 이전 입력값은 보관되었습니다.");
+              }
             }}
           />
-        )}
-      </Section>
-
-      <Section title="사진">{renderPhotos("list")}</Section>
-
-      <div className="flex flex-wrap gap-4">
-        <Link
-          href={detail ? `/properties/${detail.propertyId}` : "/properties"}
-          className="inline-flex h-12 min-w-[120px] items-center justify-center rounded-control bg-primary-soft px-10 text-body font-medium text-ink-2 hover:bg-primary-line"
-        >
-          취소
-        </Link>
-        <Button
-          type="submit"
-          variant={isDraft ? "outlined" : "submit"}
-          isLoading={isBusy}
-          disabled={isReadOnly}
-        >
-          {isEdit ? "저장" : "임시저장"}
-        </Button>
-        {isDraft ? (
-          <Button isLoading={isBusy} disabled={isReadOnly} onClick={() => void submit(true)}>
-            {isEdit ? "활성 등록으로 전환" : "활성 등록"}
-          </Button>
         ) : null}
-      </div>
-
-      {duplicates ? (
-        <DuplicateDialog
-          matches={duplicates}
-          reason={values.duplicateOverrideReason}
-          error={duplicateError}
-          isPending={saveMutation.isPending}
-          onReasonChange={(value) => {
-            setField("duplicateOverrideReason", value);
-            setDuplicateError(undefined);
-          }}
-          onConfirm={confirmDuplicate}
-          onClose={() => setDuplicates(null)}
-        />
-      ) : null}
-      {isCategoryDialogOpen && detail ? (
-        <CategoryChangeDialog
-          propertyId={detail.propertyId}
-          currentCategoryId={current?.categoryId ?? detail.categoryId}
-          version={current?.version ?? detail.version}
-          onClose={() => setIsCategoryDialogOpen(false)}
-          onChanged={() => {
-            setIsCategoryDialogOpen(false);
-            setFieldRaw({});
-            setFieldErrors({});
-            if (props.mode === "edit") {
-              props.onReload("카테고리를 바꿨습니다. 이전 입력값은 보관되었습니다.");
-            }
-          }}
-        />
-      ) : null}
-    </form>
+      </form>
+    </OfficeFieldScope>
   );
 }
 
@@ -842,8 +853,9 @@ function TextAreaField({
   error?: string;
 }) {
   const id = `textarea-${label}`;
+  const fieldGapClass = useFieldGapClass();
   return (
-    <div className={cn("flex flex-col", FIELD_GAP_CLASS)}>
+    <div className={cn("flex flex-col", fieldGapClass)}>
       <FieldLabel htmlFor={id}>{label}</FieldLabel>
       <textarea
         id={id}

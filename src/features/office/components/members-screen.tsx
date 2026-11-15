@@ -9,6 +9,8 @@ import { useOfficeAccess } from "@/shared/session/office-access-context";
 import type { EmploymentRosterListResponse } from "@/lib/api/contracts/office.schema";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
+import { CreateButton } from "@/shared/components/ui/create-link";
+import { SecondaryLink } from "@/shared/components/ui/secondary-link";
 import { DataTable } from "@/shared/components/ui/data-table";
 import type { PageSize } from "@/shared/components/ui/data-table";
 import { Modal } from "@/shared/components/ui/modal";
@@ -32,9 +34,6 @@ import { describeOfficeError, fieldErrorMap } from "../model/messages";
 import { validateRoster } from "../model/validation";
 import type { RosterField } from "../model/validation";
 import { MutedNote } from "@/shared/components/feedback/page-parts";
-
-const LINK_CLASS =
-  "inline-flex h-9 items-center rounded-control border border-line px-3.5 text-caption text-ink-2 clickable-control";
 
 function yesNo(value: boolean | null | undefined): string {
   if (value === null || value === undefined) return "-";
@@ -91,7 +90,22 @@ function MemberListTab({ status, isOwner }: { status?: "SUSPENDED"; isOwner: boo
   const table = useTableState();
   const query = useMemberships({ status, page: table.page - 1, size: table.size });
   const base = [
-    { key: "name", header: "이름", render: (row: MemberRow) => row.displayName },
+    {
+      key: "name",
+      header: "이름",
+      render: (row: MemberRow) =>
+        isOwner ? (
+          <Link
+            href={`/members/${row.membershipId}`}
+            aria-label={`${row.displayName} 상세`}
+            className="font-semibold text-ink hover:text-primary hover:underline"
+          >
+            {row.displayName}
+          </Link>
+        ) : (
+          row.displayName
+        ),
+    },
     { key: "role", header: "역할", render: (row: MemberRow) => labelOf(ROLE_LABEL, row.role) },
   ];
   const ownerColumns = [
@@ -123,19 +137,6 @@ function MemberListTab({ status, isOwner }: { status?: "SUSPENDED"; isOwner: boo
       key: "billable",
       header: "과금 대상",
       render: (row: MemberRow) => billableLabel(row.billable),
-    },
-    {
-      key: "detail",
-      header: "관리",
-      render: (row: MemberRow) => (
-        <Link
-          href={`/members/${row.membershipId}`}
-          className="text-caption font-semibold text-primary hover:underline"
-          aria-label={`${row.displayName} 상세`}
-        >
-          상세
-        </Link>
-      ),
     },
   ];
   return (
@@ -395,16 +396,15 @@ function RosterTab() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <MutedNote>
-          계정이 없는 고용인까지 포함한 실제 고용명부 기준으로 한도를 계산합니다.
-        </MutedNote>
-        <MutedNote>{ROSTER_NOTICE_COPY.roster}</MutedNote>
-        {!isReadOnly ? (
-          <Button variant="outlined" size="sm" onClick={() => setIsAdding(true)}>
-            항목 추가
-          </Button>
-        ) : null}
+        <FormNotice>
+          {`계정이 없는 고용인까지 포함한 실제 고용명부 기준으로 한도를 계산합니다. ${ROSTER_NOTICE_COPY.roster}`}
+        </FormNotice>
       </div>
+      {!isReadOnly ? (
+        <div>
+          <CreateButton onClick={() => setIsAdding(true)}>항목 추가</CreateButton>
+        </div>
+      ) : null}
       <DataTable
         caption="고용명부"
         columns={[
@@ -485,24 +485,19 @@ export function MembersScreen() {
         actions={
           isOwner ? (
             <div className="flex flex-wrap gap-2">
-              <Link href="/members/requests" className={LINK_CLASS}>
-                참여 요청·초대
-              </Link>
-              <Link href="/members/owner-transfer" className={LINK_CLASS}>
-                대표 이전
-              </Link>
+              <SecondaryLink href="/members/requests">참여 요청·초대</SecondaryLink>
+              <SecondaryLink href="/members/owner-transfer">대표 이전</SecondaryLink>
             </div>
           ) : (
-            <Link href="/members/owner-transfer" className={LINK_CLASS}>
-              대표 이전 확인
-            </Link>
+            <SecondaryLink href="/members/owner-transfer">대표 이전 확인</SecondaryLink>
           )
         }
       />
       {isOwner ? (
         <>
-          <MutedNote>{MEMBERSHIP_NOTICE_COPY.ownerResponsibility}</MutedNote>
-          <MutedNote>{MEMBERSHIP_NOTICE_COPY.withdrawnMember}</MutedNote>
+          <FormNotice>
+            {`${MEMBERSHIP_NOTICE_COPY.ownerResponsibility} ${MEMBERSHIP_NOTICE_COPY.withdrawnMember}`}
+          </FormNotice>
           <QuotaBanner />
           <Tabs
             label="구성원 보기"

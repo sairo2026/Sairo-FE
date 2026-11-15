@@ -4,7 +4,7 @@ import { useId } from "react";
 import type { InputHTMLAttributes, ReactNode } from "react";
 import { cn } from "@/shared/lib/cn";
 import { formatPhone } from "@/shared/lib/format";
-import { FIELD_GAP_CLASS, FieldLabel } from "./field-label";
+import { FieldLabel, useFieldGapClass, useIsOfficeField } from "./field-label";
 
 export type TextFieldKind = "text" | "number" | "tel" | "password";
 
@@ -54,6 +54,8 @@ export function TextField({
   maxLength,
   ...rest
 }: TextFieldProps) {
+  const fieldGapClass = useFieldGapClass();
+  const isOffice = useIsOfficeField();
   const generatedId = useId();
   const inputId = id ?? generatedId;
   const messageId = `${inputId}-message`;
@@ -66,10 +68,21 @@ export function TextField({
   }
 
   return (
-    <div className={cn("flex min-w-0 flex-col", FIELD_GAP_CLASS, className)}>
-      <FieldLabel htmlFor={inputId} required={required}>
-        {label}
-      </FieldLabel>
+    <div className={cn("flex min-w-0 flex-col", fieldGapClass, className)}>
+      {isOffice && maxLength && !error ? (
+        <div className="flex items-baseline justify-between gap-3">
+          <FieldLabel htmlFor={inputId} required={required}>
+            {label}
+          </FieldLabel>
+          <span className="text-caption text-ink-3" aria-hidden="true">
+            {Array.from(value).length}/{maxLength}
+          </span>
+        </div>
+      ) : (
+        <FieldLabel htmlFor={inputId} required={required}>
+          {label}
+        </FieldLabel>
+      )}
       <div
         className={cn(
           "flex h-[58px] items-center gap-4 rounded-control border border-line bg-surface px-5 focus-within:border-primary focus-within:bg-white",
@@ -120,7 +133,7 @@ export function TextField({
           {error ?? statusText ?? hint}
         </p>
       ) : null}
-      {maxLength && !error ? (
+      {maxLength && !error && !isOffice ? (
         <p className="text-right text-caption text-ink-3" aria-hidden="true">
           {Array.from(value).length}/{maxLength}
         </p>

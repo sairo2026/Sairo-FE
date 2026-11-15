@@ -21,10 +21,11 @@ import { MiniCalendar } from "./mini-calendar";
 type StatIcon = "contract" | "visit" | "coordination";
 
 const STAT_ICON_PATH: Record<StatIcon, string> = {
-  contract: "M7 3h10l4 4v14H7zM17 3v4h4M10 12h8M10 16h8",
-  visit: "M3 11l9-8 9 8M5 10v10h14V10M10 20v-6h4v6",
+  contract:
+    "M7 2h2v2h6V2h2v2h2a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2h2zM5 9v11h14V9zm10.7 2.3l1.4 1.4-5.5 5.5-3.3-3.3 1.4-1.4 1.9 1.9z",
+  visit: "M12 3L2 12h3v8h5v-5h4v5h5v-8h3z",
   coordination:
-    "M16 11a3 3 0 100-6 3 3 0 000 6zM8 12a3 3 0 100-6 3 3 0 000 6zM2 20c0-3 3-5 6-5s6 2 6 5M14 15c4-1 8 1 8 5",
+    "M9 11a3 3 0 100-6 3 3 0 000 6zm7 0a3 3 0 100-6 3 3 0 000 6zM9 13c-3 0-6 1.5-6 4v2h12v-2c0-2.5-3-4-6-4zm7 0c-.6 0-1.2.1-1.8.2 1.2.9 1.8 2.1 1.8 3.8v2h6v-2c0-2.5-3-4-6-4z",
 };
 
 function StatCard({
@@ -51,23 +52,19 @@ function StatCard({
           <svg
             aria-hidden="true"
             viewBox="0 0 24 24"
-            width="28"
-            height="28"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+            width="24"
+            height="24"
+            fill="currentColor"
             className="text-primary"
           >
-            <path d={STAT_ICON_PATH[icon]} />
+            <path fillRule="evenodd" d={STAT_ICON_PATH[icon]} />
           </svg>
         ) : null}
         <span
           className={`flex items-center justify-between font-bold text-ink ${icon ? "text-h1" : "text-h2"}`}
         >
           {title}
-          <span aria-hidden="true" className="clickable-arrow">
+          <span aria-hidden="true" className="clickable-arrow text-ink-3">
             {icon ? (
               <svg
                 viewBox="0 0 18 36"
@@ -75,7 +72,7 @@ function StatCard({
                 height="36"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="2"
+                strokeWidth="1.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 className="block"
@@ -171,27 +168,20 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader
-        title="오늘 할 일"
-        description={
-          isDeputy
-            ? "본인 업무와 담당 방문만 보입니다."
-            : "오늘 방문과 업무, 조율 진행 현황을 한눈에 봅니다."
-        }
-      />
+      <div className="sr-only">
+        <PageHeader
+          title="오늘 할 일"
+          description={
+            isDeputy
+              ? "본인 업무와 담당 방문만 보입니다."
+              : "오늘 방문과 업무, 조율 진행 현황을 한눈에 봅니다."
+          }
+        />
+      </div>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-[repeat(3,minmax(0,326px))]">
-        {isDeputy ? null : (
-          <StatCard
-            href="/contracts?tab=maturity"
-            title="계약 만기 D-90"
-            icon="contract"
-            value={summary.leaseExpiringWithin90DaysCount}
-            label="건"
-          />
-        )}
         <StatCard
           href="/coordinations"
-          title="오늘 임장 목록"
+          title="오늘 방문 목록"
           icon="visit"
           value={summary.todayScheduledVisits.length}
           label="건"
@@ -203,6 +193,15 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
           value={summary.activeCoordinationCount}
           label="건"
         />
+        {isDeputy ? null : (
+          <StatCard
+            href="/contracts?tab=maturity"
+            title="계약 만기 D-90"
+            icon="contract"
+            value={summary.leaseExpiringWithin90DaysCount}
+            label="건"
+          />
+        )}
       </div>
       {isEmptyOffice ? <FirstUseGuide isOwner={isOwner} needsCard={needsCard} /> : null}
       {needsCard && !isEmptyOffice ? (
@@ -251,7 +250,7 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
           />
         </div>
       </section>
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[443px_minmax(0,1fr)] lg:gap-11">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[443px_minmax(0,1fr)]">
         <section
           aria-labelledby="home-tasks"
           className="flex flex-col gap-5 rounded-card border border-line bg-white p-8"

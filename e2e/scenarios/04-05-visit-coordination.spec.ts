@@ -31,7 +31,7 @@ test.describe("시나리오 4 방문 조율 생성부터 결과 기록까지", (
   test("조율을 만들고 두 매물에 출입승인 3건을 등록해 승인자 링크를 발급한다", async ({ page }) => {
     await test.step("/coordinations/new에서 고객과 후보 매물을 골라 조율을 만든다", async () => {
       await page.goto("/coordinations");
-      await page.getByRole("link", { name: "+ 조율 만들기" }).click();
+      await page.getByRole("link", { name: "조율 만들기" }).click();
       await page
         .getByRole("radio", { name: /김수요/ })
         .first()

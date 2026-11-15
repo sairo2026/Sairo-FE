@@ -63,9 +63,7 @@ export function PublicPricingScreen({ initialData }: { initialData?: PublicPrici
               <span className="text-body font-semibold text-ink">{tierRange(tier)}</span>
               <span className="flex flex-col text-body text-ink-2 sm:items-end">
                 <span>{tierFormula(tier)} (부가세 포함)</span>
-                <span className="text-caption">
-                  {PRICING_COPY.planFooter(formatKrw(tier.baseAmount))}
-                </span>
+                <span className="text-caption">{PRICING_COPY.planTerms}</span>
               </span>
             </li>
           ))}
@@ -88,22 +86,22 @@ export function PublicPricingScreen({ initialData }: { initialData?: PublicPrici
         <table className="w-full text-left text-body">
           <caption className="sr-only">1명부터 10명까지 인원별 월 금액 예시</caption>
           <thead>
-            <tr className="text-caption text-ink-2">
-              <th scope="col" className="py-2">
+            <tr className="text-body font-bold text-ink">
+              <th scope="col" className="h-[60px] border-b border-line py-0 text-left font-bold">
                 이용 인원
               </th>
-              <th scope="col" className="py-2">
+              <th scope="col" className="h-[60px] border-b border-line py-0 text-left font-bold">
                 월 금액 (부가세 포함)
               </th>
             </tr>
           </thead>
           <tbody>
             {pricing.examples.map((example) => (
-              <tr key={example.members} className="border-t border-line">
-                <th scope="row" className="py-2 font-medium">
+              <tr key={example.members} className="border-b border-line last:border-b-0">
+                <th scope="row" className="py-4 text-body font-medium">
                   {example.members}명
                 </th>
-                <td className="py-2">{formatKrw(example.monthlyAmount)}</td>
+                <td className="py-4 text-body font-medium">{formatKrw(example.monthlyAmount)}</td>
               </tr>
             ))}
           </tbody>
@@ -148,11 +146,11 @@ export function PublicPricingScreen({ initialData }: { initialData?: PublicPrici
         </p>
       </Card>
 
-      <div
-        className="flex min-h-24 items-center justify-center rounded-card-flat border border-dashed border-line bg-surface px-4 py-6 text-caption text-ink-2"
-        data-testid="pricing-image"
-      >
-        {imageUrl ? (
+      {imageUrl ? (
+        <div
+          className="flex min-h-24 items-center justify-center rounded-card-flat bg-surface px-4 py-6"
+          data-testid="pricing-image"
+        >
           <Image
             src={imageUrl}
             alt="요금제에서 사용하는 사이로 업무 화면 예시"
@@ -161,17 +159,15 @@ export function PublicPricingScreen({ initialData }: { initialData?: PublicPrici
             unoptimized
             className="h-auto max-h-64 w-auto"
           />
-        ) : (
-          "화면 예시를 불러오지 못했습니다."
-        )}
-      </div>
+        </div>
+      ) : null}
 
       <CommerceNotice />
 
       <div className="flex flex-col items-start gap-2">
         <Link
           href="/signup"
-          className="inline-flex h-12 items-center rounded-control bg-primary px-6 font-bold text-white hover:bg-primary-hover"
+          className="inline-flex h-14 items-center rounded-control bg-primary px-6 text-body font-bold text-white hover:bg-primary-hover"
         >
           {COPY.pricingEntry}
         </Link>

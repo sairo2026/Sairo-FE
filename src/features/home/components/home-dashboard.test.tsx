@@ -46,7 +46,7 @@ describe("홈 대시보드", () => {
     expect(await screen.findByText("서울특별시 성북구 정릉로 77")).not.toBeNull();
     expect(screen.getByRole("button", { name: "업무 임장 안내 문자 확인 열기" })).not.toBeNull();
     expect(screen.getByRole("link", { name: "계약 만기 D-90 2건" })).not.toBeNull();
-    expect(screen.getByRole("link", { name: "오늘 임장 목록 1건" })).not.toBeNull();
+    expect(screen.getByRole("link", { name: "오늘 방문 목록 1건" })).not.toBeNull();
     expect(screen.getByRole("link", { name: "방문 조율 중 1건" })).not.toBeNull();
     expect(screen.getByText("임대 만기 90일 전 후속업무")).not.toBeNull();
     expect(screen.getByText("전세 계약 D-90 후속업무")).not.toBeNull();

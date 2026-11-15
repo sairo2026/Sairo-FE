@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import type { ReactNode } from "react";
 import { ApiError } from "@/shared/api/client";
 import { toErrorScreenKind } from "@/shared/api/error-kind";
 import { ErrorScreen } from "@/shared/components/feedback/error-screen";
@@ -11,6 +10,7 @@ import { Badge, DDayTag } from "@/shared/components/ui/badge";
 import { CreateLink } from "@/shared/components/ui/create-link";
 import { DataTable } from "@/shared/components/ui/data-table";
 import type { PageSize } from "@/shared/components/ui/data-table";
+import { SecondaryLink } from "@/shared/components/ui/secondary-link";
 import { PageHeader } from "@/shared/components/ui/page-header";
 import { SearchField } from "@/shared/components/ui/search-field";
 import { SelectField } from "@/shared/components/ui/select-field";
@@ -101,17 +101,6 @@ function toParams(filters: Filters, page: number, size: number): PropertyListPar
     page: page - 1,
     size,
   };
-}
-
-function SecondaryLink({ href, children }: { href: string; children: ReactNode }) {
-  return (
-    <Link
-      href={href}
-      className="inline-flex h-12 items-center justify-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 clickable-control"
-    >
-      {children}
-    </Link>
-  );
 }
 
 export function PropertyListScreen() {
@@ -250,7 +239,7 @@ export function PropertyListScreen() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title="매물 관리" description="등록된 매물을 관리할 수 있습니다." />
-      <div className="flex flex-wrap items-center gap-4">
+      <div className="flex flex-wrap items-center gap-6">
         <CreateLink href="/properties/new">매물 등록</CreateLink>
         <div className="min-w-[260px] max-w-[856px] flex-1">
           <SearchField

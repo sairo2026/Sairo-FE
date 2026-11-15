@@ -3,7 +3,7 @@
 import { useId } from "react";
 import type { ReactNode, SelectHTMLAttributes } from "react";
 import { cn } from "@/shared/lib/cn";
-import { FIELD_GAP_CLASS, FieldLabel } from "./field-label";
+import { FieldLabel, useFieldGapClass } from "./field-label";
 import { RequirementMark } from "./requirement-mark";
 
 export type SelectOption = { value: string; label: string; isDisabled?: boolean };
@@ -57,6 +57,7 @@ export function SelectField({
   layout = "stacked",
   ...rest
 }: SelectFieldProps) {
+  const fieldGapClass = useFieldGapClass();
   const generatedId = useId();
   const selectId = id ?? generatedId;
   const errorId = `${selectId}-error`;
@@ -65,7 +66,7 @@ export function SelectField({
     <div
       className={cn(
         "flex",
-        isInline ? "flex-row items-center gap-5" : cn("flex-col", FIELD_GAP_CLASS),
+        isInline ? "flex-row items-center gap-5" : cn("flex-col", fieldGapClass),
         className,
       )}
     >

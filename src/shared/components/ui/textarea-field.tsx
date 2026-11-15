@@ -3,7 +3,7 @@
 import { useId } from "react";
 import type { TextareaHTMLAttributes } from "react";
 import { cn } from "@/shared/lib/cn";
-import { FIELD_GAP_CLASS, FieldLabel } from "./field-label";
+import { FieldLabel, useFieldGapClass } from "./field-label";
 
 export type TextAreaFieldProps = Omit<
   TextareaHTMLAttributes<HTMLTextAreaElement>,
@@ -27,11 +27,12 @@ export function TextAreaField({
   className,
   ...rest
 }: TextAreaFieldProps) {
+  const fieldGapClass = useFieldGapClass();
   const generatedId = useId();
   const fieldId = id ?? generatedId;
   const messageId = `${fieldId}-message`;
   return (
-    <div className={cn("flex flex-col", FIELD_GAP_CLASS)}>
+    <div className={cn("flex flex-col", fieldGapClass)}>
       <FieldLabel htmlFor={fieldId} required={rest.required}>
         {label}
       </FieldLabel>

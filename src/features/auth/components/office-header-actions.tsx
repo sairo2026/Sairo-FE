@@ -119,7 +119,7 @@ export function OfficeHeaderActions() {
         {unreadCount > 0 ? (
           <span
             aria-hidden="true"
-            className="absolute top-1 right-1 h-2.5 w-2.5 rounded-full bg-danger"
+            className="absolute top-1 right-1 h-2.5 w-2.5 rounded-full bg-primary"
           />
         ) : null}
       </button>

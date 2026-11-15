@@ -10,8 +10,10 @@ import { FormNotice } from "@/shared/components/feedback/form-frame";
 
 import { DataTable } from "@/shared/components/ui/data-table";
 import type { PageSize } from "@/shared/components/ui/data-table";
+import { ScheduleTag } from "@/shared/components/ui/badge";
+import { CreateLink } from "@/shared/components/ui/create-link";
 import { PageHeader } from "@/shared/components/ui/page-header";
-import { SelectableCard } from "@/shared/components/ui/selectable-card";
+import { SecondaryLink } from "@/shared/components/ui/secondary-link";
 import { formatSeoulDate } from "@/shared/lib/format";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { CoordinationStatusBadge } from "./coordination-status-badge";
@@ -21,6 +23,7 @@ import {
   NEXT_ACTION_HASH,
   isCoordinationStatus,
   statusLabel,
+  statusTone,
 } from "../model/labels";
 import { describeVisitError } from "../model/messages";
 
@@ -69,46 +72,33 @@ export function CoordinationListScreen({ initialStatus }: { initialStatus?: stri
         <FormNotice>배정된 조율 건만 보입니다.</FormNotice>
       ) : (
         <div className="flex flex-wrap gap-3">
-          <Link
-            href="/coordinations/new"
-            aria-disabled={isReadOnly || undefined}
-            className="inline-flex h-14 items-center justify-center rounded-control bg-primary px-6 text-body font-bold text-white hover:bg-primary-hover"
-          >
-            + 조율 만들기
-          </Link>
-          <Link
-            href="/granted-properties"
-            className="inline-flex h-14 items-center justify-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 clickable-control"
-          >
-            허용받은 매물
-          </Link>
-          <Link
-            href="/coordinations/trust"
-            className="inline-flex h-14 items-center justify-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 clickable-control"
-          >
-            신뢰 요약·받은 평가
-          </Link>
+          <CreateLink href="/coordinations/new" isDisabled={isReadOnly}>
+            조율 만들기
+          </CreateLink>
+          <SecondaryLink href="/granted-properties">허용받은 매물</SecondaryLink>
+          <SecondaryLink href="/coordinations/trust">신뢰 요약·받은 평가</SecondaryLink>
           {role === "OWNER" ? (
-            <Link
-              href="/coordinations/supervision"
-              className="inline-flex h-14 items-center justify-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 clickable-control"
-            >
-              보조원 고지 감독
-            </Link>
+            <SecondaryLink href="/coordinations/supervision">보조원 고지 감독</SecondaryLink>
           ) : null}
         </div>
       )}
-      <ul aria-label="상태별 건수" className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+      <ul aria-label="상태별 건수" className="flex flex-wrap gap-3">
         {COORDINATION_STATUSES.map((key) => (
           <li key={key}>
-            <SelectableCard
-              isSelected={status === key}
+            <button
+              type="button"
+              aria-pressed={status === key}
               onClick={() => select(key)}
-              className="flex w-full flex-col items-start gap-1 rounded-card-flat px-4 py-3 text-left"
+              className="block rounded-control"
             >
-              <CoordinationStatusBadge status={key} compact />
-              <span className="text-h2 font-bold text-ink">{counts ? counts[key] : "-"}</span>
-            </SelectableCard>
+              <ScheduleTag
+                tone={statusTone(key)}
+                label={statusLabel(key)}
+                count={counts ? counts[key] : 0}
+                isInteractive
+                className={status === key ? "ring-2 ring-primary" : undefined}
+              />
+            </button>
           </li>
         ))}
       </ul>
@@ -143,10 +133,11 @@ export function CoordinationListScreen({ initialStatus }: { initialStatus?: stri
           {
             key: "customer",
             header: "고객",
+            widthClass: "w-[120px]",
             render: (row) => (
               <Link
                 href={`/coordinations/${row.coordinationId}`}
-                className="font-semibold text-ink hover:text-primary hover:underline"
+                className="font-bold text-ink hover:text-primary hover:underline"
               >
                 {row.customerName}
               </Link>
@@ -164,16 +155,23 @@ export function CoordinationListScreen({ initialStatus }: { initialStatus?: stri
               </span>
             ),
           },
-          { key: "manager", header: "담당자", render: (row) => row.managerName },
+          {
+            key: "manager",
+            header: "담당자",
+            widthClass: "w-[100px]",
+            render: (row) => row.managerName,
+          },
           {
             key: "period",
             header: "방문 가능 기간",
+            widthClass: "w-[220px]",
             render: (row) =>
               `${formatSeoulDate(row.periodStartDate)} ~ ${formatSeoulDate(row.periodEndDate)}`,
           },
           {
             key: "status",
             header: "상태",
+            widthClass: "w-[140px]",
             render: (row) => {
               const hash = isCoordinationStatus(row.status) ? NEXT_ACTION_HASH[row.status] : "";
               return (
