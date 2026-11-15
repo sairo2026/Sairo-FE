@@ -96,6 +96,14 @@ describe("사이트 기본 메타데이터", () => {
       expect(typeof metadata.description).toBe("string");
       expect(metadata.description).not.toMatch(EXAGGERATION);
       expect(metadata.robots).toEqual({ index: true, follow: true });
+      expect(metadata.openGraph).toMatchObject({
+        title: `${title} | 사이로`,
+        description: metadata.description,
+      });
+      expect(metadata.twitter).toMatchObject({
+        title: `${title} | 사이로`,
+        description: metadata.description,
+      });
     },
   );
 

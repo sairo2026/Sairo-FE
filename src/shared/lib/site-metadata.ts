@@ -17,3 +17,14 @@ export const SITE_OG_IMAGE = {
 export const INDEXABLE_ROBOTS: NonNullable<Metadata["robots"]> = { index: true, follow: true };
 
 export const NOINDEX_ROBOTS: NonNullable<Metadata["robots"]> = { index: false, follow: false };
+
+export function publicPageSocialMetadata(
+  title: string,
+  description: string,
+): Pick<Metadata, "openGraph" | "twitter"> {
+  const socialTitle = `${title} | 사이로`;
+  return {
+    openGraph: { title: socialTitle, description },
+    twitter: { title: socialTitle, description },
+  };
+}

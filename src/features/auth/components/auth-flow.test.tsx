@@ -421,7 +421,7 @@ describe("ReconsentNotice", () => {
       ).not.toBeNull(),
     );
     expect(screen.getByText("자동결제 안내 문구가 추가되었습니다")).not.toBeNull();
-    await userEvent.click(screen.getByRole("button", { name: "동의하고 계속" }));
+    await userEvent.click(screen.getByRole("button", { name: "필수 약관에 동의하고 계속" }));
     await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/home"));
   });
 
@@ -457,9 +457,9 @@ describe("ReconsentNotice", () => {
     });
     renderWithQuery(<ReconsentNotice />);
     await waitFor(() =>
-      expect(screen.getByRole("button", { name: "동의하고 계속" })).not.toBeNull(),
+      expect(screen.getByRole("button", { name: "필수 약관에 동의하고 계속" })).not.toBeNull(),
     );
-    await userEvent.click(screen.getByRole("button", { name: "동의하고 계속" }));
+    await userEvent.click(screen.getByRole("button", { name: "필수 약관에 동의하고 계속" }));
     await waitFor(() =>
       expect(screen.getByText(/그 사이 약관이 다시 바뀌었습니다/)).not.toBeNull(),
     );
