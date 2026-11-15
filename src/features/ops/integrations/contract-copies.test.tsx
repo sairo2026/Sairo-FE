@@ -295,7 +295,11 @@ describe("공급자 계약서 사본 화면", () => {
     server.use(
       http.post("/api/ops/integrations/:id/contract-copies", () =>
         mockErrors.validation([
-          { field: "storageKey", message: "저장 키 형식이 올바르지 않습니다." },
+          {
+            field: "storageKey",
+            code: "INVALID_FORMAT",
+            message: "저장 키 형식이 올바르지 않습니다.",
+          },
         ]),
       ),
     );
@@ -303,7 +307,9 @@ describe("공급자 계약서 사본 화면", () => {
     await screen.findByRole("table", { name: "계약서 사본 목록" });
     fillForm();
     await userEvent.setup().click(screen.getByRole("button", { name: "사본 등록" }));
-    expect(await screen.findByText(/저장 키 형식이 올바르지 않습니다/)).toBeTruthy();
+    expect(
+      await screen.findByText("형식이 올바르지 않습니다. 입력한 내용을 확인해 주세요."),
+    ).toBeTruthy();
   });
 
   it("등록이 403이면 권한 안내를 보인다", async () => {

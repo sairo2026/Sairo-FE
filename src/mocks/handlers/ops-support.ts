@@ -530,14 +530,22 @@ const inquiryHandlers: RequestHandler[] = [
           : "첨부.pdf";
     const size = file && typeof file !== "string" ? file.size : 1024;
     if (!ALLOWED_EXTENSIONS.some((extension) => fileName.toLowerCase().endsWith(extension))) {
-      return mockErrors.validation([{ field: "file", message: "허용되지 않는 형식입니다." }]);
+      return mockErrors.validation([
+        { field: "file", code: "NOT_ALLOWED", message: "허용되지 않는 형식입니다." },
+      ]);
     }
     if (size > MAX_BYTES) {
-      return mockErrors.validation([{ field: "file", message: "파일 용량이 20MB를 넘습니다." }]);
+      return mockErrors.validation([
+        { field: "file", code: "OUT_OF_RANGE", message: "파일 용량이 20MB를 넘습니다." },
+      ]);
     }
     if (item.attachments.filter((attachment) => attachment.byOperator).length >= 5) {
       return mockErrors.validation([
-        { field: "file", message: "운영자 첨부는 문의당 5개까지 올릴 수 있습니다." },
+        {
+          field: "file",
+          code: "OUT_OF_RANGE",
+          message: "운영자 첨부는 문의당 5개까지 올릴 수 있습니다.",
+        },
       ]);
     }
     supportState.nextAttachmentId += 1;

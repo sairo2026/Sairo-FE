@@ -140,7 +140,11 @@ describe("신청 허용 관리", () => {
     server.use(
       http.post("/api/properties/501/access-approvals/7001/apply-grants", () =>
         mockErrors.validation([
-          { field: "granteeMembershipId", message: "대상이 올바르지 않습니다." },
+          {
+            field: "granteeMembershipId",
+            code: "INVALID_VALUE",
+            message: "서버: 대상이 올바르지 않습니다.",
+          },
         ]),
       ),
     );
@@ -155,7 +159,9 @@ describe("신청 허용 관리", () => {
     await user.click(required(hits.find((item) => item.textContent?.includes("성북구"))));
     await user.type(within(dialog).getByLabelText(/특정 중개사 구성원 번호/), "7");
     await user.click(within(dialog).getByRole("button", { name: "허용 추가" }));
-    expect(await within(dialog).findByText("대상이 올바르지 않습니다.")).not.toBeNull();
+    expect(
+      await within(dialog).findByText("올바르지 않은 값입니다. 입력한 내용을 확인해 주세요."),
+    ).not.toBeNull();
   });
 
   it("검색 조건이 없는 사무소 검색 실패를 안내한다", async () => {

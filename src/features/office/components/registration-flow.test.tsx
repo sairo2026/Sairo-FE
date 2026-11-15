@@ -213,7 +213,9 @@ describe("사무소 등록 신청", () => {
     await screen.findByLabelText("사무소명");
     await fillDetails(user, { officeName: "형식오류사무소" });
     await user.click(screen.getByRole("button", { name: "다음" }));
-    expect(await screen.findByText("주소 형식이 올바르지 않습니다.")).not.toBeNull();
+    expect(
+      await screen.findByText("올바르지 않은 값입니다. 입력한 내용을 확인해 주세요."),
+    ).not.toBeNull();
   });
 
   it("요청이 너무 많으면 대기 안내를 보여준다", async () => {
@@ -326,7 +328,9 @@ describe("증빙 업로드", () => {
     renderOffice(<OfficeEvidenceScreen registrationId={31} entity="INDIVIDUAL" />);
     await selectAllIndividual(user);
     await user.click(screen.getByRole("button", { name: "등록" }));
-    expect(await screen.findByText("주민등록번호 뒷자리가 보입니다.")).not.toBeNull();
+    expect(
+      await screen.findByText("올바르지 않은 값입니다. 입력한 내용을 확인해 주세요."),
+    ).not.toBeNull();
     expect(navigation.replace).not.toHaveBeenCalled();
   });
 

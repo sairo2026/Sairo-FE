@@ -271,7 +271,9 @@ describe("서류 첨부", () => {
   it("서버가 파일 필드 오류를 돌려주면 파일 아래에 보인다", async () => {
     server.use(
       http.post("/api/contracts/9101/documents", () =>
-        mockErrors.validation([{ field: "file", message: "서버: 파일이 올바르지 않습니다." }]),
+        mockErrors.validation([
+          { field: "file", code: "INVALID_FORMAT", message: "서버: 파일이 올바르지 않습니다." },
+        ]),
       ),
     );
     const user = userEvent.setup();
@@ -279,7 +281,10 @@ describe("서류 첨부", () => {
     const dialog = await openUpload(user);
     await fillValid(user, dialog);
     await user.click(within(dialog).getByRole("button", { name: "올리기" }));
-    expect(await within(dialog).findByText("서버: 파일이 올바르지 않습니다.")).not.toBeNull();
+    expect(
+      await within(dialog).findByText("형식이 올바르지 않습니다. 입력한 내용을 확인해 주세요."),
+    ).not.toBeNull();
+    expect(within(dialog).queryByText(/서버:/)).toBeNull();
   });
 
   it("중개보조원은 접근 권한 화면을 보고 없는 계약은 찾을 수 없음이다", async () => {

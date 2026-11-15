@@ -173,14 +173,17 @@ describe("승인자 링크 화면 조건 등록", () => {
   it("서버가 필드 오류를 보내면 해당 입력 아래에 표시한다", async () => {
     server.use(
       http.put("/api/public/approver-property-links/:token/conditions", () =>
-        mockErrors.validation([{ field: "maxVisitsPerDay", message: "서버에서 거절한 값입니다." }]),
+        mockErrors.validation([
+          { field: "maxVisitsPerDay", code: "OUT_OF_RANGE", message: "서버에서 거절한 값입니다." },
+        ]),
       ),
     );
     const user = userEvent.setup();
     renderLink();
     await screen.findByLabelText("하루 최대 방문 횟수");
     await user.click(screen.getByRole("button", { name: "조건 저장" }));
-    expect(await screen.findByText("서버에서 거절한 값입니다.")).not.toBeNull();
+    expect(await screen.findByText("허용 범위를 벗어났습니다. 값을 확인해 주세요.")).not.toBeNull();
+    expect(screen.queryByText(/서버에서/)).toBeNull();
   });
 
   it("개인정보 안내 버전이 바뀌었으면 다시 확인하라고 안내한다", async () => {

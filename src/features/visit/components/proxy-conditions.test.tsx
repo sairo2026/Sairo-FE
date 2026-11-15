@@ -132,14 +132,19 @@ describe("승인자 조건 대리 입력 화면", () => {
         "/api/properties/:propertyId/access-approvals/:approvalId/approver-conditions/proxy",
         () =>
           mockErrors.validation([
-            { field: "minGapMinutes", message: "간격 값이 올바르지 않습니다." },
+            {
+              field: "minGapMinutes",
+              code: "OUT_OF_RANGE",
+              message: "서버: 간격 값이 올바르지 않습니다.",
+            },
           ]),
       ),
     );
     const user = userEvent.setup();
     renderOffice(<ProxyConditionsScreen propertyId={501} approvalId={7001} />, { role: "OWNER" });
     await user.click(await screen.findByRole("button", { name: "대리 입력으로 저장" }));
-    expect(await screen.findByText("간격 값이 올바르지 않습니다.")).not.toBeNull();
+    expect(await screen.findByText("허용 범위를 벗어났습니다. 값을 확인해 주세요.")).not.toBeNull();
+    expect(screen.queryByText(/서버:/)).toBeNull();
   });
 
   it("이력을 불러오지 못하면 오류 화면을 보여준다", async () => {

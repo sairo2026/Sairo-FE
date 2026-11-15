@@ -226,7 +226,7 @@ describe("답글", () => {
     open();
     await user.type(await screen.findByLabelText("추가 내용"), "내용");
     await user.click(screen.getByRole("button", { name: "답글 등록" }));
-    expect(await screen.findByText("이 작업을 할 권한이 없습니다.")).not.toBeNull();
+    expect(await screen.findByText(/이 작업을 할 권한이 없습니다/)).not.toBeNull();
   });
 });
 

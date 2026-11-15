@@ -281,7 +281,9 @@ describe("새 버전 저장", () => {
   it("서버 400이면 필드 메시지를 보인다", async () => {
     server.use(
       http.post("/api/ops/price-schedules", () =>
-        mockErrors.validation([{ field: "soloAmount", message: "기준액이 범위를 벗어났습니다." }]),
+        mockErrors.validation([
+          { field: "soloAmount", code: "OUT_OF_RANGE", message: "기준액이 범위를 벗어났습니다." },
+        ]),
       ),
     );
     const user = userEvent.setup();
@@ -289,7 +291,7 @@ describe("새 버전 저장", () => {
     await loaded();
     fillValidForm();
     await user.click(screen.getByRole("button", { name: "요금표 저장" }));
-    expect(await screen.findByText("기준액이 범위를 벗어났습니다.")).toBeTruthy();
+    expect(await screen.findByText("허용 범위를 벗어났습니다. 값을 확인해 주세요.")).toBeTruthy();
   });
 
   it("저장이 403이면 역할 안내를 보인다", async () => {
@@ -313,7 +315,7 @@ describe("새 버전 저장", () => {
     await loaded();
     fillValidForm();
     await user.click(screen.getByRole("button", { name: "요금표 저장" }));
-    expect(await screen.findByText("저장할 수 없는 요금표입니다.")).toBeTruthy();
+    expect(await screen.findByText("요금표를 저장하지 못했습니다.")).toBeTruthy();
   });
 
   it("저장이 429이면 한도 안내를 보인다", async () => {

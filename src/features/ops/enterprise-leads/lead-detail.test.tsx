@@ -269,7 +269,11 @@ describe("처리 실행", () => {
     await user.selectOptions(screen.getByLabelText("담당 운영자"), "99");
     await user.click(dialogButton("담당 배정"));
     expect(await within(screen.getByRole("dialog")).findByRole("alert")).toBeTruthy();
-    expect(screen.getByText("활성 지원 운영자가 아닙니다.")).toBeTruthy();
+    expect(
+      screen.getByText(
+        "선택한 담당자는 이 업무 역할이 활성 상태가 아니라 지정할 수 없습니다. 다른 담당자를 선택해 주세요.",
+      ),
+    ).toBeTruthy();
   });
 
   it("상담 시작은 확인 뒤 상담 단계로 바뀐다", async () => {
@@ -451,7 +455,11 @@ describe("처리 실행", () => {
     const dialog = screen.getByRole("dialog");
     await user.type(within(dialog).getByLabelText("재개 사유"), "고객이 재문의함");
     await user.click(dialogButton("문의 재개"));
-    expect(await within(dialog).findByText("재개하려면 담당 운영자가 필요합니다.")).toBeTruthy();
+    expect(
+      await within(dialog).findByText(
+        "재개하려면 활성 상태의 담당 운영자가 필요합니다. 담당자를 지정한 뒤 다시 시도해 주세요.",
+      ),
+    ).toBeTruthy();
     await user.type(within(dialog).getByLabelText("재개 후 담당 운영자 번호(선택)"), "9");
     await user.click(dialogButton("문의 재개"));
     expect(await screen.findByText("문의를 재개했습니다.")).toBeTruthy();
@@ -466,7 +474,11 @@ describe("처리 실행", () => {
     await user.type(within(dialog).getByLabelText("재개 사유"), "재문의");
     await user.type(within(dialog).getByLabelText("재개 후 담당 운영자 번호(선택)"), "99");
     await user.click(dialogButton("문의 재개"));
-    expect(await within(dialog).findByText("활성 지원 운영자가 아닙니다.")).toBeTruthy();
+    expect(
+      await within(dialog).findByText(
+        "선택한 담당자는 이 업무 역할이 활성 상태가 아니라 지정할 수 없습니다. 다른 담당자를 선택해 주세요.",
+      ),
+    ).toBeTruthy();
   });
 
   it("버전 충돌이면 안내하고 최신 내용을 다시 불러온다", async () => {

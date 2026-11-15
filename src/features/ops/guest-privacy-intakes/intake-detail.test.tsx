@@ -400,7 +400,9 @@ describe("전환과 종결 실행", () => {
     const user = userEvent.setup();
     server.use(
       http.post("/api/ops/guest-privacy-intakes/:id/resolve", () =>
-        mockErrors.validation([{ field: "legalBasis", message: "근거가 필요합니다." }]),
+        mockErrors.validation([
+          { field: "legalBasis", code: "REQUIRED", message: "근거가 필요합니다." },
+        ]),
       ),
     );
     await loaded(41);
@@ -408,6 +410,6 @@ describe("전환과 종결 실행", () => {
     await fillConvert(user);
     await user.click(submitButton("권리 요청으로 전환"));
     await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "전환" }));
-    await waitFor(() => expect(screen.getByText("입력값을 확인해 주세요.")).toBeTruthy());
+    await waitFor(() => expect(screen.getByText("필수 입력입니다.")).toBeTruthy());
   });
 });

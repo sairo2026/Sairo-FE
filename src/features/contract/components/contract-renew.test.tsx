@@ -110,14 +110,15 @@ describe("재계약", () => {
     server.use(
       http.post("/api/contracts/9101/renew", () =>
         errorResponse(400, "INCOMPLETE_FOR_SIGNING", "부족", {
-          fieldErrors: [{ field: "depositAmount", message: "서버: 보증금 필요" }],
+          fieldErrors: [{ field: "depositAmount", code: "REQUIRED", message: "서버: 보증금 필요" }],
         }),
       ),
     );
     renderOffice(<ContractRenewScreen contractId={9101} />, { role: "OWNER" });
     await fillRenewal(user);
     await user.click(screen.getByRole("button", { name: "재계약 등록" }));
-    expect(await screen.findByText("서버: 보증금 필요")).not.toBeNull();
+    expect(await screen.findByText("필수 입력입니다.")).not.toBeNull();
+    expect(screen.queryByText(/서버:/)).toBeNull();
     server.use(http.post("/api/contracts/9101/renew", () => mockErrors.rateLimited(10)));
     await user.click(screen.getByRole("button", { name: "재계약 등록" }));
     expect(await screen.findByText(/요청이 너무 많습니다/)).not.toBeNull();

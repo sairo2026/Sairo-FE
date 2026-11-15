@@ -334,7 +334,9 @@ describe("발급 결과 기록", () => {
     const user = userEvent.setup();
     server.use(
       http.post("/api/ops/billing/invoices/1/tax-documents", () =>
-        mockErrors.validation([{ field: "approvalNumber", message: "승인번호 형식이 달라요." }]),
+        mockErrors.validation([
+          { field: "approvalNumber", code: "INVALID_FORMAT", message: "승인번호 형식이 달라요." },
+        ]),
       ),
     );
     renderScreen();
@@ -343,7 +345,9 @@ describe("발급 결과 기록", () => {
     await user.type(within(dialog).getByLabelText("승인번호"), "A-4");
     pickDate(dialog, "2027-08-06");
     await user.click(within(dialog).getByRole("button", { name: "저장" }));
-    expect(await within(dialog).findByText("승인번호 형식이 달라요.")).toBeTruthy();
+    expect(
+      await within(dialog).findByText("형식이 올바르지 않습니다. 입력한 내용을 확인해 주세요."),
+    ).toBeTruthy();
   });
 
   it("기록 요청이 403이나 429이면 안내한다", async () => {

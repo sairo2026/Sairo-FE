@@ -7,6 +7,7 @@ import { ApiError } from "@/shared/api/client";
 import { Button } from "@/shared/components/ui/button";
 import { Modal } from "@/shared/components/ui/modal";
 import { TextField } from "@/shared/components/ui/text-field";
+import { describeApiError } from "@/shared/lib/error-copy";
 import { rememberStepUpReturn } from "@/shared/lib/step-up-return";
 import { KAKAO_STEP_UP_START_PATH, stepUpWithPassword } from "../api/auth-context.api";
 
@@ -22,7 +23,7 @@ function toErrorMessage(error: unknown): string {
         : "시도가 너무 많습니다. 잠시 뒤에 다시 시도해 주세요.";
     }
   }
-  return "재인증하지 못했습니다. 잠시 뒤에 다시 시도해 주세요.";
+  return describeApiError(error, "재인증하지 못했습니다. 잠시 뒤에 다시 시도해 주세요.");
 }
 
 /** 결제수단 변경, 대표 이전 같은 중요한 작업 전에 10분 안에 본인을 다시 확인한다. */

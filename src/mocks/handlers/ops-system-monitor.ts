@@ -38,8 +38,8 @@ function pageOf<T>(items: T[], url: URL) {
   };
 }
 
-function bad(field: string, message: string) {
-  return mockErrors.validation([{ field, message }]);
+function bad(field: string, message: string, code = "INVALID_VALUE") {
+  return mockErrors.validation([{ field, code, message }]);
 }
 
 function text(value: unknown): string | null {

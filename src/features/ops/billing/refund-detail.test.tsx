@@ -267,14 +267,18 @@ describe("환불 검토", () => {
     const user = userEvent.setup();
     server.use(
       http.post("/api/ops/refund-requests/2/review", () =>
-        mockErrors.validation([{ field: "reasonEventId", message: "사건 ID를 확인해 주세요." }]),
+        mockErrors.validation([
+          { field: "reasonEventId", code: "INVALID_VALUE", message: "사건 ID를 확인해 주세요." },
+        ]),
       ),
     );
     renderDetail(2);
     await screen.findByText("사건별 환불 권리액");
     await user.click(screen.getByRole("button", { name: "승인" }));
     await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "승인" }));
-    expect(await screen.findByText("사건 ID를 확인해 주세요.")).toBeTruthy();
+    expect(
+      await screen.findByText("올바르지 않은 값입니다. 입력한 내용을 확인해 주세요."),
+    ).toBeTruthy();
   });
 
   it("검토 요청이 403이면 권한 안내를 보인다", async () => {
@@ -370,7 +374,11 @@ describe("환불 실행", () => {
     await screen.findByText("사건별 환불 권리액");
     await user.click(screen.getByRole("button", { name: "환불 실행" }));
     await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "환불 실행" }));
-    expect(await screen.findByText("본인 확인이 필요합니다.")).toBeTruthy();
+    expect(
+      await screen.findByText(
+        "중요한 작업이라 본인 확인이 필요합니다. 확인을 마친 뒤 이어서 진행해 주세요.",
+      ),
+    ).toBeTruthy();
   });
 
   it("PG 결과가 불확실하면 확인 중으로 안내한다", async () => {

@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import type { OperatorMemberDetailResponse } from "@/lib/api/contracts/ops.schema";
-import { ApiError } from "@/shared/api/client";
-import { fieldErrorSummary } from "@/shared/lib/api-messages";
 import { DateTimeField } from "@/shared/components/ui/date-time-field";
 import { RadioGroup, SelectField } from "@/shared/components/ui/select-field";
 import { formatSeoulDateTime } from "@/shared/lib/format";
@@ -20,14 +18,6 @@ type Props = {
   onClose: () => void;
   onDone: (result: { suspendedAt: string; scope: string }) => void;
 };
-
-function toFieldMessageError(error: unknown): unknown {
-  const message = fieldErrorSummary(error);
-  if (error instanceof ApiError && message) {
-    return new ApiError(400, { ...error.details, message }, error.requestId);
-  }
-  return error;
-}
 
 /** 열 때마다 새로 만들어 입력값이 남지 않게 한다. 사유 외 입력이 모두 있어야 실행할 수 있다. */
 export function EmergencySuspendDialog({ userId, sessions, onClose, onDone }: Props) {
@@ -55,7 +45,7 @@ export function EmergencySuspendDialog({ userId, sessions, onClose, onDone }: Pr
       });
       onDone({ suspendedAt: result.suspendedAt, scope: result.scope });
     } catch (caught) {
-      throw toFieldMessageError(caught);
+      throw caught;
     }
   }
 

@@ -1,5 +1,4 @@
-import { ApiError, ApiNetworkError } from "@/shared/api/client";
-import { formatWait } from "@/shared/lib/api-messages";
+import { describeApiError } from "@/shared/lib/error-copy";
 
 export const COPY = {
   pricingTitle: "사무소 단위 월 구독 요금",
@@ -85,22 +84,5 @@ export const ERROR_BY_CODE: Record<string, string> = {
 };
 
 export function describeBillingError(error: unknown, fallback: string): string {
-  if (error instanceof ApiNetworkError) {
-    return error.kind === "offline"
-      ? "인터넷 연결을 확인해 주세요."
-      : "서버에 연결하지 못했습니다.";
-  }
-  if (error instanceof ApiError) {
-    if (error.status === 429) {
-      return error.retryAfterSeconds
-        ? `요청이 너무 많습니다. ${formatWait(error.retryAfterSeconds)} 뒤에 다시 시도해 주세요.`
-        : "요청이 너무 많습니다. 잠시 뒤에 다시 시도해 주세요.";
-    }
-    const mapped = ERROR_BY_CODE[error.code];
-    if (mapped && error.status < 500) return mapped;
-    if (error.status === 403) return "이 작업을 할 권한이 없습니다.";
-    if (error.status >= 500) return "일시적인 오류가 발생했습니다. 잠시 뒤에 다시 시도해 주세요.";
-    return ERROR_BY_CODE[error.code] ?? fallback;
-  }
-  return fallback;
+  return describeApiError(error, fallback, ERROR_BY_CODE);
 }

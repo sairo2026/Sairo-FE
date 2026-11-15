@@ -291,7 +291,9 @@ describe("등록", () => {
   it("서버 400이면 필드 메시지를 보인다", async () => {
     server.use(
       http.post("/api/ops/trial-events", () =>
-        mockErrors.validation([{ field: "name", message: "이벤트명이 중복됩니다." }]),
+        mockErrors.validation([
+          { field: "name", code: "NOT_ALLOWED", message: "이벤트명이 중복됩니다." },
+        ]),
       ),
     );
     const user = userEvent.setup();
@@ -299,7 +301,9 @@ describe("등록", () => {
     await loaded();
     fillWindow(200, 260);
     await user.click(screen.getByRole("button", { name: "이벤트 등록" }));
-    expect(await screen.findByText("이벤트명이 중복됩니다.")).toBeTruthy();
+    expect(
+      await screen.findByText("사용할 수 없는 값입니다. 다른 값을 입력해 주세요."),
+    ).toBeTruthy();
   });
 
   it("등록이 429이면 한도 안내를 보인다", async () => {
@@ -323,7 +327,7 @@ describe("등록", () => {
     await loaded();
     fillWindow(200, 260);
     await user.click(screen.getByRole("button", { name: "이벤트 등록" }));
-    expect(await screen.findByText("등록할 수 없는 이벤트입니다.")).toBeTruthy();
+    expect(await screen.findByText("이벤트를 등록하지 못했습니다.")).toBeTruthy();
   });
 });
 

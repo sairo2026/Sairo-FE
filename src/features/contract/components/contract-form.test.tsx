@@ -158,7 +158,9 @@ describe("계약 등록", () => {
     server.use(
       http.post("/api/properties/501/contracts", () =>
         errorResponse(400, "INCOMPLETE_FOR_SIGNING", "부족", {
-          fieldErrors: [{ field: "depositAmount", message: "서버: 보증금이 필요합니다." }],
+          fieldErrors: [
+            { field: "depositAmount", code: "REQUIRED", message: "서버: 보증금이 필요합니다." },
+          ],
         }),
       ),
     );
@@ -168,7 +170,8 @@ describe("계약 등록", () => {
     await pickManager(user);
     await fillLease(user);
     await user.click(screen.getByRole("button", { name: "체결 등록" }));
-    expect(await screen.findByText("서버: 보증금이 필요합니다.")).not.toBeNull();
+    expect(await screen.findByText("필수 입력입니다.")).not.toBeNull();
+    expect(screen.queryByText(/서버:/)).toBeNull();
     expect(screen.getByText(/체결에 필요한 값이 빠져 있습니다/)).not.toBeNull();
   });
 

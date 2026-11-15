@@ -187,13 +187,17 @@ describe("운영자 2차 인증 화면", () => {
   it("검증 실패 응답은 입력 칸 아래에 보인다", async () => {
     server.use(
       http.post("/api/ops/auth/mfa/verify", () =>
-        mockErrors.validation([{ field: "otpCode", message: "코드 형식이 올바르지 않습니다." }]),
+        mockErrors.validation([
+          { field: "otpCode", code: "INVALID_FORMAT", message: "코드 형식이 올바르지 않습니다." },
+        ]),
       ),
     );
     renderPublicScreen(<OpsMfaScreen />);
     await userEvent.type(screen.getByLabelText("확인 코드"), "123456");
     await userEvent.click(screen.getByRole("button", { name: "확인" }));
-    expect(await screen.findByText("코드 형식이 올바르지 않습니다.")).not.toBeNull();
+    expect(
+      await screen.findByText("형식이 올바르지 않습니다. 입력한 내용을 확인해 주세요."),
+    ).not.toBeNull();
   });
 
   it("서버 오류는 일반 오류 안내를 보인다", async () => {

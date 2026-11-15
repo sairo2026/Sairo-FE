@@ -161,12 +161,15 @@ describe("오류 문구", () => {
   it("필드 오류를 필드명 기준으로 모은다", () => {
     const error = apiError(400, "INVALID_REQUEST", {
       fieldErrors: [
-        { field: "a", code: "X", message: "첫째" },
-        { field: "a", code: "Y", message: "둘째" },
-        { field: "b", code: "Z", message: "셋째" },
+        { field: "a", code: "REQUIRED", message: "첫째" },
+        { field: "a", code: "TOO_LONG", message: "둘째" },
+        { field: "b", code: "INVALID_FORMAT", message: "셋째" },
       ],
     });
-    expect(fieldErrorMap(error)).toEqual({ a: "첫째", b: "셋째" });
+    expect(fieldErrorMap(error)).toEqual({
+      a: "필수 입력입니다.",
+      b: "형식이 올바르지 않습니다. 입력한 내용을 확인해 주세요.",
+    });
     expect(fieldErrorMap(new Error("x"))).toEqual({});
   });
 

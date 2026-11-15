@@ -104,7 +104,7 @@ describe("오류 문구", () => {
     );
     expect(describeAuthError(new ApiNetworkError("offline"), "기본")).toContain("인터넷 연결");
     expect(describeAuthError(new ApiNetworkError("timeout"), "기본")).toContain(
-      "연결하지 못했습니다",
+      "이미 처리되었을 수 있으니",
     );
   });
 });

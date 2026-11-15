@@ -310,13 +310,17 @@ describe("보관 규칙 수정", () => {
   it("저장이 400이면 서버 입력 오류를 보인다", async () => {
     server.use(
       http.put("/api/ops/retention-rules/:code", () =>
-        mockErrors.validation([{ field: "retentionDays", message: "범위를 벗어났습니다." }]),
+        mockErrors.validation([
+          { field: "retentionDays", code: "OUT_OF_RANGE", message: "범위를 벗어났습니다." },
+        ]),
       ),
     );
     const { user, dialog } = await openEdit();
     fireEvent.change(within(dialog).getByLabelText("변경 사유"), { target: { value: "사유" } });
     await user.click(within(dialog).getByRole("button", { name: "저장" }));
-    expect(await within(dialog).findByText(/범위를 벗어났습니다/)).toBeTruthy();
+    expect(
+      await within(dialog).findByText("허용 범위를 벗어났습니다. 값을 확인해 주세요."),
+    ).toBeTruthy();
   });
 
   it("저장이 429이면 기다릴 시간을 안내한다", async () => {
