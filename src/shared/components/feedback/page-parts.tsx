@@ -24,7 +24,7 @@ export function FlowFrame({
   children: ReactNode;
 }) {
   return (
-    <AuthFrame title={title} description={description} width={width}>
+    <AuthFrame title={title} description={description} width={width} variant="form">
       {children}
     </AuthFrame>
   );

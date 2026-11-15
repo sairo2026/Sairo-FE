@@ -21,7 +21,7 @@ export function AuthFrame({
 }) {
   if (variant === "login") {
     return (
-      <div className="flex flex-1 items-start justify-center bg-surface px-4 py-12 sm:py-16">
+      <div className="flex flex-1 items-center justify-center bg-surface px-4 py-12 sm:py-16">
         <Card tone="elevated" shadow="login" className="w-full max-w-[624px]">
           <div className="flex flex-col items-center gap-5">
             <BrandLogo className="w-[220px]" />
@@ -37,7 +37,7 @@ export function AuthFrame({
   }
   const isForm = variant === "form";
   return (
-    <div className="flex flex-1 items-start justify-center bg-surface px-4 py-12 sm:py-16">
+    <div className="flex flex-1 items-center justify-center bg-surface px-4 py-12 sm:py-16">
       <Card
         tone="elevated"
         shadow={isForm ? "modal" : "auth"}
