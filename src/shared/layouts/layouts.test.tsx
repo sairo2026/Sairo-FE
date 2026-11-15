@@ -6,14 +6,14 @@ import { ApproverLayout, CustomerSiteLayout, OfficeLayout, OpsLayout } from "./l
 afterEach(cleanup);
 
 describe("레이아웃", () => {
-  it("사무소 레이아웃은 메뉴 6개를 보여주고 현재 위치를 알린다", () => {
+  it("사무소 레이아웃은 메뉴 7개를 보여주고 현재 위치를 알린다", () => {
     render(
       <OfficeLayout activeKey="properties" officeName="사이로중개사무소">
         <p>본문</p>
       </OfficeLayout>,
     );
     const nav = screen.getByRole("navigation", { name: "주요 메뉴" });
-    expect(nav.querySelectorAll("a").length).toBe(6);
+    expect(nav.querySelectorAll("a").length).toBe(7);
     expect(screen.getByRole("link", { name: "매물 관리" }).getAttribute("aria-current")).toBe(
       "page",
     );

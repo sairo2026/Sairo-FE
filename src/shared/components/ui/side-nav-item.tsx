@@ -34,5 +34,6 @@ export const OFFICE_NAV_ITEMS = [
   { key: "customers", label: "고객 관리", href: "/customers" },
   { key: "coordinations", label: "방문 조율", href: "/coordinations" },
   { key: "contracts", label: "계약 관리", href: "/contracts" },
-  { key: "settlements", label: "월말결산", href: "/settlements" },
+  { key: "data", label: "데이터 관리", href: "/import" },
+  { key: "office", label: "사무소 관리", href: "/settlements" },
 ] as const;

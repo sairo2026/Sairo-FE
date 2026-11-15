@@ -12,7 +12,8 @@ import { OfficeLayout } from "@/shared/layouts/layouts";
 import { useAuthContext } from "../hooks/use-auth-context";
 import { describeGrace } from "../model/access-notice";
 import { decideAccess, isOfficeRole } from "../model/access-policy";
-import { getOfficeMenu } from "../model/role-menu";
+import { getOfficeMenu, resolveActiveMenu } from "../model/role-menu";
+import { LinkTabs } from "@/shared/components/ui/link-tabs";
 import { OfficeHeaderActions } from "./office-header-actions";
 import { OfficeAccessProvider, useOfficeAccess } from "@/shared/session/office-access-context";
 
@@ -77,7 +78,14 @@ export function OfficeAccessShell({
 
 function OfficeShellFrame({ children, activeKey }: { children: ReactNode; activeKey?: string }) {
   const { context, role, isReadOnly } = useOfficeAccess();
+  const pathname = usePathname();
   const membership = useMyMembership();
+  const menu = role
+    ? getOfficeMenu(role, (href) => decideAccess(context, href).kind === "allow")
+    : undefined;
+  const active = resolveActiveMenu(pathname, activeKey);
+  const activeSection = menu?.find((item) => item.key === active?.sectionKey);
+  const tabs = activeSection?.tabs ?? [];
   const officeName =
     membership.data?.status === "APPROVED" && membership.data.officeId === context.officeId
       ? membership.data.officeName
@@ -88,10 +96,10 @@ function OfficeShellFrame({ children, activeKey }: { children: ReactNode; active
     : grace;
   return (
     <OfficeLayout
-      activeKey={activeKey}
+      activeKey={active?.sectionKey ?? activeKey}
       officeName={officeName}
       headerActions={<OfficeHeaderActions />}
-      navItems={role ? getOfficeMenu(role) : undefined}
+      navItems={menu}
       tone={activeKey === "home" ? "board" : "white"}
     >
       {banner ? (
@@ -101,6 +109,15 @@ function OfficeShellFrame({ children, activeKey }: { children: ReactNode; active
         >
           {banner}
         </p>
+      ) : null}
+      {activeSection && tabs.length > 0 ? (
+        <div className="mb-8">
+          <LinkTabs
+            label={`${activeSection.label} 탭`}
+            items={tabs}
+            activeKey={active?.tabKey ?? null}
+          />
+        </div>
       ) : null}
       {children}
     </OfficeLayout>
