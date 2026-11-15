@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import type { HomeSummaryResponse } from "@/lib/api/contracts/work.schema";
 import { COORDINATION_STATUSES, statusLabel, statusTone } from "@/features/visit/model/labels";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
@@ -11,6 +10,7 @@ import { Button } from "@/shared/components/ui/button";
 import { PageHeader } from "@/shared/components/ui/page-header";
 import { formatSeoulDate, formatSeoulDateTime } from "@/shared/lib/format";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
+import type { HomeSummary } from "../api/wire";
 import { useHomeSummary, useTasks } from "../hooks/home-queries";
 import { TaskDialog } from "./task-dialog";
 import type { TaskItem } from "./task-dialog";
@@ -96,7 +96,12 @@ function TaskOpener({ taskId, onClose }: { taskId: number; onClose: () => void }
   return <TaskDialog isOpen task={found} onClose={onClose} />;
 }
 
-function HomeBody({ summary }: { summary: HomeSummaryResponse }) {
+/** 계약 ID가 있으면 그 계약 상세로, 없는 응답이면 만기 계약 목록으로 보낸다. */
+function followupHref(contractId: number | undefined) {
+  return contractId === undefined ? "/contracts?tab=maturity" : `/contracts/${contractId}`;
+}
+
+function HomeBody({ summary }: { summary: HomeSummary }) {
   const { role, isReadOnly } = useOfficeAccess();
   const isDeputy = role === "DEPUTY";
   const isOwner = role === "OWNER";
@@ -291,7 +296,7 @@ function HomeBody({ summary }: { summary: HomeSummaryResponse }) {
                   {summary.openFollowupTasks.map((task) => (
                     <li key={task.taskId}>
                       <Link
-                        href="/contracts?tab=maturity"
+                        href={followupHref(task.contractId)}
                         className="group flex items-center justify-between gap-3 rounded-control border border-line px-4 py-3 transition-colors hover:border-primary hover:bg-primary-soft active:bg-primary-line"
                       >
                         <span className="truncate-text font-semibold text-ink">{task.title}</span>

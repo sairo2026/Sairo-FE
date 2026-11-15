@@ -1,12 +1,14 @@
 // @vitest-environment jsdom
 import { cleanup, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { http } from "msw";
+import { http, HttpResponse } from "msw";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { errorResponse, mockErrors } from "@/mocks/error-responses";
 import { getMockPropertyState, resetMockPropertyState } from "@/mocks/handlers/property";
 import { server, startMockServer } from "@/mocks/server";
 import { renderOffice } from "@/shared/testing/office-render";
+import { ApiNetworkError } from "@/shared/api/api-error";
+import { describePropertyError } from "../model/messages";
 import { PropertyCreateScreen, PropertyEditScreen } from "./property-form-screen";
 
 const navigation = vi.hoisted(() => ({ push: vi.fn(), replace: vi.fn() }));
@@ -308,5 +310,73 @@ describe("매물 수정", () => {
     );
     renderOffice(<PropertyEditScreen propertyId={501} />, { role: "OWNER" });
     expect(await screen.findByText(/보관된 매물은 수정할 수 없습니다/)).not.toBeNull();
+  });
+});
+
+describe("매물 등록 요청 멱등 키", () => {
+  function captureKeys() {
+    const keys: Array<string | null> = [];
+    server.events.on("request:start", ({ request }) => {
+      if (request.method === "POST" && new URL(request.url).pathname === "/api/properties") {
+        keys.push(request.headers.get("Idempotency-Key"));
+      }
+    });
+    return keys;
+  }
+
+  afterEach(() => server.events.removeAllListeners());
+
+  it("연결 오류 뒤 다시 누르면 같은 키로 보내 매물이 한 건만 생긴다", async () => {
+    const keys = captureKeys();
+    server.use(http.post("/api/properties", () => HttpResponse.error(), { once: true }));
+    const user = userEvent.setup();
+    renderOffice(<PropertyCreateScreen />, { role: "OWNER" });
+    await fillBasics(user);
+    const before = getMockPropertyState().properties.length;
+    await user.click(screen.getByRole("button", { name: "임시저장" }));
+    await screen.findByText(/서버에 연결하지 못했습니다/);
+    await user.click(screen.getByRole("button", { name: "임시저장" }));
+    await waitFor(() => expect(navigation.push).toHaveBeenCalledTimes(1));
+    expect(keys).toHaveLength(2);
+    expect(keys[0]).toMatch(/^\S{1,100}$/);
+    expect(keys[1]).toBe(keys[0]);
+    expect(getMockPropertyState().properties).toHaveLength(before + 1);
+  });
+
+  it("입력을 고쳐 다시 보내면 새 키를 쓴다", async () => {
+    const keys = captureKeys();
+    server.use(http.post("/api/properties", () => HttpResponse.error(), { once: true }));
+    const user = userEvent.setup();
+    renderOffice(<PropertyCreateScreen />, { role: "OWNER" });
+    await fillBasics(user);
+    await user.click(screen.getByRole("button", { name: "임시저장" }));
+    await screen.findByText(/서버에 연결하지 못했습니다/);
+    await user.type(screen.getByLabelText(/매물명/), " 수정");
+    await user.click(screen.getByRole("button", { name: "임시저장" }));
+    await waitFor(() => expect(navigation.push).toHaveBeenCalledTimes(1));
+    expect(keys).toHaveLength(2);
+    expect(keys[1]).not.toBe(keys[0]);
+  });
+
+  it("폼을 새로 열면 새 키를 쓴다", async () => {
+    const keys = captureKeys();
+    const user = userEvent.setup();
+    renderOffice(<PropertyCreateScreen />, { role: "OWNER" });
+    await fillBasics(user);
+    await user.click(screen.getByRole("button", { name: "임시저장" }));
+    await waitFor(() => expect(navigation.push).toHaveBeenCalledTimes(1));
+    cleanup();
+    renderOffice(<PropertyCreateScreen />, { role: "OWNER" });
+    await fillBasics(user);
+    await user.click(screen.getByRole("button", { name: "임시저장" }));
+    await waitFor(() => expect(navigation.push).toHaveBeenCalledTimes(2));
+    expect(keys).toHaveLength(2);
+    expect(keys[1]).not.toBe(keys[0]);
+  });
+
+  it("시간 초과 오류 문구는 같은 요청이 이미 처리되었을 수 있다고 알린다", () => {
+    expect(describePropertyError(new ApiNetworkError("timeout"), "실패")).toContain(
+      "이미 처리되었을 수 있으니",
+    );
   });
 });

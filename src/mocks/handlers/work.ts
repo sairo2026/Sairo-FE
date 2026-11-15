@@ -1,4 +1,5 @@
 import { http, HttpResponse } from "msw";
+import type { HomeSummary } from "@/features/home/api/wire";
 import type {
   HomeSummaryResponse,
   MonthlySettlementResponse,
@@ -27,7 +28,7 @@ export type WorkMockState = {
   tasks: MockTask[];
   notifications: MockNotification[];
   todayVisits: HomeSummaryResponse["todayScheduledVisits"];
-  followupTasks: HomeSummaryResponse["openFollowupTasks"];
+  followupTasks: HomeSummary["openFollowupTasks"];
   statusCounts: StatusCount[];
   leaseExpiringCount: number;
   unreadVisitRequestNoticeCount: number;
@@ -125,7 +126,9 @@ function initialState(): WorkMockState {
         customerName: "김수요",
       },
     ],
-    followupTasks: [{ taskId: 7001, title: "전세 계약 D-90 후속업무", dueDate: "2026-12-01" }],
+    followupTasks: [
+      { taskId: 7001, title: "전세 계약 D-90 후속업무", dueDate: "2026-12-01", contractId: 601 },
+    ],
     statusCounts: MOCK_STATUS_ORDER.map((status) => ({
       status,
       count: status === "COORDINATABLE" ? 1 : 0,
@@ -251,7 +254,7 @@ export const workHandlers = [
       unreadVisitRequestNoticeCount: state.unreadVisitRequestNoticeCount,
       visitRequestSummary: state.visitRequestSummary,
       calendarDays: state.calendarDays,
-    } satisfies HomeSummaryResponse);
+    } satisfies HomeSummary);
   }),
 
   http.get("/api/tasks", ({ request }) => {
