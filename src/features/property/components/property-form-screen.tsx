@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { PropertyDetailResponse } from "@/lib/api/contracts/property.schema";
+import { useIdempotencyKeyHolder } from "@/shared/api/idempotency-key";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { Button } from "@/shared/components/ui/button";
@@ -291,6 +292,7 @@ export function PropertyForm(props: FormProps) {
     return writes;
   }
 
+  const createKeys = useIdempotencyKeyHolder();
   const saveMutation = useMutation({
     mutationFn: async (input: { activate: boolean; overrideReason: string }) => {
       const writes = changedFieldWrites();
@@ -313,7 +315,9 @@ export function PropertyForm(props: FormProps) {
         }
         return { propertyId: detail.propertyId, partial: false };
       }
-      const created = await createProperty(toCreateRequest(submitValues));
+      const request = toCreateRequest(submitValues);
+      const created = await createProperty(request, createKeys.keyFor(request));
+      createKeys.discard();
       try {
         let version = created.version;
         for (const write of writes) {

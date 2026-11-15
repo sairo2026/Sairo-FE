@@ -60,10 +60,11 @@ export function findDuplicateCustomers(name: string, phone: string) {
   });
 }
 
-export function createCustomer(request: CustomerCreateRequest) {
+export function createCustomer(request: CustomerCreateRequest, idempotencyKey?: string) {
   return apiFetch("/api/customers", {
     method: "POST",
     body: request,
+    idempotencyKey,
     schema: CustomerCreateResponseSchema,
   });
 }

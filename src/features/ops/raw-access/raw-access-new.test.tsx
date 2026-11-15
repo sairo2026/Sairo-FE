@@ -188,13 +188,15 @@ describe("원문 접근 요청 화면", () => {
     const user = userEvent.setup();
     server.use(
       http.post("/api/ops/raw-access-requests", () =>
-        mockErrors.validation([{ field: "scope", message: "범위가 너무 넓습니다." }]),
+        mockErrors.validation([
+          { field: "scope", code: "OUT_OF_RANGE", message: "범위가 너무 넓습니다." },
+        ]),
       ),
     );
     renderForm();
     await fillRequired(user);
     await user.click(screen.getByRole("button", { name: "승인 요청" }));
-    expect(await screen.findByText("범위가 너무 넓습니다.")).toBeTruthy();
+    expect(await screen.findByText("허용 범위를 벗어났습니다. 값을 확인해 주세요.")).toBeTruthy();
   });
 
   it("권한 오류와 요청 한도 초과를 안내한다", async () => {

@@ -265,7 +265,9 @@ describe("합의 등록", () => {
     renderScreen();
     await fillForm(user, { price: "10" });
     await user.click(screen.getByRole("button", { name: "합의 등록" }));
-    expect(await screen.findByText("시작 고객 가격 버전을 확인해 주세요.")).toBeTruthy();
+    expect(
+      await screen.findByText("올바르지 않은 값입니다. 입력한 내용을 확인해 주세요."),
+    ).toBeTruthy();
   });
 
   it("없는 사무소는 404로 안내한다", async () => {

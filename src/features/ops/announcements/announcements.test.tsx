@@ -264,13 +264,19 @@ describe("게시와 예약", () => {
     server.use(
       http.post("/api/ops/announcements/3/publish", () =>
         mockErrors.validation([
-          { field: "scheduledAt", message: "예약 시각이 올바르지 않습니다." },
+          {
+            field: "scheduledAt",
+            code: "INVALID_VALUE",
+            message: "예약 시각이 올바르지 않습니다.",
+          },
         ]),
       ),
     );
     const { user, dialog } = await openPublish();
     await user.click(within(dialog).getByRole("button", { name: "게시" }));
-    expect(await screen.findByText("예약 시각이 올바르지 않습니다.")).toBeTruthy();
+    expect(
+      await screen.findByText("올바르지 않은 값입니다. 입력한 내용을 확인해 주세요."),
+    ).toBeTruthy();
   });
 
   it("검토 단계가 아니면 409로 안내한다", async () => {
@@ -519,14 +525,20 @@ describe("작성", () => {
     server.use(
       http.post("/api/ops/announcements", () =>
         mockErrors.validation([
-          { field: "title", message: "제목에 사용할 수 없는 문구가 있습니다." },
+          {
+            field: "title",
+            code: "NOT_ALLOWED",
+            message: "제목에 사용할 수 없는 문구가 있습니다.",
+          },
         ]),
       ),
     );
     const user = await openCreate();
     fillValidForm();
     await user.click(screen.getByRole("button", { name: "초안 저장" }));
-    expect(await screen.findByText("제목에 사용할 수 없는 문구가 있습니다.")).toBeTruthy();
+    expect(
+      await screen.findByText("사용할 수 없는 값입니다. 다른 값을 입력해 주세요."),
+    ).toBeTruthy();
   });
 
   it("저장이 403이면 역할 안내를 보인다", async () => {
@@ -546,7 +558,7 @@ describe("작성", () => {
     const user = await openCreate();
     fillValidForm();
     await user.click(screen.getByRole("button", { name: "초안 저장" }));
-    expect(await screen.findByText("처리할 수 없는 공지입니다.")).toBeTruthy();
+    expect(await screen.findByText("공지를 저장하지 못했습니다.")).toBeTruthy();
   });
 
   it("저장이 429이면 한도 안내를 보인다", async () => {

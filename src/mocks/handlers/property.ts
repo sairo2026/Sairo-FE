@@ -6,6 +6,7 @@ import type {
   PropertyListResponse,
 } from "@/lib/api/contracts/property.schema";
 import { errorResponse, mockErrors } from "../error-responses";
+import { resetMockIdempotency, withIdempotency } from "../idempotency";
 
 const NOW = "2026-11-10T09:00:00+09:00";
 
@@ -179,6 +180,7 @@ let state = initialState();
 
 export function resetMockPropertyState(): void {
   state = initialState();
+  resetMockIdempotency();
 }
 
 export function getMockPropertyState(): PropertyMockState {
@@ -319,47 +321,49 @@ export const propertyHandlers = [
     return HttpResponse.json({ matches });
   }),
 
-  http.post("/api/properties", async ({ request }) => {
-    const body = (await request.json()) as {
-      name: string;
-      categoryId: number;
-      address?: string | null;
-      managingMembershipId?: number | null;
-    };
-    const category = categoryOf(body.categoryId);
-    if (!category || !category.active) {
-      return mockErrors.validation([
-        { field: "categoryId", message: "선택할 수 없는 카테고리입니다." },
-      ]);
-    }
-    const created = buildMockProperty({
-      ...(body as Partial<PropertyDetailResponse>),
-      propertyId: state.nextId++,
-      name: body.name,
-      categoryId: category.categoryId,
-      categoryName: category.name,
-      registrationStage: "DRAFT",
-      address: body.address ?? null,
-      managingMembershipId: body.managingMembershipId ?? null,
-      managingMemberName: body.managingMembershipId ? "이중개" : null,
-      moveInNegotiable: false,
-      occupancyStatus: "UNKNOWN",
-      customFields: [],
-      offers: [],
-    });
-    state.properties = [created, ...state.properties];
-    return HttpResponse.json(
-      {
-        propertyId: created.propertyId,
+  http.post("/api/properties", ({ request }) =>
+    withIdempotency(request, "property", async () => {
+      const body = (await request.json()) as {
+        name: string;
+        categoryId: number;
+        address?: string | null;
+        managingMembershipId?: number | null;
+      };
+      const category = categoryOf(body.categoryId);
+      if (!category || !category.active) {
+        return mockErrors.validation([
+          { field: "categoryId", message: "선택할 수 없는 카테고리입니다." },
+        ]);
+      }
+      const created = buildMockProperty({
+        ...(body as Partial<PropertyDetailResponse>),
+        propertyId: state.nextId++,
+        name: body.name,
+        categoryId: category.categoryId,
+        categoryName: category.name,
         registrationStage: "DRAFT",
-        officeId: 12,
-        createdAt: NOW,
-        updatedAt: NOW,
-        version: 1,
-      },
-      { status: 201 },
-    );
-  }),
+        address: body.address ?? null,
+        managingMembershipId: body.managingMembershipId ?? null,
+        managingMemberName: body.managingMembershipId ? "이중개" : null,
+        moveInNegotiable: false,
+        occupancyStatus: "UNKNOWN",
+        customFields: [],
+        offers: [],
+      });
+      state.properties = [created, ...state.properties];
+      return HttpResponse.json(
+        {
+          propertyId: created.propertyId,
+          registrationStage: "DRAFT",
+          officeId: 12,
+          createdAt: NOW,
+          updatedAt: NOW,
+          version: 1,
+        },
+        { status: 201 },
+      );
+    }),
+  ),
 
   http.get("/api/properties/:propertyId", ({ params }) => {
     const property = findProperty(params.propertyId);

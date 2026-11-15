@@ -124,7 +124,12 @@ export type MonthlyMemoUpsertResponse = z.infer<typeof MonthlyMemoUpsertResponse
 
 export const HomeSummaryResponseSchema = z.object({
   openFollowupTasks: z.array(
-    z.object({ dueDate: z.iso.date(), title: z.string(), taskId: z.number() }),
+    z.object({
+      dueDate: z.iso.date(),
+      title: z.string(),
+      contractId: z.number(),
+      taskId: z.number(),
+    }),
   ),
   openTasks: z.array(
     z.object({

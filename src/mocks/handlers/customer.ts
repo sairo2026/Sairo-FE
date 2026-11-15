@@ -5,6 +5,7 @@ import type {
   CustomerListResponse,
 } from "@/lib/api/contracts/customer.schema";
 import { errorResponse, mockErrors } from "../error-responses";
+import { resetMockIdempotency, withIdempotency } from "../idempotency";
 
 const NOW = "2026-11-10T09:00:00+09:00";
 
@@ -202,6 +203,7 @@ let state = initialState();
 
 export function resetMockCustomerState(): void {
   state = initialState();
+  resetMockIdempotency();
 }
 
 export function getMockCustomerState(): CustomerMockState {
@@ -363,32 +365,34 @@ export const customerHandlers = [
     });
   }),
 
-  http.post("/api/customers", async ({ request }) => {
-    const body = (await request.json()) as Record<string, unknown> & { name: string };
-    if (hasSensitive(body)) {
-      return errorResponse(400, "SENSITIVE_DATA_DETECTED", "민감정보가 감지되었습니다.");
-    }
-    const created = buildMockCustomer({
-      ...(body as Partial<CustomerDetailResponse>),
-      customerId: state.nextId++,
-      name: body.name,
-      roles: ["OTHER"],
-      deletable: true,
-    });
-    state.customers = [created, ...state.customers];
-    return HttpResponse.json(
-      {
-        customerId: created.customerId,
-        deletedAt: null,
-        officeId: 12,
-        createdAt: NOW,
-        updatedAt: NOW,
-        version: 1,
-        processingBasis: created.processingBasis,
-      },
-      { status: 201 },
-    );
-  }),
+  http.post("/api/customers", ({ request }) =>
+    withIdempotency(request, "customer", async () => {
+      const body = (await request.json()) as Record<string, unknown> & { name: string };
+      if (hasSensitive(body)) {
+        return errorResponse(400, "SENSITIVE_DATA_DETECTED", "민감정보가 감지되었습니다.");
+      }
+      const created = buildMockCustomer({
+        ...(body as Partial<CustomerDetailResponse>),
+        customerId: state.nextId++,
+        name: body.name,
+        roles: ["OTHER"],
+        deletable: true,
+      });
+      state.customers = [created, ...state.customers];
+      return HttpResponse.json(
+        {
+          customerId: created.customerId,
+          deletedAt: null,
+          officeId: 12,
+          createdAt: NOW,
+          updatedAt: NOW,
+          version: 1,
+          processingBasis: created.processingBasis,
+        },
+        { status: 201 },
+      );
+    }),
+  ),
 
   http.get("/api/customers/:customerId", ({ params }) => {
     const customer = findCustomer(params.customerId);

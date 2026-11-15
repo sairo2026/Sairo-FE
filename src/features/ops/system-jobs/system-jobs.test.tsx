@@ -408,7 +408,9 @@ describe("시스템 작업 화면", () => {
     renderJobs();
     server.use(
       http.post("/api/ops/system-jobs/:jobName/rerun", () =>
-        mockErrors.validation([{ field: "runId", message: "실행 ID가 올바르지 않습니다." }]),
+        mockErrors.validation([
+          { field: "runId", code: "INVALID_VALUE", message: "실행 ID가 올바르지 않습니다." },
+        ]),
       ),
     );
     await screen.findByText("billing-first-charge");
@@ -416,7 +418,7 @@ describe("시스템 작업 화면", () => {
     await user.click(screen.getByRole("button", { name: "실행 105 재실행" }));
     await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "재실행" }));
     expect(
-      await screen.findByText(/입력값을 확인해 주세요. 실행 ID가 올바르지 않습니다./),
+      await screen.findByText("올바르지 않은 값입니다. 입력한 내용을 확인해 주세요."),
     ).toBeTruthy();
   });
 });

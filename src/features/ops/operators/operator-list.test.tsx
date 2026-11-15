@@ -165,7 +165,11 @@ describe("역할 지정", () => {
     renderList();
     const dialog = await openRoles(user, "박지원");
     await user.click(within(dialog).getByRole("button", { name: "역할 저장" }));
-    expect(await within(dialog).findByText("본인 확인이 필요합니다.")).toBeTruthy();
+    expect(
+      await within(dialog).findByText(
+        "중요한 작업이라 본인 확인이 필요합니다. 확인을 마친 뒤 이어서 진행해 주세요.",
+      ),
+    ).toBeTruthy();
   });
 
   it("마지막 보안관리자의 역할을 회수하려 하면 막고 안내한다", async () => {
@@ -232,7 +236,11 @@ describe("비활성화와 재활성화", () => {
     const dialog = screen.getByRole("dialog");
     await user.type(within(dialog).getByLabelText("비활성화 사유"), "사유");
     await user.click(within(dialog).getByRole("button", { name: "비활성화" }));
-    expect(await within(dialog).findByText("본인 확인이 필요합니다.")).toBeTruthy();
+    expect(
+      await within(dialog).findByText(
+        "중요한 작업이라 본인 확인이 필요합니다. 확인을 마친 뒤 이어서 진행해 주세요.",
+      ),
+    ).toBeTruthy();
   });
 
   it("마지막 보안관리자를 비활성화하려 하면 안내한다", async () => {
@@ -273,7 +281,11 @@ describe("비활성화와 재활성화", () => {
     await loaded();
     await user.click(screen.getByRole("button", { name: "이퇴사 재활성화" }));
     await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "재활성화" }));
-    expect(await screen.findByText("본인 확인이 필요합니다.")).toBeTruthy();
+    expect(
+      await screen.findByText(
+        "중요한 작업이라 본인 확인이 필요합니다. 확인을 마친 뒤 이어서 진행해 주세요.",
+      ),
+    ).toBeTruthy();
   });
 
   it("이미 활성인 계정을 재활성화하면 상태 전이 오류를 안내한다", async () => {

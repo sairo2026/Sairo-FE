@@ -161,8 +161,8 @@ describe("참여 요청", () => {
     );
     renderOffice(<MembershipRequestForm officeId={5} />);
     expect(screen.getByText("땡땡사무소에 참여를 요청하시겠습니까?")).not.toBeNull();
-    expect(screen.getByRole("radio", { name: "소속 공인중개사" })).not.toBeNull();
-    expect(screen.getByRole("radio", { name: "중개 보조원" })).not.toBeNull();
+    expect(screen.getByRole("radio", { name: "소속공인중개사" })).not.toBeNull();
+    expect(screen.getByRole("radio", { name: "중개보조원" })).not.toBeNull();
   });
 
   it("소속공인중개사는 자격번호와 확인 항목을 모두 요구한다", async () => {
@@ -177,7 +177,7 @@ describe("참여 요청", () => {
   it("중개보조원은 자격번호를 받지 않고 직무교육 확인을 요구한다", async () => {
     const user = userEvent.setup();
     renderOffice(<MembershipRequestForm officeId={5} />);
-    await user.click(screen.getByRole("radio", { name: "중개 보조원" }));
+    await user.click(screen.getByRole("radio", { name: "중개보조원" }));
     expect(screen.queryByLabelText("자격증 번호")).toBeNull();
     await user.click(screen.getByRole("button", { name: "참여 요청" }));
     expect(screen.getByText("직무교육 이수 확인에 체크해 주세요.")).not.toBeNull();
@@ -212,7 +212,7 @@ describe("참여 요청", () => {
   it("인증되지 않은 사무소는 찾을 수 없다고 안내한다", async () => {
     const user = userEvent.setup();
     renderOffice(<MembershipRequestForm officeId={99} />);
-    await user.click(screen.getByRole("radio", { name: "중개 보조원" }));
+    await user.click(screen.getByRole("radio", { name: "중개보조원" }));
     await user.click(screen.getByLabelText("고용신고를 확인했습니다"));
     await user.click(screen.getByLabelText("직무교육을 이수했습니다"));
     await user.click(screen.getByRole("button", { name: "참여 요청" }));
@@ -226,7 +226,9 @@ describe("참여 요청", () => {
     await user.click(screen.getByLabelText("고용신고를 확인했습니다"));
     await user.click(screen.getByLabelText("필요한 교육을 이수했습니다"));
     await user.click(screen.getByRole("button", { name: "참여 요청" }));
-    expect(await screen.findByText("자격증 번호 형식이 올바르지 않습니다.")).not.toBeNull();
+    expect(
+      await screen.findByText("올바르지 않은 값입니다. 입력한 내용을 확인해 주세요."),
+    ).not.toBeNull();
   });
 });
 

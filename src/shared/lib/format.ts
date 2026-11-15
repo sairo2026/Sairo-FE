@@ -67,6 +67,11 @@ export function formatTimeSlot(value: string | Date): string {
 }
 
 /** 개수와 수량은 천 단위 쉼표를 붙인 숫자로 표시한다. */
+/** 임대 만기까지 남은 일수 표기. 만기 당일은 D-0, 지난 뒤에는 D+지난 일수다. */
+export function formatDDay(daysLeft: number): string {
+  return daysLeft >= 0 ? `D-${daysLeft}` : `D+${-daysLeft}`;
+}
+
 export function formatCount(value: number): string {
   return value.toLocaleString("ko-KR");
 }

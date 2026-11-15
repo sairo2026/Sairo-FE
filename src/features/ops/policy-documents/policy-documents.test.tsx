@@ -288,13 +288,15 @@ describe("새 버전 등록", () => {
     await loaded();
     fillValidForm("1.0");
     await user.click(screen.getByRole("button", { name: "초안 등록" }));
-    expect(await screen.findByText(/같은 종류와 버전의 문서가 이미 있습니다/)).toBeTruthy();
+    expect(await screen.findByText(/이미 등록된 버전입니다/)).toBeTruthy();
   });
 
   it("서버 400이면 필드 메시지를 보인다", async () => {
     server.use(
       http.post("/api/ops/policy-documents", () =>
-        mockErrors.validation([{ field: "version", message: "버전 형식이 올바르지 않습니다." }]),
+        mockErrors.validation([
+          { field: "version", code: "INVALID_FORMAT", message: "버전 형식이 올바르지 않습니다." },
+        ]),
       ),
     );
     const user = userEvent.setup();
@@ -302,7 +304,9 @@ describe("새 버전 등록", () => {
     await loaded();
     fillValidForm();
     await user.click(screen.getByRole("button", { name: "초안 등록" }));
-    expect(await screen.findByText("버전 형식이 올바르지 않습니다.")).toBeTruthy();
+    expect(
+      await screen.findByText("형식이 올바르지 않습니다. 입력한 내용을 확인해 주세요."),
+    ).toBeTruthy();
   });
 
   it("등록이 422이면 서버 메시지를 보인다", async () => {
@@ -316,7 +320,7 @@ describe("새 버전 등록", () => {
     await loaded();
     fillValidForm();
     await user.click(screen.getByRole("button", { name: "초안 등록" }));
-    expect(await screen.findByText("등록할 수 없는 문서입니다.")).toBeTruthy();
+    expect(await screen.findByText("문서를 등록하지 못했습니다.")).toBeTruthy();
   });
 
   it("등록이 429이면 한도 안내를 보인다", async () => {

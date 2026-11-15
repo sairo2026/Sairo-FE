@@ -255,7 +255,11 @@ describe("비밀번호 찾기와 재설정", () => {
     server.use(
       http.post("/api/auth/password/reset", () =>
         mockErrors.validation([
-          { field: "newPassword", code: "INVALID_VALUE", message: "너무 흔한 비밀번호입니다." },
+          {
+            field: "newPassword",
+            code: "NOT_ALLOWED",
+            message: "서버 문장: 흔한 비밀번호 사용 시도",
+          },
         ]),
       ),
     );
@@ -264,7 +268,10 @@ describe("비밀번호 찾기와 재설정", () => {
     await user.type(screen.getByLabelText("새 비밀번호"), "abcd1234!");
     await user.type(screen.getByLabelText("새 비밀번호 확인"), "abcd1234!");
     await user.click(screen.getByRole("button", { name: "비밀번호 바꾸기" }));
-    expect(await screen.findByText("너무 흔한 비밀번호입니다.")).not.toBeNull();
+    expect(
+      await screen.findByText("너무 흔한 비밀번호입니다. 다른 비밀번호를 입력해 주세요."),
+    ).not.toBeNull();
+    expect(screen.queryByText(/서버 문장/)).toBeNull();
   });
 });
 

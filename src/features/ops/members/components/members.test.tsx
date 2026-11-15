@@ -353,7 +353,9 @@ describe("긴급 접근 중단", () => {
   it("입력 검증 실패(400)는 서버 문구로 안내하고 대화상자를 유지한다", async () => {
     server.use(
       http.post("/api/ops/members/:userId/emergency-suspend", () =>
-        mockErrors.validation([{ field: "sessionId", message: "세션이 이미 종료되었습니다." }]),
+        mockErrors.validation([
+          { field: "sessionId", code: "INVALID_VALUE", message: "세션이 이미 종료되었습니다." },
+        ]),
       ),
     );
     renderDetail(["SECURITY_ADMIN"]);
@@ -362,7 +364,7 @@ describe("긴급 접근 중단", () => {
     fillReview(dialog);
     await userEvent.click(within(dialog).getByRole("button", { name: "접근 중단 실행" }));
     expect((await within(dialog).findByRole("alert")).textContent).toContain(
-      "세션이 이미 종료되었습니다.",
+      "올바르지 않은 값입니다. 입력한 내용을 확인해 주세요.",
     );
     expect(screen.getByRole("dialog")).not.toBeNull();
   });

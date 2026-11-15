@@ -374,13 +374,19 @@ describe("처리 시작과 매핑 편집", () => {
     server.use(
       http.put("/api/ops/import-support-requests/:id/mapping", () =>
         mockErrors.validation([
-          { field: "mappings[].targetField", message: "허용되지 않는 대상 필드입니다." },
+          {
+            field: "mappings[].targetField",
+            code: "NOT_ALLOWED",
+            message: "허용되지 않는 대상 필드입니다.",
+          },
         ]),
       ),
     );
     const { user } = await openDetail(405);
     await user.click(screen.getByRole("button", { name: "매핑 저장" }));
-    expect(await screen.findByText("입력값을 확인해 주세요.")).toBeTruthy();
+    expect(
+      await screen.findByText("사용할 수 없는 값입니다. 다른 값을 입력해 주세요."),
+    ).toBeTruthy();
   });
 
   it("담당이 아닌 건은 편집 대신 안내만 보인다", async () => {
@@ -431,7 +437,11 @@ describe("대표 검수", () => {
     );
     const { user } = await openDetail(405);
     await user.click(screen.getByRole("button", { name: "검수 제출" }));
-    expect(await screen.findByText("확정된 매핑이 없습니다.")).toBeTruthy();
+    expect(
+      await screen.findByText(
+        "확정된 항목 연결이 없어 검수를 제출할 수 없습니다. 항목 연결을 확정한 뒤 다시 제출해 주세요.",
+      ),
+    ).toBeTruthy();
   });
 
   it("대표의 수정 요청 내용과 횟수를 보인다", async () => {
@@ -488,7 +498,11 @@ describe("승인 뒤 실행과 납품", () => {
     const { user } = await openDetail(408);
     await user.click(screen.getByRole("button", { name: "승인한 버전으로 실행" }));
     await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "실행" }));
-    expect(await screen.findByText("승인한 버전과 최신 버전이 다릅니다.")).toBeTruthy();
+    expect(
+      await screen.findByText(
+        "승인한 항목 연결과 실행하려는 연결이 다릅니다. 최신 연결을 다시 확인해 주세요.",
+      ),
+    ).toBeTruthy();
   });
 
   it("실행 완료 건은 납품을 확인하면 납품 완료가 된다", async () => {

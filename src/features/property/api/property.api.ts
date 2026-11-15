@@ -68,10 +68,11 @@ export function checkDuplicateProperty(address: string, addressDetail: string) {
   );
 }
 
-export function createProperty(request: PropertyCreateRequest) {
+export function createProperty(request: PropertyCreateRequest, idempotencyKey?: string) {
   return apiFetch("/api/properties", {
     method: "POST",
     body: request,
+    idempotencyKey,
     schema: PropertyCreateResponseSchema,
   });
 }

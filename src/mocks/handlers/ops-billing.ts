@@ -665,7 +665,7 @@ const TAX_KINDS = ["TAX_INVOICE", "CASH_RECEIPT", "EXEMPT_INVOICE"];
 const TAX_RECORD_STATUSES = ["ISSUED", "ISSUE_FAILED", "NOT_REQUIRED", "PENDING"];
 const TAX_ELIGIBLE: InvoiceStatus[] = ["PAID", "PARTIALLY_REFUNDED", "FULLY_REFUNDED"];
 
-type FieldError = { field: string; message: string };
+type FieldError = { field: string; code?: string; message: string };
 
 function textOf(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
@@ -1122,7 +1122,11 @@ export const opsBillingHandlers: RequestHandler[] = [
     const schedule =
       typeof body.priceScheduleId === "number" ? findSchedule(body.priceScheduleId) : null;
     if (!schedule || schedule.audience !== "START_CUSTOMER")
-      errors.push({ field: "priceScheduleId", message: "시작 고객 가격 버전을 확인해 주세요." });
+      errors.push({
+        field: "priceScheduleId",
+        code: "INVALID_VALUE",
+        message: "시작 고객 가격 버전을 확인해 주세요.",
+      });
     const months = body.guaranteeMonths;
     if (months !== undefined && months !== null && (!isInt(months) || months < 1 || months > 24))
       errors.push({ field: "guaranteeMonths", message: "1~24개월로 입력해 주세요." });

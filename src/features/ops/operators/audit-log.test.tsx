@@ -173,7 +173,7 @@ describe("감사 이력", () => {
   it("허용되지 않은 값이라는 400 응답을 안내한다", async () => {
     server.use(http.get("/api/ops/audit-log", () => mockErrors.validation([])));
     renderScreen();
-    expect(await screen.findByText("입력값을 확인해 주세요.")).toBeTruthy();
+    expect(await screen.findByText("목록을 불러오지 못했습니다.")).toBeTruthy();
   });
 
   it("서버 오류는 안내하고 다시 시도하면 불러온다", async () => {

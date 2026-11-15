@@ -29,7 +29,7 @@ export const NOTIFICATION_TYPE_LABEL: Record<string, string> = {
   INVITATION: "초대",
   ASSIGNEE_CHANGED: "담당 변경",
   VISIT_SCHEDULED: "방문 일정",
-  VISIT_CONFIRMED: "방문 확정",
+  VISIT_CONFIRMED: "확정 완료",
   VISIT_RESCHEDULE_NEEDED: "재조율 필요",
   VISIT_COMPLETION_PENDING: "방문 완료 처리 대기",
   VISIT_SUPERVISION_CHECK: "감독 확인",
@@ -42,6 +42,7 @@ export const NOTIFICATION_TYPE_LABEL: Record<string, string> = {
   DELETION_SCHEDULED: "삭제 예정",
   SUPPORT_REPLY: "지원 답변",
   TERMS_CHANGED: "약관·방침 변경",
+  CONTRACT_EXPIRY: "임대 만기",
 };
 
 export function notificationHref(targetType: string, targetId: number | null | undefined) {

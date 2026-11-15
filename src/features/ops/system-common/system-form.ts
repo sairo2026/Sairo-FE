@@ -40,7 +40,7 @@ export function describeSystemError(error: unknown, fallback = "처리하지 못
     const mapped = SYSTEM_MESSAGE_BY_CODE[error.code];
     if (mapped) {
       const summary = fieldErrorSummary(error);
-      return error.code === "INVALID_REQUEST" && summary ? `${mapped} ${summary}` : mapped;
+      return error.code === "INVALID_REQUEST" && summary ? summary : mapped;
     }
   }
   return describeOpsError(error, fallback);

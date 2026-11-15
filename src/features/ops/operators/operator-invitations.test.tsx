@@ -192,7 +192,11 @@ describe("초대 만들기", () => {
     await loaded();
     await fillForm(user);
     await user.click(screen.getByRole("button", { name: "초대 보내기" }));
-    expect(await screen.findByText("본인 확인이 필요합니다.")).toBeTruthy();
+    expect(
+      await screen.findByText(
+        "중요한 작업이라 본인 확인이 필요합니다. 확인을 마친 뒤 이어서 진행해 주세요.",
+      ),
+    ).toBeTruthy();
   });
 
   it("같은 이메일로 대기 중인 초대가 있으면 안내한다", async () => {
@@ -284,7 +288,11 @@ describe("초대 취소", () => {
     renderScreen();
     const dialog = await askCancel(user);
     await user.click(within(dialog).getByRole("button", { name: "초대 취소" }));
-    expect(await screen.findByText("본인 확인이 필요합니다.")).toBeTruthy();
+    expect(
+      await screen.findByText(
+        "중요한 작업이라 본인 확인이 필요합니다. 확인을 마친 뒤 이어서 진행해 주세요.",
+      ),
+    ).toBeTruthy();
     expect(within(rowOf("이신규")).getByText("대기")).toBeTruthy();
   });
 

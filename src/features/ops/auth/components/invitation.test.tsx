@@ -214,14 +214,18 @@ describe("운영자 인증 앱 등록 화면", () => {
   it("검증 실패 응답은 서버 문구로 안내한다", async () => {
     server.use(
       http.post("/api/ops/auth/invitations/accept", () =>
-        mockErrors.validation([{ field: "otpCode", message: "숫자 6자리만 입력할 수 있습니다." }]),
+        mockErrors.validation([
+          { field: "otpCode", code: "INVALID_FORMAT", message: "숫자 6자리만 입력할 수 있습니다." },
+        ]),
       ),
     );
     renderPublicScreen(<InvitationEnrollScreen />);
     await screen.findByLabelText("수동 입력 비밀값");
     await userEvent.type(screen.getByLabelText("확인 코드"), "123456");
     await userEvent.click(screen.getByRole("button", { name: "등록 완료" }));
-    expect((await screen.findByRole("alert")).textContent).toContain("숫자 6자리만");
+    expect((await screen.findByRole("alert")).textContent).toContain(
+      "형식이 올바르지 않습니다. 입력한 내용을 확인해 주세요.",
+    );
   });
 
   it("비밀값을 다시 발급하면 새 값으로 바꾸고 이전 값이 쓸 수 없다고 안내한다", async () => {

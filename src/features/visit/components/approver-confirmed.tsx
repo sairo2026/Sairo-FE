@@ -6,7 +6,13 @@ import { EmptyState } from "@/shared/components/feedback/empty-state";
 import { FormNotice } from "@/shared/components/feedback/form-frame";
 import { Badge } from "@/shared/components/ui/badge";
 import { formatSeoulDateTime } from "@/shared/lib/format";
-import { APPLICANT_RELATION_LABEL, ITEM_RESULT_LABEL, labelOf } from "../model/labels";
+import {
+  APPLICANT_RELATION_LABEL,
+  ITEM_RESULT_LABEL,
+  PUBLIC_VISIT_STATE_LABEL,
+  PUBLIC_VISIT_STATE_TONE,
+  labelOf,
+} from "../model/labels";
 import { ApproverRequestList } from "./approver-requests";
 
 export function ApproverConfirmed({
@@ -73,8 +79,11 @@ export function ApproverConfirmed({
                     {labelOf(ITEM_RESULT_LABEL, item.result)}
                   </Badge>
                   {item.state === "RESCHEDULE_REQUIRED" ? (
-                    <Badge tone="red" className="h-8 min-w-0 px-3 text-caption">
-                      재조율 필요
+                    <Badge
+                      tone={PUBLIC_VISIT_STATE_TONE.RESCHEDULE_REQUIRED}
+                      className="h-8 min-w-0 px-3 text-caption"
+                    >
+                      {PUBLIC_VISIT_STATE_LABEL.RESCHEDULE_REQUIRED}
                     </Badge>
                   ) : null}
                   {item.applicantRelation === "GRANTED_OFFICE" ? (

@@ -356,8 +356,8 @@ function SearchResults({
 }
 
 const ROLE_CHOICES: Array<{ role: MembershipRole; label: string }> = [
-  { role: "AGENT", label: "소속 공인중개사" },
-  { role: "DEPUTY", label: "중개 보조원" },
+  { role: "AGENT", label: "소속공인중개사" },
+  { role: "DEPUTY", label: "중개보조원" },
 ];
 
 function QualificationFields({

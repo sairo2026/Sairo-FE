@@ -39,7 +39,7 @@ describe("알림함", () => {
     renderOffice(<NotificationListScreen />, { role: "OWNER" });
     expect(document.querySelector("[aria-busy=true]")).not.toBeNull();
     expect(await screen.findByText("방문 일정이 확정되었습니다.")).not.toBeNull();
-    expect(screen.getByText("방문 확정")).not.toBeNull();
+    expect(screen.getByText("확정 완료")).not.toBeNull();
     expect(screen.getByText("읽지 않음")).not.toBeNull();
     const link = screen.getAllByRole("link", { name: "관련 화면으로 이동" })[0];
     expect(link?.getAttribute("href")).toBe("/coordinations/801");
@@ -167,6 +167,47 @@ describe("알림함", () => {
     renderOffice(<NotificationListScreen />, { role: "OWNER" });
     await user.click(await screen.findByRole("tab", { name: "방문 신청 알림" }));
     expect(await screen.findByText("방문 신청 알림이 없습니다.")).not.toBeNull();
+  });
+});
+
+describe("알림 종류 확장", () => {
+  it("임대 만기 알림은 계약 상세로 이어진다", async () => {
+    setMockWorkState({
+      notifications: [
+        buildMockNotification({
+          notificationId: 9101,
+          type: "CONTRACT_EXPIRY",
+          message: "정릉 아파트 계약의 임대차 만기가 90일 남았습니다.",
+          targetType: "CONTRACT",
+          targetId: 601,
+        }),
+      ],
+    });
+    renderOffice(<NotificationListScreen />, { role: "OWNER" });
+    expect(
+      await screen.findByText("정릉 아파트 계약의 임대차 만기가 90일 남았습니다."),
+    ).not.toBeNull();
+    expect(screen.getByText("임대 만기")).not.toBeNull();
+    const link = screen.getByRole("link", { name: "관련 화면으로 이동" });
+    expect(link.getAttribute("href")).toBe("/contracts/601");
+  });
+
+  it("알 수 없는 알림 종류와 이동 대상은 일반 알림으로 표시하고 링크를 달지 않는다", async () => {
+    setMockWorkState({
+      notifications: [
+        buildMockNotification({
+          notificationId: 9102,
+          type: "FUTURE_KIND",
+          message: "새 종류의 알림입니다.",
+          targetType: "FUTURE_TARGET",
+          targetId: 5,
+        }),
+      ],
+    });
+    renderOffice(<NotificationListScreen />, { role: "OWNER" });
+    expect(await screen.findByText("새 종류의 알림입니다.")).not.toBeNull();
+    expect(screen.getByText("알림")).not.toBeNull();
+    expect(screen.queryByRole("link", { name: "관련 화면으로 이동" })).toBeNull();
   });
 });
 

@@ -364,7 +364,9 @@ describe("고용명부", () => {
     await user.type(within(dialog).getByLabelText(/업무개시일/), "2026-11-01");
     await user.selectOptions(within(dialog).getByLabelText("확인 출처"), "REGISTRATION_DOC");
     await user.click(within(dialog).getByRole("button", { name: "추가" }));
-    expect(await within(dialog).findByText("이름 형식이 올바르지 않습니다.")).not.toBeNull();
+    expect(
+      await within(dialog).findByText("올바르지 않은 값입니다. 입력한 내용을 확인해 주세요."),
+    ).not.toBeNull();
   });
 
   it("고용종료일을 수정하면 목록이 갱신된다", async () => {

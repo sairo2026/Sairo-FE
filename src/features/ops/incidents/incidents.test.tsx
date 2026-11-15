@@ -318,7 +318,9 @@ describe("장애 탭", () => {
     fillIncidentForm();
     await pickOperator(screen.getByLabelText("담당 운영자"), 999);
     await userEvent.setup().click(screen.getByRole("button", { name: "장애 등록" }));
-    expect(await screen.findByText(/입력값을 확인해 주세요. 활성 운영자가 아닙니다./)).toBeTruthy();
+    expect(
+      await screen.findByText("올바르지 않은 값입니다. 입력한 내용을 확인해 주세요."),
+    ).toBeTruthy();
   });
 
   it("등록이 403이면 권한 안내를 보인다", async () => {
@@ -466,7 +468,9 @@ describe("장애 탭", () => {
     const { user, dialog } = await openUpdate(11);
     await pickOperator(within(dialog).getByLabelText("담당 운영자"), 999);
     await user.click(within(dialog).getByRole("button", { name: "저장" }));
-    expect(await within(dialog).findByText(/활성 운영자가 아닙니다/)).toBeTruthy();
+    expect(
+      await within(dialog).findByText("올바르지 않은 값입니다. 입력한 내용을 확인해 주세요."),
+    ).toBeTruthy();
   });
 
   it("종료 시각은 서버 시각으로 기록된다는 안내를 둔다", async () => {
@@ -636,7 +640,9 @@ describe("개인정보 사고 탭", () => {
     await renderPrivacy();
     fillPrivacyForm("12");
     await userEvent.setup().click(screen.getByRole("button", { name: "사고 등록" }));
-    expect(await screen.findByText(/이미 개인정보 사고가 등록된 장애입니다/)).toBeTruthy();
+    expect(
+      await screen.findByText("올바르지 않은 값입니다. 입력한 내용을 확인해 주세요."),
+    ).toBeTruthy();
   });
 
   it("등록이 429이면 기다릴 시간을 안내한다", async () => {

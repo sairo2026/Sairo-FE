@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { http } from "msw";
+import { http, HttpResponse } from "msw";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { mockErrors } from "@/mocks/error-responses";
 import {
@@ -119,14 +119,19 @@ describe("고객 등록", () => {
   it("서버의 필드 오류를 해당 입력에 보여준다", async () => {
     server.use(
       http.post("/api/customers", () =>
-        mockErrors.validation([{ field: "email", message: "이미 쓰는 이메일입니다." }]),
+        mockErrors.validation([
+          { field: "email", code: "INVALID_FORMAT", message: "서버: 이미 쓰는 이메일입니다." },
+        ]),
       ),
     );
     const user = userEvent.setup();
     renderOffice(<CustomerCreateScreen />, { role: "AGENT" });
     await fillRequired(user);
     await user.click(screen.getByRole("button", { name: "등록" }));
-    expect(await screen.findByText("이미 쓰는 이메일입니다.")).not.toBeNull();
+    expect(
+      await screen.findByText("형식이 올바르지 않습니다. 입력한 내용을 확인해 주세요."),
+    ).not.toBeNull();
+    expect(screen.queryByText(/서버:/)).toBeNull();
   });
 
   it("이름과 연락처가 겹치지 않으면 바로 등록하고 상세로 이동한다", async () => {
@@ -267,5 +272,67 @@ describe("고객 수정", () => {
     });
     renderOffice(<CustomerEditScreen customerId={301} />, { role: "AGENT" });
     expect(await screen.findByText(/보관된 고객은 수정할 수 없습니다/)).not.toBeNull();
+  });
+});
+
+describe("고객 등록 요청 멱등 키", () => {
+  function captureKeys() {
+    const keys: Array<string | null> = [];
+    server.events.on("request:start", ({ request }) => {
+      if (request.method === "POST" && new URL(request.url).pathname === "/api/customers") {
+        keys.push(request.headers.get("Idempotency-Key"));
+      }
+    });
+    return keys;
+  }
+
+  afterEach(() => server.events.removeAllListeners());
+
+  it("연결 오류 뒤 다시 누르면 같은 키로 보내 고객이 한 명만 생긴다", async () => {
+    const keys = captureKeys();
+    server.use(http.post("/api/customers", () => HttpResponse.error(), { once: true }));
+    const user = userEvent.setup();
+    renderOffice(<CustomerCreateScreen />, { role: "AGENT" });
+    await fillRequired(user);
+    const before = getMockCustomerState().customers.length;
+    await user.click(screen.getByRole("button", { name: "등록" }));
+    await screen.findByText(/서버에 연결하지 못했습니다/);
+    await user.click(screen.getByRole("button", { name: "등록" }));
+    await waitFor(() => expect(navigation.push).toHaveBeenCalledTimes(1));
+    expect(keys).toHaveLength(2);
+    expect(keys[0]).toMatch(/^\S{1,100}$/);
+    expect(keys[1]).toBe(keys[0]);
+    expect(getMockCustomerState().customers).toHaveLength(before + 1);
+  });
+
+  it("입력을 고쳐 다시 보내면 새 키를 쓴다", async () => {
+    const keys = captureKeys();
+    server.use(http.post("/api/customers", () => HttpResponse.error(), { once: true }));
+    const user = userEvent.setup();
+    renderOffice(<CustomerCreateScreen />, { role: "AGENT" });
+    await fillRequired(user);
+    await user.click(screen.getByRole("button", { name: "등록" }));
+    await screen.findByText(/서버에 연결하지 못했습니다/);
+    await user.type(screen.getByLabelText(/^이름/), "님");
+    await user.click(screen.getByRole("button", { name: "등록" }));
+    await waitFor(() => expect(navigation.push).toHaveBeenCalledTimes(1));
+    expect(keys).toHaveLength(2);
+    expect(keys[1]).not.toBe(keys[0]);
+  });
+
+  it("모의 서버는 같은 키와 같은 본문이면 첫 응답을, 같은 키에 다른 본문이면 400을 돌려준다", async () => {
+    const send = (name: string) =>
+      fetch("/api/customers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Idempotency-Key": "key-1" },
+        body: JSON.stringify({ name }),
+      });
+    const first = await send("가");
+    const replay = await send("가");
+    const other = await send("나");
+    expect(first.status).toBe(201);
+    expect(await replay.json()).toEqual(await first.clone().json());
+    expect(other.status).toBe(400);
+    expect(getMockCustomerState().customers.filter((item) => item.name === "가")).toHaveLength(1);
   });
 });

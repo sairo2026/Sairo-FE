@@ -274,13 +274,19 @@ describe("안내 생성", () => {
     server.use(
       http.post("/api/ops/price-schedules/10/notices", () =>
         mockErrors.validation([
-          { field: "officeIds", message: "사무소 ID 형식이 잘못되었습니다." },
+          {
+            field: "officeIds",
+            code: "INVALID_FORMAT",
+            message: "사무소 ID 형식이 잘못되었습니다.",
+          },
         ]),
       ),
     );
     renderScreen();
     await createFor(user, "10");
-    expect(await screen.findByText("사무소 ID 형식이 잘못되었습니다.")).toBeTruthy();
+    expect(
+      await screen.findByText("형식이 올바르지 않습니다. 입력한 내용을 확인해 주세요."),
+    ).toBeTruthy();
   });
 
   it("생성 요청이 429이면 요청 한도 안내를 보인다", async () => {
