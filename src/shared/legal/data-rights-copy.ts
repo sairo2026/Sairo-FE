@@ -1,3 +1,5 @@
+import { instrumentalParticle, objectParticle, topicParticle } from "@/shared/lib/korean";
+
 export const DATA_MIGRATION_COPY = {
   uploadTitle: "데이터 이전 업로드 안내",
   upload:
@@ -30,9 +32,9 @@ export const PRIVACY_RIGHTS_COPY = {
   officeCustomer:
     "사무소가 입력한 고객, 매물 소유자, 구매희망자, 승인자, 계약 당사자의 정보에 관한 요청은 해당 사무소가 처리자이므로 사무소로 전달됩니다. 사이로는 사무소의 지시에 따라 처리를 지원합니다.",
   identity: (item: string) =>
-    `본인 확인을 위해 ${item}을 추가로 확인해 주세요. 보완하는 동안에도 처리 기한은 멈추지 않습니다.`,
+    `본인 확인을 위해 ${objectParticle(item)} 추가로 확인해 주세요. 보완하는 동안에도 처리 기한은 멈추지 않습니다.`,
   rejection: (kind: string, reason: string, contact: string) =>
-    `요청하신 ${kind}은 ${reason}로 처리할 수 없습니다. 이 결정에 이의가 있으면 ${contact}으로 이의를 제기하실 수 있습니다.`,
+    `요청하신 ${topicParticle(kind)} ${instrumentalParticle(reason)} 처리할 수 없습니다. 이 결정에 이의가 있으면 ${instrumentalParticle(contact)} 이의를 제기하실 수 있습니다.`,
   partialDeletion: (items: string, basis: string) =>
     `요청하신 삭제 가운데 법령에 따라 보존해야 하는 항목은 ${items}이며 근거는 ${basis}입니다. 나머지는 삭제했습니다.`,
   ownerGuide:

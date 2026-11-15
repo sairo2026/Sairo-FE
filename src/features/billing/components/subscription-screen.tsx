@@ -134,7 +134,7 @@ function StatusBody({
               value:
                 chargeAmount === null
                   ? "금액을 불러오지 못했습니다. 구독 구매 동의 화면에서 확인해 주세요."
-                  : `${formatKrw(chargeAmount)} (VAT 포함)`,
+                  : `${formatKrw(chargeAmount)} (부가세 포함)`,
             },
             { label: "결제 카드", value: cardText(subscription) ?? "등록 전" },
             {
@@ -243,7 +243,7 @@ function StatusBody({
       ) : (
         <p className="text-body text-ink">
           {subscription.nextChargeAt
-            ? `다음 결제일 ${formatSeoulDate(subscription.nextChargeAt)} · 예정 금액 ${formatKrw(subscription.nextChargeAmount)}(VAT 포함)`
+            ? `다음 결제일 ${formatSeoulDate(subscription.nextChargeAt)} · 예정 금액 ${formatKrw(subscription.nextChargeAmount)}(부가세 포함)`
             : "다음 결제 정보가 없습니다."}
         </p>
       )}

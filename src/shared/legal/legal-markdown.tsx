@@ -113,7 +113,10 @@ export function LegalMarkdown({ blocks, isCompact = false }: LegalMarkdownProps)
           <ul key={index} className="flex flex-col gap-2">
             {block.items.map((item, itemIndex) => (
               <li key={itemIndex} className="flex gap-2">
-                <span aria-hidden className="shrink-0 text-ink-2">
+                <span
+                  aria-hidden
+                  className={cn("shrink-0 text-ink-2", item.marker && "min-w-7 text-right")}
+                >
                   {item.marker || "·"}
                 </span>
                 <div className="flex flex-col gap-1">

@@ -352,7 +352,7 @@ describe("구독 흐름 보완", () => {
     });
     const user = userEvent.setup();
     show();
-    expect(await screen.findByText("59,900원 (VAT 포함)")).not.toBeNull();
+    expect(await screen.findByText("59,900원 (부가세 포함)")).not.toBeNull();
     expect(screen.getAllByText("신한카드 끝자리 1234").length).toBeGreaterThan(0);
     expect(screen.getByText("2027-02-08 00:00")).not.toBeNull();
     expect(screen.getByText(/기한까지 결제하지 않으면 구독이 종료됩니다/)).not.toBeNull();

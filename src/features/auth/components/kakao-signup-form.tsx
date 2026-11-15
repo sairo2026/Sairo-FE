@@ -34,6 +34,7 @@ import {
 } from "../model/legal-copy";
 import { TermsVersionChangedDialog } from "./terms-version-changed-dialog";
 import type { ChangedTerm } from "./terms-version-changed-dialog";
+import { breakSentences } from "@/shared/lib/sentences";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const NAME_MAX = 100;
@@ -275,7 +276,9 @@ export function KakaoSignupForm() {
           <FormNotice>
             카카오 계정과 같은 이메일이 있어도 기존 이메일 계정과 합쳐지지 않습니다.
           </FormNotice>
-          <p className="text-caption text-ink-2">{KAKAO_LINK_NOTICE}</p>
+          <p className="whitespace-pre-line text-caption text-ink-2">
+            {breakSentences(KAKAO_LINK_NOTICE)}
+          </p>
           <div className="flex justify-center gap-3">
             <Link
               href="/login"

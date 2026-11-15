@@ -156,8 +156,8 @@ describe("서비스 첫 화면 요금 요약", () => {
         .map((node) => node.textContent),
     ).toEqual(["1인", "2~4인", "5인 이상", "기업"]);
     expect(within(tiers).getByText("월 39,900원")).not.toBeNull();
-    expect(within(tiers).getByText(/월 39,900원 \+ \(인원 - 1\) × 10,000원/)).not.toBeNull();
-    expect(within(tiers).getByText(/월 69,900원 \+ \(인원 - 4\) × 8,000원/)).not.toBeNull();
+    expect(within(tiers).getByText(/월 39,900원\(1명 포함\), 추가 1명당 10,000원/)).not.toBeNull();
+    expect(within(tiers).getByText(/월 69,900원\(4명 포함\), 추가 1명당 8,000원/)).not.toBeNull();
     expect(within(tiers).getByText("별도 견적")).not.toBeNull();
     expect(screen.getByText(/부가가치세를 포함한 월 이용료입니다/)).not.toBeNull();
     expect(

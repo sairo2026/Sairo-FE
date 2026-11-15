@@ -13,5 +13,5 @@ export function tierFormula(tier: PricingTier): string {
   if (tier.perSeatAmount === null || tier.perSeatAmount === undefined) {
     return `월 ${formatKrw(tier.baseAmount)}`;
   }
-  return `월 ${formatKrw(tier.baseAmount)} + (인원 - ${tier.includedMembers}) × ${formatKrw(tier.perSeatAmount)}`;
+  return `월 ${formatKrw(tier.baseAmount)}(${tier.includedMembers}명 포함), 추가 1명당 ${formatKrw(tier.perSeatAmount)}`;
 }

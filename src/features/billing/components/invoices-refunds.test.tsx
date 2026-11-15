@@ -83,7 +83,7 @@ describe("결제 내역", () => {
 describe("청구서 상세와 환불 신청", () => {
   it("공급가액과 세액, 환불 가능 금액, 결제 시도, 증빙 상태를 보여준다", async () => {
     renderOffice(<InvoiceDetailScreen invoiceId={501} />, { role: "OWNER" });
-    expect(await screen.findByText("59,900원 (VAT 포함)")).not.toBeNull();
+    expect(await screen.findByText("59,900원 (부가세 포함)")).not.toBeNull();
     expect(screen.getByText("54,455원")).not.toBeNull();
     expect(screen.getByText("5,445원")).not.toBeNull();
     expect(screen.getByText(/주문 order-501-1 · 성공/)).not.toBeNull();
@@ -136,7 +136,7 @@ describe("청구서 상세와 환불 신청", () => {
 
   it("환불할 수 있으면 비활성 사유를 보여주지 않는다", async () => {
     renderOffice(<InvoiceDetailScreen invoiceId={501} />, { role: "OWNER" });
-    await screen.findByText("59,900원 (VAT 포함)");
+    await screen.findByText("59,900원 (부가세 포함)");
     expect(screen.queryByText(/환불 가능한 금액이 없어/)).toBeNull();
   });
 
@@ -317,7 +317,7 @@ describe("요금제 안내", () => {
     const user = userEvent.setup();
     renderOffice(<BillingPlansScreen />, { role: "OWNER" });
     expect(await screen.findByText("표준 가격")).not.toBeNull();
-    expect(screen.getByText(/현재 과금 인원 3명 기준 59,900원\(VAT 포함\)/)).not.toBeNull();
+    expect(screen.getByText(/현재 과금 인원 3명 기준 59,900원\(부가세 포함\)/)).not.toBeNull();
     expect(screen.getByText("별도 견적으로 안내합니다.")).not.toBeNull();
     const input = screen.getByRole("textbox", { name: "인원 수로 계산해 보기" });
     await user.clear(input);

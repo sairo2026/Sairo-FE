@@ -59,7 +59,7 @@ describe("시작 고객 합의", () => {
     const user = userEvent.setup();
     renderOffice(<StartAgreementScreen />, { role: "OWNER" });
     expect(await screen.findByText("2027-06-30 23:59")).not.toBeNull();
-    expect(screen.getByText(/3명 · 59,900원 \(VAT 포함\)/)).not.toBeNull();
+    expect(screen.getByText(/3명 · 59,900원 \(부가세 포함\)/)).not.toBeNull();
     expect(screen.getByText("주간 사용 확인: 예")).not.toBeNull();
     expect(screen.getByText("사례 공개 선택 동의: 동의하지 않음")).not.toBeNull();
     expect(screen.getByText("확인은 선택이며 자격과 가격에 영향이 없습니다.")).not.toBeNull();
@@ -126,7 +126,7 @@ describe("가격 변경 안내", () => {
     renderOffice(<PriceNoticesScreen />, { role: "OWNER" });
     expect(await screen.findByText("가격 인상 안내")).not.toBeNull();
     expect(screen.getByText("2026-11 → 2027-03")).not.toBeNull();
-    expect(screen.getByText("64,900원 (VAT 포함)")).not.toBeNull();
+    expect(screen.getByText("64,900원 (부가세 포함)")).not.toBeNull();
     expect(screen.getByText("2027-03-02 23:59")).not.toBeNull();
     expect(screen.getByText("응답 대기")).not.toBeNull();
     expect(

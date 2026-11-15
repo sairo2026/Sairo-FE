@@ -60,9 +60,9 @@ function PlansView({ data }: { data: BillingPlanListResponse }) {
                   </span>
                   <span className="text-ink-2">
                     {tier.perSeatPrice
-                      ? `${formatKrw(tier.basePrice)} + (인원 - ${tier.includedMembers}) × ${formatKrw(tier.perSeatPrice)}`
-                      : `${formatKrw(tier.basePrice)}`}{" "}
-                    (VAT 포함)
+                      ? `월 ${formatKrw(tier.basePrice)}(${tier.includedMembers}명 포함), 추가 1명당 ${formatKrw(tier.perSeatPrice)}`
+                      : `월 ${formatKrw(tier.basePrice)}`}{" "}
+                    (부가세 포함)
                   </span>
                 </li>
               ))}
@@ -73,7 +73,7 @@ function PlansView({ data }: { data: BillingPlanListResponse }) {
       <Card title="예상 금액">
         <p className="mb-3 text-body text-ink">
           현재 과금 인원 {data.memberCount}명 기준{" "}
-          {current === null ? "미확인" : formatKrw(current)}(VAT 포함)
+          {current === null ? "미확인" : formatKrw(current)}(부가세 포함)
         </p>
         <TextField
           label="인원 수로 계산해 보기"

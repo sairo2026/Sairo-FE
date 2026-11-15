@@ -156,7 +156,7 @@ describe("권리 요청 처리 상태", () => {
     seed({ status: "FORWARDED", handlerType: "OFFICE", responsibleOfficeName: "해든중개" });
     open();
     expect(
-      await screen.findByText("해든중개이 처리하며 사이로가 사무소의 지시에 따라 지원합니다."),
+      await screen.findByText("해든중개가 처리하며 사이로가 사무소의 지시에 따라 지원합니다."),
     ).not.toBeNull();
     expect(screen.getByText("사무소 전달", { selector: "span" })).not.toBeNull();
   });
@@ -184,7 +184,7 @@ describe("권리 요청 처리 상태", () => {
     seed({ status: "WAITING_FOR_INFO", supplementRequest: "가입 휴대폰 번호" });
     open();
     expect(
-      await screen.findByText(/본인 확인을 위해 가입 휴대폰 번호을 추가로 확인해 주세요/),
+      await screen.findByText(/본인 확인을 위해 가입 휴대폰 번호를 추가로 확인해 주세요/),
     ).not.toBeNull();
   });
 

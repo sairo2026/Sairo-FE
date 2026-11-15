@@ -293,7 +293,7 @@ describe("승인자 내 매물 모아보기", () => {
     await screen.findByText("연결된 매물 1개");
     const close = screen.getByRole("button", { name: "계정 해지" });
     expect(close.getAttribute("aria-disabled")).toBe("true");
-    await user.click(screen.getByLabelText("위 내용을 확인했고 계정을 해지합니다"));
+    await user.click(screen.getByLabelText(/^위 내용을 확인했고 계정을 해지합니다/));
     await user.click(close);
     expect(await screen.findByText(/10분 안에 번호 인증으로 다시 확인/)).not.toBeNull();
     await user.type(screen.getByLabelText("휴대폰 번호"), "01012345678");

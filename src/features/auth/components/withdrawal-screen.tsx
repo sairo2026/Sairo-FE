@@ -146,6 +146,7 @@ function WithdrawalView({ preview }: { preview: WithdrawalPreviewResponse }) {
                 setError(undefined);
               }}
               label={WITHDRAWAL_COPY.confirmLabel}
+              requirement="required"
             />
             {error ? <FormAlert>{error}</FormAlert> : null}
             <div className="flex gap-3">

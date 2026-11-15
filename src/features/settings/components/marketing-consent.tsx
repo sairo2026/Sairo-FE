@@ -131,6 +131,7 @@ export function MarketingConsent({ me, isReadOnly }: { me: MeResponse; isReadOnl
           <div className="flex flex-wrap items-center gap-3">
             <Checkbox
               label={TOGGLE.confirmBeforeOn}
+              requirement="optional"
               checked={isChecked}
               onCheckedChange={(checked) => {
                 setIsChecked(checked);
