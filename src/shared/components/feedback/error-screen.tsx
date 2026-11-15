@@ -48,6 +48,12 @@ export const ERROR_SCREEN_COPY: Record<ErrorScreenKind, ScreenCopy> = {
     description: "서버에 연결하지 못했습니다. 연결 상태를 확인한 뒤 다시 시도해 주세요.",
     isAlert: true,
   },
+  timeout: {
+    title: "응답이 늦어지고 있습니다",
+    description:
+      "요청이 오래 걸리고 있습니다. 같은 요청이 이미 처리되었을 수 있으니 목록을 확인한 뒤 다시 시도해 주세요.",
+    isAlert: true,
+  },
 };
 
 type AudienceCopy = Partial<Record<ErrorScreenKind, Partial<ScreenCopy>>>;

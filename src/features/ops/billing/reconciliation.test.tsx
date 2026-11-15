@@ -272,7 +272,9 @@ describe("대사 차이 해결", () => {
     const user = userEvent.setup();
     server.use(
       http.post("/api/ops/billing/reconciliation/2/resolve", () =>
-        mockErrors.validation([{ field: "resolutionEvidence", message: "근거가 너무 짧습니다." }]),
+        mockErrors.validation([
+          { field: "resolutionEvidence", code: "TOO_SHORT", message: "근거가 너무 짧습니다." },
+        ]),
       ),
     );
     renderScreen();
@@ -280,7 +282,9 @@ describe("대사 차이 해결", () => {
     await user.type(within(dialog).getByLabelText("차이 원인"), "a");
     await user.type(within(dialog).getByLabelText("해결 근거"), "b");
     await user.click(within(dialog).getByRole("button", { name: "해결 기록" }));
-    expect(await within(dialog).findByText("근거가 너무 짧습니다.")).toBeTruthy();
+    expect(
+      await within(dialog).findByText("입력한 내용이 너무 짧습니다. 조금 더 입력해 주세요."),
+    ).toBeTruthy();
   });
 
   it("해결 요청이 429이면 요청 한도 안내를 보인다", async () => {

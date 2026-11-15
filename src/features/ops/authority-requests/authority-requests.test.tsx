@@ -349,13 +349,17 @@ describe("자료 요청 기록", () => {
   it("기록이 400이면 서버 입력 오류를 보인다", async () => {
     server.use(
       http.post("/api/ops/authority-requests", () =>
-        mockErrors.validation([{ field: "agencyName", message: "기관 이름을 확인해 주세요." }]),
+        mockErrors.validation([
+          { field: "agencyName", code: "INVALID_VALUE", message: "기관 이름을 확인해 주세요." },
+        ]),
       ),
     );
     await renderRequests();
     fillCreate();
     await userEvent.setup().click(screen.getByRole("button", { name: "요청 기록" }));
-    expect(await screen.findByText(/기관 이름을 확인해 주세요/)).toBeTruthy();
+    expect(
+      await screen.findByText("올바르지 않은 값입니다. 입력한 내용을 확인해 주세요."),
+    ).toBeTruthy();
   });
 
   it("기록이 403이면 권한 안내를 보인다", async () => {
@@ -569,13 +573,17 @@ describe("종결", () => {
   it("종결이 400이면 서버 입력 오류를 보인다", async () => {
     server.use(
       http.post("/api/ops/authority-requests/:id/close", () =>
-        mockErrors.validation([{ field: "decision", message: "결정 값이 올바르지 않습니다." }]),
+        mockErrors.validation([
+          { field: "decision", code: "NOT_ALLOWED", message: "결정 값이 올바르지 않습니다." },
+        ]),
       ),
     );
     const { user, dialog } = await openClose(72);
     chooseDecision(dialog, "REFUSED", "NOT_ALLOWED");
     await user.click(within(dialog).getByRole("button", { name: "종결" }));
-    expect(await within(dialog).findByText(/결정 값이 올바르지 않습니다/)).toBeTruthy();
+    expect(
+      await within(dialog).findByText("사용할 수 없는 값입니다. 다른 값을 입력해 주세요."),
+    ).toBeTruthy();
   });
 
   it("종결이 429이면 기다릴 시간을 안내한다", async () => {

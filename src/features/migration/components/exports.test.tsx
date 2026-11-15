@@ -118,7 +118,7 @@ describe("데이터 내보내기", () => {
     const user = userEvent.setup();
     renderOffice(<ExportsScreen />, { role: "OWNER" });
     await user.click(await screen.findByRole("button", { name: "내보내기 만들기" }));
-    expect(await screen.findByText("이 작업을 할 권한이 없습니다.")).not.toBeNull();
+    expect(await screen.findByText(/이 작업을 할 권한이 없습니다/)).not.toBeNull();
   });
 
   it("429를 받으면 기다리라는 안내를 보여준다", async () => {

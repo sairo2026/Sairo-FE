@@ -226,7 +226,9 @@ describe("참여 요청", () => {
     await user.click(screen.getByLabelText("고용신고를 확인했습니다"));
     await user.click(screen.getByLabelText("필요한 교육을 이수했습니다"));
     await user.click(screen.getByRole("button", { name: "참여 요청" }));
-    expect(await screen.findByText("자격증 번호 형식이 올바르지 않습니다.")).not.toBeNull();
+    expect(
+      await screen.findByText("올바르지 않은 값입니다. 입력한 내용을 확인해 주세요."),
+    ).not.toBeNull();
   });
 });
 

@@ -412,7 +412,11 @@ describe("담당 배정과 우선순위", () => {
     await screen.findByRole("option", { name: /퇴사자/ });
     await user.selectOptions(screen.getByLabelText("담당 운영자"), "99");
     await user.click(screen.getByRole("button", { name: "담당 배정" }));
-    expect(await screen.findByText("활성 지원 담당 운영자가 아닙니다.")).toBeTruthy();
+    expect(
+      await screen.findByText(
+        "선택한 담당자는 이 업무 역할이 활성 상태가 아니라 지정할 수 없습니다. 다른 담당자를 선택해 주세요.",
+      ),
+    ).toBeTruthy();
   });
 
   it("우선순위를 바꾸면 새 우선순위가 보인다", async () => {
@@ -525,7 +529,7 @@ describe("운영자 첨부 올리기", () => {
     await user.upload(fileInput(), new File(["x"], "여섯번째.pdf", { type: "application/pdf" }));
     await user.click(screen.getByRole("button", { name: "첨부 올리기" }));
     expect(
-      await screen.findByText(/파일 항목 오류: 운영자 첨부는 문의당 5개까지 올릴 수 있습니다/),
+      await screen.findByText("파일 항목 오류: 허용 범위를 벗어났습니다. 값을 확인해 주세요."),
     ).toBeTruthy();
   });
 

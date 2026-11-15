@@ -940,7 +940,7 @@ export const opsContentHandlers: RequestHandler[] = [
     if (duplicate) {
       return errorResponse(
         409,
-        "POLICY_VERSION_EXISTS",
+        "DOCUMENT_VERSION_CONFLICT",
         "같은 종류와 버전의 문서가 이미 있습니다. 게시본은 덮어쓰지 않으니 새 버전으로 등록해 주세요.",
       );
     }

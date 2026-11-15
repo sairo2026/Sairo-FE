@@ -119,14 +119,19 @@ describe("고객 등록", () => {
   it("서버의 필드 오류를 해당 입력에 보여준다", async () => {
     server.use(
       http.post("/api/customers", () =>
-        mockErrors.validation([{ field: "email", message: "이미 쓰는 이메일입니다." }]),
+        mockErrors.validation([
+          { field: "email", code: "INVALID_FORMAT", message: "서버: 이미 쓰는 이메일입니다." },
+        ]),
       ),
     );
     const user = userEvent.setup();
     renderOffice(<CustomerCreateScreen />, { role: "AGENT" });
     await fillRequired(user);
     await user.click(screen.getByRole("button", { name: "등록" }));
-    expect(await screen.findByText("이미 쓰는 이메일입니다.")).not.toBeNull();
+    expect(
+      await screen.findByText("형식이 올바르지 않습니다. 입력한 내용을 확인해 주세요."),
+    ).not.toBeNull();
+    expect(screen.queryByText(/서버:/)).toBeNull();
   });
 
   it("이름과 연락처가 겹치지 않으면 바로 등록하고 상세로 이동한다", async () => {

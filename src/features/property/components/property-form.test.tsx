@@ -113,14 +113,19 @@ describe("매물 등록", () => {
   it("서버가 필드 오류를 보내면 해당 입력에 표시한다", async () => {
     server.use(
       http.post("/api/properties", () =>
-        mockErrors.validation([{ field: "name", message: "이미 쓰는 이름입니다." }]),
+        mockErrors.validation([
+          { field: "name", code: "NOT_ALLOWED", message: "서버: 이미 쓰는 이름입니다." },
+        ]),
       ),
     );
     const user = userEvent.setup();
     renderOffice(<PropertyCreateScreen />, { role: "OWNER" });
     await fillBasics(user);
     await user.click(screen.getByRole("button", { name: "임시저장" }));
-    expect(await screen.findByText("이미 쓰는 이름입니다.")).not.toBeNull();
+    expect(
+      await screen.findByText("사용할 수 없는 값입니다. 다른 값을 입력해 주세요."),
+    ).not.toBeNull();
+    expect(screen.queryByText(/서버:/)).toBeNull();
     expect(navigation.push).not.toHaveBeenCalled();
   });
 

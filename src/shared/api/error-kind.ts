@@ -7,11 +7,12 @@ export type ErrorScreenKind =
   | "rate-limited"
   | "server"
   | "maintenance"
-  | "network";
+  | "network"
+  | "timeout";
 
 /** 오류를 어떤 공통 오류 화면으로 보여줄지 정한다. 문자열 메시지가 아니라 상태와 코드로 분기한다. */
 export function toErrorScreenKind(error: unknown): ErrorScreenKind {
-  if (error instanceof ApiNetworkError) return "network";
+  if (error instanceof ApiNetworkError) return error.kind === "timeout" ? "timeout" : "network";
   if (error instanceof ApiError) {
     if (error.status === 401) return "unauthenticated";
     if (error.status === 403) return "forbidden";

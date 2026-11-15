@@ -128,7 +128,9 @@ describe("업무 목록과 업무 팝업", () => {
   it("서버가 필드 오류를 돌려주면 해당 입력 아래에 보인다", async () => {
     server.use(
       http.post("/api/tasks", () =>
-        mockErrors.validation([{ field: "dueDate", message: "예정일이 올바르지 않습니다." }]),
+        mockErrors.validation([
+          { field: "dueDate", code: "OUT_OF_RANGE", message: "서버: 예정일이 올바르지 않습니다." },
+        ]),
       ),
     );
     const user = userEvent.setup();
@@ -139,7 +141,10 @@ describe("업무 목록과 업무 팝업", () => {
       expect((within(dialog).getByLabelText(/담당자/) as HTMLSelectElement).value).not.toBe(""),
     );
     await user.click(within(dialog).getByRole("button", { name: "저장" }));
-    expect(await within(dialog).findByText("예정일이 올바르지 않습니다.")).not.toBeNull();
+    expect(
+      await within(dialog).findByText("허용 범위를 벗어났습니다. 값을 확인해 주세요."),
+    ).not.toBeNull();
+    expect(within(dialog).queryByText(/서버:/)).toBeNull();
   });
 
   it("자동 생성 업무는 제목 수정과 삭제가 막히고 완료 처리와 메모만 가능하다", async () => {

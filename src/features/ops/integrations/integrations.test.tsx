@@ -443,12 +443,16 @@ describe("설정 변경", () => {
   it("저장이 400이면 서버 입력 오류를 보인다", async () => {
     server.use(
       http.patch("/api/ops/integrations/:id", () =>
-        mockErrors.validation([{ field: "provider", message: "공급자 이름이 올바르지 않습니다." }]),
+        mockErrors.validation([
+          { field: "provider", code: "INVALID_VALUE", message: "공급자 이름이 올바르지 않습니다." },
+        ]),
       ),
     );
     const { user, dialog } = await openEdit(1);
     await user.click(within(dialog).getByRole("button", { name: "저장" }));
-    expect(await within(dialog).findByText(/공급자 이름이 올바르지 않습니다/)).toBeTruthy();
+    expect(
+      await within(dialog).findByText("올바르지 않은 값입니다. 입력한 내용을 확인해 주세요."),
+    ).toBeTruthy();
   });
 
   it("저장이 429이면 기다릴 시간을 안내한다", async () => {

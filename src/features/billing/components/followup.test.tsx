@@ -238,7 +238,13 @@ describe("세금계산서 수신 정보", () => {
     server.use(
       http.put("/api/billing/tax-recipient", () =>
         errorResponse(422, "TAX_RECIPIENT_INVALID", "형식", {
-          fieldErrors: [{ field: "businessNumber", message: "검증번호가 맞지 않습니다." }],
+          fieldErrors: [
+            {
+              field: "businessNumber",
+              code: "INVALID_FORMAT",
+              message: "서버 문장: 검증번호 불일치",
+            },
+          ],
         }),
       ),
     );
@@ -252,7 +258,10 @@ describe("세금계산서 수신 정보", () => {
         alert.textContent?.includes("세금계산서 수신 정보 형식을 확인해 주세요."),
       ),
     ).toBe(true);
-    expect(screen.getByText("검증번호가 맞지 않습니다.")).not.toBeNull();
+    expect(
+      screen.getByText("형식이 올바르지 않습니다. 입력한 내용을 확인해 주세요."),
+    ).not.toBeNull();
+    expect(screen.queryByText(/서버 문장/)).toBeNull();
   });
 
   it("저장된 값은 불러와 보여주고 조회 실패 시 오류를 보여준다", async () => {

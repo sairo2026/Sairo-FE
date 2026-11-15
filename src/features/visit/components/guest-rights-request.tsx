@@ -10,6 +10,7 @@ import { Modal } from "@/shared/components/ui/modal";
 import { RadioGroup } from "@/shared/components/ui/select-field";
 import { TextAreaField } from "@/shared/components/ui/textarea-field";
 import { TextField } from "@/shared/components/ui/text-field";
+import { describeApiError } from "@/shared/lib/error-copy";
 import { formatSeoulDate, formatSeoulDateTime } from "@/shared/lib/format";
 import { countCodePoints } from "@/shared/lib/format";
 import { submitGuestPrivacyIntake } from "../api/guest-privacy.api";
@@ -48,13 +49,12 @@ const MESSAGE_BY_CODE: Record<string, string> = {
 };
 
 function describeError(error: unknown): string {
-  if (error instanceof ApiError) {
-    if (error.status === 429) return COPY.errors.rateLimited;
-    return (
-      MESSAGE_BY_CODE[error.code] ?? "요청을 접수하지 못했습니다. 잠시 뒤에 다시 시도해 주세요."
-    );
-  }
-  return "요청을 접수하지 못했습니다. 잠시 뒤에 다시 시도해 주세요.";
+  if (error instanceof ApiError && error.status === 429) return COPY.errors.rateLimited;
+  return describeApiError(
+    error,
+    "요청을 접수하지 못했습니다. 잠시 뒤에 다시 시도해 주세요.",
+    MESSAGE_BY_CODE,
+  );
 }
 
 export function isContactValid(channel: string, contact: string): boolean {

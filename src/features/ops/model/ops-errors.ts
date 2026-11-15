@@ -1,5 +1,5 @@
-import { ApiError, ApiNetworkError } from "@/shared/api/client";
-import { formatWait } from "@/shared/lib/api-messages";
+import { fieldErrorSummary } from "@/shared/lib/api-messages";
+import { describeApiError } from "@/shared/lib/error-copy";
 
 const OPS_MESSAGE_BY_CODE: Record<string, string> = {
   SELF_APPROVAL_FORBIDDEN: "본인이 요청하거나 수혜하는 건은 직접 승인할 수 없습니다.",
@@ -26,21 +26,7 @@ const OPS_MESSAGE_BY_CODE: Record<string, string> = {
   FORBIDDEN: "이 처리를 할 수 있는 운영 역할이 아닙니다.",
 };
 
-/** 운영 콘솔 처리 실패를 운영자에게 보일 문구로 바꾼다. 서버가 준 메시지보다 코드별 문구를 우선한다. */
+/** 운영 콘솔 처리 실패를 운영자에게 보일 문구로 바꾼다. 서버가 준 message는 쓰지 않고 코드별 문구만 쓰며, 입력 오류는 필드 오류 문구를 합쳐 보인다. */
 export function describeOpsError(error: unknown, fallback = "처리하지 못했습니다."): string {
-  if (error instanceof ApiNetworkError) {
-    return error.kind === "offline"
-      ? "인터넷 연결을 확인해 주세요."
-      : "서버에 연결하지 못했습니다. 잠시 뒤에 다시 시도해 주세요.";
-  }
-  if (error instanceof ApiError) {
-    if (error.status === 429) {
-      return error.retryAfterSeconds
-        ? `요청이 너무 많습니다. ${formatWait(error.retryAfterSeconds)} 뒤에 다시 시도해 주세요.`
-        : "요청이 너무 많습니다. 잠시 뒤에 다시 시도해 주세요.";
-    }
-    if (error.status >= 500) return "일시적인 오류가 발생했습니다. 잠시 뒤에 다시 시도해 주세요.";
-    return OPS_MESSAGE_BY_CODE[error.code] ?? (error.message || fallback);
-  }
-  return fallback;
+  return fieldErrorSummary(error) ?? describeApiError(error, fallback, OPS_MESSAGE_BY_CODE);
 }

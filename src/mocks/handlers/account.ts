@@ -344,7 +344,11 @@ export const accountHandlers = [
     }
     if (body.password === "weakpass1") {
       return mockErrors.validation([
-        { field: "password", code: "INVALID_VALUE", message: "너무 흔한 비밀번호입니다." },
+        {
+          field: "password",
+          code: "NOT_ALLOWED",
+          message: "흔하거나 유출된 적이 있는 비밀번호는 사용할 수 없습니다.",
+        },
       ]);
     }
     // 가입이 끝나면 세션이 만들어지므로 이후 접근 상태 조회도 인증 전 상태를 돌려준다.

@@ -204,7 +204,11 @@ describe("실행", () => {
     await screen.findByText("고객 문의 대응");
     await user.click(button("실행"));
     await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "실행" }));
-    expect(await screen.findByText("본인 확인이 필요합니다.")).toBeTruthy();
+    expect(
+      await screen.findByText(
+        "중요한 작업이라 본인 확인이 필요합니다. 확인을 마친 뒤 이어서 진행해 주세요.",
+      ),
+    ).toBeTruthy();
     expect(screen.getByRole("button", { name: "실행" })).toBeTruthy();
   });
 
@@ -315,7 +319,11 @@ describe("파일 받기", () => {
     renderDetail(7, ["OPS"]);
     await screen.findByText("고객 문의 대응");
     await user.click(button("파일 받기"));
-    expect(await screen.findByText("본인 확인이 필요합니다.")).toBeTruthy();
+    expect(
+      await screen.findByText(
+        "중요한 작업이라 본인 확인이 필요합니다. 확인을 마친 뒤 이어서 진행해 주세요.",
+      ),
+    ).toBeTruthy();
   });
 
   it("이미 받은 파일은 안내하고 버튼이 꺼진다", async () => {
@@ -421,7 +429,11 @@ describe("접근 창 상태와 회수", () => {
     const dialog = screen.getByRole("dialog");
     await user.type(within(dialog).getByLabelText("회수 사유"), "사유");
     await user.click(within(dialog).getByRole("button", { name: "접근 회수" }));
-    expect(await within(dialog).findByText("본인 확인이 필요합니다.")).toBeTruthy();
+    expect(
+      await within(dialog).findByText(
+        "중요한 작업이라 본인 확인이 필요합니다. 확인을 마친 뒤 이어서 진행해 주세요.",
+      ),
+    ).toBeTruthy();
   });
 
   it("이미 만료되거나 회수된 접근을 회수하면 상태 전이 오류를 안내한다", async () => {

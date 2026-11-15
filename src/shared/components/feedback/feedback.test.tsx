@@ -26,6 +26,7 @@ const KINDS: ErrorScreenKind[] = [
   "server",
   "maintenance",
   "network",
+  "timeout",
 ];
 
 describe("ErrorScreen", () => {

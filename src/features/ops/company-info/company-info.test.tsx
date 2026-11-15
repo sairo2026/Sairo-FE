@@ -385,13 +385,21 @@ describe("게시", () => {
   it("서버 400이면 필드 메시지를 보인다", async () => {
     server.use(
       http.post("/api/ops/company-service-info", () =>
-        mockErrors.validation([{ field: "supportEmail", message: "지원 이메일을 확인해 주세요." }]),
+        mockErrors.validation([
+          {
+            field: "supportEmail",
+            code: "INVALID_FORMAT",
+            message: "지원 이메일을 확인해 주세요.",
+          },
+        ]),
       ),
     );
     const user = userEvent.setup();
     await loaded();
     await user.click(screen.getByRole("button", { name: "새 버전으로 게시" }));
-    expect(await screen.findByText("지원 이메일을 확인해 주세요.")).toBeTruthy();
+    expect(
+      await screen.findByText("형식이 올바르지 않습니다. 입력한 내용을 확인해 주세요."),
+    ).toBeTruthy();
   });
 
   it("게시가 403이면 역할 안내를 보인다", async () => {
@@ -411,7 +419,7 @@ describe("게시", () => {
     const user = userEvent.setup();
     await loaded();
     await user.click(screen.getByRole("button", { name: "새 버전으로 게시" }));
-    expect(await screen.findByText("게시할 수 없는 회사 정보입니다.")).toBeTruthy();
+    expect(await screen.findByText("회사 정보를 게시하지 못했습니다.")).toBeTruthy();
   });
 
   it("게시가 429이면 한도 안내를 보인다", async () => {
@@ -607,13 +615,17 @@ describe("영업일 달력", () => {
   it("서버 400이면 메시지를 보인다", async () => {
     server.use(
       http.put("/api/ops/business-calendar/:date", () =>
-        mockErrors.validation([{ field: "reason", message: "사유 형식이 올바르지 않습니다." }]),
+        mockErrors.validation([
+          { field: "reason", code: "INVALID_VALUE", message: "사유 형식이 올바르지 않습니다." },
+        ]),
       ),
     );
     const { user, table } = await openCalendar();
     await user.click(within(table).getByRole("button", { name: `${dayString(30)} 변경` }));
     await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "반영" }));
-    expect(await screen.findByText("사유 형식이 올바르지 않습니다.")).toBeTruthy();
+    expect(
+      await screen.findByText("올바르지 않은 값입니다. 입력한 내용을 확인해 주세요."),
+    ).toBeTruthy();
   });
 
   it("반영이 403이면 역할 안내를 보인다", async () => {

@@ -407,7 +407,10 @@ describe("이메일 가입 완료", () => {
     await user.type(screen.getByLabelText(/^비밀번호\*?$/), "weakpass1");
     await user.type(screen.getByLabelText(/^비밀번호 확인/), "weakpass1");
     await user.click(screen.getByRole("button", { name: "가입하기" }));
-    expect(await screen.findByText("너무 흔한 비밀번호입니다.")).not.toBeNull();
+    expect(
+      await screen.findByText("너무 흔한 비밀번호입니다. 다른 비밀번호를 입력해 주세요."),
+    ).not.toBeNull();
+    expect(screen.queryByText(/유출된 적/)).toBeNull();
     expect(navigation.replace).not.toHaveBeenCalled();
   });
 

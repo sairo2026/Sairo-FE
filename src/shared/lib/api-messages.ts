@@ -1,12 +1,12 @@
-import { ApiError, ApiNetworkError } from "@/shared/api/client";
+import { ApiError } from "@/shared/api/client";
+import {
+  FIELD_ERROR_FALLBACK_COPY,
+  describeApiError,
+  describeFieldError,
+  formatWait,
+} from "./error-copy";
 
-export function formatWait(totalSeconds: number): string {
-  const seconds = Math.max(0, Math.ceil(totalSeconds));
-  const minutes = Math.floor(seconds / 60);
-  const rest = seconds % 60;
-  if (minutes === 0) return `${rest}초`;
-  return rest === 0 ? `${minutes}분` : `${minutes}분 ${rest}초`;
-}
+export { formatWait };
 
 const MESSAGE_BY_CODE: Record<string, string> = {
   INVALID_CREDENTIALS: "이메일 또는 비밀번호가 맞지 않습니다.",
@@ -22,21 +22,7 @@ const MESSAGE_BY_CODE: Record<string, string> = {
 };
 
 export function describeAuthError(error: unknown, fallback: string): string {
-  if (error instanceof ApiNetworkError) {
-    return error.kind === "offline"
-      ? "인터넷 연결을 확인해 주세요."
-      : "서버에 연결하지 못했습니다.";
-  }
-  if (error instanceof ApiError) {
-    if (error.status === 429) {
-      return error.retryAfterSeconds
-        ? `요청이 너무 많습니다. ${formatWait(error.retryAfterSeconds)} 뒤에 다시 시도해 주세요.`
-        : "요청이 너무 많습니다. 잠시 뒤에 다시 시도해 주세요.";
-    }
-    if (error.status >= 500) return "일시적인 오류가 발생했습니다. 잠시 뒤에 다시 시도해 주세요.";
-    return MESSAGE_BY_CODE[error.code] ?? fallback;
-  }
-  return fallback;
+  return describeApiError(error, fallback, MESSAGE_BY_CODE);
 }
 
 export function isApiCode(error: unknown, code: string): error is ApiError {
@@ -47,17 +33,22 @@ export function fieldErrorMap(error: unknown): Record<string, string> {
   if (!(error instanceof ApiError) || !error.fieldErrors) return {};
   const result: Record<string, string> = {};
   for (const item of error.fieldErrors) {
-    if (item.field && !(item.field in result)) result[item.field] = item.message;
+    if (item.field && !(item.field in result)) result[item.field] = describeFieldError(item);
   }
   return result;
 }
 
-/** 400 응답의 필드 오류 문구를 한 문장으로 합친다. 필드 오류가 없으면 undefined다. */
+/** 400 응답의 필드 오류 문구를 중복 없이 한 문장으로 합친다. 구체적인 문구가 없으면 undefined다. */
 export function fieldErrorSummary(error: unknown): string | undefined {
   if (!(error instanceof ApiError) || error.status !== 400 || !error.fieldErrors?.length) {
     return undefined;
   }
-  return error.fieldErrors.map((item) => item.message).join(" ");
+  const specific = new Set(
+    error.fieldErrors
+      .map((item) => describeFieldError(item))
+      .filter((copy) => copy !== FIELD_ERROR_FALLBACK_COPY),
+  );
+  return specific.size > 0 ? [...specific].join(" ") : undefined;
 }
 
 export function isApiStatus(error: unknown, status: number): boolean {
