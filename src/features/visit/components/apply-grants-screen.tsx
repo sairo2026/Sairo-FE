@@ -55,7 +55,7 @@ function AddGrantModal({
 
   const search = useMutation({
     mutationFn: () =>
-      searchOffices({ name: name.trim(), region: region.trim(), page: 0, size: 10 }),
+      searchOffices({ name: name.trim(), region: region.trim(), page: 0, size: 25 }),
     onSuccess: (data) => {
       setSearchError(undefined);
       setHits(data.items);
