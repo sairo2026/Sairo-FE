@@ -396,7 +396,7 @@ describe("구독 흐름 보완", () => {
     });
     const user = userEvent.setup();
     show();
-    expect(await screen.findByText("71,000원 (VAT 포함)")).not.toBeNull();
+    expect(await screen.findByText("71,000원 (부가세 포함)")).not.toBeNull();
     await user.click(screen.getByRole("button", { name: "지금 결제" }));
     expect((await screen.findByRole("dialog")).textContent).toContain(
       "71,000원(부가가치세 포함)을 지금 결제합니다",
