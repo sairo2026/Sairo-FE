@@ -25,7 +25,13 @@ import {
   ENTITY_TYPE_LABEL,
   labelOf,
 } from "../model/labels";
-import { describeOfficeError, fieldErrorMap, isApiCode } from "../model/messages";
+import {
+  changeRequestFieldErrors,
+  describeChangeRequestError,
+  describeOfficeError,
+  fieldErrorMap,
+  isApiCode,
+} from "../model/messages";
 import { formatBusinessNumber, isValidPhone, validateChangeRequest } from "../model/validation";
 import { DetailList, MutedNote, TextLink } from "@/shared/components/feedback/page-parts";
 
@@ -99,7 +105,10 @@ function PhoneEditor({ office }: { office: OfficeDetailResponse }) {
       if (isApiCode(caught, "VERSION_CONFLICT")) {
         await queryClient.invalidateQueries({ queryKey: officeKeys.current });
       }
-      setError(describeOfficeError(caught, "연락처를 저장하지 못했습니다. 다시 시도해 주세요."));
+      setError(
+        fieldErrorMap(caught).representativePhone ??
+          describeOfficeError(caught, "연락처를 저장하지 못했습니다. 다시 시도해 주세요."),
+      );
     },
   });
 
@@ -191,8 +200,10 @@ function ChangeRequestDialog({ isOpen, onClose }: { isOpen: boolean; onClose: ()
       await queryClient.invalidateQueries({ queryKey: officeKeys.changeRequestsAll });
     },
     onError: (caught) => {
-      setErrors(fieldErrorMap(caught));
-      setFormError(describeOfficeError(caught, "변경을 신청하지 못했습니다. 다시 시도해 주세요."));
+      setErrors(changeRequestFieldErrors(caught));
+      setFormError(
+        describeChangeRequestError(caught, "변경을 신청하지 못했습니다. 다시 시도해 주세요."),
+      );
     },
   });
 

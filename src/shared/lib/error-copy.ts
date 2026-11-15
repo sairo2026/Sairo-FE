@@ -310,6 +310,21 @@ export const FIELD_ERROR_FALLBACK_COPY = "입력한 내용을 확인해 주세�
 
 /** 항목과 코드가 짝으로 정해진 문구. 비밀번호 정책처럼 기준을 알려 줘야 하는 항목만 둔다. */
 export const FIELD_ERROR_OVERRIDES: Record<string, string> = {
+  "windows.REQUIRED":
+    "가능한 시간대를 1개 이상 입력해 주세요. 요일별 시간대나 날짜별 가능 시간 중 하나는 있어야 합니다.",
+  "businessNumber.INVALID_FORMAT":
+    "사업자등록번호 형식이 올바르지 않습니다. 숫자 10자리를 입력해 주세요. 하이픈(-)은 넣어도 됩니다.",
+  "businessNumber.INVALID_VALUE":
+    "존재하지 않는 사업자등록번호로 보입니다. 번호를 다시 확인해 주세요.",
+  "receiverEmail.INVALID_FORMAT": "이메일 주소 형식이 올바르지 않습니다. 다시 확인해 주세요.",
+  "representativePhone.INVALID_FORMAT":
+    "연락처 형식이 올바르지 않습니다. 010-0000-0000 형식으로 입력해 주세요.",
+  "requestedValues.representativePhone.INVALID_FORMAT":
+    "연락처 형식이 올바르지 않습니다. 010-0000-0000 형식으로 입력해 주세요.",
+  "requestedValues.businessRegistrationNumber.INVALID_FORMAT":
+    "사업자등록번호 형식이 올바르지 않습니다. 숫자 10자리를 입력해 주세요.",
+  "requestedValues.businessRegistrationNumber.INVALID_VALUE":
+    "존재하지 않는 사업자등록번호로 보입니다. 번호를 다시 확인해 주세요.",
   "password.REQUIRED": "비밀번호를 입력해 주세요.",
   "password.TOO_SHORT": "비밀번호는 8자 이상이어야 합니다.",
   "password.TOO_LONG": "비밀번호는 12자 이하여야 합니다.",

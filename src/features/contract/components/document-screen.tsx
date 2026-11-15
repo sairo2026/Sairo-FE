@@ -173,6 +173,7 @@ function UploadDialog({
         />
         <Checkbox
           label="주민등록번호 등 개인정보 포함 여부를 확인했습니다"
+          requirement="required"
           checked={values.piiReviewed}
           onCheckedChange={(value) => set("piiReviewed", value)}
         />
@@ -183,6 +184,7 @@ function UploadDialog({
         ) : null}
         <Checkbox
           label="주민등록번호를 가린 사본입니다"
+          requirement="optional"
           checked={values.piiMaskingConfirmed}
           onCheckedChange={(value) => set("piiMaskingConfirmed", value)}
         />

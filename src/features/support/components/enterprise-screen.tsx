@@ -185,6 +185,7 @@ function LeadForm({
         <div className="flex flex-col gap-1">
           <Checkbox
             label={COPY.privacyNoticeLabel}
+            requirement="required"
             checked={form.acknowledged}
             onCheckedChange={(checked) => update("acknowledged", checked)}
           />

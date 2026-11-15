@@ -189,7 +189,7 @@ describe("서류 첨부", () => {
     renderOffice(<DocumentScreen contractId={9101} />, { role: "OWNER" });
     const dialog = await openUpload(user);
     await user.click(
-      within(dialog).getByRole("checkbox", { name: "주민등록번호를 가린 사본입니다" }),
+      within(dialog).getByRole("checkbox", { name: /^주민등록번호를 가린 사본입니다/ }),
     );
     expect(
       within(dialog).getByText(/원본은 사무소가 법령에 따라 직접 보존해 주세요/),

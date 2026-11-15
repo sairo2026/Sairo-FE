@@ -8,7 +8,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 import type { AuthContextResponse } from "@/lib/api/contracts/common.schema";
 import { MOCK_ACTIVE_CONTEXT, resetMockAuthState, setMockAuthContext } from "@/mocks/handlers/auth";
 import { mockErrors } from "@/mocks/error-responses";
-import { resetMockOfficeState, setMockOfficeState } from "@/mocks/handlers/office";
+import { resetMockOfficeState } from "@/mocks/handlers/office";
 import { resetMockOpsSession, setMockOperator } from "@/mocks/handlers/ops-session";
 import { server, startMockServer } from "@/mocks/server";
 import { apiFetch } from "@/shared/api/client";
@@ -233,7 +233,7 @@ describe("OfficeAccessShell", () => {
       within(tabs)
         .getAllByRole("link")
         .map((link) => link.textContent),
-    ).toEqual(["월말결산", "구성원", "사무소 정보", "인증", "구독·결제"]);
+    ).toEqual(["월말결산", "구성원", "사무소 정보", "인증 상태", "구독·결제"]);
     expect(within(tabs).getByRole("link", { name: "구독·결제" }).getAttribute("aria-current")).toBe(
       "page",
     );
@@ -313,25 +313,8 @@ describe("OfficeAccessShell", () => {
     await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/login"));
   });
 
-  it("승인된 소속이 있으면 상단에 사무소명을 보여주고 없으면 기본 표시를 쓴다", async () => {
-    setMockAuthContext(contextOf({ role: "OWNER" }));
-    setMockOfficeState({
-      myMembership: {
-        membershipId: 41,
-        officeId: 12,
-        officeName: "사이로공인중개사사무소",
-        role: "OWNER",
-        status: "APPROVED",
-        requestSource: "REGISTRATION",
-        expiresAt: null,
-        invitationAcceptedAt: null,
-        rejectionReason: null,
-        resolved: null,
-        createdAt: "2026-11-10T09:00:00+09:00",
-        updatedAt: "2026-11-10T09:00:00+09:00",
-        version: 1,
-      },
-    });
+  it("접근 상태에 사무소명이 있으면 상단에 보여주고 없으면 기본 표시를 쓴다", async () => {
+    setMockAuthContext(contextOf({ role: "OWNER", officeName: "사이로공인중개사사무소" }));
     const first = renderWithQuery(
       <OfficeAccessShell activeKey="home">
         <p>본문</p>
@@ -339,7 +322,7 @@ describe("OfficeAccessShell", () => {
     );
     expect(await screen.findByText("사이로공인중개사사무소")).not.toBeNull();
     first.unmount();
-    resetMockOfficeState();
+    setMockAuthContext(contextOf({ role: "OWNER", officeName: null }));
     renderWithQuery(
       <OfficeAccessShell activeKey="home">
         <p>본문</p>

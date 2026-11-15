@@ -20,6 +20,7 @@ import {
 import { DEAL_TYPES, DEAL_TYPE_LABEL, isDealType } from "../model/labels";
 import type { DealType } from "../model/labels";
 import { describeCustomerError, isApiCode } from "../model/messages";
+import { topicParticle } from "@/shared/lib/korean";
 
 type Condition = CustomerDetail["demandConditions"][number];
 
@@ -99,7 +100,7 @@ function validateDemand(values: DemandValues): DemandErrors {
     for (const key of [range.low, range.high]) {
       const raw = values[key].trim();
       if (raw !== "" && !/^\d+(\.\d+)?$/.test(raw)) {
-        errors[key] = `${range.label}은 0 이상의 숫자로 입력해 주세요.`;
+        errors[key] = `${topicParticle(range.label)} 0 이상의 숫자로 입력해 주세요.`;
       }
     }
     const low = values[range.low].trim();

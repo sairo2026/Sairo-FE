@@ -80,7 +80,7 @@ describe("기업 도입 문의 접수", () => {
     const user = userEvent.setup();
     renderOffice(<EnterpriseScreen />);
     await fillForm(user);
-    await user.click(screen.getByLabelText("개인정보 수집·이용 안내를 확인했습니다."));
+    await user.click(screen.getByLabelText(/^개인정보 수집·이용 안내를 확인했습니다./));
     await user.click(screen.getByRole("button", { name: "문의 접수" }));
     expect(await screen.findByText(/조회키는 지금 한 번만 보여 드립니다/)).not.toBeNull();
     expect(screen.getByText("key-70", { selector: "strong" })).not.toBeNull();
@@ -93,7 +93,7 @@ describe("기업 도입 문의 접수", () => {
     const user = userEvent.setup();
     renderOffice(<EnterpriseScreen />);
     await fillForm(user);
-    await user.click(screen.getByLabelText("개인정보 수집·이용 안내를 확인했습니다."));
+    await user.click(screen.getByLabelText(/^개인정보 수집·이용 안내를 확인했습니다./));
     await user.click(screen.getByRole("button", { name: "문의 접수" }));
     expect(await screen.findByText(/15초 뒤에 다시 시도/)).not.toBeNull();
   });

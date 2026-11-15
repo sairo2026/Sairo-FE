@@ -20,7 +20,15 @@ const SUB_ITEMS: Array<{ key: SubKey; label: string }> = [
   { key: "followups", label: "후속업무" },
 ];
 
-export function ContractSubNav({ contractId, active }: { contractId: number; active?: SubKey }) {
+export function ContractSubNav({
+  contractId,
+  active,
+  openFollowupTaskCount = 0,
+}: {
+  contractId: number;
+  active?: SubKey;
+  openFollowupTaskCount?: number;
+}) {
   return (
     <nav aria-label="계약 하위 메뉴" className="flex flex-wrap gap-2">
       <Link
@@ -42,6 +50,14 @@ export function ContractSubNav({ contractId, active }: { contractId: number; act
           )}
         >
           {item.label}
+          {item.key === "followups" && openFollowupTaskCount > 0 ? (
+            <span
+              aria-label={`제출하지 않은 후속업무 ${openFollowupTaskCount}건`}
+              className="ml-2 inline-flex min-w-5 justify-center rounded-full bg-tag-red px-1.5 text-caption font-bold text-tag-red-ink"
+            >
+              {openFollowupTaskCount}
+            </span>
+          ) : null}
         </Link>
       ))}
     </nav>
@@ -68,7 +84,11 @@ function SubBody({
         title={title}
         description={`${property.data?.name ?? `계약 ${detail.contractId}`} · ${labelOf(DEAL_TYPE_LABEL, detail.dealType)} · ${labelOf(CONTRACT_STATUS_LABEL, detail.contractStatus)}. ${description}`}
       />
-      <ContractSubNav contractId={detail.contractId} active={active} />
+      <ContractSubNav
+        contractId={detail.contractId}
+        active={active}
+        openFollowupTaskCount={detail.openFollowupTaskCount}
+      />
       {children}
     </div>
   );

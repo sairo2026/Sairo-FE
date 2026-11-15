@@ -7,7 +7,6 @@ import { ApiError } from "@/shared/api/client";
 import { toErrorScreenKind } from "@/shared/api/error-kind";
 import { ErrorScreen } from "@/shared/components/feedback/error-screen";
 import { PageSkeleton } from "@/shared/components/feedback/skeleton";
-import { useMyMembership } from "@/features/home/hooks/home-queries";
 import { OfficeLayout } from "@/shared/layouts/layouts";
 import { useAuthContext } from "../hooks/use-auth-context";
 import { describeGrace } from "../model/access-notice";
@@ -79,17 +78,13 @@ export function OfficeAccessShell({
 function OfficeShellFrame({ children, activeKey }: { children: ReactNode; activeKey?: string }) {
   const { context, role, isReadOnly } = useOfficeAccess();
   const pathname = usePathname();
-  const membership = useMyMembership();
   const menu = role
     ? getOfficeMenu(role, (href) => decideAccess(context, href).kind === "allow")
     : undefined;
   const active = resolveActiveMenu(pathname, activeKey);
   const activeSection = menu?.find((item) => item.key === active?.sectionKey);
   const tabs = activeSection?.tabs ?? [];
-  const officeName =
-    membership.data?.status === "APPROVED" && membership.data.officeId === context.officeId
-      ? membership.data.officeName
-      : undefined;
+  const officeName = context.officeName ?? undefined;
   const grace = describeGrace(context);
   const banner = isReadOnly
     ? "결제가 지연되어 읽기만 가능합니다. 대표가 결제를 마치면 다시 저장할 수 있습니다."

@@ -279,10 +279,10 @@ describe("이전 지원 진행 화면", () => {
     );
     await user.click(screen.getByRole("button", { name: "승인" }));
     expect(
-      screen.getByText(/매핑 버전 2을 승인합니다. 승인한 뒤에는 매핑을 바꿀 수 없고/),
+      screen.getByText(/매핑 버전 2를 승인합니다. 승인한 뒤에는 매핑을 바꿀 수 없고/),
     ).not.toBeNull();
     await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "승인" }));
-    expect(await screen.findByText(/매핑 버전 2을 승인했습니다/)).not.toBeNull();
+    expect(await screen.findByText(/매핑 버전 2를 승인했습니다/)).not.toBeNull();
   });
 
   it("수정 요청은 사유가 있어야 하고 1회만 가능하다", async () => {
@@ -334,7 +334,7 @@ describe("이전 지원 진행 화면", () => {
     });
     open();
     expect(
-      await screen.findByText(/매핑 버전 2을 승인했습니다. 승인한 뒤에는 매핑을 바꿀 수 없습니다/),
+      await screen.findByText(/매핑 버전 2를 승인했습니다. 승인한 뒤에는 매핑을 바꿀 수 없습니다/),
     ).not.toBeNull();
     expect(screen.getByText("2950건")).not.toBeNull();
     expect(screen.getByText("중복 제외").nextElementSibling?.textContent).toBe("30건");

@@ -151,7 +151,7 @@ function ConsentForm({
             { label: "이용 인원", value: `${preview.memberCount}명` },
             {
               label: "월 금액",
-              value: `${formatKrw(preview.totalAmountInclVat)} (VAT 포함, 부가세 ${formatKrw(preview.vatAmount)})`,
+              value: `${formatKrw(preview.totalAmountInclVat)} (부가세 ${formatKrw(preview.vatAmount)} 포함)`,
             },
             { label: "동의 한도", value: formatKrw(preview.amountLimit) },
             {
@@ -190,11 +190,13 @@ function ConsentForm({
             checked={autoCharge}
             onCheckedChange={setAutoCharge}
             label={<CheckItemText text={preview.checkItems[0] ?? ""} />}
+            requirement="required"
           />
           <Checkbox
             checked={cancelRefund}
             onCheckedChange={setCancelRefund}
             label={<CheckItemText text={preview.checkItems[1] ?? ""} />}
+            requirement="required"
           />
           <div className="flex flex-wrap gap-4">
             <TextLink href="/legal/refund-policy">{CONSENT_COPY.refundLink}</TextLink>

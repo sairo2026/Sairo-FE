@@ -68,7 +68,7 @@ export function InvoicesScreen() {
           { key: "members", header: "인원", render: (row) => `${row.memberCount}명` },
           {
             key: "amount",
-            header: "금액(VAT 포함)",
+            header: "금액(부가세 포함)",
             align: "right",
             render: (row) => formatKrw(row.amount),
           },

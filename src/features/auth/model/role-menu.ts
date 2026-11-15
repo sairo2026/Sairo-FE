@@ -111,7 +111,7 @@ export const OFFICE_MENU_CONFIG: readonly MenuSectionConfig[] = [
       },
       {
         key: "verification",
-        label: "인증",
+        label: "인증 상태",
         href: "/billing/auth-suspension",
         roles: OWNER_ONLY,
         matchPrefixes: ["/billing/auth-suspension", "/office/verification"],

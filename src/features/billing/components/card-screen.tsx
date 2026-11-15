@@ -24,6 +24,7 @@ import { CARD_NOTICE_COPY } from "../model/legal-copy";
 import { COPY, describeBillingError } from "../model/messages";
 import { CommerceNotice, SellerNotice } from "./commerce-notice";
 import { ReadinessNextStep } from "./readiness-next-step";
+import { breakSentences } from "@/shared/lib/sentences";
 
 export const CARD_RESULT_PATH = "/billing/card/result";
 
@@ -138,7 +139,9 @@ function CardView({
           <FormAlert>시행 중인 카드 등록 안내가 없어 지금은 카드를 등록할 수 없습니다.</FormAlert>
         ) : null}
         <div className="mb-4 rounded-control bg-surface px-4 py-4">
-          <p className="text-caption text-ink-2">{CARD_NOTICE_COPY.body}</p>
+          <p className="whitespace-pre-line text-caption text-ink-2">
+            {breakSentences(CARD_NOTICE_COPY.body)}
+          </p>
         </div>
         <Checkbox
           checked={confirmed}
@@ -147,6 +150,7 @@ function CardView({
             setError(undefined);
           }}
           label={CARD_NOTICE_COPY.checkLabel}
+          requirement="required"
         />
         {error ? <FormAlert>{error}</FormAlert> : null}
         {info ? <FormNotice>{info}</FormNotice> : null}

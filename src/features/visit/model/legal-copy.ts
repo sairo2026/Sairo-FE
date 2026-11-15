@@ -1,3 +1,5 @@
+import { instrumentalParticle, subjectParticle, topicParticle } from "@/shared/lib/korean";
+
 export type LinkNoticeContext = {
   officeName: string | null;
   officeContactPhone: string | null;
@@ -14,8 +16,8 @@ function officeOf(context: LinkNoticeContext): string {
 
 function managedBy(context: LinkNoticeContext): string {
   return context.operatorName
-    ? `이 정보는 ${officeOf(context)}이 관리하며 ${context.operatorName}가 사무소의 위탁을 받아 보관합니다.`
-    : `이 정보는 ${officeOf(context)}이 관리하며 사이로가 사무소의 위탁을 받아 보관합니다.`;
+    ? `이 정보는 ${subjectParticle(officeOf(context))} 관리하며 ${subjectParticle(context.operatorName)} 사무소의 위탁을 받아 보관합니다.`
+    : `이 정보는 ${subjectParticle(officeOf(context))} 관리하며 사이로가 사무소의 위탁을 받아 보관합니다.`;
 }
 
 function inquiry(context: LinkNoticeContext): string[] {
@@ -25,7 +27,7 @@ function inquiry(context: LinkNoticeContext): string[] {
 export function approverNoticeLines(context: LinkNoticeContext): string[] {
   const days = context.retentionDays;
   return [
-    `${officeOf(context)}이 방문 일정을 조율하기 위해 아래 조건을 받습니다.`,
+    `${subjectParticle(officeOf(context))} 방문 일정을 조율하기 위해 아래 조건을 받습니다.`,
     "받는 항목: 방문 가능한 시간과 방문 조건",
     "이용 목적: 방문 신청을 받을지 판단하고 방문 일정을 확정하는 일",
     days === null
@@ -39,7 +41,7 @@ export function approverNoticeLines(context: LinkNoticeContext): string[] {
 
 export function approverPreRegisteredNotice(context: LinkNoticeContext): string {
   const days = context.retentionDays === null ? "정해진 기간" : `${context.retentionDays}일`;
-  return `${officeOf(context)}은 이 매물의 출입 승인을 위해 승인자 이름과 연락처를 미리 등록했을 수 있습니다. 등록한 정보는 사무소가 관리하며 방문 조율 외 목적으로 사용하지 않습니다. 같은 정보는 출입승인이 끝난 뒤 ${days}이 지나면 삭제하거나 개인을 알아볼 수 없게 처리합니다.`;
+  return `${topicParticle(officeOf(context))} 이 매물의 출입 승인을 위해 승인자 이름과 연락처를 미리 등록했을 수 있습니다. 등록한 정보는 사무소가 관리하며 방문 조율 외 목적으로 사용하지 않습니다. 같은 정보는 출입승인이 끝난 뒤 ${days}이 지나면 삭제하거나 개인을 알아볼 수 없게 처리합니다.`;
 }
 
 export const APPROVER_VISIBLE_INFO_NOTICE =
@@ -48,7 +50,7 @@ export const APPROVER_VISIBLE_INFO_NOTICE =
 export function customerNoticeLines(context: LinkNoticeContext): string[] {
   const days = context.retentionDays;
   return [
-    `${officeOf(context)}이 방문 일정을 조율하기 위해 아래 정보를 받습니다.`,
+    `${subjectParticle(officeOf(context))} 방문 일정을 조율하기 위해 아래 정보를 받습니다.`,
     "받는 항목: 방문 가능한 시간",
     "이용 목적: 방문 일정 조율과 확정 안내",
     days === null
@@ -84,16 +86,16 @@ export function linkRightsFooter(context: LinkNoticeContext): string {
   ];
   const contact = parts.join(" ");
   const privacy = context.privacyContact ? ` 또는 ${context.privacyContact}` : "";
-  return `입력하신 내용의 열람, 정정, 삭제, 처리정지를 요청할 수 있습니다. 링크가 만료되었다면 ${
-    contact || FALLBACK_OFFICE
-  }${privacy}로 요청해 주세요.`;
+  return `입력하신 내용의 열람, 정정, 삭제, 처리정지를 요청할 수 있습니다. 링크가 만료되었다면 ${instrumentalParticle(
+    `${contact || FALLBACK_OFFICE}${privacy}`,
+  )} 요청해 주세요.`;
 }
 
 export function linkExpiredNotice(context: LinkNoticeContext): string {
   const contact = [context.officeName ?? FALLBACK_OFFICE, context.officeContactPhone]
     .filter((part): part is string => Boolean(part))
     .join(" ");
-  return `${LINK_COMMON_COPY.expired} ${contact}로 문의해 주세요.`;
+  return `${LINK_COMMON_COPY.expired} ${instrumentalParticle(contact)} 문의해 주세요.`;
 }
 
 export const APPROVER_ACCOUNT_NOTICE =
@@ -108,9 +110,9 @@ export const ACCESS_LOG_NOTICE =
 export const GUEST_RIGHTS_REQUEST_COPY = {
   title: "내 정보 요청하기",
   description: (context: Pick<LinkNoticeContext, "officeName" | "operatorName">) =>
-    `링크로 입력하신 내용의 열람, 정정, 삭제, 처리정지를 요청할 수 있습니다. 요청은 ${
-      context.officeName ?? FALLBACK_OFFICE
-    }이 처리하며 ${context.operatorName ?? "사이로"}가 접수와 전달을 돕습니다.`,
+    `링크로 입력하신 내용의 열람, 정정, 삭제, 처리정지를 요청할 수 있습니다. 요청은 ${subjectParticle(
+      context.officeName ?? FALLBACK_OFFICE,
+    )} 처리하며 ${subjectParticle(context.operatorName ?? "사이로")} 접수와 전달을 돕습니다.`,
   fields: [
     "요청 종류(열람, 정정, 삭제, 처리정지)",
     "요청자 구분(본인, 대리인)",

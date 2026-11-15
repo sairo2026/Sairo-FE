@@ -138,3 +138,22 @@ describe("재검증 사유 매핑", () => {
     expect(describeRequestStatusReason("PENDING", "START_PASSED")).toBeUndefined();
   });
 });
+
+describe("승인자 응답의 가려진 재검증 상세", () => {
+  it("서버가 상세 문구를 가려 보내도 일반 문구만 쓰고 코드 이름을 싣지 않는다", () => {
+    for (const code of REVALIDATION_REASON_CODES) {
+      const lines = approverFailureLines(code, "***");
+      expect(lines.length, code).toBeGreaterThan(0);
+      for (const line of lines) {
+        expect(line, code).not.toContain(code);
+        expect(line, code).not.toMatch(/[A-Z]{3,}_[A-Z_]+/);
+      }
+    }
+  });
+
+  it("중개보조원 한도 코드는 일반 문구로만 보인다", () => {
+    expect(approverFailureLines("DEPUTY_VISIT_LOCKED", "가려진 문구")).toEqual([
+      GENERIC_APPROVER_REASON,
+    ]);
+  });
+});

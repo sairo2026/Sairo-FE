@@ -4,6 +4,7 @@ import { Card } from "@/shared/components/ui/card";
 import { FormAlert } from "@/shared/components/feedback/form-frame";
 import { CookieNotice } from "@/shared/legal/cookie-notice";
 import { KAKAO_LINK_NOTICE } from "../model/legal-copy";
+import { breakSentences } from "@/shared/lib/sentences";
 
 const ENTRY_ERRORS: Record<string, string> = {
   auth_failed: "카카오 로그인에 실패했습니다. 다시 시도해 주세요.",
@@ -42,7 +43,11 @@ export function AuthEntry({
             >
               이메일로 시작하기
             </Link>
-            {isLogin ? null : <p className="mt-1 text-caption text-ink-2">{KAKAO_LINK_NOTICE}</p>}
+            {isLogin ? null : (
+              <p className="mt-1 whitespace-pre-line text-caption text-ink-2">
+                {breakSentences(KAKAO_LINK_NOTICE)}
+              </p>
+            )}
           </div>
           <p className="text-caption text-ink-2">
             {isLogin ? (

@@ -103,6 +103,29 @@ describe("사무소 정보", () => {
     expect(screen.getByText("010-9999-8888")).not.toBeNull();
   });
 
+  it("서버가 대표 연락처 형식을 거절하면 입력 아래에 안내한다", async () => {
+    server.use(
+      http.patch("/api/offices/current", () =>
+        mockErrors.validation([
+          { field: "representativePhone", code: "INVALID_FORMAT", message: "서버: 형식" },
+        ]),
+      ),
+    );
+    const user = userEvent.setup();
+    renderOffice(<OfficeInfoScreen />, { role: "OWNER" });
+    await user.click(await screen.findByRole("button", { name: "대표 연락처 변경" }));
+    const input = screen.getByLabelText("대표 연락처");
+    await user.clear(input);
+    await user.type(input, "01099998888");
+    await user.click(screen.getByRole("button", { name: "저장" }));
+    expect(
+      await screen.findByText(
+        "연락처 형식이 올바르지 않습니다. 010-0000-0000 형식으로 입력해 주세요.",
+      ),
+    ).not.toBeNull();
+    expect(screen.queryByText(/서버:/)).toBeNull();
+  });
+
   it("연락처 형식이 틀리면 저장하지 않고 안내한다", async () => {
     const user = userEvent.setup();
     renderOffice(<OfficeInfoScreen />, { role: "OWNER" });
@@ -161,6 +184,55 @@ describe("사무소 정보", () => {
     expect(
       within(dialog).getByText("연락처를 010-0000-0000 형식으로 입력해 주세요."),
     ).not.toBeNull();
+  });
+
+  it("심사 중인 변경 신청이 있으면 심사 중이라고 안내한다", async () => {
+    server.use(
+      http.post("/api/office-change-requests", () =>
+        errorResponse(409, "PENDING_REGISTRATION_EXISTS", "원문"),
+      ),
+    );
+    const user = userEvent.setup();
+    renderOffice(<OfficeInfoScreen />, { role: "OWNER" });
+    await user.click(await screen.findByRole("button", { name: "정보 변경 신청" }));
+    const dialog = screen.getByRole("dialog");
+    await user.selectOptions(within(dialog).getByLabelText("변경 종류"), "ADDRESS");
+    await user.type(within(dialog).getByLabelText("새 주소"), "서울시 중구 1");
+    await user.click(within(dialog).getByRole("button", { name: "변경 신청" }));
+    expect(await within(dialog).findByText(/심사 중인 변경 신청이 있습니다/)).not.toBeNull();
+    expect(within(dialog).queryByText("원문")).toBeNull();
+  });
+
+  it("서버가 사업자등록번호와 연락처 값을 거절하면 해당 입력 아래에 안내한다", async () => {
+    server.use(
+      http.post("/api/office-change-requests", () =>
+        mockErrors.validation([
+          {
+            field: "requestedValues.businessRegistrationNumber",
+            code: "INVALID_VALUE",
+            message: "서버: 체크섬",
+          },
+          {
+            field: "requestedValues.representativePhone",
+            code: "INVALID_FORMAT",
+            message: "서버: 형식",
+          },
+        ]),
+      ),
+    );
+    const user = userEvent.setup();
+    renderOffice(<OfficeInfoScreen />, { role: "OWNER" });
+    await user.click(await screen.findByRole("button", { name: "정보 변경 신청" }));
+    const dialog = screen.getByRole("dialog");
+    await user.selectOptions(within(dialog).getByLabelText("변경 종류"), "REGISTRATION_INFO");
+    await user.type(within(dialog).getByLabelText("사업자등록번호"), "1234567890");
+    await user.click(within(dialog).getByRole("button", { name: "변경 신청" }));
+    expect(
+      await within(dialog).findByText(
+        "존재하지 않는 사업자등록번호로 보입니다. 번호를 다시 확인해 주세요.",
+      ),
+    ).not.toBeNull();
+    expect(within(dialog).queryByText(/서버:/)).toBeNull();
   });
 
   it("본인 확인이 필요하면 확인 뒤 같은 요청을 이어서 보낸다", async () => {
@@ -481,6 +553,23 @@ describe("구성원 상세", () => {
     await user.click(within(dialog).getByRole("button", { name: "변경" }));
     expect(await screen.findByText("역할을 변경했습니다.")).not.toBeNull();
     expect(calls).toBe(2);
+  });
+
+  it("중개보조원 한도를 넘는 강등은 한도 초과 안내를 보여준다", async () => {
+    server.use(
+      http.patch("/api/memberships/:id/role", () =>
+        errorResponse(409, "DEPUTY_QUOTA_EXCEEDED", "원문"),
+      ),
+    );
+    setStepUpHandler(async () => true);
+    const user = userEvent.setup();
+    renderOffice(<MemberDetailScreen membershipId={2} />, { role: "OWNER" });
+    await user.click(await screen.findByRole("button", { name: "역할 변경" }));
+    const dialog = screen.getByRole("dialog");
+    await user.selectOptions(within(dialog).getByLabelText("새 역할"), "DEPUTY");
+    await user.click(within(dialog).getByRole("button", { name: "변경" }));
+    expect(await screen.findByText(/중개보조원 수가 허용 한도를 넘습니다/)).not.toBeNull();
+    expect(screen.queryByText("원문")).toBeNull();
   });
 
   it("정지하려면 사유가 필요하고 정지하면 해제 버튼이 나타난다", async () => {

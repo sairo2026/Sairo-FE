@@ -64,6 +64,21 @@ describe("계약 상세 세 가지 상태", () => {
     expect(screen.getByRole("link", { name: "재계약" })).not.toBeNull();
   });
 
+  it("제출하지 않은 후속업무가 있으면 후속업무 메뉴에 건수를 보이고 없으면 숨긴다", async () => {
+    setMockContractState({
+      contracts: [
+        buildMockContract({ contractId: 9601, openFollowupTaskCount: 2 }),
+        buildMockContract({ contractId: 9602 }),
+      ],
+    });
+    const first = renderOffice(<ContractDetailScreen contractId={9601} />, { role: "OWNER" });
+    expect(await screen.findByLabelText("제출하지 않은 후속업무 2건")).not.toBeNull();
+    first.unmount();
+    renderOffice(<ContractDetailScreen contractId={9602} />, { role: "OWNER" });
+    await screen.findByRole("list", { name: "계약 세 가지 상태" });
+    expect(screen.queryByLabelText(/제출하지 않은 후속업무/)).toBeNull();
+  });
+
   it("매매는 임대기간 상태가 없고 재계약 버튼도 없다", async () => {
     setMockContractState({
       contracts: [

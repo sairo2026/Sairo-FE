@@ -1,4 +1,5 @@
 import { describeApiError } from "@/shared/lib/error-copy";
+import { subjectParticle } from "@/shared/lib/korean";
 
 export const SUPPORT_COPY = {
   hubTitle: "서비스 이용",
@@ -120,7 +121,8 @@ export const PRIVACY_COPY = {
   detailTitle: "요청 처리 상태",
   received: "요청을 접수했습니다. 처리 상태와 기한은 이 화면에서 확인할 수 있습니다.",
   handlerSairo: "사이로가 직접 처리합니다.",
-  handlerOffice: (name: string) => `${name}이 처리하며 사이로가 사무소의 지시에 따라 지원합니다.`,
+  handlerOffice: (name: string) =>
+    `${subjectParticle(name)} 처리하며 사이로가 사무소의 지시에 따라 지원합니다.`,
   handlerOfficeNoName: "해당 사무소가 처리하며 사이로가 사무소의 지시에 따라 지원합니다.",
   legalDue: "법정 처리 기한",
   internalDue: "내부 목표 기한",

@@ -288,6 +288,7 @@ function MergeForm({ first, second }: { first: CustomerDetail; second: CustomerD
       </FormAlert>
       <Checkbox
         label="병합은 되돌릴 수 없다는 점을 확인했습니다."
+        requirement="required"
         checked={isConfirmed}
         disabled={mutation.isPending}
         onCheckedChange={setIsConfirmed}

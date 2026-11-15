@@ -248,6 +248,8 @@ export const workHandlers = [
         status: "TODO" as const,
         assigneeMembershipId: task.assigneeMembershipId,
         assigneeName: task.assigneeName,
+        sourceType: task.sourceType,
+        sourceId: task.sourceId ?? null,
         overdue: isOverdue(task),
       })),
       unreadNotificationCount: state.notifications.filter((item) => !item.read).length,

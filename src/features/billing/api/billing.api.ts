@@ -28,6 +28,7 @@ import { z } from "zod";
 import { apiFetch, withQuery } from "@/shared/api/client";
 import {
   ArchiveGrantStatusWireSchema,
+  PaymentAttemptWireSchema,
   ExportWireSchema,
   InvoiceDetailWireSchema,
   PublicPricingWireSchema,
@@ -102,11 +103,17 @@ export function submitPurchaseConsent(request: SubscriptionPurchaseConsentReques
 }
 
 export function requestFirstPayment() {
-  return apiFetch("/api/subscriptions/first-payment", { method: "POST" });
+  return apiFetch("/api/subscriptions/first-payment", {
+    method: "POST",
+    schema: PaymentAttemptWireSchema,
+  });
 }
 
 export function requestRetryPayment() {
-  return apiFetch("/api/subscriptions/retry-payment", { method: "POST" });
+  return apiFetch("/api/subscriptions/retry-payment", {
+    method: "POST",
+    schema: PaymentAttemptWireSchema,
+  });
 }
 
 export function cancelSubscription() {

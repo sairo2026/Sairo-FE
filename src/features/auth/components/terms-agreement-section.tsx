@@ -7,6 +7,7 @@ import { LegalDocumentModal } from "@/shared/legal/legal-document-view";
 import { findLegalDocumentByTermsCode } from "@/shared/legal/registry";
 import type { LegalDocument } from "@/shared/legal/registry";
 import { COLLECTION_TABLE_COPY, PRIVACY_NOTICE_COPY, SIGNUP_TERMS_COPY } from "../model/legal-copy";
+import { breakSentences } from "@/shared/lib/sentences";
 
 export type TermsCatalogItem = TermsCatalogResponse["items"][number];
 export type TermsSelection = Record<string, boolean>;
@@ -112,7 +113,9 @@ export function TermsAgreementSection({
               {isChanged ? <ChangedBadge /> : null}
             </p>
             {item.termsCode === MARKETING_TERMS_CODE ? (
-              <p className="pl-8 text-caption text-ink-2">{SIGNUP_TERMS_COPY.marketingSummary}</p>
+              <p className="whitespace-pre-line pl-8 text-caption text-ink-2">
+                {breakSentences(SIGNUP_TERMS_COPY.marketingSummary)}
+              </p>
             ) : null}
           </div>
         );
