@@ -27,6 +27,33 @@ describe("접근 상태별 이동 화면", () => {
     expect(landingPathFor({ accessCondition })).toBe(path);
   });
 
+  it("대기 중인 요청이 있으면 선택 화면을 거치지 않고 상태 화면으로 보낸다", () => {
+    expect(landingPathFor({ accessCondition: "PRE_VERIFICATION", pendingMembershipId: 3 })).toBe(
+      "/office/membership",
+    );
+    expect(landingPathFor({ accessCondition: "PRE_VERIFICATION", pendingRegistrationId: 4 })).toBe(
+      "/office/review",
+    );
+    expect(
+      landingPathFor({
+        accessCondition: "PRE_VERIFICATION",
+        pendingRegistrationId: null,
+        pendingMembershipId: null,
+      }),
+    ).toBe("/office/start");
+  });
+
+  it("결제 전에는 대표만 결제 화면으로 보내고 직원은 안내 화면으로 보낸다", () => {
+    expect(landingPathFor({ accessCondition: "VERIFIED_UNPAID", role: "OWNER" })).toBe("/billing");
+    expect(landingPathFor({ accessCondition: "VERIFIED_UNPAID", role: "AGENT" })).toBe("/access");
+    expect(landingPathFor({ accessCondition: "VERIFIED_UNPAID", role: "DEPUTY" })).toBe("/access");
+  });
+
+  it("미납 읽기 전용에서는 대표만 결제 화면으로 보내고 직원은 홈으로 보낸다", () => {
+    expect(landingPathFor({ accessCondition: "PAYMENT_OVERDUE", role: "OWNER" })).toBe("/billing");
+    expect(landingPathFor({ accessCondition: "PAYMENT_OVERDUE", role: "AGENT" })).toBe("/home");
+  });
+
   it("활성 상태는 역할과 관계없이 홈으로 보내 카카오 로그인과 도착 경로가 같다", () => {
     expect(landingPathFor({ accessCondition: "ACTIVE", role: "OWNER" })).toBe("/home");
     expect(landingPathFor({ accessCondition: "ACTIVE", role: "AGENT" })).toBe("/home");

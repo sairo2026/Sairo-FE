@@ -4,6 +4,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useCustomerDetail } from "@/features/customer/hooks/customer-queries";
+import { usePropertyDetail } from "@/features/property/hooks/property-queries";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
@@ -15,7 +17,12 @@ import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { createCoordination } from "../api/visit.api";
 import { visitKeys } from "../hooks/visit-queries";
 import { MAX_CANDIDATES } from "../model/labels";
+import {
+  CUSTOMER_LINK_EXPIRY_RULE,
+  CUSTOMER_LINK_SHORT_EXPIRY_NOTICE,
+} from "../model/customer-link-rules";
 import { describeVisitError, isApiCode } from "../model/messages";
+import { prefillNoticeMessages } from "../model/prefill-notices";
 import { addDays, todayKst, validatePeriod } from "../model/time";
 import { CandidatePicker, CustomerPicker } from "./pickers";
 import type { CandidateChoice } from "./pickers";
@@ -27,15 +34,33 @@ type Errors = {
   end?: string;
 };
 
-export function CoordinationCreateScreen() {
+export function CoordinationCreateScreen({
+  initialPropertyId,
+  initialCustomerId,
+}: {
+  initialPropertyId?: number;
+  initialCustomerId?: number;
+}) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { role, isReadOnly } = useOfficeAccess();
   const isDeputy = role === "DEPUTY";
   const members = useAssignableMembers();
   const today = todayKst();
-  const [customer, setCustomer] = useState<{ customerId: number; name: string } | null>(null);
-  const [candidates, setCandidates] = useState<CandidateChoice[]>([]);
+  const preProperty = usePropertyDetail(initialPropertyId ?? 0);
+  const preCustomer = useCustomerDetail(initialCustomerId ?? 0);
+  const preselectedProperty: CandidateChoice | null =
+    preProperty.data && preProperty.data.registrationStage === "ACTIVE"
+      ? { propertyId: preProperty.data.propertyId, name: preProperty.data.name }
+      : null;
+  const preselectedCustomer =
+    preCustomer.data && preCustomer.data.status === "ACTIVE"
+      ? { customerId: preCustomer.data.customerId, name: preCustomer.data.name }
+      : null;
+  const [pickedCustomer, setCustomer] = useState<{ customerId: number; name: string } | null>(null);
+  const [pickedCandidates, setCandidates] = useState<CandidateChoice[] | null>(null);
+  const customer = pickedCustomer ?? preselectedCustomer;
+  const candidates = pickedCandidates ?? (preselectedProperty ? [preselectedProperty] : []);
   const [start, setStart] = useState(today);
   const [end, setEnd] = useState(addDays(today, 7));
   const [manager, setManager] = useState("");
@@ -62,12 +87,12 @@ export function CoordinationCreateScreen() {
   });
 
   function toggle(choice: CandidateChoice) {
-    setCandidates((current) =>
-      current.some((item) => item.propertyId === choice.propertyId)
-        ? current.filter((item) => item.propertyId !== choice.propertyId)
-        : current.length >= MAX_CANDIDATES
-          ? current
-          : [...current, choice],
+    setCandidates(
+      candidates.some((item) => item.propertyId === choice.propertyId)
+        ? candidates.filter((item) => item.propertyId !== choice.propertyId)
+        : candidates.length >= MAX_CANDIDATES
+          ? candidates
+          : [...candidates, choice],
     );
     setErrors((current) => ({ ...current, candidates: undefined }));
   }
@@ -93,6 +118,20 @@ export function CoordinationCreateScreen() {
     })),
   ];
 
+  const startsSoon = start !== "" && start <= addDays(today, 1);
+  const prefillNotices = prefillNoticeMessages({
+    propertyRequested: initialPropertyId !== undefined,
+    propertyLoading: initialPropertyId !== undefined && preProperty.isPending,
+    propertyFailed: preProperty.isError,
+    propertyInactive: preProperty.data !== undefined && preselectedProperty === null,
+    propertyName: preselectedProperty?.name,
+    customerRequested: initialCustomerId !== undefined,
+    customerLoading: initialCustomerId !== undefined && preCustomer.isPending,
+    customerFailed: preCustomer.isError,
+    customerInactive: preCustomer.data !== undefined && preselectedCustomer === null,
+    customerName: preselectedCustomer?.name,
+  });
+
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
@@ -100,6 +139,9 @@ export function CoordinationCreateScreen() {
         description="고객 한 명과 후보 매물을 골라 조율을 시작합니다."
       />
       {isReadOnly ? <FormNotice>읽기만 가능한 상태라 조율을 만들 수 없습니다.</FormNotice> : null}
+      {prefillNotices.map((message) => (
+        <FormNotice key={message}>{message}</FormNotice>
+      ))}
       <Card>
         <div className="flex flex-col gap-8">
           <CustomerPicker
@@ -136,6 +178,8 @@ export function CoordinationCreateScreen() {
             />
           </div>
           <p className="text-caption text-ink-2">방문 가능 기간은 오늘부터 최대 30일입니다.</p>
+          <p className="text-caption text-ink-2">{CUSTOMER_LINK_EXPIRY_RULE}</p>
+          {startsSoon ? <FormNotice>{CUSTOMER_LINK_SHORT_EXPIRY_NOTICE}</FormNotice> : null}
           {isDeputy ? (
             <FormNotice>중개보조원은 담당자를 바꿀 수 없어 본인이 담당자로 지정됩니다.</FormNotice>
           ) : (

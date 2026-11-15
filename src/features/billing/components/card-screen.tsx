@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { ApiError } from "@/shared/api/client";
@@ -22,8 +23,20 @@ import type { BillingAuthLauncher } from "../lib/payment-widget";
 import { CARD_NOTICE_COPY } from "../model/legal-copy";
 import { COPY, describeBillingError } from "../model/messages";
 import { CommerceNotice, SellerNotice } from "./commerce-notice";
+import { ReadinessNextStep } from "./readiness-next-step";
 
 export const CARD_RESULT_PATH = "/billing/card/result";
+
+const CARD_REMOVE_WARNING_STATUSES = [
+  "ACTIVE",
+  "PRE_PAYMENT",
+  "PAST_DUE_GRACE",
+  "PAST_DUE_RESTRICTED",
+];
+const CARD_REMOVE_MESSAGE =
+  "등록된 카드를 해제할까요? 해제해도 이미 결제된 내역은 그대로 남습니다.";
+const CARD_REMOVE_WARNING =
+  "등록된 카드를 해제하면 다음 결제부터 자동결제가 되지 않아 이용이 중단될 수 있습니다. 해제하지 않고 다른 카드로 교체하는 것을 권합니다. 이미 결제된 내역은 그대로 남습니다.";
 
 function firstBillingText(subscription: SubscriptionCurrent) {
   return subscription.firstBillingScheduledAt
@@ -161,7 +174,11 @@ function CardView({
       <ConfirmDialog
         isOpen={removing}
         title="카드 해제"
-        message="등록된 카드를 해제할까요? 해제해도 이미 결제된 내역은 그대로 남습니다."
+        message={
+          CARD_REMOVE_WARNING_STATUSES.includes(subscription.status)
+            ? CARD_REMOVE_WARNING
+            : CARD_REMOVE_MESSAGE
+        }
         confirmLabel="해제"
         isPending={remove.isPending}
         onConfirm={() => remove.mutate()}
@@ -199,6 +216,7 @@ export type CardResultParams = {
 
 export function CardResultScreen({ authKey, customerKey, version, failCode }: CardResultParams) {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const started = useRef(false);
   const register = useMutation({
     mutationFn: () =>
@@ -207,7 +225,10 @@ export function CardResultScreen({ authKey, customerKey, version, failCode }: Ca
         customerKey: customerKey ?? "",
         cardNoticeVersion: version ?? "",
       }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: billingKeys.subscription }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: billingKeys.subscription });
+      router.replace(CARD_RESULT_PATH);
+    },
   });
   const hasParams = Boolean(authKey && customerKey) && !failCode;
   const subscription = useSubscription();
@@ -219,6 +240,19 @@ export function CardResultScreen({ authKey, customerKey, version, failCode }: Ca
     register.mutate();
   }, [hasParams, register]);
 
+  if (register.isSuccess) {
+    const date = register.data.firstBillingScheduledAt
+      ? formatSeoulDate(register.data.firstBillingScheduledAt)
+      : null;
+    return (
+      <Result title="카드 등록 결과">
+        <FormNotice>
+          {CARD_NOTICE_COPY.done(card?.cardIssuer ?? null, card?.cardLast4 ?? null, date)}
+        </FormNotice>
+        <ReadinessNextStep subscription={subscription.data} completed="card" />
+      </Result>
+    );
+  }
   if (!hasParams) {
     return (
       <Result title="카드 등록 결과">
@@ -251,17 +285,7 @@ export function CardResultScreen({ authKey, customerKey, version, failCode }: Ca
       </Result>
     );
   }
-  const date = register.data.firstBillingScheduledAt
-    ? formatSeoulDate(register.data.firstBillingScheduledAt)
-    : null;
-  return (
-    <Result title="카드 등록 결과">
-      <FormNotice>
-        {CARD_NOTICE_COPY.done(card?.cardIssuer ?? null, card?.cardLast4 ?? null, date)}
-      </FormNotice>
-      <TextLink href="/billing">구독 현황으로</TextLink>
-    </Result>
-  );
+  return null;
 }
 
 function Result({ title, children }: { title: string; children: ReactNode }) {

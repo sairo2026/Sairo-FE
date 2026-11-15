@@ -114,8 +114,19 @@ describe("접근 상태별 허용 범위", () => {
     expect(decideAccess(context("VERIFIED_UNPAID"), "/billing").kind).toBe("allow");
     expect(decideAccess(context("PAYMENT_OVERDUE"), "/billing").kind).toBe("allow");
     expect(decideAccess(context("AUTH_REVOKED"), "/billing").kind).toBe("allow");
-    expect(decideAccess(context("VERIFIED_UNPAID", { role: "AGENT" }), "/billing")).toEqual({
+    expect(decideAccess(context("ACTIVE", { role: "AGENT" }), "/billing")).toEqual({
       kind: "forbidden",
+    });
+  });
+
+  it("직원이 결제 화면으로 오면 결제 전에는 안내 화면으로, 미납 읽기 전용에서는 홈으로 보낸다", () => {
+    expect(decideAccess(context("VERIFIED_UNPAID", { role: "AGENT" }), "/billing")).toEqual(NOTICE);
+    expect(decideAccess(context("VERIFIED_UNPAID", { role: "DEPUTY" }), "/billing")).toEqual(
+      NOTICE,
+    );
+    expect(decideAccess(context("PAYMENT_OVERDUE", { role: "AGENT" }), "/billing")).toEqual({
+      kind: "redirect",
+      to: "/home",
     });
   });
 
@@ -271,6 +282,23 @@ describe("접근 안내 문구", () => {
     expect(owner?.actions.map((action) => action.href)).toContain("/billing");
     expect(agent?.actions.map((action) => action.href)).not.toContain("/billing");
     expect(agent?.description).toContain("대표가 결제");
+  });
+
+  it("결제 전에는 직원에게 대표의 결제를 기다린다고 안내한다", () => {
+    const agent = describeAccess(context("VERIFIED_UNPAID", { role: "AGENT" }));
+    const owner = describeAccess(context("VERIFIED_UNPAID", { role: "OWNER" }));
+    expect(agent?.title).toBe("대표의 결제를 기다리고 있습니다");
+    expect(owner?.title).toBe("결제를 기다리고 있습니다");
+  });
+
+  it("참여 승인을 기다리는 사용자에게는 참여 요청 상태 화면으로 가는 동작을 첫 번째로 준다", () => {
+    const waiting = describeAccess(context("PRE_VERIFICATION", { pendingMembershipId: 3 }));
+    expect(waiting?.actions[0]).toEqual({
+      label: "참여 요청 상태 확인",
+      href: "/office/membership",
+    });
+    const drafting = describeAccess(context("PRE_VERIFICATION", { pendingRegistrationId: 4 }));
+    expect(drafting?.actions[0]?.href).toBe("/office/verification");
   });
 
   it("미납 읽기 전용에서는 반환 기간 종료일을 보여준다", () => {

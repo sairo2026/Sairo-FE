@@ -100,7 +100,10 @@ export function decideAccess(
         accessCondition === "PAYMENT_OVERDUE" ||
         accessCondition === "AUTH_REVOKED";
       if (!canOpen) return notice;
-      return role === "OWNER" ? { kind: "allow", isReadOnly: false } : { kind: "forbidden" };
+      if (role === "OWNER") return { kind: "allow", isReadOnly: false };
+      if (accessCondition === "VERIFIED_UNPAID") return notice;
+      if (accessCondition === "PAYMENT_OVERDUE") return { kind: "redirect", to: "/home" };
+      return { kind: "forbidden" };
     }
     case "business":
       if (accessCondition === "ACTIVE" || accessCondition === "PAYMENT_OVERDUE") {

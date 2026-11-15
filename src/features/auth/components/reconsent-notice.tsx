@@ -13,7 +13,7 @@ import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import { formatSeoulDate } from "@/shared/lib/format";
 import { findLegalDocumentByTermsCode } from "@/shared/legal/registry";
-import { fetchTermsReconsent, recordTermsAgreement } from "../api/auth-context.api";
+import { fetchTermsReconsent, logout, recordTermsAgreement } from "../api/auth-context.api";
 import { authContextQueryKey } from "../hooks/use-auth-context";
 import { RECONSENT_COPY } from "../model/legal-copy";
 import { AUTH_ROUTES } from "../model/routes";
@@ -38,6 +38,13 @@ export function ReconsentNotice() {
   const queryClient = useQueryClient();
   const [isDeclined, setIsDeclined] = useState(false);
   const query = useQuery({ queryKey: reconsentQueryKey, queryFn: fetchTermsReconsent });
+  const logoutMutation = useMutation({
+    mutationFn: logout,
+    onSuccess: () => {
+      queryClient.clear();
+      router.replace(AUTH_ROUTES.login);
+    },
+  });
   const agreeMutation = useMutation({
     mutationFn: agreeToAll,
     onSuccess: async () => {
@@ -155,6 +162,33 @@ export function ReconsentNotice() {
             회원 탈퇴
           </Link>
         </div>
+        <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-caption font-semibold text-ink-2">
+          <Link
+            href={AUTH_ROUTES.privacyRequests}
+            className="hover:text-primary hover:underline active:text-primary-pressed"
+          >
+            개인정보 권리 요청
+          </Link>
+          <Link
+            href={AUTH_ROUTES.support}
+            className="hover:text-primary hover:underline active:text-primary-pressed"
+          >
+            지원 문의
+          </Link>
+          <button
+            type="button"
+            disabled={logoutMutation.isPending}
+            onClick={() => logoutMutation.mutate()}
+            className="font-semibold hover:text-primary hover:underline active:text-primary-pressed"
+          >
+            로그아웃
+          </button>
+        </div>
+        {logoutMutation.isError ? (
+          <p role="alert" className="mt-3 text-caption text-danger">
+            로그아웃하지 못했습니다. 다시 시도해 주세요.
+          </p>
+        ) : null}
       </Card>
     </main>
   );

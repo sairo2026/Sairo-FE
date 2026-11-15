@@ -162,6 +162,25 @@ describe("카드 등록", () => {
     expect(await screen.findByText("등록된 카드가 없습니다.")).not.toBeNull();
   });
 
+  it("구독 중에 카드를 해제하려면 자동결제가 멈출 수 있다고 먼저 경고한다", async () => {
+    billingState.subscription = buildSubscription({
+      status: "ACTIVE",
+      paymentMethod: {
+        cardIssuer: "신한카드",
+        cardLast4: "1234",
+        registeredAt: "2026-11-10T09:00:00+09:00",
+      },
+      readiness: { hasBillingKey: true, hasValidConsent: true },
+    });
+    const user = userEvent.setup();
+    renderOffice(<CardScreen launcher={fakeLauncher()} />, { role: "OWNER" });
+    await user.click(await screen.findByRole("button", { name: "카드 해제" }));
+    const dialog = await screen.findByRole("dialog");
+    expect(dialog.textContent).toContain("다음 결제부터 자동결제가 되지 않아");
+    await user.click(within(dialog).getByRole("button", { name: "취소" }));
+    expect(billingState.subscription.readiness.hasBillingKey).toBe(true);
+  });
+
   it("처리 중인 청구가 있으면 카드 교체가 결과 확인 뒤 완료된다고 안내한다", async () => {
     billingState.subscription = buildSubscription({
       paymentMethod: {
@@ -218,6 +237,29 @@ describe("카드 등록 결과", () => {
       ),
     ).not.toBeNull();
     expect(billingState.subscription.readiness.hasBillingKey).toBe(true);
+  });
+
+  it("성공하면 주소의 인증 정보를 지우고 아직 동의 전이면 동의를 주 버튼으로 안내한다", async () => {
+    renderOffice(
+      <CardResultScreen authKey="auth-ok" customerKey="customer-key-0001" version="1.0" />,
+      { role: "OWNER" },
+    );
+    const next = await screen.findByRole("link", { name: "구독 구매 동의하기" });
+    expect(next.getAttribute("href")).toBe("/billing/consent");
+    expect(router.replace).toHaveBeenCalledWith("/billing/card/result");
+  });
+
+  it("성공했고 동의도 끝나 있으면 결제 준비 완료를 알린다", async () => {
+    billingState.subscription = buildSubscription({
+      readiness: { hasBillingKey: false, hasValidConsent: true },
+    });
+    renderOffice(
+      <CardResultScreen authKey="auth-ok" customerKey="customer-key-0001" version="1.0" />,
+      { role: "OWNER" },
+    );
+    expect(await screen.findByText(/결제 준비가 완료됐습니다/)).not.toBeNull();
+    expect(screen.queryByRole("link", { name: "구독 구매 동의하기" })).toBeNull();
+    expect(screen.getByRole("link", { name: "구독 현황으로" })).not.toBeNull();
   });
 
   it("카드사가 승인하지 않으면 결제된 금액이 없다고 안내한다", async () => {
@@ -356,6 +398,26 @@ describe("구독 구매 동의", () => {
       await screen.findByText(/구독 조건 확인이 기록됐습니다. 동의를 저장해도 결제되지 않습니다/),
     ).not.toBeNull();
     expect(billingState.subscription.readiness.hasValidConsent).toBe(true);
+    expect(screen.getByRole("link", { name: "카드 등록하기" }).getAttribute("href")).toBe(
+      "/billing/card",
+    );
+  });
+
+  it("동의를 마쳤고 카드도 있으면 결제 준비 완료를 알린다", async () => {
+    billingState.subscription = buildSubscription({
+      readiness: { hasBillingKey: true, hasValidConsent: false },
+      paymentMethod: {
+        cardIssuer: "신한카드",
+        cardLast4: "1234",
+        registeredAt: "2026-11-10T09:00:00+09:00",
+      },
+    });
+    const user = userEvent.setup();
+    renderOffice(<ConsentScreen />, { role: "OWNER" });
+    for (const box of await screen.findAllByRole("checkbox")) await user.click(box);
+    await user.click(screen.getByRole("button", { name: "동의하고 확인 완료" }));
+    expect(await screen.findByText(/결제 준비가 완료됐습니다/)).not.toBeNull();
+    expect(screen.queryByRole("link", { name: "카드 등록하기" })).toBeNull();
   });
 
   it("서버 재계산값과 다르면 미리보기를 다시 받아 재확인을 받는다", async () => {

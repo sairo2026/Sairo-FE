@@ -31,6 +31,7 @@ import { describeContractError } from "../model/messages";
 const TABS = [
   { key: "valid", label: "유효 계약" },
   { key: "maturity", label: "임대 만기 90일 이내" },
+  { key: "draft", label: "초안 계약" },
   { key: "all", label: "전체 계약" },
 ] as const;
 
@@ -43,6 +44,7 @@ function ContractTable({ tab }: { tab: string }) {
   const [size, setSize] = useState<PageSize>(25);
   const query = useContractList({
     ...(tab === "valid" ? { contractStatus: "SIGNED" } : {}),
+    ...(tab === "draft" ? { contractStatus: "DRAFT" } : {}),
     ...(tab === "maturity" ? { leaseEndWithinDays: 90 } : {}),
     ...(applied.partyName !== "" ? { partyName: applied.partyName } : {}),
     ...(applied.propertyAddress !== "" ? { propertyAddress: applied.propertyAddress } : {}),
@@ -115,7 +117,9 @@ function ContractTable({ tab }: { tab: string }) {
         emptyMessage={
           tab === "maturity"
             ? "임대 만기가 90일 안에 오는 계약이 없습니다."
-            : "표시할 계약이 없습니다."
+            : tab === "draft"
+              ? "작성 중인 초안 계약이 없습니다."
+              : "표시할 계약이 없습니다."
         }
         columns={[
           {

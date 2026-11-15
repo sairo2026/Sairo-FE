@@ -272,6 +272,9 @@ describe("고객 수정", () => {
     });
     renderOffice(<CustomerEditScreen customerId={301} />, { role: "AGENT" });
     expect(await screen.findByText(/보관된 고객은 수정할 수 없습니다/)).not.toBeNull();
+    expect(screen.getByRole("link", { name: "상세로 돌아가기" }).getAttribute("href")).toBe(
+      "/customers/301",
+    );
   });
 });
 

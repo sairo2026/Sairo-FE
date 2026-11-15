@@ -12,6 +12,7 @@ import {
   emptyDateRule,
   emptyDateWindow,
   emptyRange,
+  excludeOnlyDates,
 } from "../model/conditions";
 import type {
   ConditionErrors,
@@ -107,6 +108,7 @@ export function ConditionForm({
   }
 
   const maxVisitsEmpty = values.maxVisitsPerDay.trim() === "";
+  const wholeDayBlockedDates = excludeOnlyDates(values);
 
   return (
     <div className="flex flex-col gap-8">
@@ -140,8 +142,13 @@ export function ConditionForm({
         </h2>
         <p className="text-caption text-ink-2">
           한 요일에 여러 시간대를 넣을 수 있습니다. 겹치거나 맞닿는 시간대는 저장할 때 하나로
-          합쳐집니다.
+          합쳐집니다. 가능한 시간대가 하나도 없으면 모든 신청이 거절됩니다.
         </p>
+        {errors.windows ? (
+          <p role="alert" className="text-caption text-danger">
+            {errors.windows}
+          </p>
+        ) : null}
         {WEEKDAYS.map((weekday) => {
           const ranges = values.weekday[weekday.value] ?? [];
           return (
@@ -191,9 +198,20 @@ export function ConditionForm({
           날짜별 가능 시간과 날짜 예외
         </h2>
         <p className="text-caption text-ink-2">
-          날짜 예외는 그 날짜에 한해 요일별 가능 시간을 대체합니다. 방문할 수 없는 날은 하루 종일
-          방문 불가로 입력하세요.
+          날짜 예외는 그 날짜에 한해 요일별 가능 시간을 대체합니다. 제외할 시간대는 같은 날짜의
+          가능한 시간대에서 빼는 용도라서, 가능한 시간대 없이 제외할 시간대만 넣으면 그날 전체가
+          방문 불가로 처리됩니다. 방문할 수 없는 날은 하루 종일 방문 불가로 입력하세요.
         </p>
+        {wholeDayBlockedDates.map((date) => (
+          <p
+            key={date}
+            role="status"
+            className="rounded-control bg-tag-yellow px-4 py-3 text-caption text-tag-yellow-ink"
+          >
+            {date}에는 제외할 시간대만 있고 가능한 시간대가 없어 그날 전체가 방문 불가로 처리됩니다.
+            일부 시간만 막으려면 같은 날짜에 이 날짜만 가능한 시간을 함께 입력해 주세요.
+          </p>
+        ))}
         {values.dateWindows.map((row, index) => (
           <div key={row.id} className="flex flex-col gap-3 rounded-control bg-surface p-4">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -325,7 +343,8 @@ export function ConditionForm({
           onValueChange={(value) => patch({ grouping: value as ConditionFormValues["grouping"] })}
         />
         <p className="text-caption text-ink-2">
-          연속·분산 선호는 신청 목록의 표시 순서에만 참고하며 위반으로 판정하지 않습니다.
+          연속·분산 선호는 저장되지만 아직 신청 목록의 순서에는 쓰이지 않으며 위반으로도 판정하지
+          않습니다. 신청 목록은 접수 순서로 보입니다.
         </p>
       </section>
 

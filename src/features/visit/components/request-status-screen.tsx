@@ -22,8 +22,11 @@ import {
   REQUEST_KIND_LABEL,
   REQUEST_STATUS_FILTERS,
   REQUEST_STATUS_LABEL,
+  isRequestStatusFilter,
 } from "../model/request-labels";
+import { describeRequestStatusReason } from "../model/revalidation-reasons";
 import { RequestStatusBadge, WithdrawButton } from "./request-section";
+import { RevalidationFailureNote } from "./revalidation-failure-note";
 
 function NoticePanel({ requestIds }: { requestIds: number[] }) {
   const query = useRequestNotices();
@@ -92,10 +95,23 @@ function NoticePanel({ requestIds }: { requestIds: number[] }) {
   );
 }
 
-export function RequestStatusScreen({ coordinationId }: { coordinationId: number }) {
+function ReasonLine({ status, reason }: { status: string; reason: string | null | undefined }) {
+  const text = describeRequestStatusReason(status, reason);
+  return text ? <span className="text-caption text-ink-2">사유 {text}</span> : null;
+}
+
+export function RequestStatusScreen({
+  coordinationId,
+  initialStatus,
+}: {
+  coordinationId: number;
+  initialStatus?: string;
+}) {
   const requests = useVisitRequests(coordinationId);
   const detail = useCoordinationDetail(coordinationId);
-  const [filter, setFilter] = useState<string>("");
+  const [filter, setFilter] = useState<string>(
+    isRequestStatusFilter(initialStatus) ? initialStatus : "",
+  );
   const nameOf = (candidateId: number) =>
     detail.data?.candidateProperties.find((item) => item.candidatePropertyId === candidateId)
       ?.propertyName ?? `후보 ${candidateId}`;
@@ -169,11 +185,14 @@ export function RequestStatusScreen({ coordinationId }: { coordinationId: number
                               {formatSeoulDateTime(item.requestedEndAt)} · 제출{" "}
                               {formatSeoulDateTime(item.submittedAt)}
                             </span>
-                            {item.statusReason ? (
-                              <span className="text-caption text-ink-2">
-                                사유 {item.statusReason}
-                              </span>
-                            ) : null}
+                            {item.status === "REVALIDATION_FAILED" ? (
+                              <RevalidationFailureNote
+                                requestId={item.requestId}
+                                statusReason={item.statusReason}
+                              />
+                            ) : (
+                              <ReasonLine status={item.status} reason={item.statusReason} />
+                            )}
                           </div>
                           <span className="flex items-center gap-2">
                             <RequestStatusBadge status={item.status} />

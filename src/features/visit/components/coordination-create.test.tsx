@@ -4,11 +4,20 @@ import userEvent from "@testing-library/user-event";
 import { http } from "msw";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { errorResponse } from "@/mocks/error-responses";
-import { resetMockCustomerState } from "@/mocks/handlers/customer";
-import { resetMockPropertyState } from "@/mocks/handlers/property";
+import {
+  getMockCustomerState,
+  resetMockCustomerState,
+  setMockCustomerState,
+} from "@/mocks/handlers/customer";
+import {
+  getMockPropertyState,
+  resetMockPropertyState,
+  setMockPropertyState,
+} from "@/mocks/handlers/property";
 import { getMockVisitState, resetMockVisitState, setMockVisitState } from "@/mocks/handlers/visit";
 import { server, startMockServer } from "@/mocks/server";
 import { renderOffice } from "@/shared/testing/office-render";
+import { addDays, todayKst } from "../model/time";
 import { CoordinationCreateScreen } from "./coordination-create-screen";
 
 const navigation = vi.hoisted(() => ({ push: vi.fn() }));
@@ -160,6 +169,79 @@ describe("방문 조율 생성", () => {
     await user.type(screen.getByLabelText("고객 검색"), "없는이름");
     await user.click(screen.getAllByRole("button", { name: "검색" })[0] as HTMLElement);
     expect(await screen.findByText("검색된 고객이 없습니다.")).not.toBeNull();
+  });
+
+  it("시작일이 오늘이면 고객 링크가 6시간만 유효하다고 알리고 모레 이후로 바꾸면 알림이 사라진다", async () => {
+    renderOffice(<CoordinationCreateScreen />, { role: "OWNER" });
+    expect(
+      screen.getByText(/발급한 뒤 7일 또는 방문 가능 시작일 24시간 전 중 빠른 시각/),
+    ).not.toBeNull();
+    expect(screen.getByText(/발급한 시각부터 6시간만 사용할 수 있습니다/)).not.toBeNull();
+    fireEvent.change(screen.getByLabelText("방문 가능 시작일"), {
+      target: { value: addDays(todayKst(), 2) },
+    });
+    fireEvent.change(screen.getByLabelText("방문 가능 종료일"), {
+      target: { value: addDays(todayKst(), 9) },
+    });
+    await waitFor(() => expect(screen.queryByText(/발급한 시각부터 6시간만/)).toBeNull());
+  });
+
+  it("매물이나 고객이 없으면 등록 링크와 활성 등록 매물만 고를 수 있다는 안내를 보여준다", async () => {
+    setMockPropertyState({ properties: [] });
+    setMockCustomerState({ customers: [] });
+    renderOffice(<CoordinationCreateScreen />, { role: "OWNER" });
+    expect(await screen.findByRole("link", { name: "매물 등록하기" })).not.toBeNull();
+    expect(screen.getByRole("link", { name: "매물 등록하기" }).getAttribute("href")).toBe(
+      "/properties/new",
+    );
+    expect(screen.getByRole("link", { name: "고객 등록하기" }).getAttribute("href")).toBe(
+      "/customers/new",
+    );
+    expect(screen.getByText(/활성 등록된 매물만 선택할 수 있고/)).not.toBeNull();
+  });
+
+  it("주소의 매물 번호와 고객 번호로 후보 매물과 고객을 미리 고른다", async () => {
+    const propertyId = getMockPropertyState().properties[0]?.propertyId ?? 0;
+    const customerId = getMockCustomerState().customers[0]?.customerId ?? 0;
+    const user = userEvent.setup();
+    renderOffice(
+      <CoordinationCreateScreen initialPropertyId={propertyId} initialCustomerId={customerId} />,
+      { role: "OWNER" },
+    );
+    expect(await screen.findByText(/매물을 후보로 미리 골랐습니다/)).not.toBeNull();
+    expect(await screen.findByText(/고객을 미리 골랐습니다/)).not.toBeNull();
+    expect(screen.getByText(/후보 매물 선택 \(1\/20\)/)).not.toBeNull();
+    await user.click(screen.getByRole("button", { name: "조율 만들기" }));
+    await waitFor(() => expect(navigation.push).toHaveBeenCalledTimes(1));
+    const created = getMockVisitState().coordinations[0];
+    expect(created?.candidateProperties.map((item) => item.propertyId)).toEqual([propertyId]);
+    expect(created?.customerId).toBe(customerId);
+  });
+
+  it("미리 고른 매물을 다시 누르면 후보에서 빠진다", async () => {
+    const propertyId = getMockPropertyState().properties[0]?.propertyId ?? 0;
+    const user = userEvent.setup();
+    renderOffice(<CoordinationCreateScreen initialPropertyId={propertyId} />, { role: "OWNER" });
+    expect(await screen.findByText(/후보 매물 선택 \(1\/20\)/)).not.toBeNull();
+    await user.click(await screen.findByRole("checkbox", { name: "국민대 앞 아파트 선택" }));
+    expect(screen.getByText(/후보 매물 선택 \(0\/20\)/)).not.toBeNull();
+  });
+
+  it("활성 등록이 아닌 매물이나 없는 매물은 미리 고르지 않고 이유를 알린다", async () => {
+    const properties = getMockPropertyState().properties;
+    const inactive = properties.find((item) => item.registrationStage !== "ACTIVE");
+    expect(inactive).toBeDefined();
+    const { unmount } = renderOffice(
+      <CoordinationCreateScreen initialPropertyId={inactive?.propertyId ?? 0} />,
+      { role: "OWNER" },
+    );
+    expect(
+      await screen.findByText(/활성 등록 상태가 아니어서 후보로 고르지 못했습니다/),
+    ).not.toBeNull();
+    expect(screen.getByText(/후보 매물 선택 \(0\/20\)/)).not.toBeNull();
+    unmount();
+    renderOffice(<CoordinationCreateScreen initialPropertyId={999999} />, { role: "OWNER" });
+    expect(await screen.findByText(/미리 고를 매물을 불러오지 못했습니다/)).not.toBeNull();
   });
 
   it("읽기 전용 상태에서는 만들기 버튼이 막힌다", () => {

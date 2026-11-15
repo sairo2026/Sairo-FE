@@ -35,6 +35,9 @@ export const ImportBatchListResponseSchema = z.object({
       status: z.string(),
       createdAt: z.iso.datetime({ offset: true }),
       rowCount: z.number().nullable().optional(),
+      succeededCount: z.number().nullable().optional(),
+      failedCount: z.number().nullable().optional(),
+      skippedDuplicateCount: z.number().nullable().optional(),
       executedAt: z.iso.datetime({ offset: true }).nullable().optional(),
       cancellableUntil: z.iso.datetime({ offset: true }).nullable().optional(),
       supportRequestId: z.number().nullable().optional(),
@@ -154,9 +157,14 @@ export const ImportMappingSuggestionResponseSchema = z.object({
 export type ImportMappingSuggestionResponse = z.infer<typeof ImportMappingSuggestionResponseSchema>;
 
 export const ImportPreviewResponseSchema = z.object({
-  duplicateWarnings: z.array(z.unknown()).nullable().optional(),
+  duplicateWarnings: z
+    .array(z.object({ reason: z.string(), existingArchived: z.boolean() }))
+    .nullable()
+    .optional(),
   rows: z.array(
     z.object({
+      duplicateJudgement: z.string(),
+      matchedTargetId: z.number().nullable(),
       relationMatches: z
         .array(
           z.object({
@@ -186,10 +194,14 @@ export const ImportPreviewResponseSchema = z.object({
     }),
   ),
   summary: z.object({
+    duplicateCount: z.number(),
+    newCount: z.number(),
+    alreadyImportedCount: z.number(),
+    duplicateInFileCount: z.number(),
+    duplicateExistingCount: z.number(),
     rowCount: z.number(),
     errorRowCount: z.number(),
     warningCount: z.number(),
-    duplicateCount: z.number(),
     relationMatchCount: z.number(),
   }),
   page: z.number(),
@@ -263,7 +275,12 @@ export const ImportSupportRequestDetailResponseSchema = z.object({
   allowedActions: z.array(z.string()),
   batchStatus: z.string(),
   executionResult: z
-    .object({ succeeded: z.number(), failed: z.number(), unprocessed: z.number() })
+    .object({
+      succeeded: z.number(),
+      failed: z.number(),
+      skippedDuplicate: z.number(),
+      unprocessed: z.number(),
+    })
     .nullable()
     .optional(),
   submittedMapping: z
@@ -353,6 +370,12 @@ export const ImportBatchDetailResponseSchema = z.object({
       total: z.number(),
       succeeded: z.number(),
       failed: z.number(),
+      skippedDuplicate: z.number(),
+      skippedByReason: z.object({
+        alreadyImported: z.number(),
+        duplicateInFile: z.number(),
+        duplicateExisting: z.number(),
+      }),
       unprocessed: z.number(),
     })
     .nullable()

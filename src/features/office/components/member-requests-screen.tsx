@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
+import { ErrorScreen } from "@/shared/components/feedback/error-screen";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
@@ -326,6 +327,8 @@ function PendingTable() {
 }
 
 export function MemberRequestsScreen() {
+  const { role } = useOfficeAccess();
+  if (role !== "OWNER") return <ErrorScreen kind="forbidden" />;
   return (
     <div className="flex flex-col gap-6">
       <PageHeader

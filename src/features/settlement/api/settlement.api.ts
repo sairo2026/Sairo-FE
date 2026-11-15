@@ -5,7 +5,7 @@ import {
   MonthlySettlementListResponseSchema,
   MonthlySettlementResponseSchema,
 } from "@/lib/api/contracts/work.schema";
-import { apiFetch, withQuery } from "@/shared/api/client";
+import { ApiError, apiFetch, withQuery } from "@/shared/api/client";
 
 export const SettlementDetailRowSchema = z.record(z.string(), z.unknown());
 
@@ -47,4 +47,33 @@ export function saveMemo(yearMonth: string, version: number, content: string) {
     headers: { "If-Match": String(version) },
     schema: MonthlyMemoUpsertResponseSchema,
   });
+}
+
+async function toApiError(response: Response): Promise<ApiError> {
+  const body: unknown = await response.json().catch(() => null);
+  const record = typeof body === "object" && body !== null ? body : {};
+  const code = "code" in record && typeof record.code === "string" ? record.code : "UNKNOWN";
+  const message =
+    "message" in record && typeof record.message === "string"
+      ? record.message
+      : "요청을 처리하지 못했습니다.";
+  return new ApiError(response.status, { code, message });
+}
+
+/** CSV 본문은 JSON이 아니어서 공통 클라이언트를 쓰지 않는다. */
+export async function fetchSettlementCsv(yearMonth: string): Promise<Blob> {
+  const response = await fetch(`/api/settlements/${yearMonth}/export`, { credentials: "include" });
+  if (!response.ok) throw await toApiError(response);
+  return response.blob();
+}
+
+export function saveBlob(blob: Blob, fileName: string): void {
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = fileName;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
 }

@@ -94,6 +94,14 @@ describe("내 정보와 연락처", () => {
     expect(screen.getByText("변경과 연결·해제는 본인 확인을 한 번 더 합니다.")).not.toBeNull();
   });
 
+  it("홈으로 돌아가는 링크를 보여준다", async () => {
+    seedMe();
+    open();
+    expect((await screen.findByRole("link", { name: "홈으로" })).getAttribute("href")).toBe(
+      "/home",
+    );
+  });
+
   it("이메일과 휴대폰이 없으면 등록되지 않음을 보여준다", async () => {
     seedMe({ email: null, phone: null, emailVerified: false, phoneVerified: false });
     open();

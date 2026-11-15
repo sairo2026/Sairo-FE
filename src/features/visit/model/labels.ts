@@ -119,21 +119,6 @@ export const APPLICANT_RELATION_LABEL = {
   GRANTED_OFFICE: "허용받은 사무소",
 } as const;
 
-export const REVALIDATION_FAILURE_LABEL: Record<string, string> = {
-  WINDOW_MISMATCH: "승인자 가능 시간과 맞지 않습니다.",
-  MIN_GAP: "다른 방문과의 최소 간격을 지키지 못합니다.",
-  MAX_VISITS_PER_DAY: "하루 최대 방문 횟수를 넘습니다.",
-  SINGLE_VISIT_MAX: "1회 허용 시간을 넘습니다.",
-  VALIDITY_PERIOD: "조건 적용 기간 밖입니다.",
-  GRANT_INACTIVE: "신청 허용이 회수되었거나 만료되었습니다.",
-  SCHEDULE_CONFLICT: "같은 시간대에 다른 일정이 있습니다.",
-  TRAVEL_INFEASIBLE: "앞뒤 방문과의 이동시간이 부족합니다.",
-  DEPUTY_VISIT_LOCKED: "신청 사무소의 중개보조원 인원 한도를 넘어 방문 업무가 잠겨 있습니다.",
-};
-
-export const APPROVER_HIDDEN_FAILURE_CODES: readonly string[] = ["DEPUTY_VISIT_LOCKED"];
-export const GENERIC_REVALIDATION_FAILURE = "재검증에 실패해 신청을 확정하지 못했습니다.";
-
 export const CANCEL_REASON_CODES = [
   "USER_CANCEL",
   "APPROVER_REASON",

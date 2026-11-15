@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useSubscription } from "@/features/billing/hooks/billing-queries";
 import { COORDINATION_STATUSES, statusLabel, statusTone } from "@/features/visit/model/labels";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
@@ -11,7 +12,7 @@ import { PageHeader } from "@/shared/components/ui/page-header";
 import { formatSeoulDate, formatSeoulDateTime } from "@/shared/lib/format";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import type { HomeSummary } from "../api/wire";
-import { useHomeSummary, useTasks } from "../hooks/home-queries";
+import { useHomeSummary, useIsEmptyOffice, useTasks } from "../hooks/home-queries";
 import { TaskDialog } from "./task-dialog";
 import type { TaskItem } from "./task-dialog";
 import { MiniCalendar } from "./mini-calendar";
@@ -96,15 +97,59 @@ function TaskOpener({ taskId, onClose }: { taskId: number; onClose: () => void }
   return <TaskDialog isOpen task={found} onClose={onClose} />;
 }
 
-/** 계약 ID가 있으면 그 계약 상세로, 없는 응답이면 만기 계약 목록으로 보낸다. */
+/** 계약 ID가 있으면 그 계약의 후속업무 확인 화면으로, 없는 응답이면 만기 계약 목록으로 보낸다. */
 function followupHref(contractId: number | undefined) {
-  return contractId === undefined ? "/contracts?tab=maturity" : `/contracts/${contractId}`;
+  return contractId === undefined
+    ? "/contracts?tab=maturity"
+    : `/contracts/${contractId}/followups`;
+}
+
+const FIRST_USE_LINK_CLASS =
+  "group flex items-center justify-between gap-3 rounded-control border border-line px-4 py-3 font-semibold text-ink transition-colors hover:border-primary hover:bg-primary-soft active:bg-primary-line";
+
+function FirstUseGuide({ isOwner, needsCard }: { isOwner: boolean; needsCard: boolean }) {
+  const steps = [
+    { href: "/properties/new", label: "매물 등록" },
+    { href: "/customers/new", label: "고객 등록" },
+    ...(isOwner ? [{ href: "/import", label: "데이터 이전" }] : []),
+    ...(needsCard ? [{ href: "/billing/card-guide", label: "카드 등록 안내" }] : []),
+  ];
+  return (
+    <section
+      aria-labelledby="home-first-use"
+      className="flex flex-col gap-4 rounded-card border border-line bg-white px-7 py-6"
+    >
+      <div className="flex flex-col gap-1">
+        <h2 id="home-first-use" className="text-h2 font-semibold text-ink">
+          첫 사용 안내
+        </h2>
+        <p className="text-caption text-ink-2">
+          아직 등록된 매물과 고객이 없습니다. 아래에서 시작해 주세요.
+        </p>
+      </div>
+      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {steps.map((step) => (
+          <li key={step.href}>
+            <Link href={step.href} className={FIRST_USE_LINK_CLASS}>
+              {step.label}
+              <span aria-hidden="true" className="text-ink-3 group-hover:text-primary">
+                ›
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
 }
 
 function HomeBody({ summary }: { summary: HomeSummary }) {
   const { role, isReadOnly } = useOfficeAccess();
   const isDeputy = role === "DEPUTY";
   const isOwner = role === "OWNER";
+  const isEmptyOffice = useIsEmptyOffice(role !== null && !isDeputy && !isReadOnly);
+  const subscription = useSubscription(isOwner);
+  const needsCard = isOwner && subscription.data?.readiness.hasBillingKey === false;
   const [creating, setCreating] = useState(false);
   const [openTaskId, setOpenTaskId] = useState<number | null>(null);
   const overdue = summary.openTasks.filter((task) => task.overdue);
@@ -165,9 +210,10 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
           label="건"
         />
       </div>
-      {isOwner ? (
+      {isEmptyOffice ? <FirstUseGuide isOwner={isOwner} needsCard={needsCard} /> : null}
+      {needsCard && !isEmptyOffice ? (
         <p className="text-caption text-ink-2">
-          결제 카드를 아직 등록하지 않았다면{" "}
+          결제 카드를 아직 등록하지 않았습니다.{" "}
           <Link
             href="/billing/card-guide"
             className="font-semibold text-primary underline hover:text-primary-hover active:text-primary-pressed"

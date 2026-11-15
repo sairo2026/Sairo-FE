@@ -7,6 +7,8 @@ import {
   emptyDateRule,
   emptyDateWindow,
   emptyRange,
+  excludeOnlyDates,
+  hasAvailableWindow,
   toConditionRequest,
   validateCondition,
   violatedRuleLabel,
@@ -127,8 +129,43 @@ describe("승인자 조건 입력 모델", () => {
     expect(form.dateRules[0]?.minGapMinutes.mode).toBe("FOLLOW");
   });
 
-  it("알 수 없는 위반 규칙 코드는 그대로 보여준다", () => {
+  it("알 수 없는 위반 규칙 코드는 영문 그대로 보이지 않고 일반 문구로 바꾼다", () => {
     expect(violatedRuleLabel("MIN_GAP")).toBe("방문 간 최소 간격 위반");
-    expect(violatedRuleLabel("NEW_CODE")).toBe("NEW_CODE");
+    expect(violatedRuleLabel("NEW_CODE")).toBe("조건 위반");
+  });
+
+  it("가능한 시간대가 하나도 없으면 저장 전에 막는다", () => {
+    const empty = emptyConditionForm();
+    expect(hasAvailableWindow(empty)).toBe(false);
+    expect(validateCondition(empty).windows).toMatch(/가능한 시간대를 1개 이상/);
+    const onlyExclude = {
+      ...empty,
+      dateWindows: [{ ...emptyDateWindow(), date: "2026-11-20", kind: "EXCLUDE" as const }],
+    };
+    expect(validateCondition(onlyExclude).windows).toBeDefined();
+    const withWeekday = { ...empty, weekday: { 1: [emptyRange()] } };
+    expect(validateCondition(withWeekday).windows).toBeUndefined();
+    const withDateWindow = {
+      ...empty,
+      dateWindows: [{ ...emptyDateWindow(), date: "2026-11-20", kind: "AVAILABLE" as const }],
+    };
+    expect(validateCondition(withDateWindow).windows).toBeUndefined();
+  });
+
+  it("제외할 시간대만 있는 날짜를 하루 전체 불가로 처리되는 날짜로 알려 준다", () => {
+    const form = {
+      ...emptyConditionForm(),
+      dateWindows: [
+        { ...emptyDateWindow(), date: "2026-11-21", kind: "EXCLUDE" as const },
+        { ...emptyDateWindow(), date: "2026-11-20", kind: "EXCLUDE" as const },
+        { ...emptyDateWindow(), date: "2026-11-20", kind: "EXCLUDE" as const },
+        { ...emptyDateWindow(), date: "2026-11-22", kind: "EXCLUDE" as const },
+        { ...emptyDateWindow(), date: "2026-11-22", kind: "AVAILABLE" as const },
+        { ...emptyDateWindow(), date: "2026-11-23", kind: "EXCLUDE" as const },
+        { ...emptyDateWindow(), date: "2026-11-23", kind: "BLOCK" as const },
+        { ...emptyDateWindow(), date: "", kind: "EXCLUDE" as const },
+      ],
+    };
+    expect(excludeOnlyDates(form)).toEqual(["2026-11-20", "2026-11-21"]);
   });
 });

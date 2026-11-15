@@ -25,12 +25,12 @@ import {
   cancelImportSupport,
   requestImportSupportChanges,
 } from "../api/support-request.api";
-import type { ImportSupportRequestDetailResponse } from "@/lib/api/contracts/migration.schema";
+import type { ImportSupportDetail } from "../api/wire";
 import { migrationKeys } from "../hooks/migration-queries";
 import { supportRequestKeys, useImportSupportRequest } from "../hooks/support-queries";
 import { PaymentUnavailableError, tossPaymentLauncher } from "../lib/payment-launcher";
 import type { PaymentLauncher } from "../lib/payment-launcher";
-import { SUPPORT_STATUS, SUPPORT_STEPS } from "../model/labels";
+import { SUPPORT_STATUS, SUPPORT_STEPS, targetFieldLabel } from "../model/labels";
 import { describeMigrationError } from "../model/messages";
 import { SUPPORT_REQUEST_COPY as COPY } from "../model/support-copy";
 
@@ -102,7 +102,7 @@ function Stepper({ status }: { status: string }) {
   );
 }
 
-type Props = { detail: ImportSupportRequestDetailResponse; launcher: PaymentLauncher };
+type Props = { detail: ImportSupportDetail; launcher: PaymentLauncher };
 
 function Actions({ detail, launcher }: Props) {
   const queryClient = useQueryClient();
@@ -268,7 +268,7 @@ function Actions({ detail, launcher }: Props) {
                   {mapping.items.map((item) => (
                     <tr key={item.sourceColumn} className="border-t border-line">
                       <td className="px-3 py-2 text-ink">{item.sourceColumn}</td>
-                      <td className="px-3 py-2 text-ink-2">{item.targetField}</td>
+                      <td className="px-3 py-2 text-ink-2">{targetFieldLabel(item.targetField)}</td>
                       <td className="px-3 py-2 text-ink-2">
                         {item.confidence === null || item.confidence === undefined
                           ? "-"
@@ -285,7 +285,7 @@ function Actions({ detail, launcher }: Props) {
               items={[
                 { label: "행 수", value: `${detail.previewSummary.rowCount}건` },
                 { label: "경고", value: `${detail.previewSummary.warningCount}건` },
-                { label: "중복", value: `${detail.previewSummary.duplicateCount}건` },
+                { label: "중복 제외", value: `${detail.previewSummary.duplicateCount}건` },
                 { label: "연결 후보", value: `${detail.previewSummary.relationMatchCount}건` },
               ]}
             />
@@ -324,6 +324,7 @@ function Actions({ detail, launcher }: Props) {
           items={[
             { label: "성공", value: `${detail.executionResult.succeeded}건` },
             { label: "실패", value: `${detail.executionResult.failed}건` },
+            { label: "중복 제외", value: `${detail.executionResult.skippedDuplicate}건` },
             { label: "미처리", value: `${detail.executionResult.unprocessed}건` },
           ]}
         />

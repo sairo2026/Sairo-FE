@@ -228,8 +228,34 @@ function checkRange(start: string, end: string): string | undefined {
   return undefined;
 }
 
+export const NO_WINDOW_MESSAGE =
+  "가능한 시간대를 1개 이상 입력해 주세요. 요일별 시간대와 날짜별 가능 시간이 모두 없으면 모든 신청이 승인자가 허용한 시간대가 아니라는 이유로 거절됩니다.";
+
+export function hasAvailableWindow(values: ConditionFormValues): boolean {
+  return (
+    Object.values(values.weekday).some((ranges) => ranges.length > 0) ||
+    values.dateWindows.some((row) => row.kind === "AVAILABLE")
+  );
+}
+
+/** 제외할 시간대만 있고 그날의 가능한 시간대가 없는 날짜. 서버는 이런 날을 하루 전체 방문 불가로 본다. */
+export function excludeOnlyDates(values: ConditionFormValues): string[] {
+  const available = new Set(
+    values.dateWindows.filter((row) => row.kind === "AVAILABLE").map((row) => row.date),
+  );
+  const blocked = new Set(
+    values.dateWindows.filter((row) => row.kind === "BLOCK").map((row) => row.date),
+  );
+  const dates = values.dateWindows
+    .filter((row) => row.kind === "EXCLUDE" && row.date !== "")
+    .map((row) => row.date)
+    .filter((date) => !available.has(date) && !blocked.has(date));
+  return [...new Set(dates)].sort();
+}
+
 export function validateCondition(values: ConditionFormValues): ConditionErrors {
   const errors: ConditionErrors = {};
+  if (!hasAvailableWindow(values)) errors.windows = NO_WINDOW_MESSAGE;
   if (values.appliesFrom === "") errors.appliesFrom = "적용 시작일을 입력해 주세요.";
   if (values.appliesUntil === "") errors.appliesUntil = "적용 종료일을 입력해 주세요.";
   else if (values.appliesFrom !== "" && values.appliesUntil < values.appliesFrom) {
@@ -343,10 +369,19 @@ export const VIOLATED_RULE_LABEL: Record<string, string> = {
   WINDOW_MISMATCH: "가능 시간과 맞지 않음",
   MIN_GAP: "방문 간 최소 간격 위반",
   MAX_VISITS_PER_DAY: "하루 최대 방문 횟수 초과",
+  MIN_LEAD: "최소 사전 신청 시간 위반",
   SINGLE_VISIT_MAX: "1회 허용 시간 초과",
+  CONDITION_EXPIRED: "적용 기간 밖",
   VALIDITY_PERIOD: "적용 기간 밖",
+  CONDITION_CHANGED: "조건 변경으로 맞지 않음",
+  NO_PERMISSION: "신청 권한이 유효하지 않음",
+  DEPUTY_VISIT_LOCKED: "다른 일정과 겹치거나 신청 쪽 사정으로 확정할 수 없음",
+  CUSTOMER_CONFLICT: "다른 일정과 겹치거나 신청 쪽 사정으로 확정할 수 없음",
+  BROKER_CONFLICT: "다른 일정과 겹치거나 신청 쪽 사정으로 확정할 수 없음",
+  PROPERTY_CONFLICT: "다른 일정과 겹치거나 신청 쪽 사정으로 확정할 수 없음",
+  TRAVEL_CONFLICT: "다른 일정과 겹치거나 신청 쪽 사정으로 확정할 수 없음",
 };
 
 export function violatedRuleLabel(code: unknown): string {
-  return typeof code === "string" ? (VIOLATED_RULE_LABEL[code] ?? code) : "조건 위반";
+  return typeof code === "string" ? (VIOLATED_RULE_LABEL[code] ?? "조건 위반") : "조건 위반";
 }

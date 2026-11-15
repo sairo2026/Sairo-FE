@@ -14,7 +14,7 @@ import {
 import { QueryGate } from "@/shared/components/feedback/query-gate";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
-import { ConfirmDialog } from "@/shared/components/ui/modal";
+import { ConfirmDialog, Modal } from "@/shared/components/ui/modal";
 import { PageHeader } from "@/shared/components/ui/page-header";
 import { formatKrw, formatSeoulDate, formatSeoulDateTime } from "@/shared/lib/format";
 import {
@@ -23,7 +23,12 @@ import {
   requestRetryPayment,
   withdrawCancellation,
 } from "../api/billing.api";
-import { billingKeys, useSubscription } from "../hooks/billing-queries";
+import {
+  billingKeys,
+  isPaymentInFlight,
+  useConsentPreview,
+  useSubscription,
+} from "../hooks/billing-queries";
 import { SUBSCRIPTION_STATUS, labelOf, PLAN_LABEL } from "../model/labels";
 import { COPY, describeBillingError } from "../model/messages";
 
@@ -41,6 +46,14 @@ export function trialReminder(trialEndsAt: string | null | undefined, now = Date
   if (days === null || days < 0) return null;
   const threshold = REMINDER_DAYS.find((limit) => days <= limit);
   return threshold === undefined ? null : days;
+}
+
+const IMMEDIATE_END_STATUSES = ["PRE_PAYMENT", "PAST_DUE_GRACE", "PAST_DUE_RESTRICTED"];
+const CANCELLABLE_STATUSES = ["TRIAL", "ACTIVE", ...IMMEDIATE_END_STATUSES];
+
+function cardText(subscription: SubscriptionCurrent): string | null {
+  const card = subscription.paymentMethod;
+  return card ? `${card.cardIssuer ?? "카드"} 끝자리 ${card.cardLast4 ?? "----"}` : null;
 }
 
 function ReadinessList({ subscription }: { subscription: SubscriptionCurrent }) {
@@ -69,7 +82,13 @@ function ReadinessList({ subscription }: { subscription: SubscriptionCurrent }) 
   );
 }
 
-function StatusBody({ subscription }: { subscription: SubscriptionCurrent }) {
+function StatusBody({
+  subscription,
+  chargeAmount,
+}: {
+  subscription: SubscriptionCurrent;
+  chargeAmount: number | null;
+}) {
   const { status } = subscription;
   const reminder = trialReminder(subscription.trialEndsAt);
   const isReady = subscription.readiness.hasBillingKey && subscription.readiness.hasValidConsent;
@@ -80,7 +99,7 @@ function StatusBody({ subscription }: { subscription: SubscriptionCurrent }) {
       <div className="flex flex-col gap-3">
         {subscription.trialEndsAt ? (
           <p className="text-body text-ink">
-            {COPY.trialLine(formatSeoulDate(subscription.trialEndsAt))}
+            {COPY.trialLine(formatSeoulDateTime(subscription.trialEndsAt))}
           </p>
         ) : null}
         {reminder !== null ? (
@@ -108,6 +127,23 @@ function StatusBody({ subscription }: { subscription: SubscriptionCurrent }) {
     return (
       <div className="flex flex-col gap-3">
         <p className="text-body text-ink">결제 준비 중입니다. 실제 청구가 시작된 것이 아닙니다.</p>
+        <DetailList
+          items={[
+            {
+              label: "결제 예정 금액",
+              value:
+                chargeAmount === null
+                  ? "금액을 불러오지 못했습니다. 구독 구매 동의 화면에서 확인해 주세요."
+                  : `${formatKrw(chargeAmount)} (VAT 포함)`,
+            },
+            { label: "결제 카드", value: cardText(subscription) ?? "등록 전" },
+            {
+              label: "결제 기한",
+              value: formatSeoulDateTime(subscription.currentPeriodEnd),
+            },
+          ]}
+        />
+        <MutedNote>기한까지 결제하지 않으면 구독이 종료됩니다.</MutedNote>
         {subscription.prePaymentSince ? (
           <p className="text-body text-ink-2">
             결제 전 상태 시작 {formatSeoulDateTime(subscription.prePaymentSince)}
@@ -154,9 +190,14 @@ function StatusBody({ subscription }: { subscription: SubscriptionCurrent }) {
             : "이용료가 납부되지 않아 새 업무 입력이 제한됐습니다. 자료 조회와 내보내기, 결제, 해지는 계속 가능합니다."}
         </p>
         {unusableCard ? (
-          <p role="alert" className="text-body font-semibold text-danger">
-            등록한 카드를 사용할 수 없습니다. 다른 카드로 교체해 주세요.
-          </p>
+          <div className="flex flex-col gap-1">
+            <p role="alert" className="text-body font-semibold text-danger">
+              등록한 카드를 사용할 수 없습니다. 다른 카드로 교체해 주세요.
+            </p>
+            <div>
+              <TextLink href="/billing/card">카드 교체</TextLink>
+            </div>
+          </div>
         ) : null}
         {subscription.latestInvoice?.nextRetryAt ? (
           <MutedNote>
@@ -183,6 +224,13 @@ function StatusBody({ subscription }: { subscription: SubscriptionCurrent }) {
             {formatSeoulDate(subscription.returnPeriodEndsAt)}까지 자료를 내보낼 수 있습니다.
           </p>
         ) : null}
+        {subscription.isInReturnPeriod ? (
+          <>
+            <TextLink href="/billing/return-guide">자료 내보내기 안내 보기</TextLink>
+            <MutedNote>다시 구독하려면 아래 준비를 마친 뒤 결제해 주세요.</MutedNote>
+            <ReadinessList subscription={subscription} />
+          </>
+        ) : null}
       </div>
     );
   }
@@ -202,13 +250,32 @@ function StatusBody({ subscription }: { subscription: SubscriptionCurrent }) {
       <MutedNote>
         결제일이 없는 달에는 그 달 마지막 날에 결제되고, 다음 달에는 원래 결제일로 돌아갑니다.
       </MutedNote>
+      {isReady || subscription.cancellationEffectiveAt ? null : (
+        <>
+          <ReadinessList subscription={subscription} />
+          <p className="text-body font-semibold text-danger">
+            자동결제 준비가 끝나지 않아 다음 결제일에 결제되지 않을 수 있습니다.
+          </p>
+          {subscription.readiness.hasBillingKey && !subscription.readiness.hasValidConsent ? (
+            <MutedNote>
+              구독 구매 동의가 없거나, 인원·요금·약관이 바뀌어 다시 동의가 필요한 상태입니다.
+            </MutedNote>
+          ) : null}
+        </>
+      )}
     </div>
   );
 }
 
-function SubscriptionActions({ subscription }: { subscription: SubscriptionCurrent }) {
+function SubscriptionActions({
+  subscription,
+  chargeAmount,
+}: {
+  subscription: SubscriptionCurrent;
+  chargeAmount: number | null;
+}) {
   const queryClient = useQueryClient();
-  const [dialog, setDialog] = useState<"cancel" | "withdraw" | null>(null);
+  const [dialog, setDialog] = useState<"pay" | "cancel" | "withdraw" | null>(null);
   const [error, setError] = useState<string>();
   const [notice, setNotice] = useState<string>();
 
@@ -219,31 +286,38 @@ function SubscriptionActions({ subscription }: { subscription: SubscriptionCurre
     setError(describeBillingError(caught, "처리하지 못했습니다. 잠시 뒤에 다시 시도해 주세요."));
     await refresh();
   };
+  const onPaid = async (result: unknown) => {
+    setDialog(null);
+    setError(undefined);
+    await refresh();
+    const latest = queryClient.getQueryData<SubscriptionCurrent>(billingKeys.subscription);
+    const paidStatus = (result as { status?: string } | null)?.status;
+    if (isPaymentInFlight(latest)) setNotice(COPY.payVerifying);
+    else setNotice(paidStatus === "ACTIVE" ? COPY.payDone : COPY.payAccepted);
+  };
 
   const firstPayment = useMutation({
     mutationFn: requestFirstPayment,
-    onSuccess: async () => {
-      setError(undefined);
-      setNotice("결제가 완료됐습니다.");
-      await refresh();
-    },
+    onSuccess: onPaid,
     onError,
   });
   const retry = useMutation({
     mutationFn: requestRetryPayment,
-    onSuccess: async () => {
-      setError(undefined);
-      setNotice("결제가 완료됐습니다.");
-      await refresh();
-    },
+    onSuccess: onPaid,
     onError,
   });
+  const { status } = subscription;
+  const endsImmediately = IMMEDIATE_END_STATUSES.includes(status);
   const cancel = useMutation({
     mutationFn: cancelSubscription,
     onSuccess: async (result) => {
       setDialog(null);
       setError(undefined);
-      setNotice(COPY.cancelDone(formatSeoulDateTime(result.effectiveAt)));
+      setNotice(
+        endsImmediately
+          ? COPY.cancelImmediateDone
+          : COPY.cancelDone(formatSeoulDateTime(result.effectiveAt)),
+      );
       await refresh();
     },
     onError,
@@ -259,14 +333,13 @@ function SubscriptionActions({ subscription }: { subscription: SubscriptionCurre
     onError,
   });
 
-  const { status } = subscription;
   const isReady = subscription.readiness.hasBillingKey && subscription.readiness.hasValidConsent;
   const isPaying = firstPayment.isPending || retry.isPending;
+  const verifying = isPaymentInFlight(subscription);
   const canRetry =
     (status === "PAST_DUE_GRACE" || status === "PAST_DUE_RESTRICTED" || status === "ENDED") &&
     (subscription.isInReturnPeriod || status !== "ENDED");
-  const canCancel =
-    (status === "TRIAL" || status === "ACTIVE") && !subscription.cancellationEffectiveAt;
+  const canCancel = CANCELLABLE_STATUSES.includes(status) && !subscription.cancellationEffectiveAt;
   const endDate = subscription.cancellationEffectiveAt ?? subscription.currentPeriodEnd;
 
   return (
@@ -274,12 +347,13 @@ function SubscriptionActions({ subscription }: { subscription: SubscriptionCurre
       {notice ? <FormNotice>{notice}</FormNotice> : null}
       {error ? <FormAlert>{error}</FormAlert> : null}
       {isPaying ? <MutedNote>{COPY.payProcessing}</MutedNote> : null}
+      {verifying && !isPaying ? <MutedNote>{COPY.payBlockedVerifying}</MutedNote> : null}
       <div className="flex flex-wrap gap-3">
         {status === "PRE_PAYMENT" ? (
           <Button
             isLoading={firstPayment.isPending}
-            disabled={!isReady || isPaying}
-            onClick={() => firstPayment.mutate()}
+            disabled={!isReady || isPaying || verifying}
+            onClick={() => setDialog("pay")}
           >
             지금 결제
           </Button>
@@ -287,15 +361,15 @@ function SubscriptionActions({ subscription }: { subscription: SubscriptionCurre
         {canRetry ? (
           <Button
             isLoading={retry.isPending}
-            disabled={!subscription.canRetryPayment || isPaying}
+            disabled={!subscription.canRetryPayment || isPaying || verifying}
             onClick={() => retry.mutate()}
           >
-            지금 재결제
+            {status === "ENDED" ? "다시 구독하기" : "지금 재결제"}
           </Button>
         ) : null}
         {canCancel ? (
           <Button variant="ghost" onClick={() => setDialog("cancel")}>
-            해지 예약
+            {endsImmediately ? "구독 해지" : "해지 예약"}
           </Button>
         ) : null}
         {subscription.cancellationEffectiveAt && status !== "ENDED" ? (
@@ -305,14 +379,46 @@ function SubscriptionActions({ subscription }: { subscription: SubscriptionCurre
         ) : null}
       </div>
       <ConfirmDialog
-        isOpen={dialog === "cancel"}
-        title="해지 예약"
-        message={COPY.cancelConfirm(formatSeoulDateTime(endDate))}
-        confirmLabel="해지 예약"
-        isPending={cancel.isPending}
-        onConfirm={() => cancel.mutate()}
+        isOpen={dialog === "pay"}
+        title="지금 결제"
+        message={COPY.payConfirm(
+          chargeAmount === null ? null : formatKrw(chargeAmount),
+          cardText(subscription),
+        )}
+        confirmLabel="결제하기"
+        isPending={firstPayment.isPending}
+        onConfirm={() => firstPayment.mutate()}
         onCancel={() => setDialog(null)}
       />
+      <Modal
+        isOpen={dialog === "cancel"}
+        title={endsImmediately ? "구독 해지" : "해지 예약"}
+        onClose={() => setDialog(null)}
+        footer={
+          <>
+            <Button variant="cancel" onClick={() => setDialog(null)}>
+              취소
+            </Button>
+            <Button variant="submit" isLoading={cancel.isPending} onClick={() => cancel.mutate()}>
+              {endsImmediately ? "지금 해지" : "해지 예약"}
+            </Button>
+          </>
+        }
+      >
+        <div className="flex flex-col gap-3">
+          <p>
+            {endsImmediately
+              ? COPY.cancelImmediateConfirm
+              : COPY.cancelConfirm(formatSeoulDateTime(endDate))}
+          </p>
+          {endsImmediately ? null : (
+            <p className="text-caption text-ink-2">
+              기간이 끝나기를 기다리지 않고 사무소를 바로 종료하려면{" "}
+              <TextLink href="/office/close">지금 바로 종료</TextLink>를 이용해 주세요.
+            </p>
+          )}
+        </div>
+      </Modal>
       <ConfirmDialog
         isOpen={dialog === "withdraw"}
         title="해지 예약 취소"
@@ -331,6 +437,8 @@ function SubscriptionActions({ subscription }: { subscription: SubscriptionCurre
 
 function SubscriptionView({ subscription }: { subscription: SubscriptionCurrent }) {
   const status = labelOf(SUBSCRIPTION_STATUS, subscription.status);
+  const preview = useConsentPreview(undefined, undefined, subscription.status === "PRE_PAYMENT");
+  const chargeAmount = preview.data?.totalAmountInclVat ?? null;
   return (
     <div className="flex flex-col gap-6">
       <Card title="구독 현황">
@@ -341,9 +449,9 @@ function SubscriptionView({ subscription }: { subscription: SubscriptionCurrent 
             {subscription.memberCount}명 · 가격 버전 {subscription.priceVersion}
           </span>
         </div>
-        <StatusBody subscription={subscription} />
+        <StatusBody subscription={subscription} chargeAmount={chargeAmount} />
         <div className="mt-5">
-          <SubscriptionActions subscription={subscription} />
+          <SubscriptionActions subscription={subscription} chargeAmount={chargeAmount} />
         </div>
       </Card>
       <Card title="결제수단">
@@ -401,16 +509,20 @@ function SubscriptionView({ subscription }: { subscription: SubscriptionCurrent 
           </div>
         </Card>
       ) : null}
-      {subscription.pendingPriceChangeNoticeCount > 0 ? (
-        <Card title="가격 변경 안내">
-          <p className="text-body text-ink">
-            처리할 가격 변경 안내가 {subscription.pendingPriceChangeNoticeCount}건 있습니다.
-          </p>
-          <div className="mt-3">
-            <TextLink href="/billing/price-changes">안내 확인하고 응답</TextLink>
-          </div>
-        </Card>
-      ) : null}
+      <Card title="가격 변경 안내">
+        <p className="text-body text-ink">
+          {subscription.pendingPriceChangeNoticeCount > 0
+            ? `처리할 가격 변경 안내가 ${subscription.pendingPriceChangeNoticeCount}건 있습니다.`
+            : "처리할 가격 변경 안내가 없습니다."}
+        </p>
+        <div className="mt-3">
+          <TextLink href="/billing/price-changes">
+            {subscription.pendingPriceChangeNoticeCount > 0
+              ? "안내 확인하고 응답"
+              : "지난 안내 내역 보기"}
+          </TextLink>
+        </div>
+      </Card>
     </div>
   );
 }

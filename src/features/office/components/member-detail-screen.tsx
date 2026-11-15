@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
+import { ErrorScreen } from "@/shared/components/feedback/error-screen";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import type { MembershipDetailResponse } from "@/lib/api/contracts/office.schema";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
@@ -296,6 +297,12 @@ function MemberDetailBody({ detail }: { detail: MembershipDetailResponse }) {
 }
 
 export function MemberDetailScreen({ membershipId }: { membershipId: number }) {
+  const { role } = useOfficeAccess();
+  if (role !== "OWNER") return <ErrorScreen kind="forbidden" />;
+  return <MemberDetailLoader membershipId={membershipId} />;
+}
+
+function MemberDetailLoader({ membershipId }: { membershipId: number }) {
   const query = useMembershipDetail(membershipId);
   return (
     <QueryGate query={query} loadingLabel="구성원 정보를 불러오는 중입니다.">

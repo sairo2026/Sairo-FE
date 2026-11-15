@@ -36,7 +36,10 @@ import {
   labelOf,
   linkValidity,
 } from "../model/labels";
+import { ApiError } from "@/shared/api/client";
+import { CUSTOMER_LINK_EXPIRY_RULE } from "../model/customer-link-rules";
 import { describeVisitError, isApiCode } from "../model/messages";
+import { SCHEDULE_BLOCKED_COPY, blockedCandidateIds } from "../model/schedule-blocked";
 import { minutesBetween } from "../model/time";
 import { CoordinationStatusBadge } from "./coordination-status-badge";
 import { IssuedLinkDialog } from "./issued-link-dialog";
@@ -46,6 +49,7 @@ import { LifecycleSection } from "./lifecycle-section";
 import { CandidatePicker } from "./pickers";
 import { ResultSection } from "./result-section";
 import { ChangeSection, RequestsSection } from "./request-section";
+import { ScheduleBlockedCandidates } from "./schedule-blocked-candidates";
 import type { CandidateChoice } from "./pickers";
 
 type Detail = VisitCoordinationDetailResponse;
@@ -53,6 +57,32 @@ type Candidate = Detail["candidateProperties"][number];
 
 const SCHEDULABLE = ["COORDINATABLE", "FINAL_CONFIRMATION_REQUIRED", "RESCHEDULE_REQUIRED"];
 const CLOSED = ["CANCELLED", "VISIT_COMPLETED", "VISIT_INCOMPLETE"];
+const CANDIDATE_ADDABLE = [
+  "TIME_COLLECTING",
+  "COORDINATABLE",
+  "FINAL_CONFIRMATION_REQUIRED",
+  "APPLYING",
+];
+const LINK_ISSUABLE = [
+  "TIME_COLLECTING",
+  "COORDINATABLE",
+  "FINAL_CONFIRMATION_REQUIRED",
+  "RESCHEDULE_REQUIRED",
+  "CONFIRMED",
+];
+const CANDIDATE_REMOVABLE = "TIME_COLLECTING";
+
+const SCHEDULE_UNAVAILABLE_COPY: Record<string, string> = {
+  APPLYING:
+    "신청을 받는 중에는 일정 구성을 바꿀 수 없습니다. 신청 현황에서 들어온 신청을 확인해 주세요.",
+  CONFIRMED:
+    "확정된 방문의 일정은 변경 신청이나 재조율로 바꿉니다. 일정 구성은 다시 저장할 수 없습니다.",
+  CANCELLED: "취소된 조율이라 일정을 구성할 수 없습니다.",
+  VISIT_COMPLETED: "임장이 끝난 조율이라 일정을 구성할 수 없습니다.",
+  VISIT_INCOMPLETE: "임장이 끝난 조율이라 일정을 구성할 수 없습니다.",
+};
+const SCHEDULE_WAITING_COPY =
+  "고객이 가능 시간을 제출해 조율 가능 상태가 되면 일정을 구성할 수 있습니다.";
 
 function useRefresh() {
   const queryClient = useQueryClient();
@@ -185,13 +215,8 @@ function CandidatesPanel({ detail, isReadOnly }: { detail: Detail; isReadOnly: b
     },
   });
 
-  function canRemove(candidate: Candidate) {
-    if (isReadOnly || isClosed) return false;
-    if (detail.status === "TIME_COLLECTING") return true;
-    return (
-      candidate.crossOffice && candidate.grantState !== null && candidate.grantState !== "ACTIVE"
-    );
-  }
+  const canRemove =
+    !isReadOnly && detail.status === CANDIDATE_REMOVABLE && detail.candidateProperties.length > 1;
 
   return (
     <section className="flex flex-col gap-3" aria-labelledby="candidates-title">
@@ -200,15 +225,18 @@ function CandidatesPanel({ detail, isReadOnly }: { detail: Detail; isReadOnly: b
         <Button
           variant="outlined"
           size="sm"
-          disabled={isReadOnly || isClosed || remaining <= 0}
+          disabled={
+            isReadOnly || isClosed || remaining <= 0 || !CANDIDATE_ADDABLE.includes(detail.status)
+          }
           onClick={() => setIsAdding(true)}
         >
           후보 추가
         </Button>
       </div>
       <p className="text-caption text-ink-2">
-        후보 매물은 {detail.candidateProperties.length}/{MAX_CANDIDATES}개입니다. 제거는 시간 수집
-        전에만 할 수 있고, 허용이 끝난 매물은 확정 방문이 없으면 언제든 제거할 수 있습니다.
+        후보 매물은 {detail.candidateProperties.length}/{MAX_CANDIDATES}개입니다. 후보 제거는 시간
+        수집 중에만 할 수 있고 후보는 1개 이상 남아야 합니다. 시간 수집이 끝난 뒤 허용이 끝난 매물은
+        신청할 수 없으니 필요하면 조율을 새로 만들어 주세요.
       </p>
       {error ? <FormAlert>{error}</FormAlert> : null}
       {detail.candidateProperties.length === 0 ? (
@@ -219,7 +247,7 @@ function CandidatesPanel({ detail, isReadOnly }: { detail: Detail; isReadOnly: b
             <CandidateRow
               key={candidate.candidatePropertyId}
               candidate={candidate}
-              canRemove={canRemove(candidate)}
+              canRemove={canRemove}
               isBusy={removing === candidate.candidatePropertyId}
               onRemove={() => removeMutation.mutate(candidate.candidatePropertyId)}
             />
@@ -273,6 +301,7 @@ function CustomerTimePanel({ detail, isReadOnly }: { detail: Detail; isReadOnly:
   const [now] = useState(() => Date.now());
   const isLive = link !== null && !link.revokedAt && Date.parse(link.expiresAt) > now;
   const hidesReissue = detail.status === "CONFIRMED" && isLive;
+  const linkBlocked = !LINK_ISSUABLE.includes(detail.status);
 
   const issue = useMutation({
     mutationFn: () =>
@@ -308,6 +337,7 @@ function CustomerTimePanel({ detail, isReadOnly }: { detail: Detail; isReadOnly:
           아직 고객 링크를 발급하지 않았습니다. 발급한 링크는 직접 복사해 고객에게 전달합니다.
         </p>
       )}
+      <p className="text-caption text-ink-2">{CUSTOMER_LINK_EXPIRY_RULE}</p>
       <p className="text-caption text-ink-2">
         링크 원문은 보안을 위해 서버에 남기지 않아 발급한 직후에만 복사할 수 있습니다. 다시 전달해야
         하면 재발급해 주세요.
@@ -338,6 +368,10 @@ function CustomerTimePanel({ detail, isReadOnly }: { detail: Detail; isReadOnly:
       {hidesReissue ? (
         <p className="text-caption text-ink-2">
           확정된 방문은 살아 있는 고객 링크가 없을 때만 재발급할 수 있습니다.
+        </p>
+      ) : linkBlocked && !isClosed ? (
+        <p className="text-caption text-ink-2">
+          신청을 받는 중에는 고객 링크를 새로 발급하거나 재발급할 수 없습니다.
         </p>
       ) : (
         <div>
@@ -397,6 +431,7 @@ function SchedulePanel({ detail, isReadOnly }: { detail: Detail; isReadOnly: boo
   const [errors, setErrors] = useState<Record<number, string>>({});
   const [error, setError] = useState<string>();
   const [notice, setNotice] = useState<string>();
+  const [blockedIds, setBlockedIds] = useState<number[] | null>(null);
   const canSchedule = SCHEDULABLE.includes(detail.status);
   const nameOf = (id: number) =>
     detail.candidateProperties.find((item) => item.candidatePropertyId === id)?.propertyName ?? "";
@@ -422,12 +457,19 @@ function SchedulePanel({ detail, isReadOnly }: { detail: Detail; isReadOnly: boo
       ),
     onSuccess: async () => {
       setError(undefined);
+      setBlockedIds(null);
       setNotice("일정 구성을 저장했습니다. 신청 가능한 시작 시각 후보가 계산되었습니다.");
       await refresh();
     },
     onError: async (caught) => {
       setNotice(undefined);
-      setError(describeVisitError(caught, "일정을 저장하지 못했습니다."));
+      if (caught instanceof ApiError && caught.code === "TIME_OUT_OF_RANGE") {
+        setError(SCHEDULE_BLOCKED_COPY);
+        setBlockedIds(blockedCandidateIds(caught));
+      } else {
+        setBlockedIds(null);
+        setError(describeVisitError(caught, "일정을 저장하지 못했습니다."));
+      }
       if (isApiCode(caught, "VERSION_CONFLICT") || isApiCode(caught, "INVALID_TRANSITION")) {
         await refresh();
       }
@@ -465,7 +507,7 @@ function SchedulePanel({ detail, isReadOnly }: { detail: Detail; isReadOnly: boo
       <SectionTitle id="schedule-title">일정 구성</SectionTitle>
       {!canSchedule ? (
         <p className="text-caption text-ink-2">
-          고객이 가능 시간을 제출해 조율 가능 상태가 되면 일정을 구성할 수 있습니다.
+          {SCHEDULE_UNAVAILABLE_COPY[detail.status] ?? SCHEDULE_WAITING_COPY}
         </p>
       ) : (
         <>
@@ -515,6 +557,12 @@ function SchedulePanel({ detail, isReadOnly }: { detail: Detail; isReadOnly: boo
             ))}
           </ul>
           {error ? <FormAlert>{error}</FormAlert> : null}
+          {blockedIds ? (
+            <ScheduleBlockedCandidates
+              candidates={detail.candidateProperties}
+              serverIds={blockedIds}
+            />
+          ) : null}
           {notice ? <FormNotice>{notice}</FormNotice> : null}
           <div className="flex flex-wrap gap-2">
             <Button

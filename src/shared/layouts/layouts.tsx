@@ -69,6 +69,8 @@ export type OfficeNavItem = { key: string; label: string; href: string };
 export type OfficeLayoutProps = LayoutProps & {
   activeKey?: string;
   officeName?: string;
+  /** 사무소명 오른쪽에 놓는 알림·내 계정·지원·로그아웃 같은 상단 동작. */
+  headerActions?: ReactNode;
   /** 역할별 메뉴. 생략하면 기본 6개 메뉴를 보여준다. */
   navItems?: readonly OfficeNavItem[];
   /** board는 홈처럼 흰 카드를 올리는 화면의 연한 바탕이다. */
@@ -80,6 +82,7 @@ export function OfficeLayout({
   children,
   activeKey,
   officeName,
+  headerActions,
   navItems,
   tone = "white",
 }: OfficeLayoutProps) {
@@ -108,8 +111,9 @@ export function OfficeLayout({
           </nav>
         </aside>
         <div className="min-w-0">
-          <header className="flex h-[88px] items-center border-b border-line px-8 text-caption font-semibold text-ink-2 lg:px-16">
-            {officeName ?? "사무소"}
+          <header className="flex min-h-[88px] flex-wrap items-center justify-between gap-x-6 gap-y-3 border-b border-line px-8 py-4 text-caption font-semibold text-ink-2 lg:px-16">
+            <span>{officeName ?? "사무소"}</span>
+            {headerActions}
           </header>
           <main className="px-5 py-10 sm:px-8 lg:px-16 lg:py-14">{children}</main>
         </div>

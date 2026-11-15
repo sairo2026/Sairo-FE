@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http } from "msw";
 import type { ReactNode } from "react";
@@ -8,6 +8,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 import type { AuthContextResponse } from "@/lib/api/contracts/common.schema";
 import { MOCK_ACTIVE_CONTEXT, resetMockAuthState, setMockAuthContext } from "@/mocks/handlers/auth";
 import { mockErrors } from "@/mocks/error-responses";
+import { resetMockOfficeState, setMockOfficeState } from "@/mocks/handlers/office";
 import { resetMockOpsSession, setMockOperator } from "@/mocks/handlers/ops-session";
 import { server, startMockServer } from "@/mocks/server";
 import { apiFetch } from "@/shared/api/client";
@@ -44,6 +45,7 @@ afterEach(() => {
   server.resetHandlers();
   resetMockAuthState();
   resetMockOpsSession();
+  resetMockOfficeState();
   navigation.replace.mockClear();
 });
 
@@ -214,6 +216,71 @@ describe("OfficeAccessShell", () => {
     expect(screen.getByRole("link", { name: "방문 조율" })).not.toBeNull();
   });
 
+  it("상단에 알림, 내 계정, 지원, 로그아웃을 보여준다", async () => {
+    setMockAuthContext(contextOf({ role: "OWNER" }));
+    renderWithQuery(
+      <OfficeAccessShell activeKey="home">
+        <p>본문</p>
+      </OfficeAccessShell>,
+    );
+    await waitFor(() => expect(screen.getByText("본문")).not.toBeNull());
+    expect(screen.getByRole("link", { name: "내 계정" }).getAttribute("href")).toBe("/account");
+    expect(screen.getByRole("link", { name: "지원" }).getAttribute("href")).toBe("/support");
+    const notifications = screen.getByRole("link", { name: /^알림/ });
+    expect(notifications.getAttribute("href")).toBe("/notifications");
+    await waitFor(() =>
+      expect(within(notifications).getByLabelText("읽지 않은 알림 1건")).not.toBeNull(),
+    );
+    expect(screen.getByRole("button", { name: "로그아웃" })).not.toBeNull();
+  });
+
+  it("상단 로그아웃은 로그인 화면으로 보낸다", async () => {
+    setMockAuthContext(contextOf({ role: "OWNER" }));
+    renderWithQuery(
+      <OfficeAccessShell activeKey="home">
+        <p>본문</p>
+      </OfficeAccessShell>,
+    );
+    await userEvent.click(await screen.findByRole("button", { name: "로그아웃" }));
+    await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/login"));
+  });
+
+  it("승인된 소속이 있으면 상단에 사무소명을 보여주고 없으면 기본 표시를 쓴다", async () => {
+    setMockAuthContext(contextOf({ role: "OWNER" }));
+    setMockOfficeState({
+      myMembership: {
+        membershipId: 41,
+        officeId: 12,
+        officeName: "사이로공인중개사사무소",
+        role: "OWNER",
+        status: "APPROVED",
+        requestSource: "REGISTRATION",
+        expiresAt: null,
+        invitationAcceptedAt: null,
+        rejectionReason: null,
+        resolved: null,
+        createdAt: "2026-11-10T09:00:00+09:00",
+        updatedAt: "2026-11-10T09:00:00+09:00",
+        version: 1,
+      },
+    });
+    const first = renderWithQuery(
+      <OfficeAccessShell activeKey="home">
+        <p>본문</p>
+      </OfficeAccessShell>,
+    );
+    expect(await screen.findByText("사이로공인중개사사무소")).not.toBeNull();
+    first.unmount();
+    resetMockOfficeState();
+    renderWithQuery(
+      <OfficeAccessShell activeKey="home">
+        <p>본문</p>
+      </OfficeAccessShell>,
+    );
+    await waitFor(() => expect(screen.getByText("본문")).not.toBeNull());
+    expect(screen.getByText("사무소")).not.toBeNull();
+  });
+
   it("미납 유예 중에는 유예 안내를 위에 띄운다", async () => {
     setMockAuthContext(contextOf({ graceUntil: "2026-12-01T00:00:00+09:00" }));
     renderWithQuery(
@@ -305,6 +372,17 @@ describe("ReconsentNotice", () => {
     expect(screen.getByText("자동결제 안내 문구가 추가되었습니다")).not.toBeNull();
     await userEvent.click(screen.getByRole("button", { name: "동의하고 계속" }));
     await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/home"));
+  });
+
+  it("권리 요청과 지원 문의 링크와 로그아웃을 함께 보여준다", async () => {
+    setMockAuthContext(contextOf({ reconsentRequired: true }));
+    renderWithQuery(<ReconsentNotice />);
+    expect(
+      (await screen.findByRole("link", { name: "개인정보 권리 요청" })).getAttribute("href"),
+    ).toBe("/privacy-requests");
+    expect(screen.getByRole("link", { name: "지원 문의" }).getAttribute("href")).toBe("/support");
+    await userEvent.click(screen.getByRole("button", { name: "로그아웃" }));
+    await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/login"));
   });
 
   it("재동의할 항목이 없으면 홈으로 보낸다", async () => {

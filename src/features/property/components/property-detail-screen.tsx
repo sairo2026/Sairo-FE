@@ -172,9 +172,9 @@ function RelationPanel({ property }: { property: PropertyDetailResponse }) {
         )}
       </section>
       <section className="flex flex-col gap-3">
-        <h3 className="text-body font-semibold text-ink">진행 중인 임장 조율</h3>
+        <h3 className="text-body font-semibold text-ink">진행 중인 방문 조율</h3>
         {property.activeCoordinations.length === 0 ? (
-          <MutedNote>진행 중인 임장 조율이 없습니다.</MutedNote>
+          <MutedNote>진행 중인 방문 조율이 없습니다.</MutedNote>
         ) : (
           <ul className="flex flex-col gap-2">
             {property.activeCoordinations.map((item) => (
@@ -182,7 +182,13 @@ function RelationPanel({ property }: { property: PropertyDetailResponse }) {
                 key={item.coordinationId}
                 className="flex flex-wrap items-center gap-2 text-body text-ink"
               >
-                {item.customerName} <CoordinationStatusBadge status={item.status} compact />
+                <Link
+                  href={`/coordinations/${item.coordinationId}`}
+                  className="font-semibold text-primary hover:underline"
+                >
+                  {item.customerName}
+                </Link>
+                <CoordinationStatusBadge status={item.status} compact />
               </li>
             ))}
           </ul>
@@ -196,9 +202,14 @@ function RelationPanel({ property }: { property: PropertyDetailResponse }) {
           <ul className="flex flex-col gap-2">
             {property.visits.map((visit) => (
               <li key={visit.scheduleItemId} className="text-body text-ink">
-                {visit.scheduledStartAt
-                  ? formatSeoulDateTime(visit.scheduledStartAt)
-                  : "일정 미확정"}{" "}
+                <Link
+                  href={`/coordinations/${visit.coordinationId}`}
+                  className="font-semibold text-primary hover:underline"
+                >
+                  {visit.scheduledStartAt
+                    ? formatSeoulDateTime(visit.scheduledStartAt)
+                    : "일정 미확정"}
+                </Link>{" "}
                 · {visit.customerName} · {labelOf(VISIT_RESULT_LABEL, visit.result)}
               </li>
             ))}
@@ -306,11 +317,11 @@ function ArchiveDialog({
       <div className="flex flex-col gap-3">
         {isBlocked ? (
           <>
-            <p>진행 중인 임장 조율이나 계약을 정리하기 전에는 보관할 수 없습니다.</p>
+            <p>진행 중인 방문 조율이나 계약을 정리하기 전에는 보관할 수 없습니다.</p>
             <ul className="flex list-disc flex-col gap-1 pl-5">
               {blockers.coordinations.map((item) => (
                 <li key={`c-${item.coordinationId}`}>
-                  임장 조율 {item.customerName} · {statusLabel(item.status)}
+                  방문 조율 {item.customerName} · {statusLabel(item.status)}
                 </li>
               ))}
               {blockers.contracts.map((item) => (
@@ -320,6 +331,9 @@ function ArchiveDialog({
                 </li>
               ))}
             </ul>
+            <p className="text-caption text-ink-2">
+              다른 사무소의 예정된 확정 방문이 있어도 보관할 수 없습니다.
+            </p>
           </>
         ) : property.registrationStage === "DRAFT" ? (
           <p>
@@ -349,9 +363,13 @@ function DetailBody({ property }: { property: PropertyDetailResponse }) {
 
   const restoreMutation = useMutation({
     mutationFn: () => restoreProperty(property.propertyId),
-    onSuccess: async () => {
+    onSuccess: async (restored) => {
       setError(undefined);
-      setNotice("매물을 복원했습니다.");
+      setNotice(
+        restored.registrationStage === "DRAFT"
+          ? "매물을 복원했습니다. 주소와 담당 공인중개사가 비어 있거나 유효하지 않아 임시저장 상태로 돌아왔습니다. 수정에서 주소와 담당 공인중개사를 채워 활성 등록을 마쳐 주세요."
+          : "매물을 복원했습니다.",
+      );
       await queryClient.invalidateQueries({ queryKey: propertyKeys.all });
     },
     onError: (caught) => setError(describePropertyError(caught, "매물을 복원하지 못했습니다.")),
@@ -396,7 +414,13 @@ function DetailBody({ property }: { property: PropertyDetailResponse }) {
                 href={`/properties/${property.propertyId}/cross-office`}
                 className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 hover:border-primary hover:text-primary"
               >
-                다른 사무소 신청
+                다른 사무소 신청 현황
+              </Link>
+              <Link
+                href={`/coordinations/new?propertyId=${property.propertyId}`}
+                className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 hover:border-primary hover:text-primary"
+              >
+                방문 조율 시작
               </Link>
               <Link
                 href={`/contracts/new?propertyId=${property.propertyId}`}

@@ -1731,6 +1731,7 @@ export const VisitRequestNoticeListResponseSchema = z.object({
     z.object({
       noticeId: z.number(),
       requestId: z.number(),
+      coordinationId: z.number().optional(),
       noticeType: z.string(),
       channel: z.string().nullable().optional(),
       createdAt: z.iso.datetime({ offset: true }),

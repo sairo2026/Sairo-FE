@@ -16,15 +16,13 @@ import { Modal } from "@/shared/components/ui/modal";
 import { formatSeoulDateTime } from "@/shared/lib/format";
 import {
   APPLICANT_RELATION_LABEL,
-  APPROVER_HIDDEN_FAILURE_CODES,
-  GENERIC_REVALIDATION_FAILURE,
-  REVALIDATION_FAILURE_LABEL,
   TRUST_BAND_LABEL,
   TRUST_INDICATOR_LABEL,
   TRUST_STATE_LABEL,
   labelOf,
 } from "../model/labels";
 import { describeVisitError, isApiCode } from "../model/messages";
+import { approverFailureLines } from "../model/revalidation-reasons";
 
 type Trust = NonNullable<ApproverCompareItem["applicantTrust"]>;
 
@@ -139,10 +137,10 @@ function RequestCard({
 }
 
 function failureText(result: ApproverSelectionResponse): string {
-  const code = result.revalidation.failureCode;
-  if (code && APPROVER_HIDDEN_FAILURE_CODES.includes(code)) return GENERIC_REVALIDATION_FAILURE;
-  const known = code ? REVALIDATION_FAILURE_LABEL[code] : undefined;
-  return [known, result.revalidation.failureDetail].filter(Boolean).join(" ");
+  return approverFailureLines(
+    result.revalidation.failureCode,
+    result.revalidation.failureDetail,
+  ).join(" ");
 }
 
 export function ApproverRequestList({
@@ -218,7 +216,9 @@ export function ApproverRequestList({
       {result ? (
         result.requestStatus === "CONFIRMED" ? (
           <FormNotice>
-            선택한 신청이 확정되었습니다.
+            선택한 신청이 확정되었습니다. 확정 일시는{" "}
+            {formatSeoulDateTime(result.revalidation.checkedAt)}이며, 확정된 방문은 확정 일정 탭에서
+            확인할 수 있습니다.
             {result.timeClosedRequestIds.length > 0
               ? ` 시간이 겹치는 다른 신청 ${result.timeClosedRequestIds.length}건은 시간 마감되었습니다.`
               : ""}

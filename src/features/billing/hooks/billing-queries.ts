@@ -19,6 +19,7 @@ import {
   listRefundRequests,
 } from "../api/billing.api";
 import type { PageParams } from "../api/billing.api";
+import type { SubscriptionCurrent } from "../api/wire";
 
 export const billingKeys = {
   all: ["billing"] as const,
@@ -64,16 +65,34 @@ export function useBillingPlans() {
   return useQuery({ queryKey: billingKeys.plans, queryFn: fetchBillingPlans });
 }
 
+const PAYMENT_IN_FLIGHT = ["PROCESSING", "VERIFYING"];
+const IN_FLIGHT_POLL_MS = 10_000;
+
+export function isPaymentInFlight(subscription: SubscriptionCurrent | undefined): boolean {
+  const status = subscription?.latestInvoice?.status;
+  return status !== undefined && PAYMENT_IN_FLIGHT.includes(status);
+}
+
+export function subscriptionRefetchInterval(subscription: SubscriptionCurrent | undefined) {
+  return isPaymentInFlight(subscription) ? IN_FLIGHT_POLL_MS : false;
+}
+
 export function useSubscription(enabled = true) {
-  return useQuery({ queryKey: billingKeys.subscription, queryFn: fetchSubscription, enabled });
+  return useQuery({
+    queryKey: billingKeys.subscription,
+    queryFn: fetchSubscription,
+    enabled,
+    refetchInterval: (query) => subscriptionRefetchInterval(query.state.data),
+  });
 }
 
 export function useCardNotice() {
   return useQuery({ queryKey: billingKeys.cardNotice, queryFn: fetchCardNotice });
 }
 
-export function useConsentPreview(plan?: string, noticeId?: number) {
+export function useConsentPreview(plan?: string, noticeId?: number, enabled = true) {
   return useQuery({
+    enabled,
     queryKey: billingKeys.consentPreview(plan, noticeId),
     queryFn: () => fetchConsentPreview({ plan, priceChangeNoticeId: noticeId }),
     gcTime: 0,
