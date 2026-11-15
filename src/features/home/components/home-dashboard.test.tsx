@@ -10,6 +10,7 @@ import { resetMockPropertyState, setMockPropertyState } from "@/mocks/handlers/p
 import { buildMockTask, resetMockWorkState, setMockWorkState } from "@/mocks/handlers/work";
 import { server, startMockServer } from "@/mocks/server";
 import { renderOffice } from "@/shared/testing/office-render";
+import { COORDINATION_STATUSES, statusLabel } from "@/features/visit/model/labels";
 import { HomeDashboard } from "./home-dashboard";
 
 vi.mock("next/navigation", () => ({
@@ -179,6 +180,34 @@ describe("홈 대시보드", () => {
     expect(screen.getByRole("link", { name: "재검증 실패 1건" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "시간 마감 2건" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "읽지 않은 방문 신청 알림 3건" })).toBeTruthy();
+  });
+
+  it("방문 조율 현황의 상태 태그는 각 상태로 거른 조율 목록으로 이어진다", async () => {
+    renderOffice(<HomeDashboard />, { role: "OWNER" });
+    const status = await screen.findByRole("region", { name: "방문 조율 현황" });
+    const links = within(status).getAllByRole("link");
+    expect(links).toHaveLength(COORDINATION_STATUSES.length);
+    COORDINATION_STATUSES.forEach((value, index) => {
+      expect(links[index]?.getAttribute("href")).toBe(`/coordinations?status=${value}`);
+      expect(links[index]?.textContent).toContain(statusLabel(value));
+      expect(links[index]?.className).toContain("hover:opacity-80");
+      expect(links[index]?.className).toContain("active:opacity-65");
+    });
+  });
+
+  it("신청 현황 카드는 신청 상태가 조율 상태와 달라 필터 없는 조율 목록으로 이어진다", async () => {
+    renderOffice(<HomeDashboard />);
+    for (const name of ["신청 대기 0건", "재검증 실패 0건", "시간 마감 0건"]) {
+      const link = await screen.findByRole("link", { name });
+      expect(link.getAttribute("href")).toBe("/coordinations");
+      expect(link.className).toContain("hover:border-primary");
+    }
+  });
+
+  it("읽지 않은 방문 신청 알림 링크는 방문 신청 알림 탭을 연다", async () => {
+    renderOffice(<HomeDashboard />);
+    const link = await screen.findByRole("link", { name: /읽지 않은 방문 신청 알림 \d+건/ });
+    expect(link.getAttribute("href")).toBe("/notifications?tab=visit-request");
   });
 
   it("기한이 지난 미완료 업무를 오늘 업무와 따로 보여준다", async () => {

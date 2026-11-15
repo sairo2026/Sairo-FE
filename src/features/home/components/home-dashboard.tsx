@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { useSubscription } from "@/features/billing/hooks/billing-queries";
 import { COORDINATION_STATUSES, statusLabel, statusTone } from "@/features/visit/model/labels";
+import { coordinationListPath } from "@/features/visit/model/visit-routes";
+import { VISIT_REQUEST_NOTICES_HREF } from "../model/labels";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { ScheduleTag } from "@/shared/components/ui/badge";
@@ -229,7 +231,7 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
             방문 신청 현황
           </h2>
           <Link
-            href="/notifications"
+            href={VISIT_REQUEST_NOTICES_HREF}
             aria-label={`읽지 않은 방문 신청 알림 ${summary.unreadVisitRequestNoticeCount}건`}
             className="text-caption font-semibold text-primary underline hover:text-primary-hover active:text-primary-pressed"
           >
@@ -238,19 +240,19 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
         </div>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
           <StatCard
-            href="/coordinations"
+            href={coordinationListPath()}
             title="신청 대기"
             value={summary.visitRequestSummary.pendingCount}
             label="건"
           />
           <StatCard
-            href="/coordinations"
+            href={coordinationListPath()}
             title="재검증 실패"
             value={summary.visitRequestSummary.revalidationFailedCount}
             label="건"
           />
           <StatCard
-            href="/coordinations"
+            href={coordinationListPath()}
             title="시간 마감"
             value={summary.visitRequestSummary.timeClosedCount}
             label="건"
@@ -378,7 +380,7 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
               {COORDINATION_STATUSES.map((status) => (
                 <li key={status}>
                   <Link
-                    href="/coordinations"
+                    href={coordinationListPath(status)}
                     className="block rounded-control transition-opacity hover:opacity-80 active:opacity-65"
                   >
                     <ScheduleTag
