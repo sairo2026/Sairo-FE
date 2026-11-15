@@ -26,15 +26,15 @@ export const COORDINATION_STATUS_LABEL: Record<CoordinationStatus, string> = {
 };
 
 export const COORDINATION_STATUS_TONE: Record<CoordinationStatus, BadgeTone> = {
-  TIME_COLLECTING: "gray",
-  COORDINATABLE: "blue",
-  FINAL_CONFIRMATION_REQUIRED: "yellow",
+  TIME_COLLECTING: "rose",
+  COORDINATABLE: "orange",
+  FINAL_CONFIRMATION_REQUIRED: "lime",
   APPLYING: "teal",
-  CONFIRMED: "green",
-  RESCHEDULE_REQUIRED: "red",
-  VISIT_COMPLETED: "green",
-  VISIT_INCOMPLETE: "amber",
-  CANCELLED: "gray",
+  CONFIRMED: "mint",
+  RESCHEDULE_REQUIRED: "violet",
+  VISIT_COMPLETED: "gray",
+  VISIT_INCOMPLETE: "silver",
+  CANCELLED: "crimson",
 };
 
 export function isCoordinationStatus(value: string): value is CoordinationStatus {

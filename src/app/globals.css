@@ -51,6 +51,22 @@
   --color-tag-teal: #cefff4;
   --color-tag-teal-ink: #00382c;
 
+  /* 방문 조율 상태 타일 색. 디자인 시스템 ScheduleTag 값이다. */
+  --color-tag-rose: #ffd8d8;
+  --color-tag-rose-ink: #a20000;
+  --color-tag-orange: #ffcc93;
+  --color-tag-orange-ink: #5b3000;
+  --color-tag-lime: #f8ffac;
+  --color-tag-lime-ink: #434900;
+  --color-tag-mint: #82ff76;
+  --color-tag-mint-ink: #00382c;
+  --color-tag-violet: #d7ceff;
+  --color-tag-violet-ink: #3319a5;
+  --color-tag-silver: #c9c9c9;
+  --color-tag-silver-ink: #3d4959;
+  --color-tag-crimson: #b65353;
+  --color-tag-crimson-ink: #ffffff;
+
   --font-sans:
     var(--font-pretendard), "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
 
@@ -337,6 +353,34 @@ a:focus-visible > .clickable-tile {
 .clickable-tile[data-tone="gray"] {
   --tile-hover: #dfe2ea;
   --tile-active: #cdd1dc;
+}
+.clickable-tile[data-tone="rose"] {
+  --tile-hover: #dbbaba;
+  --tile-active: #ccadad;
+}
+.clickable-tile[data-tone="orange"] {
+  --tile-hover: #dbaf7e;
+  --tile-active: #cca376;
+}
+.clickable-tile[data-tone="lime"] {
+  --tile-hover: #d5db94;
+  --tile-active: #c6cc8a;
+}
+.clickable-tile[data-tone="mint"] {
+  --tile-hover: #70db65;
+  --tile-active: #68cc5e;
+}
+.clickable-tile[data-tone="violet"] {
+  --tile-hover: #b9b1db;
+  --tile-active: #aca5cc;
+}
+.clickable-tile[data-tone="silver"] {
+  --tile-hover: #acacac;
+  --tile-active: #a1a1a1;
+}
+.clickable-tile[data-tone="crimson"] {
+  --tile-hover: #9d4747;
+  --tile-active: #924242;
 }
 a:hover > .clickable-tile,
 a:focus-visible > .clickable-tile {

@@ -10,20 +10,25 @@ import {
 } from "./labels";
 
 describe("방문 조율 상태 라벨", () => {
-  it("홈의 9개 문구와 색 매핑을 그대로 유지한다", () => {
+  it("홈의 9개 문구와 디자인 시스템의 상태 색 매핑을 그대로 유지한다", () => {
     expect(
       COORDINATION_STATUSES.map((status) => [statusLabel(status), statusTone(status)]),
     ).toEqual([
-      ["시간 수집 중", "gray"],
-      ["조율 가능", "blue"],
-      ["최종 확정 필요", "yellow"],
+      ["시간 수집 중", "rose"],
+      ["조율 가능", "orange"],
+      ["최종 확정 필요", "lime"],
       ["신청 진행", "teal"],
-      ["확정 완료", "green"],
-      ["재조율 필요", "red"],
-      ["방문 완료", "green"],
-      ["미방문 종료", "amber"],
-      ["취소", "gray"],
+      ["확정 완료", "mint"],
+      ["재조율 필요", "violet"],
+      ["방문 완료", "gray"],
+      ["미방문 종료", "silver"],
+      ["취소", "crimson"],
     ]);
+  });
+
+  it("상태마다 색이 서로 다르다", () => {
+    const tones = COORDINATION_STATUSES.map((status) => statusTone(status));
+    expect(new Set(tones).size).toBe(tones.length);
   });
 
   it("서버 상태값 전부가 라벨을 가진다", () => {

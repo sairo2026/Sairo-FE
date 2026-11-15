@@ -112,3 +112,24 @@ export function visitRequestNoticeHref(coordinationId: number | null | undefined
 export function notificationTypeLabel(type: string): string {
   return NOTIFICATION_TYPE_LABEL[type] ?? "알림";
 }
+
+const NOTIFICATION_TYPE_TONE: Record<string, BadgeTone> = {
+  SECURITY_ALERT: "red",
+  DELETION_SCHEDULED: "red",
+  VISIT_RESCHEDULE_NEEDED: "red",
+  TRIAL_ENDING: "amber",
+  PAYMENT: "amber",
+  PLAN_CHANGED: "amber",
+  RETURN_SCHEDULED: "amber",
+  TERMS_CHANGED: "amber",
+  CONTRACT_EXPIRY: "amber",
+  VISIT_COMPLETION_PENDING: "amber",
+  VISIT_CONFIRMED: "green",
+  VISIT_SCHEDULED: "teal",
+  NOTICE: "yellow",
+};
+
+/** 읽지 않은 알림 라벨의 색. 경고성은 빨강·주황, 확정은 초록, 안내는 노랑, 그 밖은 파랑이다. 읽은 알림은 화면에서 회색으로 낮춘다. */
+export function notificationTypeTone(type: string): BadgeTone {
+  return NOTIFICATION_TYPE_TONE[type] ?? "blue";
+}

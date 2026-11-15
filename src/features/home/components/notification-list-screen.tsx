@@ -4,7 +4,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
 import { listRequestNotices, readRequestNotice } from "@/features/visit/api/request.api";
-import { NOTICE_TYPE_DESCRIPTION, NOTICE_TYPE_LABEL } from "@/features/visit/model/request-labels";
+import {
+  NOTICE_TYPE_DESCRIPTION,
+  NOTICE_TYPE_LABEL,
+  NOTICE_TYPE_TONE,
+} from "@/features/visit/model/request-labels";
 import { ApiError } from "@/shared/api/client";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
 import { EmptyState } from "@/shared/components/feedback/empty-state";
@@ -19,7 +23,12 @@ import { PAGE_SIZE_OPTIONS } from "@/shared/components/ui/data-table";
 import type { PageSize } from "@/shared/components/ui/data-table";
 import { markNotificationRead } from "../api/home.api";
 import { homeKeys, useNotifications } from "../hooks/home-queries";
-import { notificationLink, notificationTypeLabel, visitRequestNoticeHref } from "../model/labels";
+import {
+  notificationLink,
+  notificationTypeLabel,
+  notificationTypeTone,
+  visitRequestNoticeHref,
+} from "../model/labels";
 import type { NotificationTab } from "../model/labels";
 import { describeWorkError } from "../model/messages";
 
@@ -101,7 +110,7 @@ function GeneralNotifications() {
                       <div className="flex min-w-0 flex-col gap-1">
                         <span className="flex items-center gap-2">
                           <Badge
-                            tone={item.read ? "gray" : "blue"}
+                            tone={item.read ? "gray" : notificationTypeTone(item.type)}
                             className="h-7 min-w-0 px-3 text-caption"
                           >
                             {notificationTypeLabel(item.type)}
@@ -196,7 +205,7 @@ function VisitRequestNotices() {
               >
                 <div className="flex flex-col gap-1">
                   <Badge
-                    tone={item.readAt ? "gray" : "teal"}
+                    tone={item.readAt ? "gray" : (NOTICE_TYPE_TONE[item.noticeType] ?? "blue")}
                     className="h-7 min-w-0 w-fit px-3 text-caption"
                   >
                     {NOTICE_TYPE_LABEL[item.noticeType] ?? "방문 신청"}

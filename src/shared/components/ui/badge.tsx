@@ -2,7 +2,21 @@ import type { ReactNode } from "react";
 import { cn } from "@/shared/lib/cn";
 import { formatDDay } from "@/shared/lib/format";
 
-export type BadgeTone = "blue" | "red" | "yellow" | "green" | "amber" | "teal" | "gray";
+export type BadgeTone =
+  | "blue"
+  | "red"
+  | "yellow"
+  | "green"
+  | "amber"
+  | "teal"
+  | "rose"
+  | "orange"
+  | "lime"
+  | "mint"
+  | "violet"
+  | "silver"
+  | "crimson"
+  | "gray";
 
 const toneClass: Record<BadgeTone, string> = {
   blue: "bg-tag-blue text-tag-blue-ink",
@@ -11,6 +25,13 @@ const toneClass: Record<BadgeTone, string> = {
   green: "bg-tag-green text-tag-green-ink",
   amber: "bg-tag-amber text-tag-amber-ink",
   teal: "bg-tag-teal text-tag-teal-ink",
+  rose: "bg-tag-rose text-tag-rose-ink",
+  orange: "bg-tag-orange text-tag-orange-ink",
+  lime: "bg-tag-lime text-tag-lime-ink",
+  mint: "bg-tag-mint text-tag-mint-ink",
+  violet: "bg-tag-violet text-tag-violet-ink",
+  silver: "bg-tag-silver text-tag-silver-ink",
+  crimson: "bg-tag-crimson text-tag-crimson-ink",
   gray: "border border-line bg-white text-ink-3",
 };
 
