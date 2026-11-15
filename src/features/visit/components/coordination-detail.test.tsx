@@ -38,6 +38,21 @@ afterEach(() => {
 
 afterAll(() => stopServer());
 
+const grant = {
+  grantId: 31,
+  approvalId: 7100,
+  propertyId: 9001,
+  ownerOfficeId: 77,
+  ownerOfficeName: "행복공인중개사",
+  scope: "OFFICE" as const,
+  propertyName: "허용 오피스텔",
+  propertyAddress: "서울특별시 종로구 세종로 1",
+  categoryName: "오피스텔",
+  dealTypes: [],
+  approvalValidUntil: "2026-12-31T18:00:00+09:00",
+  conditionRegistered: true,
+};
+
 function detail() {
   return getMockVisitState().coordinations[0];
 }
@@ -90,7 +105,7 @@ describe("방문 조율 상세", () => {
     expect(screen.getByText(/상세주소는 확정 신청 뒤에 보입니다/)).not.toBeNull();
     expect(
       screen.getByRole("button", { name: "허용 오피스텔 제거" }).getAttribute("aria-disabled"),
-    ).toBeNull();
+    ).toBe("true");
   });
 
   it("조율 가능 상태에서는 후보를 제거할 수 없다", async () => {
@@ -131,7 +146,14 @@ describe("방문 조율 상세", () => {
         buildMockCoordination({
           coordinationId: 801,
           status: "TIME_COLLECTING",
-          candidateProperties: [buildMockCandidate({ candidatePropertyId: 1, propertyId: 501 })],
+          candidateProperties: [
+            buildMockCandidate({ candidatePropertyId: 1, propertyId: 501 }),
+            buildMockCandidate({
+              candidatePropertyId: 2,
+              propertyId: 502,
+              propertyName: "정릉 상가",
+            }),
+          ],
         }),
       ],
     });
@@ -327,7 +349,137 @@ describe("방문 조율 상세", () => {
     const user = userEvent.setup();
     renderOffice(<CoordinationDetailScreen coordinationId={801} />, { role: "OWNER" });
     await user.click(await screen.findByRole("button", { name: "일정 저장" }));
-    expect(await screen.findByText(/허용된 시간 범위를 벗어난 구성/)).not.toBeNull();
+    expect(await screen.findByText(/승인자 조건이 등록되지 않았거나/)).not.toBeNull();
+    const link = await screen.findByRole("link", { name: "국민대 앞 아파트 승인자 조건 등록" });
+    expect(link.getAttribute("href")).toBe("/properties/501/access-approvals");
+  });
+
+  it("일정 저장이 막히면 조건이 없는 허용받은 매물을 먼저 표시하고 확인 링크를 준다", async () => {
+    setMockVisitState({
+      receivedGrants: [{ ...grant, propertyId: 9001, conditionRegistered: false }],
+      coordinations: [
+        buildMockCoordination({
+          coordinationId: 801,
+          status: "COORDINATABLE",
+          candidateProperties: [
+            buildMockCandidate({ candidatePropertyId: 1, propertyId: 501 }),
+            buildMockCandidate({
+              candidatePropertyId: 2,
+              propertyId: 9001,
+              propertyName: "허용 오피스텔",
+              crossOffice: true,
+              ownerOfficeName: "행복공인중개사",
+              grantState: "ACTIVE",
+            }),
+          ],
+          customerTimeSlots: [],
+        }),
+      ],
+    });
+    const user = userEvent.setup();
+    renderOffice(<CoordinationDetailScreen coordinationId={801} />, { role: "OWNER" });
+    await user.click(await screen.findByRole("button", { name: "일정 저장" }));
+    const list = await screen.findByRole("list", { name: "일정 저장을 막은 후보 확인" });
+    await waitFor(() => expect(within(list).getByText("승인자 조건 미등록")).not.toBeNull());
+    const rows = within(list).getAllByRole("listitem");
+    expect(within(rows[0] as HTMLElement).getByText("허용 오피스텔")).not.toBeNull();
+    expect(
+      within(rows[0] as HTMLElement)
+        .getByRole("link", { name: "허용 오피스텔 허용받은 매물에서 확인" })
+        .getAttribute("href"),
+    ).toBe("/granted-properties");
+  });
+
+  it("서버가 원인 후보를 알려 주면 그 후보를 이 매물 때문이라고 표시한다", async () => {
+    setMockVisitState({
+      coordinations: [
+        buildMockCoordination({
+          coordinationId: 801,
+          status: "COORDINATABLE",
+          candidateProperties: [
+            buildMockCandidate({ candidatePropertyId: 1, propertyId: 501 }),
+            buildMockCandidate({
+              candidatePropertyId: 2,
+              propertyId: 502,
+              propertyName: "정릉 상가",
+            }),
+          ],
+        }),
+      ],
+    });
+    server.use(
+      http.put("/api/visit-coordinations/801/schedule", () =>
+        errorResponse(422, "TIME_OUT_OF_RANGE", "원문 메시지", { candidatePropertyIds: [2] }),
+      ),
+    );
+    const user = userEvent.setup();
+    renderOffice(<CoordinationDetailScreen coordinationId={801} />, { role: "OWNER" });
+    await user.click(await screen.findByRole("button", { name: "일정 저장" }));
+    const list = await screen.findByRole("list", { name: "일정 저장을 막은 후보 확인" });
+    const rows = within(list).getAllByRole("listitem");
+    expect(within(rows[0] as HTMLElement).getByText("정릉 상가")).not.toBeNull();
+    expect(
+      within(rows[0] as HTMLElement).getByText(/이 매물 때문에 일정을 저장하지 못했습니다/),
+    ).not.toBeNull();
+    expect(screen.queryByText("원문 메시지")).toBeNull();
+  });
+
+  it("후보가 하나뿐이면 시간 수집 중이어도 제거를 막는다", async () => {
+    setMockVisitState({
+      coordinations: [
+        buildMockCoordination({
+          coordinationId: 801,
+          status: "TIME_COLLECTING",
+          candidateProperties: [buildMockCandidate({ candidatePropertyId: 1, propertyId: 501 })],
+        }),
+      ],
+    });
+    renderOffice(<CoordinationDetailScreen coordinationId={801} />, { role: "OWNER" });
+    expect(
+      (await screen.findByRole("button", { name: "국민대 앞 아파트 제거" })).getAttribute(
+        "aria-disabled",
+      ),
+    ).toBe("true");
+    expect(screen.getByText(/후보는 1개 이상 남아야 합니다/)).not.toBeNull();
+  });
+
+  it("읽기 전용 사무소에서는 시간 수집 중에도 후보를 제거할 수 없다", async () => {
+    setMockVisitState({
+      coordinations: [
+        buildMockCoordination({
+          coordinationId: 801,
+          status: "TIME_COLLECTING",
+          candidateProperties: [
+            buildMockCandidate({ candidatePropertyId: 1, propertyId: 501 }),
+            buildMockCandidate({
+              candidatePropertyId: 2,
+              propertyId: 502,
+              propertyName: "정릉 상가",
+            }),
+          ],
+        }),
+      ],
+    });
+    renderOffice(<CoordinationDetailScreen coordinationId={801} />, {
+      role: "OWNER",
+      isReadOnly: true,
+    });
+    expect(
+      (await screen.findByRole("button", { name: "정릉 상가 제거" })).getAttribute("aria-disabled"),
+    ).toBe("true");
+  });
+
+  it("신청을 받는 중에는 고객 링크 발급과 일정 구성 대신 사유를 안내한다", async () => {
+    setMockVisitState({
+      coordinations: [buildMockCoordination({ coordinationId: 801, status: "APPLYING" })],
+    });
+    renderOffice(<CoordinationDetailScreen coordinationId={801} />, { role: "OWNER" });
+    expect(await screen.findByText(/신청을 받는 중에는 고객 링크를 새로 발급/)).not.toBeNull();
+    expect(screen.queryByRole("button", { name: "고객 링크 발급" })).toBeNull();
+    expect(screen.getByText(/신청을 받는 중에는 일정 구성을 바꿀 수 없습니다/)).not.toBeNull();
+    expect(
+      screen.getByText(/발급한 뒤 7일 또는 방문 가능 시작일 24시간 전 중 빠른 시각/),
+    ).not.toBeNull();
   });
 
   it("충돌 확인에서 겹치는 일정을 종류와 시각으로 보여준다", async () => {

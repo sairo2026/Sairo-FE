@@ -331,6 +331,10 @@ describe("승인자 계정 화면의 매물 업무", () => {
 });
 
 describe("승인자 조건 일괄 적용", () => {
+  async function addWindow(user: ReturnType<typeof userEvent.setup>) {
+    await user.click(await screen.findByRole("button", { name: "월요일 시간대 추가" }));
+  }
+
   function portal() {
     login([
       portalApproval({ approvalId: 1 }),
@@ -355,6 +359,7 @@ describe("승인자 조건 일괄 적용", () => {
     portal();
     const user = userEvent.setup();
     renderPage(<ApproverBulkScreen initialIds={[]} />);
+    await addWindow(user);
     await user.click(await screen.findByRole("button", { name: "영향 미리보기" }));
     expect(await screen.findByText("적용할 출입승인을 선택해 주세요.")).not.toBeNull();
   });
@@ -363,6 +368,7 @@ describe("승인자 조건 일괄 적용", () => {
     portal();
     const user = userEvent.setup();
     renderPage(<ApproverBulkScreen initialIds={[1, 2]} />);
+    await addWindow(user);
     await user.click(await screen.findByRole("button", { name: "영향 미리보기" }));
     expect(await screen.findAllByText("영향 없음")).toHaveLength(2);
     await user.click(screen.getByRole("button", { name: "선택한 출입승인에 적용" }));
@@ -374,6 +380,7 @@ describe("승인자 조건 일괄 적용", () => {
     setMockVisitReviewState({ bulkImpactIds: [2] });
     const user = userEvent.setup();
     renderPage(<ApproverBulkScreen initialIds={[1, 2]} />);
+    await addWindow(user);
     await user.click(await screen.findByRole("button", { name: "영향 미리보기" }));
     expect(await screen.findByText(/영향 받는 확정 방문 1건/)).not.toBeNull();
     const apply = screen.getByRole("button", { name: "선택한 출입승인에 적용" });
@@ -387,6 +394,7 @@ describe("승인자 조건 일괄 적용", () => {
     portal();
     const user = userEvent.setup();
     renderPage(<ApproverBulkScreen initialIds={[1, 3]} />);
+    await addWindow(user);
     await user.click(await screen.findByRole("button", { name: "영향 미리보기" }));
     expect(
       await screen.findByText(/적용할 수 없음 · 대표 승인자 출입승인이 아닙니다/),
@@ -421,6 +429,7 @@ describe("승인자 조건 일괄 적용", () => {
     );
     const user = userEvent.setup();
     renderPage(<ApproverBulkScreen initialIds={[1]} />);
+    await addWindow(user);
     await user.click(await screen.findByRole("button", { name: "영향 미리보기" }));
     await user.click(await screen.findByRole("button", { name: "선택한 출입승인에 적용" }));
     expect(await screen.findByText("영향 확인 필요")).not.toBeNull();
@@ -448,6 +457,7 @@ describe("승인자 조건 일괄 적용", () => {
     );
     const user = userEvent.setup();
     renderPage(<ApproverBulkScreen initialIds={[1]} />);
+    await addWindow(user);
     await user.click(await screen.findByRole("button", { name: "영향 미리보기" }));
     expect(
       await screen.findByText("한 번에 최대 20개 출입승인까지 적용할 수 있습니다."),

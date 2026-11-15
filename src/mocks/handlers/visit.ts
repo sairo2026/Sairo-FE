@@ -441,11 +441,7 @@ export const visitHandlers = [
       (item) => String(item.candidatePropertyId) === params.candidateId,
     );
     if (!candidate) return mockErrors.notFound();
-    const grantInactive = candidate.crossOffice && candidate.grantState !== "ACTIVE";
-    const hasConfirmed = (found.scheduleItems ?? []).some(
-      (item) => item.candidatePropertyId === candidate.candidatePropertyId,
-    );
-    const allowed = found.status === "TIME_COLLECTING" || (grantInactive && !hasConfirmed);
+    const allowed = found.status === "TIME_COLLECTING" && found.candidateProperties.length > 1;
     if (!allowed)
       return errorResponse(409, "INVALID_TRANSITION", "지금은 후보를 제거할 수 없습니다.");
     bump(found, {

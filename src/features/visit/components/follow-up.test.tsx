@@ -123,6 +123,28 @@ describe("방문 결과 기록", () => {
     ).not.toBeNull();
   });
 
+  it("허용받은 사무소 매물의 완료 방문에는 링크 대신 매물을 가진 사무소가 발급한다고 안내한다", async () => {
+    prepare({
+      scheduleItems: [
+        {
+          itemId: 9102,
+          candidatePropertyId: 8012,
+          scheduledStartAt: "2026-11-12T10:00:00+09:00",
+          scheduledEndAt: "2026-11-12T10:30:00+09:00",
+          result: "COMPLETED",
+          state: "VALID",
+          resultRecordedAt: "2026-11-12T10:40:00+09:00",
+          correctionCount: 0,
+        },
+      ],
+    });
+    renderOffice(<CoordinationDetailScreen coordinationId={801} />, { role: "OWNER" });
+    expect(
+      await screen.findByText(/평가 링크는 매물을 가진 다른 사무소에서 발급합니다/),
+    ).not.toBeNull();
+    expect(screen.queryByRole("link", { name: "승인자 링크 발급 화면으로 이동" })).toBeNull();
+  });
+
   it("실제 방문 시각 없이 저장하면 입력 오류를 보여주고 요청하지 않는다", async () => {
     prepare();
     const handler = vi.fn();

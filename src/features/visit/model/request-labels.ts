@@ -1,4 +1,5 @@
 import type { BadgeTone } from "@/shared/components/ui/badge";
+import { BROKER_REASON_COPY, REVALIDATION_REASON_CODES } from "./revalidation-reasons";
 
 export const REQUEST_STATUS_LABEL: Record<string, string> = {
   PENDING: "신청 대기",
@@ -31,6 +32,12 @@ export const REQUEST_STATUS_FILTERS = [
   "WITHDRAWN",
   "CANCELLED",
 ] as const;
+
+export type RequestStatusFilter = (typeof REQUEST_STATUS_FILTERS)[number];
+
+export function isRequestStatusFilter(value: string | undefined): value is RequestStatusFilter {
+  return (REQUEST_STATUS_FILTERS as readonly string[]).includes(value ?? "");
+}
 
 export const REQUEST_KIND_LABEL: Record<string, string> = {
   NEW: "신규 신청",
@@ -77,15 +84,9 @@ export const CLOSE_REASON_LABEL: Record<string, string> = {
 
 export const ACTIVE_REQUEST_STATUSES: readonly string[] = ["PENDING", "SELECTED"];
 
-export const REQUEST_RULE_LABEL: Record<string, string> = {
-  CUSTOMER_AVAILABILITY: "고객이 가능하다고 한 시간이 아닙니다.",
-  WINDOW_MISMATCH: "승인자가 허용한 시간대가 아닙니다.",
-  MAX_VISITS_PER_DAY: "하루 최대 방문 횟수를 넘습니다.",
-  MIN_GAP: "다른 방문과의 최소 간격을 지키지 못합니다.",
-  MIN_LEAD: "최소 사전 신청 시간보다 늦게 신청했습니다.",
-  SINGLE_VISIT_MAX: "1회 허용 시간을 넘습니다.",
-  VALIDITY_PERIOD: "승인자 조건의 적용 기간 밖입니다.",
-};
+export const REQUEST_RULE_LABEL: Record<string, string> = Object.fromEntries(
+  REVALIDATION_REASON_CODES.map((code) => [code, BROKER_REASON_COPY[code].reason]),
+);
 
 export const REQUEST_NOT_RESERVATION_NOTICE =
   "겹치는 승인 대기 신청은 함께 존재할 수 있으며 확정 예약이나 점유가 아닙니다.";

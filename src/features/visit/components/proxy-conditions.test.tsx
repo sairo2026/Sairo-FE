@@ -60,6 +60,10 @@ describe("승인자 조건 대리 입력 화면", () => {
     expect(await screen.findByText("등록된 조건 이력이 없습니다.")).not.toBeNull();
     expect(screen.queryByText("개인정보 수집 안내")).toBeNull();
     await user.click(screen.getByRole("button", { name: "대리 입력으로 저장" }));
+    expect(await screen.findByText(/가능한 시간대를 1개 이상 입력해 주세요/)).not.toBeNull();
+    expect(getMockApproverState().conditions).toHaveLength(0);
+    await user.click(screen.getByRole("button", { name: "월요일 시간대 추가" }));
+    await user.click(screen.getByRole("button", { name: "대리 입력으로 저장" }));
     expect(await screen.findByText("조건 1번 버전으로 저장했습니다.")).not.toBeNull();
     expect(getMockApproverState().conditions[0]?.source).toBe("PROXY");
     expect(await screen.findByText("1번 버전")).not.toBeNull();

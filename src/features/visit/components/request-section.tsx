@@ -30,6 +30,10 @@ import { RequestForm } from "./request-form";
 type Detail = VisitCoordinationDetailResponse;
 type Candidate = Detail["candidateProperties"][number];
 
+function checkText(value: string): string {
+  return value === "PASSED" ? "통과" : "확인 필요";
+}
+
 const SUBMITTABLE = ["FINAL_CONFIRMATION_REQUIRED", "APPLYING"];
 
 function useRefreshAll() {
@@ -362,9 +366,9 @@ function AlternativeRow({
       <span className="text-caption text-ink">
         변경안 {formatSeoulDateTime(entry.startAt)} ~ {formatSeoulDateTime(entry.endAt)}
         <span className="block text-ink-2">
-          고객 {entry.checks.customer} · 중개사 {entry.checks.broker} · 승인자 조건{" "}
-          {entry.checks.approverCondition} · 확정 방문 {entry.checks.confirmedVisits} · 이동{" "}
-          {entry.checks.travel}
+          고객 {checkText(entry.checks.customer)} · 중개사 {checkText(entry.checks.broker)} · 승인자
+          조건 {checkText(entry.checks.approverCondition)} · 확정 방문{" "}
+          {checkText(entry.checks.confirmedVisits)} · 이동 {checkText(entry.checks.travel)}
         </span>
       </span>
       <Button size="sm" disabled={disabled} isLoading={isPending} onClick={onChoose}>

@@ -8,12 +8,14 @@ import {
   listCrossOfficeSchedules,
   listRequestNotices,
   listVisitRequests,
+  fetchVisitRequest,
 } from "../api/request.api";
 import type { CrossOfficeParams } from "../api/request.api";
 
 export const requestKeys = {
   requests: (coordinationId: number) => ["visit", "requests", coordinationId] as const,
   notices: ["visit", "notices"] as const,
+  detail: (requestId: number) => ["visit", "request-detail", requestId] as const,
   change: (coordinationId: number, itemId: number) =>
     ["visit", "change-slots", coordinationId, itemId] as const,
   applyGrants: (propertyId: number, approvalId: number) =>
@@ -28,6 +30,14 @@ export function useVisitRequests(coordinationId: number) {
   return useQuery({
     queryKey: requestKeys.requests(coordinationId),
     queryFn: () => listVisitRequests(coordinationId),
+  });
+}
+
+export function useVisitRequestDetail(requestId: number, enabled: boolean) {
+  return useQuery({
+    queryKey: requestKeys.detail(requestId),
+    queryFn: () => fetchVisitRequest(requestId),
+    enabled,
   });
 }
 
