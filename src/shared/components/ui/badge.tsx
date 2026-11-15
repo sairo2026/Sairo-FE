@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "@/shared/lib/cn";
+import { formatDDay } from "@/shared/lib/format";
 
 export type BadgeTone = "blue" | "red" | "yellow" | "green" | "amber" | "teal" | "gray";
 
@@ -43,7 +44,7 @@ export function TradeTypeTag({ type }: { type: TradeType }) {
   );
 }
 
-/** 만기까지 남은 일수. 만기 당일은 D-0으로 표시하고 값이 없으면 "없음"이다. */
+/** 만기까지 남은 일수. 만기 당일은 D-0, 지난 뒤는 D+n으로 표시하고 값이 없으면 "없음"이다. 90일 이내(D-90 이하, D-0 포함)만 강조한다. */
 export function DDayTag({ daysLeft }: { daysLeft: number | null }) {
   if (daysLeft === null) {
     return (
@@ -52,17 +53,21 @@ export function DDayTag({ daysLeft }: { daysLeft: number | null }) {
       </span>
     );
   }
-  const isUnder90 = daysLeft <= 90;
+  const isUnder90 = daysLeft >= 0 && daysLeft <= 90;
+  const isOverdue = daysLeft < 0;
   return (
     <span
+      aria-label={isOverdue ? `만기 ${-daysLeft}일 지남` : undefined}
       className={cn(
         "inline-flex h-10 min-w-[100px] items-center justify-center rounded-control border px-3 text-body",
         isUnder90
           ? "border-primary bg-primary-soft font-semibold text-primary"
-          : "border-line bg-white font-medium text-ink-2",
+          : isOverdue
+            ? "border-line bg-white font-medium text-ink-3"
+            : "border-line bg-white font-medium text-ink-2",
       )}
     >
-      D-{Math.max(0, daysLeft)}
+      {formatDDay(daysLeft)}
     </span>
   );
 }

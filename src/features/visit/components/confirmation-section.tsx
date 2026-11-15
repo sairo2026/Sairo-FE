@@ -16,7 +16,7 @@ import {
   useConfirmationDeliveries,
   useConfirmationMessages,
 } from "../hooks/follow-queries";
-import { NOTICE_METHOD_LABEL, labelOf } from "../model/labels";
+import { NOTICE_METHOD_LABEL, NOTICE_RECIPIENT_LABEL, labelOf } from "../model/labels";
 import { describeVisitError } from "../model/messages";
 import { toKstIso } from "../model/time";
 
@@ -99,7 +99,7 @@ function DeliveryForm({ detail, scheduleVersion }: { detail: Detail; scheduleVer
           value={recipient}
           options={[
             { value: "CUSTOMER", label: "고객" },
-            { value: "APPROVER", label: "출입 승인자" },
+            { value: "APPROVER", label: NOTICE_RECIPIENT_LABEL.APPROVER },
           ]}
           onValueChange={setRecipient}
         />

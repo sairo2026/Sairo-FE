@@ -187,7 +187,10 @@ describe("방문 조율 상세", () => {
     Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true });
     renderOffice(<CoordinationDetailScreen coordinationId={801} />, { role: "OWNER" });
     await user.click(await screen.findByRole("button", { name: "링크 재발급" }));
-    const dialog = await screen.findByRole("dialog");
+    const confirm = await screen.findByRole("dialog");
+    expect(within(confirm).getByText(/이전에 전달한 링크는 즉시 사용할 수 없게/)).not.toBeNull();
+    await user.click(within(confirm).getByRole("button", { name: "재발급" }));
+    const dialog = await screen.findByRole("dialog", { name: "고객 링크" });
     const input = within(dialog).getByLabelText("발급된 링크") as HTMLInputElement;
     expect(input.value).toContain("https://sairo.example.com/visit-responses/");
     await user.click(within(dialog).getByRole("button", { name: "링크 복사" }));
@@ -227,6 +230,42 @@ describe("방문 조율 상세", () => {
     });
     renderOffice(<CoordinationDetailScreen coordinationId={801} />, { role: "OWNER" });
     expect(await screen.findByRole("button", { name: "링크 재발급" })).not.toBeNull();
+  });
+
+  it("고객 링크의 사용 가능·만료·폐기 상태를 배지로 보여주고 만료되면 재발급을 안내한다", async () => {
+    const base = {
+      linkId: 9001,
+      issuedAt: "2026-11-10T09:00:00+09:00",
+      responseVersion: 1,
+    };
+    const cases = [
+      { expiresAt: "2099-01-01T00:00:00+09:00", revokedAt: null, text: "사용 가능" },
+      { expiresAt: "2020-01-01T00:00:00+09:00", revokedAt: null, text: "만료됨" },
+      {
+        expiresAt: "2099-01-01T00:00:00+09:00",
+        revokedAt: "2026-11-11T09:00:00+09:00",
+        text: "폐기됨",
+      },
+    ];
+    for (const item of cases) {
+      setMockVisitState({
+        coordinations: [
+          buildMockCoordination({
+            coordinationId: 801,
+            status: "COORDINATABLE",
+            customerLink: { ...base, expiresAt: item.expiresAt, revokedAt: item.revokedAt },
+          }),
+        ],
+      });
+      renderOffice(<CoordinationDetailScreen coordinationId={801} />, { role: "OWNER" });
+      const section = (await screen.findByText("고객 가능 시간")).closest("section");
+      if (!section) throw new Error("고객 가능 시간 영역이 없다");
+      expect(within(section).getByText(item.text)).not.toBeNull();
+      expect(within(section).queryByText(/고객이 열 수 없습니다/) === null).toBe(
+        item.text === "사용 가능",
+      );
+      cleanup();
+    }
   });
 
   it("고객 링크가 없으면 발급하고 발급 실패를 안내한다", async () => {

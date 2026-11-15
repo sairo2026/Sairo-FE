@@ -6,7 +6,7 @@ import { CookieNotice } from "@/shared/legal/cookie-notice";
 import { KAKAO_LINK_NOTICE } from "../model/legal-copy";
 
 const ENTRY_ERRORS: Record<string, string> = {
-  auth_failed: "카카오 로그인에 실패했습니다. 다시 시도해주세요.",
+  auth_failed: "카카오 로그인에 실패했습니다. 다시 시도해 주세요.",
 };
 
 export function AuthEntry({

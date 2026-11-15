@@ -168,12 +168,20 @@ export const LEGAL_ROLE_LABEL = {
   ASSISTANT: "중개보조원",
 } as const;
 
+/** 확정된 방문 묶음·항목의 상태. 홈의 조율 현황과 같은 문구·색(확정 완료 초록, 재조율 필요 빨강, 취소 회색)을 쓴다. */
 export const PUBLIC_VISIT_STATE_LABEL = {
-  VALID: "확정",
-  CANCELLED: "취소",
-  RESCHEDULE_REQUIRED: "재조율 필요",
+  VALID: COORDINATION_STATUS_LABEL.CONFIRMED,
+  CANCELLED: COORDINATION_STATUS_LABEL.CANCELLED,
+  RESCHEDULE_REQUIRED: COORDINATION_STATUS_LABEL.RESCHEDULE_REQUIRED,
   SUPERSEDED: "대체됨",
 } as const;
+
+export const PUBLIC_VISIT_STATE_TONE: Record<keyof typeof PUBLIC_VISIT_STATE_LABEL, BadgeTone> = {
+  VALID: COORDINATION_STATUS_TONE.CONFIRMED,
+  CANCELLED: COORDINATION_STATUS_TONE.CANCELLED,
+  RESCHEDULE_REQUIRED: COORDINATION_STATUS_TONE.RESCHEDULE_REQUIRED,
+  SUPERSEDED: "gray",
+};
 
 export const REVIEW_ANSWER_LABEL = {
   YES: "예",
@@ -220,6 +228,29 @@ export const DISPUTE_REASON_LABEL = {
   WRONG_TARGET: "다른 방문이나 다른 중개사에 대한 평가",
   OTHER: "기타",
 } as const;
+
+export type LinkValidity = "ACTIVE" | "EXPIRED" | "REVOKED";
+
+export const LINK_VALIDITY_LABEL: Record<LinkValidity, string> = {
+  ACTIVE: "사용 가능",
+  EXPIRED: "만료됨",
+  REVOKED: "폐기됨",
+};
+
+export const LINK_VALIDITY_TONE: Record<LinkValidity, BadgeTone> = {
+  ACTIVE: "green",
+  EXPIRED: "gray",
+  REVOKED: "red",
+};
+
+/** 링크 원문은 서버에 해시로만 남아 다시 볼 수 없으므로 발급 시각 정보만으로 상태를 판단한다. */
+export function linkValidity(
+  link: { expiresAt: string; revokedAt?: string | null },
+  now: number,
+): LinkValidity {
+  if (link.revokedAt) return "REVOKED";
+  return Date.parse(link.expiresAt) > now ? "ACTIVE" : "EXPIRED";
+}
 
 export const LINK_STATE_LABEL = {
   LINKED: "연결됨",

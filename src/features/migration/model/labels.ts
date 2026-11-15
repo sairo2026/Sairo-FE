@@ -23,7 +23,7 @@ export const BATCH_STATUS: Record<string, Labeled> = {
   EXECUTING: { label: "실행 중", tone: "amber" },
   COMPLETED: { label: "완료", tone: "green" },
   FAILED: { label: "실패", tone: "red" },
-  CANCELLED: { label: "취소됨", tone: "gray" },
+  CANCELLED: { label: "취소", tone: "gray" },
 };
 
 export const SUPPORT_STATUS: Record<string, Labeled> = {

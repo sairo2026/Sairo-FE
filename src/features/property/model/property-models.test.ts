@@ -62,6 +62,24 @@ describe("금액과 만기 표시", () => {
     expect(daysUntil("날짜아님", now)).toBeNull();
   });
 
+  it("자정 경계와 90일 기준 날짜를 한국 시간 날짜 단위로 센다", () => {
+    expect(daysUntil("2026-11-11", new Date("2026-11-10T14:59:59Z"))).toBe(1);
+    expect(daysUntil("2026-11-11", new Date("2026-11-10T15:00:00Z"))).toBe(0);
+    expect(daysUntil("2026-11-11", new Date("2026-11-11T15:00:00Z"))).toBe(-1);
+    const now = new Date("2026-11-10T03:00:00Z");
+    expect(daysUntil("2027-02-08", now)).toBe(90);
+    expect(daysUntil("2027-02-09", now)).toBe(91);
+    expect(daysUntil("2026-11-09", now)).toBe(-1);
+  });
+
+  it("윤년 2월 말과 연말 경계를 넘어도 일수가 어긋나지 않는다", () => {
+    const now = new Date("2028-02-28T03:00:00Z");
+    expect(daysUntil("2028-02-29", now)).toBe(1);
+    expect(daysUntil("2028-03-01", now)).toBe(2);
+    expect(daysUntil("2029-02-28", now)).toBe(366);
+    expect(daysUntil("2028-12-31", new Date("2028-12-30T03:00:00Z"))).toBe(1);
+  });
+
   it("이름이 없으면 줄표를 보여준다", () => {
     expect(joinNames([])).toBe("-");
     expect(joinNames(["김소유", "박소유"])).toBe("김소유, 박소유");

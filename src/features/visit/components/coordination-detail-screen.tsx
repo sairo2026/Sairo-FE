@@ -29,14 +29,16 @@ import {
   CONFLICT_TYPE_LABEL,
   GRANT_STATE_LABEL,
   GRANT_STATE_TONE,
+  LINK_VALIDITY_LABEL,
+  LINK_VALIDITY_TONE,
   MAX_CANDIDATES,
   RESCHEDULE_TRIGGER_TEXT,
   labelOf,
-  statusLabel,
-  statusTone,
+  linkValidity,
 } from "../model/labels";
 import { describeVisitError, isApiCode } from "../model/messages";
 import { minutesBetween } from "../model/time";
+import { CoordinationStatusBadge } from "./coordination-status-badge";
 import { IssuedLinkDialog } from "./issued-link-dialog";
 import type { IssuedLink } from "./issued-link-dialog";
 import { ConfirmationSection } from "./confirmation-section";
@@ -123,6 +125,14 @@ function CandidateRow({
           {state && state !== "ACTIVE" ? " · 허용이 끝나 신청할 수 없습니다" : ""}
         </span>
       </div>
+      {candidate.crossOffice ? null : (
+        <Link
+          href={`/properties/${candidate.propertyId}/access-approvals`}
+          className="text-caption font-semibold text-primary hover:underline"
+        >
+          승인자 링크 관리
+        </Link>
+      )}
       <Button
         variant="ghost"
         size="sm"
@@ -256,6 +266,7 @@ function CustomerTimePanel({ detail, isReadOnly }: { detail: Detail; isReadOnly:
   const refresh = useRefresh();
   const [issued, setIssued] = useState<IssuedLink | null>(null);
   const [error, setError] = useState<string>();
+  const [isConfirmingReissue, setIsConfirmingReissue] = useState(false);
   const link = detail.customerLink;
   const isActive = link !== null && !link.revokedAt;
   const isClosed = CLOSED.includes(detail.status);
@@ -270,27 +281,39 @@ function CustomerTimePanel({ detail, isReadOnly }: { detail: Detail; isReadOnly:
         : issueCustomerLink(detail.coordinationId),
     onSuccess: async (result) => {
       setError(undefined);
+      setIsConfirmingReissue(false);
       setIssued({ publicUrl: result.publicUrl, expiresAt: result.expiresAt });
       await refresh();
     },
-    onError: (caught) => setError(describeVisitError(caught, "링크를 발급하지 못했습니다.")),
+    onError: (caught) => {
+      setIsConfirmingReissue(false);
+      setError(describeVisitError(caught, "링크를 발급하지 못했습니다."));
+    },
   });
+
+  const validity = link ? linkValidity(link, now) : null;
 
   return (
     <section className="flex flex-col gap-3" aria-labelledby="customer-time-title">
       <SectionTitle id="customer-time-title">고객 가능 시간</SectionTitle>
-      {link ? (
-        <p className="text-caption text-ink-2">
-          발급 {formatSeoulDateTime(link.issuedAt)} · 만료 {formatSeoulDateTime(link.expiresAt)}
-          {link.revokedAt ? " · 폐기됨" : ""}
-        </p>
+      {link && validity ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge tone={LINK_VALIDITY_TONE[validity]}>{LINK_VALIDITY_LABEL[validity]}</Badge>
+          <span className="text-caption text-ink-2">
+            발급 {formatSeoulDateTime(link.issuedAt)} · 만료 {formatSeoulDateTime(link.expiresAt)}
+          </span>
+        </div>
       ) : (
         <p className="text-caption text-ink-2">
           아직 고객 링크를 발급하지 않았습니다. 발급한 링크는 직접 복사해 고객에게 전달합니다.
         </p>
       )}
       <p className="text-caption text-ink-2">
-        링크 원문은 발급 응답에서 한 번만 보입니다. 다시 전달해야 하면 재발급해 주세요.
+        링크 원문은 보안을 위해 서버에 남기지 않아 발급한 직후에만 복사할 수 있습니다. 다시 전달해야
+        하면 재발급해 주세요.
+        {validity && validity !== "ACTIVE"
+          ? " 지금 링크는 사용할 수 없어 고객이 열 수 없습니다."
+          : ""}
       </p>
       {detail.customerRespondedAt ? (
         <div className="flex flex-col gap-1">
@@ -323,12 +346,32 @@ function CustomerTimePanel({ detail, isReadOnly }: { detail: Detail; isReadOnly:
             size="sm"
             disabled={isReadOnly || isClosed}
             isLoading={issue.isPending}
-            onClick={() => issue.mutate()}
+            onClick={() => (isActive ? setIsConfirmingReissue(true) : issue.mutate())}
           >
             {isActive ? "링크 재발급" : "고객 링크 발급"}
           </Button>
         </div>
       )}
+      <Modal
+        isOpen={isConfirmingReissue}
+        title="고객 링크를 재발급할까요"
+        onClose={() => setIsConfirmingReissue(false)}
+        footer={
+          <>
+            <Button variant="cancel" onClick={() => setIsConfirmingReissue(false)}>
+              취소
+            </Button>
+            <Button isLoading={issue.isPending} onClick={() => issue.mutate()}>
+              재발급
+            </Button>
+          </>
+        }
+      >
+        <p className="text-body text-ink">
+          재발급하면 이전에 전달한 링크는 즉시 사용할 수 없게 됩니다. 새 링크를 고객에게 다시 전달해
+          주세요.
+        </p>
+      </Modal>
       <IssuedLinkDialog
         title="고객 링크"
         link={issued}
@@ -595,7 +638,7 @@ function DetailBody({ detail }: { detail: Detail }) {
           <h1 className="text-h1 font-bold text-ink">방문 조율 상세</h1>
           <div className="flex flex-wrap items-center gap-3 text-body text-ink">
             <CustomerSummary detail={detail} isDeputy={isDeputy} />
-            <Badge tone={statusTone(detail.status)}>{statusLabel(detail.status)}</Badge>
+            <CoordinationStatusBadge status={detail.status} />
           </div>
           <p className="text-caption text-ink-2">
             담당 {detail.managerName} · 방문 가능 {formatSeoulDate(detail.periodStartDate)} ~{" "}
