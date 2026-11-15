@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { OfficeAccessShell } from "@/features/auth/components/office-access-gate";
 import { CoordinationDetailScreen } from "@/features/visit/components/coordination-detail-screen";
 
-export const metadata: Metadata = { title: "방문 조율 상세 | 사이로" };
+export const metadata: Metadata = { title: "방문 조율 상세" };
 
 export default async function Page({ params }: { params: Promise<{ coordinationId: string }> }) {
   const { coordinationId } = await params;

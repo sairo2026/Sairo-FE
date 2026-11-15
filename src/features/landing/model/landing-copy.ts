@@ -1,7 +1,8 @@
+import { SITE_DESCRIPTION, SITE_TITLE } from "@/shared/lib/site-metadata";
+
 export const LANDING_META = {
-  title: "사이로 | 공인중개사무소 업무 운영 소프트웨어",
-  description:
-    "사이로는 매물, 고객, 방문 조율, 계약, 월말결산을 하나로 잇는 공인중개사무소 업무 운영 소프트웨어입니다. 방문 일정은 승인자가 정한 조건 안에서 신청하고 확정 전에 일정 충돌을 다시 확인합니다.",
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
 } as const;
 
 export const LANDING_SECTIONS = [
@@ -12,7 +13,7 @@ export const LANDING_SECTIONS = [
 ] as const;
 
 export const HERO_COPY = {
-  eyebrow: "공인중개사무소 업무 운영 소프트웨어",
+  eyebrow: "공인중개사 방문 조율·업무 관리",
   title: "방문 조율부터 계약·월말결산까지, 사무소 업무를 한 흐름으로",
   body: "사이로는 매물, 고객, 방문 조율, 계약, 월말결산을 하나로 이어 주는 공인중개사무소용 업무 도구입니다. 방문 일정은 승인자가 정한 조건 안에서 신청하고, 확정 전에 시스템이 일정 충돌을 다시 확인합니다.",
   checkTitle: "확정 전에 다시 확인하는 항목",

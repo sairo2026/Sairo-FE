@@ -3,7 +3,7 @@ import { PublicBusinessFooter } from "@/features/billing/components/public-busin
 import { LinkNoticePage } from "@/features/visit/components/link-notice-page";
 import { PublicSiteLayout } from "@/shared/layouts/layouts";
 
-export const metadata: Metadata = { title: "고객 링크 개인정보 안내 | 사이로" };
+export const metadata: Metadata = { title: "고객 링크 개인정보 안내" };
 
 export default function Page() {
   return (

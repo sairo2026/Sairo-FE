@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { AccountScreenFrame } from "@/features/auth/components/account-screen-frame";
 import { OfficeEvidenceScreen } from "@/features/office/components/office-evidence-screen";
 
-export const metadata: Metadata = { title: "증빙 업로드 | 사이로" };
+export const metadata: Metadata = { title: "증빙 업로드" };
 
 type Props = {
   searchParams: Promise<{ registrationId?: string; entity?: string; warning?: string }>;

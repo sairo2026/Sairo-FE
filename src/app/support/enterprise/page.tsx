@@ -3,7 +3,7 @@ import { PublicBusinessFooter } from "@/features/billing/components/public-busin
 import { EnterpriseScreen } from "@/features/support/components/enterprise-screen";
 import { PublicSiteLayout } from "@/shared/layouts/layouts";
 
-export const metadata: Metadata = { title: "기업 도입 문의 | 사이로" };
+export const metadata: Metadata = { title: "기업 도입 문의" };
 
 export default function Page() {
   return (

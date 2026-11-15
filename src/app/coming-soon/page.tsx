@@ -4,7 +4,7 @@ import { PublicBusinessFooter } from "@/features/billing/components/public-busin
 import { BrandLogo } from "@/shared/components/ui/brand-logo";
 
 export const metadata: Metadata = {
-  title: "사이로",
+  title: { absolute: "사이로" },
   robots: { index: false, follow: false },
 };
 

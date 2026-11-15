@@ -3,7 +3,7 @@ import { OfficeAccessShell } from "@/features/auth/components/office-access-gate
 import { CoordinationCreateScreen } from "@/features/visit/components/coordination-create-screen";
 import { parseIdParam } from "@/features/visit/model/visit-routes";
 
-export const metadata: Metadata = { title: "조율 만들기 | 사이로" };
+export const metadata: Metadata = { title: "조율 만들기" };
 
 export default async function Page({
   searchParams,

@@ -3,7 +3,7 @@ import { AccountScreenFrame } from "@/features/auth/components/account-screen-fr
 import { notFound } from "next/navigation";
 import { MembershipRequestForm } from "@/features/office/components/membership-screens";
 
-export const metadata: Metadata = { title: "참여 요청 | 사이로" };
+export const metadata: Metadata = { title: "참여 요청" };
 
 export default async function Page({ params }: { params: Promise<{ officeId: string }> }) {
   const { officeId } = await params;

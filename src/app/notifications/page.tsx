@@ -3,7 +3,7 @@ import { OfficeAccessShell } from "@/features/auth/components/office-access-gate
 import { NotificationListScreen } from "@/features/home/components/notification-list-screen";
 import { parseNotificationTab } from "@/features/home/model/labels";
 
-export const metadata: Metadata = { title: "알림함 | 사이로" };
+export const metadata: Metadata = { title: "알림함" };
 
 export default async function Page({
   searchParams,

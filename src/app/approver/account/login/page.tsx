@@ -3,7 +3,7 @@ import { ApproverLayout } from "@/shared/layouts/layouts";
 import { ApproverLoginScreen } from "@/features/visit/components/approver-login-screen";
 
 export const metadata: Metadata = {
-  title: "승인자 번호 인증 | 사이로",
+  title: "승인자 번호 인증",
   referrer: "no-referrer",
   robots: { index: false, follow: false },
 };

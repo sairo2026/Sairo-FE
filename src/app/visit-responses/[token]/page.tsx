@@ -3,7 +3,7 @@ import { CustomerLinkScreen } from "@/features/visit/components/customer-link-sc
 import { CustomerSiteLayout } from "@/shared/layouts/layouts";
 
 export const metadata: Metadata = {
-  title: "방문 가능 시간 | 사이로",
+  title: "방문 가능 시간",
   referrer: "no-referrer",
   robots: { index: false, follow: false },
 };
