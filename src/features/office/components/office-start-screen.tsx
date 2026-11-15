@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { Button } from "@/shared/components/ui/button";
-import { cn } from "@/shared/lib/cn";
+import { SelectableCard } from "@/shared/components/ui/selectable-card";
 import { ButtonRow, FlowFrame, MutedNote, TextLink } from "@/shared/components/feedback/page-parts";
 
 type Choice = "create" | "join";
@@ -78,24 +78,17 @@ export function OfficeStartScreen() {
               {CHOICES.map((item) => {
                 const selected = choice === item.key;
                 return (
-                  <button
+                  <SelectableCard
                     key={item.key}
-                    type="button"
-                    role="radio"
-                    aria-checked={selected}
+                    selectionRole="radio"
+                    isSelected={selected}
                     disabled={isBlocked}
                     onClick={() => setChoice(item.key)}
-                    className={cn(
-                      "flex min-h-48 flex-col items-center justify-between gap-6 rounded-card-flat border bg-surface px-4 py-6 text-center transition-colors",
-                      selected ? "border-primary bg-primary-soft" : "border-primary-line",
-                      isBlocked
-                        ? "cursor-not-allowed opacity-50"
-                        : "hover:border-primary hover:bg-primary-soft",
-                    )}
+                    className="flex min-h-48 flex-col items-center justify-between gap-6 rounded-card-flat px-4 py-6 text-center"
                   >
                     <span className="text-h2 font-semibold text-primary">{item.title}</span>
                     <span className="text-caption text-ink-2">{item.description}</span>
-                  </button>
+                  </SelectableCard>
                 );
               })}
             </div>

@@ -13,11 +13,11 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 
 const variantClass: Record<ButtonVariant, string> = {
   submit: "bg-primary text-white font-bold hover:bg-primary-hover active:bg-primary-pressed",
-  cancel: "bg-primary-soft text-ink-2 font-medium hover:bg-primary-line",
+  cancel: "bg-primary-soft text-ink-2 font-medium hover:bg-primary-line active:bg-primary-line",
   outlined:
-    "bg-primary-soft text-primary border border-primary font-semibold hover:bg-primary-line",
+    "bg-primary-soft text-primary border border-primary font-semibold hover:bg-primary-line active:bg-primary-line",
   ghost:
-    "bg-white text-ink-2 border border-line font-medium hover:border-primary hover:text-primary",
+    "bg-white text-ink-2 border border-line font-medium hover:border-primary hover:bg-primary-soft hover:text-primary active:bg-primary-line",
 };
 
 export function Button({

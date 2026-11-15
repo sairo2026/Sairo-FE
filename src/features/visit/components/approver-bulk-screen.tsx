@@ -168,7 +168,7 @@ export function ApproverBulkScreen({ initialIds }: { initialIds: number[] }) {
         actions={
           <Link
             href="/approver/account"
-            className="text-caption font-semibold text-primary underline"
+            className="text-caption font-semibold text-primary underline hover:text-primary-hover active:text-primary-pressed"
           >
             내 매물 모아보기
           </Link>

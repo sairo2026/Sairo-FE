@@ -80,7 +80,11 @@ function OfficeShellFrame({ children, activeKey }: { children: ReactNode; active
     ? "결제가 지연되어 읽기만 가능합니다. 대표가 결제를 마치면 다시 저장할 수 있습니다."
     : grace;
   return (
-    <OfficeLayout activeKey={activeKey} navItems={role ? getOfficeMenu(role) : undefined}>
+    <OfficeLayout
+      activeKey={activeKey}
+      navItems={role ? getOfficeMenu(role) : undefined}
+      tone={activeKey === "home" ? "board" : "white"}
+    >
       {banner ? (
         <p
           role="status"

@@ -13,7 +13,7 @@ import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { PageSkeleton } from "@/shared/components/feedback/skeleton";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
-import { Checkbox } from "@/shared/components/ui/select-field";
+import { Checkbox, Radio } from "@/shared/components/ui/select-field";
 import { PageHeader } from "@/shared/components/ui/page-header";
 import { formatSeoulDateTime } from "@/shared/lib/format";
 import { useAssignableMembers } from "@/shared/session/assignable-members";
@@ -206,19 +206,17 @@ function MergeForm({ first, second }: { first: CustomerDetail; second: CustomerD
                           const customer = side === "PRIMARY" ? primary : merged;
                           return (
                             <td key={side} className="px-3 py-3 text-body text-ink">
-                              <label className="inline-flex items-center gap-2">
-                                <input
-                                  type="radio"
-                                  name={`merge-${field}`}
-                                  checked={choices[field] === side}
-                                  onChange={() => choose(field, side)}
-                                  aria-label={`${MERGE_FIELD_LABEL[field]} ${side === "PRIMARY" ? "고객 A" : "고객 B"} 값 선택`}
-                                  className="h-5 w-5 accent-primary"
-                                />
-                                <span className="whitespace-pre-wrap">
-                                  {displayValue(customer, field, managerName)}
-                                </span>
-                              </label>
+                              <Radio
+                                name={`merge-${field}`}
+                                checked={choices[field] === side}
+                                onSelect={() => choose(field, side)}
+                                ariaLabel={`${MERGE_FIELD_LABEL[field]} ${side === "PRIMARY" ? "고객 A" : "고객 B"} 값 선택`}
+                                label={
+                                  <span className="whitespace-pre-wrap">
+                                    {displayValue(customer, field, managerName)}
+                                  </span>
+                                }
+                              />
                             </td>
                           );
                         })
@@ -246,19 +244,17 @@ function MergeForm({ first, second }: { first: CustomerDetail; second: CustomerD
             <ul className="flex flex-col gap-3">
               {inquiryOptions.map((item) => (
                 <li key={item.consultationId}>
-                  <label className="flex items-start gap-3 text-body text-ink">
-                    <input
-                      type="radio"
-                      name="keep-first-inquiry"
-                      checked={keepFirstInquiryId === item.consultationId}
-                      onChange={() => setKeepFirstInquiryId(item.consultationId)}
-                      className="mt-1 h-5 w-5 accent-primary"
-                    />
-                    <span>
-                      {item.owner} · {CONSULTATION_TYPE_LABEL.FIRST_INQUIRY} ·{" "}
-                      {formatSeoulDateTime(item.occurredAt)} · {item.content}
-                    </span>
-                  </label>
+                  <Radio
+                    name="keep-first-inquiry"
+                    checked={keepFirstInquiryId === item.consultationId}
+                    onSelect={() => setKeepFirstInquiryId(item.consultationId)}
+                    label={
+                      <span>
+                        {item.owner} · {CONSULTATION_TYPE_LABEL.FIRST_INQUIRY} ·{" "}
+                        {formatSeoulDateTime(item.occurredAt)} · {item.content}
+                      </span>
+                    }
+                  />
                 </li>
               ))}
             </ul>

@@ -35,13 +35,13 @@ export function SessionRoutingGuard({ children }: { children: ReactNode }) {
 
   if (!isSessionChecked) {
     return (
-      <main className="flex flex-1 items-center justify-center bg-slate-50 px-4 py-16">
+      <main className="flex flex-1 items-center justify-center bg-surface px-4 py-16">
         <div className="flex w-full max-w-sm flex-col items-center gap-4 rounded-3xl bg-white p-10 shadow-sm">
           <div
             aria-hidden
-            className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-[#3937b8]"
+            className="h-8 w-8 animate-spin rounded-full border-4 border-line border-t-primary"
           />
-          <p className="text-sm text-slate-500">로그인 상태를 확인하는 중입니다.</p>
+          <p className="text-sm text-ink-2">로그인 상태를 확인하는 중입니다.</p>
         </div>
       </main>
     );

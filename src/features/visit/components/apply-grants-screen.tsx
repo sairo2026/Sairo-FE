@@ -15,6 +15,7 @@ import { Card } from "@/shared/components/ui/card";
 import { DateTimeField } from "@/shared/components/ui/date-time-field";
 import { Modal } from "@/shared/components/ui/modal";
 import { PageHeader } from "@/shared/components/ui/page-header";
+import { SelectableCard } from "@/shared/components/ui/selectable-card";
 import { TextField } from "@/shared/components/ui/text-field";
 import { formatSeoulDateTime } from "@/shared/lib/format";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
@@ -135,18 +136,17 @@ function AddGrantModal({
           <ul className="flex flex-col gap-1" aria-label="검색 결과">
             {hits.map((hit) => (
               <li key={hit.officeId}>
-                <button
-                  type="button"
-                  aria-pressed={picked?.officeId === hit.officeId}
+                <SelectableCard
+                  isSelected={picked?.officeId === hit.officeId}
                   onClick={() => {
                     setPicked(hit);
                     setFieldErrors((current) => ({ ...current, office: "" }));
                   }}
-                  className={`w-full rounded-control border px-3 py-2 text-left text-caption ${picked?.officeId === hit.officeId ? "border-primary bg-primary-soft" : "border-line"}`}
+                  className="min-h-11 w-full rounded-control px-3 py-2 text-left text-caption"
                 >
                   <span className="font-semibold text-ink">{hit.name}</span>
                   <span className="block text-ink-2">{hit.address}</span>
-                </button>
+                </SelectableCard>
               </li>
             ))}
           </ul>

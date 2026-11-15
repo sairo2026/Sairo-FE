@@ -143,7 +143,7 @@ function DetailBody({ detail }: { detail: ContractDetailResponse }) {
           {detail.duplicateOfContractId ? (
             <Link
               href={`/contracts/${detail.duplicateOfContractId}`}
-              className="font-semibold underline"
+              className="font-semibold underline hover:opacity-70 active:opacity-50"
             >
               계약 {detail.duplicateOfContractId}
             </Link>

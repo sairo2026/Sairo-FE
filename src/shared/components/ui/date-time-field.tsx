@@ -2,6 +2,7 @@
 
 import { useId } from "react";
 import { cn } from "@/shared/lib/cn";
+import { FIELD_GAP_CLASS, FieldLabel } from "./field-label";
 
 export type DateTimeFieldProps = {
   label: string;
@@ -32,10 +33,10 @@ export function DateTimeField({
   const id = useId();
   const errorId = `${id}-error`;
   return (
-    <div className={cn("flex flex-col gap-2", className)}>
-      <label htmlFor={id} className="text-caption font-semibold text-ink">
+    <div className={cn("flex flex-col", FIELD_GAP_CLASS, className)}>
+      <FieldLabel htmlFor={id} required={required}>
         {label}
-      </label>
+      </FieldLabel>
       <input
         id={id}
         type={kind}

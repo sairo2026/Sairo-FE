@@ -354,7 +354,12 @@ export function OffersPanel({
         <div className="flex flex-col gap-5">
           <div role="group" aria-label="거래유형" className="flex gap-2">
             {DEAL_TYPES.map((type) => (
-              <Chip key={type} isSelected={dealType === type} onClick={() => setDealType(type)}>
+              <Chip
+                key={type}
+                size="lg"
+                isSelected={dealType === type}
+                onClick={() => setDealType(type)}
+              >
                 {DEAL_TYPE_LABEL[type]}
               </Chip>
             ))}

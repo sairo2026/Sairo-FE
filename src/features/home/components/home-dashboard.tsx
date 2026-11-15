@@ -6,7 +6,7 @@ import type { HomeSummaryResponse } from "@/lib/api/contracts/work.schema";
 import { COORDINATION_STATUSES, statusLabel, statusTone } from "@/features/visit/model/labels";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
-import { Badge } from "@/shared/components/ui/badge";
+import { ScheduleTag } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { PageHeader } from "@/shared/components/ui/page-header";
 import { formatSeoulDate, formatSeoulDateTime } from "@/shared/lib/format";
@@ -16,27 +16,58 @@ import { TaskDialog } from "./task-dialog";
 import type { TaskItem } from "./task-dialog";
 import { MiniCalendar } from "./mini-calendar";
 
+type StatIcon = "contract" | "visit" | "coordination";
+
+const STAT_ICON_PATH: Record<StatIcon, string> = {
+  contract: "M7 3h10l4 4v14H7zM17 3v4h4M10 12h8M10 16h8",
+  visit: "M3 11l9-8 9 8M5 10v10h14V10M10 20v-6h4v6",
+  coordination:
+    "M16 11a3 3 0 100-6 3 3 0 000 6zM8 12a3 3 0 100-6 3 3 0 000 6zM2 20c0-3 3-5 6-5s6 2 6 5M14 15c4-1 8 1 8 5",
+};
+
 function StatCard({
   href,
   title,
   value,
   label,
+  icon,
 }: {
   href: string;
   title: string;
   value: number;
   label: string;
+  icon?: StatIcon;
 }) {
   return (
     <Link
       href={href}
       aria-label={`${title} ${value}${label}`}
-      className="flex flex-col gap-10 rounded-card border border-line bg-white px-7 py-8 transition-colors hover:border-primary"
+      className={`group flex flex-col rounded-card border border-line bg-white px-7 py-8 transition-colors hover:border-primary hover:bg-primary-soft active:bg-primary-line ${icon ? "gap-[52px]" : "gap-10"}`}
     >
-      <span className="flex items-center justify-between text-h2 font-bold text-ink">
-        {title}
-        <span aria-hidden="true" className="text-ink-3">
-          &gt;
+      <span className="flex flex-col gap-3">
+        {icon ? (
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            width="28"
+            height="28"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-primary"
+          >
+            <path d={STAT_ICON_PATH[icon]} />
+          </svg>
+        ) : null}
+        <span
+          className={`flex items-center justify-between font-bold text-ink ${icon ? "text-h1" : "text-h2"}`}
+        >
+          {title}
+          <span aria-hidden="true" className="text-ink-3 group-hover:text-primary">
+            ›
+          </span>
         </span>
       </span>
       <span className="text-[64px] font-semibold leading-[60px] text-primary">{value}</span>
@@ -52,7 +83,11 @@ function TaskOpener({ taskId, onClose }: { taskId: number; onClose: () => void }
     return (
       <FormAlert>
         업무 정보를 불러오지 못했습니다.{" "}
-        <button type="button" className="underline" onClick={onClose}>
+        <button
+          type="button"
+          className="underline hover:opacity-70 active:opacity-50"
+          onClick={onClose}
+        >
           닫기
         </button>
       </FormAlert>
@@ -84,7 +119,7 @@ function HomeBody({ summary }: { summary: HomeSummaryResponse }) {
           <>
             <Link
               href="/notifications"
-              className="inline-flex h-12 items-center gap-2 rounded-control border border-line px-5 text-body font-medium text-ink-2 hover:border-primary hover:text-primary"
+              className="inline-flex h-12 items-center gap-2 rounded-control border border-line bg-white px-5 text-body font-medium text-ink-2 hover:border-primary hover:bg-primary-soft hover:text-primary active:bg-primary-line"
             >
               알림함
               <span
@@ -105,6 +140,7 @@ function HomeBody({ summary }: { summary: HomeSummaryResponse }) {
           <StatCard
             href="/contracts?tab=maturity"
             title="계약 만기 D-90"
+            icon="contract"
             value={summary.leaseExpiringWithin90DaysCount}
             label="건"
           />
@@ -112,12 +148,14 @@ function HomeBody({ summary }: { summary: HomeSummaryResponse }) {
         <StatCard
           href="/coordinations"
           title="오늘 임장 목록"
+          icon="visit"
           value={summary.todayScheduledVisits.length}
           label="건"
         />
         <StatCard
           href="/coordinations"
           title="방문 조율 중"
+          icon="coordination"
           value={summary.activeCoordinationCount}
           label="건"
         />
@@ -125,7 +163,10 @@ function HomeBody({ summary }: { summary: HomeSummaryResponse }) {
       {isOwner ? (
         <p className="text-caption text-ink-2">
           결제 카드를 아직 등록하지 않았다면{" "}
-          <Link href="/billing/card-guide" className="font-semibold text-primary underline">
+          <Link
+            href="/billing/card-guide"
+            className="font-semibold text-primary underline hover:text-primary-hover active:text-primary-pressed"
+          >
             카드 등록 안내
           </Link>
           를 확인해 주세요.
@@ -139,7 +180,7 @@ function HomeBody({ summary }: { summary: HomeSummaryResponse }) {
           <Link
             href="/notifications"
             aria-label={`읽지 않은 방문 신청 알림 ${summary.unreadVisitRequestNoticeCount}건`}
-            className="text-caption font-semibold text-primary underline"
+            className="text-caption font-semibold text-primary underline hover:text-primary-hover active:text-primary-pressed"
           >
             읽지 않은 방문 신청 알림 {summary.unreadVisitRequestNoticeCount}건
           </Link>
@@ -183,11 +224,18 @@ function HomeBody({ summary }: { summary: HomeSummaryResponse }) {
                   <li key={visit.scheduleItemId}>
                     <Link
                       href={`/coordinations/${visit.coordinationId}`}
-                      className="flex flex-col rounded-control border border-line px-4 py-3 hover:border-primary"
+                      className="group flex items-center justify-between gap-3 rounded-control border border-line px-4 py-3 transition-colors hover:border-primary hover:bg-primary-soft active:bg-primary-line"
                     >
-                      <span className="font-semibold text-ink">{visit.propertyAddress}</span>
-                      <span className="text-caption text-ink-2">
-                        {formatSeoulDateTime(visit.scheduledStartAt)} · {visit.customerName}
+                      <span className="flex min-w-0 flex-col">
+                        <span className="truncate-text font-semibold text-ink">
+                          {visit.propertyAddress}
+                        </span>
+                        <span className="text-caption text-ink-2">
+                          {formatSeoulDateTime(visit.scheduledStartAt)} · {visit.customerName}
+                        </span>
+                      </span>
+                      <span aria-hidden="true" className="text-ink-3 group-hover:text-primary">
+                        ›
                       </span>
                     </Link>
                   </li>
@@ -244,11 +292,14 @@ function HomeBody({ summary }: { summary: HomeSummaryResponse }) {
                     <li key={task.taskId}>
                       <Link
                         href="/contracts?tab=maturity"
-                        className="flex items-center justify-between rounded-control border border-line px-4 py-3 hover:border-primary"
+                        className="group flex items-center justify-between gap-3 rounded-control border border-line px-4 py-3 transition-colors hover:border-primary hover:bg-primary-soft active:bg-primary-line"
                       >
-                        <span className="font-semibold text-ink">{task.title}</span>
-                        <span className="text-caption text-ink-2">
+                        <span className="truncate-text font-semibold text-ink">{task.title}</span>
+                        <span className="flex shrink-0 items-center gap-3 text-caption text-ink-2">
                           {formatSeoulDate(task.dueDate)}
+                          <span aria-hidden="true" className="text-ink-3 group-hover:text-primary">
+                            ›
+                          </span>
                         </span>
                       </Link>
                     </li>
@@ -257,7 +308,10 @@ function HomeBody({ summary }: { summary: HomeSummaryResponse }) {
               )}
             </div>
           )}
-          <Link href="/tasks" className="text-caption font-semibold text-primary hover:underline">
+          <Link
+            href="/tasks"
+            className="text-caption font-semibold text-primary underline-offset-4 hover:text-primary-hover hover:underline active:text-primary-pressed"
+          >
             업무 전체 보기
           </Link>
         </section>
@@ -274,15 +328,13 @@ function HomeBody({ summary }: { summary: HomeSummaryResponse }) {
                 <li key={status}>
                   <Link
                     href="/coordinations"
-                    className="flex flex-col items-start gap-1 rounded-card-flat border border-line px-4 py-3 hover:border-primary"
+                    className="block rounded-control transition-opacity hover:opacity-80 active:opacity-65"
                   >
-                    <Badge tone={statusTone(status)} className="h-7 min-w-0 px-3 text-caption">
-                      {statusLabel(status)}
-                    </Badge>
-                    <span className="text-h2 font-bold text-ink">
-                      {counts.get(status) ?? 0}
-                      <span className="text-caption font-medium text-ink-2">건</span>
-                    </span>
+                    <ScheduleTag
+                      tone={statusTone(status)}
+                      label={statusLabel(status)}
+                      count={counts.get(status) ?? 0}
+                    />
                   </Link>
                 </li>
               ))}
@@ -328,15 +380,20 @@ function TaskRow({
       type="button"
       onClick={onOpen}
       aria-label={`업무 ${title} 열기`}
-      className="flex w-full items-center justify-between gap-3 rounded-control border border-line px-4 py-3 text-left hover:border-primary"
+      className="group flex w-full items-center justify-between gap-3 rounded-control border border-line px-4 py-3 text-left transition-colors hover:border-primary hover:bg-primary-soft active:bg-primary-line"
     >
-      <span className="flex flex-col">
-        <span className="font-semibold text-ink">{title}</span>
+      <span className="flex min-w-0 flex-col">
+        <span className="truncate-text font-semibold text-ink">{title}</span>
         <span className="text-caption text-ink-2">담당 {assigneeName}</span>
       </span>
-      <span className={`text-caption font-medium ${isOverdue ? "text-tag-red-ink" : "text-ink-2"}`}>
+      <span
+        className={`flex shrink-0 items-center gap-3 text-caption font-medium ${isOverdue ? "text-tag-red-ink" : "text-ink-2"}`}
+      >
         {isOverdue ? "기한 " : ""}
         {formatSeoulDate(dueDate)}
+        <span aria-hidden="true" className="text-ink-3 group-hover:text-primary">
+          ›
+        </span>
       </span>
     </button>
   );

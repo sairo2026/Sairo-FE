@@ -35,22 +35,22 @@ export function Modal({ isOpen, title, onClose, children, footer, size = "defaul
         aria-labelledby={titleId}
         tabIndex={-1}
         className={cn(
-          "w-full rounded-card bg-white px-8 py-7 shadow-popup outline-none",
-          size === "wide" ? "flex max-h-[85vh] max-w-3xl flex-col" : "max-w-md",
+          "w-full rounded-card bg-white px-6 py-8 shadow-modal outline-none sm:px-10 sm:py-12",
+          size === "wide" ? "flex max-h-[85vh] max-w-3xl flex-col" : "max-w-[640px]",
         )}
       >
-        <h2 id={titleId} className="text-h2 font-semibold text-ink">
+        <h2 id={titleId} className="text-h1 font-bold text-ink">
           {title}
         </h2>
         <div
           className={cn(
-            "mt-4 text-body text-ink-2",
+            "mt-8 text-body text-ink-2",
             size === "wide" && "min-h-0 flex-1 overflow-y-auto",
           )}
         >
           {children}
         </div>
-        {footer ? <div className="mt-6 flex flex-wrap justify-end gap-2">{footer}</div> : null}
+        {footer ? <div className="mt-8 flex flex-wrap justify-end gap-3">{footer}</div> : null}
       </div>
     </div>
   );
