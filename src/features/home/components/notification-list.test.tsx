@@ -12,7 +12,12 @@ import {
 } from "@/mocks/handlers/work";
 import { server, startMockServer } from "@/mocks/server";
 import { renderOffice } from "@/shared/testing/office-render";
-import { notificationHref, notificationTypeLabel } from "../model/labels";
+import {
+  notificationHref,
+  notificationTypeLabel,
+  parseNotificationTab,
+  visitRequestNoticeHref,
+} from "../model/labels";
 import { NotificationListScreen } from "./notification-list-screen";
 
 vi.mock("next/navigation", () => ({
@@ -167,6 +172,47 @@ describe("알림함", () => {
     renderOffice(<NotificationListScreen />, { role: "OWNER" });
     await user.click(await screen.findByRole("tab", { name: "방문 신청 알림" }));
     expect(await screen.findByText("방문 신청 알림이 없습니다.")).not.toBeNull();
+  });
+});
+
+describe("방문 신청 알림 이동", () => {
+  const notice = (noticeId: number, coordinationId?: number) => ({
+    noticeId,
+    requestId: noticeId + 100,
+    ...(coordinationId === undefined ? {} : { coordinationId }),
+    noticeType: "TIME_CLOSED",
+    channel: "IN_APP",
+    createdAt: "2026-11-10T09:00:00+09:00",
+    readAt: null,
+  });
+
+  it("조율 번호가 있으면 해당 조율의 신청 현황으로, 없으면 조율 목록으로 보낸다", async () => {
+    server.use(
+      http.get("/api/visit-request-notices", () =>
+        HttpResponse.json({ items: [notice(31, 801), notice(32)] }),
+      ),
+    );
+    renderOffice(<NotificationListScreen initialTab="visit-request" />, { role: "OWNER" });
+    const panel = await screen.findByRole("tabpanel");
+    await within(panel).findAllByRole("link", { name: "방문 조율로 이동" });
+    const links = within(panel).getAllByRole("link", { name: "방문 조율로 이동" });
+    expect(links.map((link) => link.getAttribute("href"))).toEqual([
+      "/coordinations/801/requests",
+      "/coordinations",
+    ]);
+    expect(links[0]?.className).toContain("hover:border-primary");
+  });
+
+  it("알림 주소 규칙과 탭 쿼리 해석", () => {
+    expect(visitRequestNoticeHref(801)).toBe("/coordinations/801/requests");
+    expect(visitRequestNoticeHref(undefined)).toBe("/coordinations");
+    expect(visitRequestNoticeHref(null)).toBe("/coordinations");
+    expect(notificationHref("VISIT_COORDINATION", 801)).toBe("/coordinations/801");
+    expect(notificationHref("VISIT_COORDINATION", null)).toBe("/coordinations");
+    expect(parseNotificationTab("visit-request")).toBe("visit-request");
+    expect(parseNotificationTab(["visit-request"])).toBe("visit-request");
+    expect(parseNotificationTab("other")).toBe("general");
+    expect(parseNotificationTab(undefined)).toBe("general");
   });
 });
 

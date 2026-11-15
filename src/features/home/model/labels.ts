@@ -1,3 +1,7 @@
+import {
+  coordinationListPath,
+  coordinationRequestsPath,
+} from "@/features/visit/model/visit-routes";
 import type { BadgeTone } from "@/shared/components/ui/badge";
 
 export const TASK_SOURCE_LABEL: Record<string, string> = {
@@ -68,6 +72,19 @@ export function notificationHref(targetType: string, targetId: number | null | u
     default:
       return null;
   }
+}
+
+export type NotificationTab = "general" | "visit-request";
+
+export const VISIT_REQUEST_NOTICES_HREF = "/notifications?tab=visit-request";
+
+export function parseNotificationTab(value: string | string[] | undefined): NotificationTab {
+  const text = Array.isArray(value) ? value[0] : value;
+  return text === "visit-request" ? "visit-request" : "general";
+}
+
+export function visitRequestNoticeHref(coordinationId: number | null | undefined): string {
+  return coordinationId ? coordinationRequestsPath(coordinationId) : coordinationListPath();
 }
 
 export function notificationTypeLabel(type: string): string {

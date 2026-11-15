@@ -18,7 +18,8 @@ import { PAGE_SIZE_OPTIONS } from "@/shared/components/ui/data-table";
 import type { PageSize } from "@/shared/components/ui/data-table";
 import { markNotificationRead } from "../api/home.api";
 import { homeKeys, useNotifications } from "../hooks/home-queries";
-import { notificationHref, notificationTypeLabel } from "../model/labels";
+import { notificationHref, notificationTypeLabel, visitRequestNoticeHref } from "../model/labels";
+import type { NotificationTab } from "../model/labels";
 import { describeWorkError } from "../model/messages";
 
 function GeneralNotifications() {
@@ -194,7 +195,7 @@ function VisitRequestNotices() {
                 </div>
                 <div className="flex gap-2">
                   <Link
-                    href="/coordinations"
+                    href={visitRequestNoticeHref(item.coordinationId)}
                     className="inline-flex h-9 items-center rounded-control border border-line px-3.5 text-caption font-medium text-ink-2 hover:border-primary hover:text-primary"
                   >
                     방문 조율로 이동
@@ -219,8 +220,12 @@ function VisitRequestNotices() {
   );
 }
 
-export function NotificationListScreen() {
-  const [tab, setTab] = useState("general");
+export function NotificationListScreen({
+  initialTab = "general",
+}: {
+  initialTab?: NotificationTab;
+}) {
+  const [tab, setTab] = useState<string>(initialTab);
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
