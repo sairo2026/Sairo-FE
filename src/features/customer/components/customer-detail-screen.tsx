@@ -272,7 +272,7 @@ function DetailBody({ customer }: { customer: CustomerDetail }) {
         <div className="flex flex-wrap gap-2">
           <Link
             href="/customers"
-            className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 hover:border-primary hover:text-primary"
+            className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 clickable-control"
           >
             목록
           </Link>
@@ -288,7 +288,7 @@ function DetailBody({ customer }: { customer: CustomerDetail }) {
             <>
               <Link
                 href={`/coordinations/new?customerId=${customer.customerId}`}
-                className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 hover:border-primary hover:text-primary"
+                className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 clickable-control"
               >
                 방문 조율 시작
               </Link>

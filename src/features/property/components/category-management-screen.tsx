@@ -380,7 +380,7 @@ export function CategoryManagementScreen() {
         actions={
           <Link
             href="/properties"
-            className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 hover:border-primary hover:text-primary"
+            className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 clickable-control"
           >
             매물 목록
           </Link>

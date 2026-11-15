@@ -186,7 +186,7 @@ export function ErrorScreen({
         {(kind === "forbidden" || kind === "not-found" || kind === "server") && links.home ? (
           <Link
             href={links.home.href}
-            className="inline-flex h-12 items-center rounded-control border border-line px-10 font-medium text-ink-2 hover:border-primary hover:text-primary"
+            className="inline-flex h-12 items-center rounded-control border border-line px-10 font-medium text-ink-2 clickable-control"
           >
             {links.home.label}
           </Link>

@@ -34,7 +34,7 @@ import type { RosterField } from "../model/validation";
 import { MutedNote } from "@/shared/components/feedback/page-parts";
 
 const LINK_CLASS =
-  "inline-flex h-9 items-center rounded-control border border-line px-3.5 text-caption text-ink-2 hover:border-primary hover:text-primary";
+  "inline-flex h-9 items-center rounded-control border border-line px-3.5 text-caption text-ink-2 clickable-control";
 
 function yesNo(value: boolean | null | undefined): string {
   if (value === null || value === undefined) return "-";

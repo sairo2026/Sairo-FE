@@ -73,7 +73,7 @@ export function ExistingAccountNotice({
               {passwordResetAvailable ? (
                 <Link
                   href="/password/forgot"
-                  className="inline-flex h-12 items-center justify-center rounded-control border border-line px-10 font-medium text-ink-2 hover:border-primary hover:text-primary"
+                  className="inline-flex h-12 items-center justify-center rounded-control border border-line px-10 font-medium text-ink-2 clickable-control"
                 >
                   비밀번호 찾기
                 </Link>

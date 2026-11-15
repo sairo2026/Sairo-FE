@@ -22,12 +22,25 @@ import {
   ITEM_RESULT_LABEL,
   labelOf,
 } from "../model/labels";
-import { describeVisitError } from "../model/messages";
-import { kstParts, toKstIso } from "../model/time";
+import { describeVisitError, fieldErrorMap } from "../model/messages";
+import { hasNotStarted, kstParts, toKstIso } from "../model/time";
 import { AssistantNoticePanel } from "./assistant-notice-panel";
 
 type Detail = VisitCoordinationDetailResponse;
 type Item = NonNullable<Detail["scheduleItems"]>[number];
+
+export const NOT_STARTED_NOTICE =
+  "방문 시작 시각 이후로 기록할 수 있습니다. 시작 전에는 취소만 기록할 수 있습니다.";
+export const CLOCK_AHEAD_NOTICE =
+  "실제 방문 시각이 서버가 아는 현재 시각보다 늦습니다. 시각을 조금 앞당겨 다시 저장해 주세요. 사용 중인 기기의 시계가 빠를 수 있습니다.";
+
+/** 서버가 시각 범위로 거절하면 어느 값이 범위를 벗어났는지에 맞춰 안내한다. */
+export function describeResultError(error: unknown): string {
+  const fields = fieldErrorMap(error);
+  if ("result" in fields) return NOT_STARTED_NOTICE;
+  if ("actualVisitedAt" in fields) return CLOCK_AHEAD_NOTICE;
+  return describeVisitError(error, "결과를 저장하지 못했습니다.");
+}
 
 const RESULT_OPTIONS = [
   { value: "COMPLETED", label: "방문 완료" },
@@ -101,13 +114,17 @@ function ResultDialog({
   onRecorded: (reviewWindowEndsAt: string | null) => void;
 }) {
   const isCorrection = item.result !== "SCHEDULED";
+  const notStarted = !isCorrection && hasNotStarted(item.scheduledStartAt);
+  const options = notStarted
+    ? RESULT_OPTIONS.filter((option) => option.value === "CANCELLED")
+    : RESULT_OPTIONS;
   const queryClient = useQueryClient();
   const [values, setValues] = useState<ResultFormValues>(() => {
     const scheduled = item.scheduledStartAt
       ? kstParts(item.scheduledStartAt)
       : { date: "", time: "" };
     return {
-      result: isCorrection ? item.result : "COMPLETED",
+      result: isCorrection ? item.result : notStarted ? "CANCELLED" : "COMPLETED",
       date: scheduled.date,
       time: scheduled.time,
       cancelReason: "USER_CANCEL",
@@ -163,10 +180,11 @@ function ResultDialog({
         <SelectField
           label="방문 결과"
           value={values.result}
-          options={RESULT_OPTIONS}
+          options={options}
           onValueChange={(value) => set("result", value)}
           error={errors.result}
         />
+        {notStarted ? <FormNotice>{NOT_STARTED_NOTICE}</FormNotice> : null}
         {values.result === "COMPLETED" ? (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <DateTimeField
@@ -214,9 +232,7 @@ function ResultDialog({
             </div>
           </>
         ) : null}
-        {mutation.isError ? (
-          <FormAlert>{describeVisitError(mutation.error, "결과를 저장하지 못했습니다.")}</FormAlert>
-        ) : null}
+        {mutation.isError ? <FormAlert>{describeResultError(mutation.error)}</FormAlert> : null}
       </div>
     </Modal>
   );
@@ -267,6 +283,9 @@ export function ResultSection({ detail }: { detail: Detail }) {
                   </span>
                 ) : null}
               </span>
+              {item.result === "SCHEDULED" && hasNotStarted(item.scheduledStartAt) ? (
+                <p className="text-caption text-ink-2">{NOT_STARTED_NOTICE}</p>
+              ) : null}
               <span className="flex flex-wrap items-center gap-2">
                 <Button
                   size="sm"

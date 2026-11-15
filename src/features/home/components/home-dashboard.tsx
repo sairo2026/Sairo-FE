@@ -45,7 +45,7 @@ function StatCard({
     <Link
       href={href}
       aria-label={`${title} ${value}${label}`}
-      className={`group flex flex-col rounded-card border border-line bg-white px-7 py-8 transition-colors hover:border-primary hover:bg-primary-soft active:bg-primary-line ${icon ? "gap-[52px]" : "gap-10"}`}
+      className={`group flex flex-col rounded-card border border-line bg-white px-7 py-8 clickable-card ${icon ? "gap-[52px]" : "gap-10"}`}
     >
       <span className="flex flex-col gap-3">
         {icon ? (
@@ -68,7 +68,7 @@ function StatCard({
           className={`flex items-center justify-between font-bold text-ink ${icon ? "text-h1" : "text-h2"}`}
         >
           {title}
-          <span aria-hidden="true" className="text-ink-3 group-hover:text-primary">
+          <span aria-hidden="true" className="clickable-arrow">
             ›
           </span>
         </span>
@@ -86,11 +86,7 @@ function TaskOpener({ taskId, onClose }: { taskId: number; onClose: () => void }
     return (
       <FormAlert>
         업무 정보를 불러오지 못했습니다.{" "}
-        <button
-          type="button"
-          className="underline hover:opacity-70 active:opacity-50"
-          onClick={onClose}
-        >
+        <button type="button" className="underline clickable-link" onClick={onClose}>
           닫기
         </button>
       </FormAlert>
@@ -107,7 +103,7 @@ function followupHref(contractId: number | undefined) {
 }
 
 const FIRST_USE_LINK_CLASS =
-  "group flex items-center justify-between gap-3 rounded-control border border-line px-4 py-3 font-semibold text-ink transition-colors hover:border-primary hover:bg-primary-soft active:bg-primary-line";
+  "group flex items-center justify-between gap-3 rounded-control border border-line px-4 py-3 font-semibold text-ink clickable-row";
 
 function FirstUseGuide({ isOwner, needsCard }: { isOwner: boolean; needsCard: boolean }) {
   const steps = [
@@ -134,7 +130,7 @@ function FirstUseGuide({ isOwner, needsCard }: { isOwner: boolean; needsCard: bo
           <li key={step.href}>
             <Link href={step.href} className={FIRST_USE_LINK_CLASS}>
               {step.label}
-              <span aria-hidden="true" className="text-ink-3 group-hover:text-primary">
+              <span aria-hidden="true" className="clickable-arrow">
                 ›
               </span>
             </Link>
@@ -171,7 +167,7 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
           <>
             <Link
               href="/notifications"
-              className="inline-flex h-12 items-center gap-2 rounded-control border border-line bg-white px-5 text-body font-medium text-ink-2 hover:border-primary hover:bg-primary-soft hover:text-primary active:bg-primary-line"
+              className="inline-flex h-12 items-center gap-2 rounded-control border border-line bg-white px-5 text-body font-medium text-ink-2 clickable-control"
             >
               알림함
               <span
@@ -218,7 +214,7 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
           결제 카드를 아직 등록하지 않았습니다.{" "}
           <Link
             href="/billing/card-guide"
-            className="font-semibold text-primary underline hover:text-primary-hover active:text-primary-pressed"
+            className="font-semibold text-primary underline clickable-link"
           >
             카드 등록 안내
           </Link>
@@ -233,7 +229,7 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
           <Link
             href={VISIT_REQUEST_NOTICES_HREF}
             aria-label={`읽지 않은 방문 신청 알림 ${summary.unreadVisitRequestNoticeCount}건`}
-            className="text-caption font-semibold text-primary underline hover:text-primary-hover active:text-primary-pressed"
+            className="text-caption font-semibold text-primary underline clickable-link"
           >
             읽지 않은 방문 신청 알림 {summary.unreadVisitRequestNoticeCount}건
           </Link>
@@ -277,7 +273,7 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
                   <li key={visit.scheduleItemId}>
                     <Link
                       href={`/coordinations/${visit.coordinationId}`}
-                      className="group flex items-center justify-between gap-3 rounded-control border border-line px-4 py-3 transition-colors hover:border-primary hover:bg-primary-soft active:bg-primary-line"
+                      className="group flex items-center justify-between gap-3 rounded-control border border-line px-4 py-3 clickable-row"
                     >
                       <span className="flex min-w-0 flex-col">
                         <span className="truncate-text font-semibold text-ink">
@@ -287,7 +283,7 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
                           {formatSeoulDateTime(visit.scheduledStartAt)} · {visit.customerName}
                         </span>
                       </span>
-                      <span aria-hidden="true" className="text-ink-3 group-hover:text-primary">
+                      <span aria-hidden="true" className="clickable-arrow">
                         ›
                       </span>
                     </Link>
@@ -345,12 +341,12 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
                     <li key={task.taskId}>
                       <Link
                         href={followupHref(task.contractId)}
-                        className="group flex items-center justify-between gap-3 rounded-control border border-line px-4 py-3 transition-colors hover:border-primary hover:bg-primary-soft active:bg-primary-line"
+                        className="group flex items-center justify-between gap-3 rounded-control border border-line px-4 py-3 clickable-row"
                       >
                         <span className="truncate-text font-semibold text-ink">{task.title}</span>
                         <span className="flex shrink-0 items-center gap-3 text-caption text-ink-2">
                           {formatSeoulDate(task.dueDate)}
-                          <span aria-hidden="true" className="text-ink-3 group-hover:text-primary">
+                          <span aria-hidden="true" className="clickable-arrow">
                             ›
                           </span>
                         </span>
@@ -363,7 +359,7 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
           )}
           <Link
             href="/tasks"
-            className="text-caption font-semibold text-primary underline-offset-4 hover:text-primary-hover hover:underline active:text-primary-pressed"
+            className="text-caption font-semibold text-primary underline-offset-4 clickable-link"
           >
             업무 전체 보기
           </Link>
@@ -379,14 +375,12 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
             <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {COORDINATION_STATUSES.map((status) => (
                 <li key={status}>
-                  <Link
-                    href={coordinationListPath(status)}
-                    className="block rounded-control transition-opacity hover:opacity-80 active:opacity-65"
-                  >
+                  <Link href={coordinationListPath(status)} className="block rounded-control">
                     <ScheduleTag
                       tone={statusTone(status)}
                       label={statusLabel(status)}
                       count={counts.get(status) ?? 0}
+                      isInteractive
                     />
                   </Link>
                 </li>
@@ -433,7 +427,7 @@ function TaskRow({
       type="button"
       onClick={onOpen}
       aria-label={`업무 ${title} 열기`}
-      className="group flex w-full items-center justify-between gap-3 rounded-control border border-line px-4 py-3 text-left transition-colors hover:border-primary hover:bg-primary-soft active:bg-primary-line"
+      className="group flex w-full items-center justify-between gap-3 rounded-control border border-line px-4 py-3 text-left clickable-row"
     >
       <span className="flex min-w-0 flex-col">
         <span className="truncate-text font-semibold text-ink">{title}</span>
@@ -444,7 +438,7 @@ function TaskRow({
       >
         {isOverdue ? "기한 " : ""}
         {formatSeoulDate(dueDate)}
-        <span aria-hidden="true" className="text-ink-3 group-hover:text-primary">
+        <span aria-hidden="true" className="clickable-arrow">
           ›
         </span>
       </span>

@@ -298,7 +298,10 @@ function IntakeBody({ intake, refetch }: { intake: IntakeItem; refetch: () => vo
         />
       )}
       <p className="text-caption text-ink-2">
-        <Link href="/ops/guest-privacy-intakes" className="font-semibold text-primary underline">
+        <Link
+          href="/ops/guest-privacy-intakes"
+          className="font-semibold text-primary underline clickable-link"
+        >
           목록으로
         </Link>
       </p>

@@ -200,7 +200,7 @@ describe("방문 신청 알림 이동", () => {
       "/coordinations/801/requests",
       "/coordinations",
     ]);
-    expect(links[0]?.className).toContain("hover:border-primary");
+    expect(links[0]?.className).toContain("clickable-control");
   });
 
   it("알림 주소 규칙과 탭 쿼리 해석", () => {

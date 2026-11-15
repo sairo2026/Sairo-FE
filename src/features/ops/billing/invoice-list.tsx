@@ -85,7 +85,7 @@ export function InvoiceListScreen() {
             render: (row) => (
               <Link
                 href={`/ops/billing/invoices/${row.invoiceId}`}
-                className="font-semibold text-primary underline"
+                className="font-semibold text-primary underline clickable-link"
               >
                 {row.invoiceId}
               </Link>

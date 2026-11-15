@@ -19,7 +19,10 @@ export function SubprocessorSection() {
       <div className="flex flex-col gap-4">
         <p className="text-body text-ink-2">
           수탁업체와 처리 조건은 연동 설정의 값을 그대로 보여줍니다. 값을 바꾸려면{" "}
-          <Link href="/ops/integrations">연동 설정</Link>에서 수정해 주세요.
+          <Link href="/ops/integrations" className="underline clickable-link">
+            연동 설정
+          </Link>
+          에서 수정해 주세요.
         </p>
         <OpsTable
           caption="수탁 정보 목록"
@@ -127,7 +130,7 @@ export function PriceAndRefundSection() {
           ) : refund ? (
             <>
               <p className="text-caption text-ink-2">게시 버전 {refund.version}</p>
-              <p className="max-h-48 overflow-y-auto whitespace-pre-wrap rounded-card-flat border border-line p-4 text-body text-ink">
+              <p className="scroll-area max-h-48 overflow-y-auto whitespace-pre-wrap rounded-card-flat border border-line p-4 text-body text-ink">
                 {refund.body}
               </p>
             </>

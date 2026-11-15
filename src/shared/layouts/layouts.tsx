@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { BrandLogo } from "@/shared/components/ui/brand-logo";
 import { OFFICE_NAV_ITEMS, SideNavItem } from "@/shared/components/ui/side-nav-item";
+import { WindowScrollHint } from "@/shared/components/ui/scroll-more-hint";
 import { ToastProvider } from "@/shared/components/ui/toast";
 import { CookieNotice } from "@/shared/legal/cookie-notice";
 import { cn } from "@/shared/lib/cn";
@@ -12,11 +13,11 @@ type LayoutProps = { children: ReactNode };
 export function CustomerSiteLayout({ children, footer }: LayoutProps & { footer?: ReactNode }) {
   return (
     <ToastProvider>
-      <div className="flex min-h-screen flex-col bg-surface text-ink">
+      <div className="flex min-h-dvh flex-col bg-surface text-ink">
         <header className="border-b border-line bg-white px-4 py-4 sm:px-8">
           <BrandLogo className="w-28" />
         </header>
-        <main className="mx-auto w-full max-w-xl flex-1 px-4 py-8 sm:px-6">{children}</main>
+        <main className="mx-auto w-full max-w-xl flex-1 px-4 pt-8 pb-16 sm:px-6">{children}</main>
         {footer ? (
           <footer className="border-t border-line bg-surface px-4 py-6">{footer}</footer>
         ) : null}
@@ -29,18 +30,24 @@ export function CustomerSiteLayout({ children, footer }: LayoutProps & { footer?
 export function PublicSiteLayout({ children, footer }: LayoutProps & { footer?: ReactNode }) {
   return (
     <ToastProvider>
-      <div className="flex min-h-screen flex-col bg-white text-ink">
+      <div className="flex min-h-dvh flex-col bg-white text-ink">
         <header className="flex items-center justify-between border-b border-line px-4 py-4 sm:px-8">
           <Link href="/" aria-label="사이로 홈">
             <BrandLogo className="w-28" />
           </Link>
           <nav aria-label="공개 메뉴" className="flex gap-5 text-caption font-semibold text-ink-2">
-            <Link href="/pricing">요금 안내</Link>
-            <Link href="/legal">약관과 정책</Link>
-            <Link href="/login">로그인</Link>
+            <Link href="/pricing" className="clickable-link px-1">
+              요금 안내
+            </Link>
+            <Link href="/legal" className="clickable-link px-1">
+              약관과 정책
+            </Link>
+            <Link href="/login" className="clickable-link px-1">
+              로그인
+            </Link>
           </nav>
         </header>
-        <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-10 sm:px-6">{children}</main>
+        <main className="mx-auto w-full max-w-4xl flex-1 px-4 pt-10 pb-16 sm:px-6">{children}</main>
         {footer ? (
           <footer className="border-t border-line bg-surface px-4 py-8 sm:px-8">{footer}</footer>
         ) : null}
@@ -53,8 +60,8 @@ export function PublicSiteLayout({ children, footer }: LayoutProps & { footer?: 
 export function ApproverLayout({ children }: LayoutProps) {
   return (
     <ToastProvider>
-      <div className="min-h-screen bg-surface text-ink">
-        <main className="mx-auto w-full max-w-lg px-4 py-10 sm:px-6">
+      <div className="min-h-dvh bg-surface text-ink">
+        <main className="mx-auto w-full max-w-lg px-4 pt-10 pb-16 sm:px-6">
           <BrandLogo className="mb-6 w-28" />
           {children}
           <CookieNotice variant="approver" className="mt-8" />
@@ -91,11 +98,11 @@ export function OfficeLayout({
     <ToastProvider>
       <div
         className={cn(
-          "min-h-screen text-ink lg:grid lg:grid-cols-[220px_minmax(0,1fr)]",
+          "min-h-dvh text-ink lg:grid lg:grid-cols-[220px_minmax(0,1fr)]",
           tone === "board" ? "bg-surface" : "bg-white",
         )}
       >
-        <aside className="border-b border-line bg-surface px-6 py-6 lg:min-h-screen lg:border-r lg:border-b-0 lg:px-5 lg:pt-8">
+        <aside className="border-b border-line bg-surface px-6 py-6 lg:min-h-dvh lg:border-r lg:border-b-0 lg:px-5 lg:pt-8">
           <Link href="/home" aria-label="사이로 홈" className="mb-6 block lg:mb-16">
             <BrandLogo className="w-32" />
           </Link>
@@ -115,8 +122,12 @@ export function OfficeLayout({
             <span>{officeName ?? "사무소"}</span>
             {headerActions}
           </header>
-          <main className="px-5 py-10 sm:px-8 lg:px-16 lg:py-14">{children}</main>
+          <main className="px-5 pt-10 pb-28 sm:px-8 lg:px-16 lg:pt-14">{children}</main>
         </div>
+        <WindowScrollHint
+          tone={tone === "board" ? "surface" : "white"}
+          className="lg:left-[220px]"
+        />
       </div>
     </ToastProvider>
   );
@@ -133,7 +144,7 @@ export function OpsLayout({
 }: LayoutProps & { navItems: OpsNavItem[]; activeKey?: string; headerRight?: ReactNode }) {
   return (
     <ToastProvider>
-      <div className="min-h-screen bg-surface text-ink">
+      <div className="min-h-dvh bg-surface text-ink">
         <header className="flex h-14 items-center justify-between gap-4 bg-primary-pressed px-6 text-body font-bold text-white">
           <span className="flex items-center gap-3">
             <BrandLogo variant="horizontal-white" className="w-24" />
@@ -158,8 +169,9 @@ export function OpsLayout({
               />
             ))}
           </nav>
-          <main className="min-w-0 px-6 py-8">{children}</main>
+          <main className="min-w-0 px-6 pt-8 pb-28">{children}</main>
         </div>
+        <WindowScrollHint tone="surface" className="lg:left-[220px]" />
       </div>
     </ToastProvider>
   );

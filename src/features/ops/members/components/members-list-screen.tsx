@@ -36,7 +36,10 @@ function MembersListBody() {
       key: "name",
       header: "이름",
       render: (row) => (
-        <Link href={`/ops/members/${row.userId}`} className="font-semibold text-primary underline">
+        <Link
+          href={`/ops/members/${row.userId}`}
+          className="font-semibold text-primary underline clickable-link"
+        >
           {row.displayName}
         </Link>
       ),

@@ -74,6 +74,18 @@ describe("방문 조율 생성", () => {
     expect(navigation.push).not.toHaveBeenCalled();
   });
 
+  it("종료일 입력에 오늘 + 30일 상한과 안내 문구가 있다", () => {
+    renderOffice(<CoordinationCreateScreen />, { role: "OWNER" });
+    const max = (screen.getByLabelText("방문 가능 종료일") as HTMLInputElement).max;
+    expect(max).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect((screen.getByLabelText("방문 가능 시작일") as HTMLInputElement).max).toBe(max);
+    expect(
+      screen.getByText(
+        `방문 가능 기간은 오늘부터 30일 안으로 정해 주세요. 종료일은 ${max}까지 고를 수 있습니다.`,
+      ),
+    ).not.toBeNull();
+  });
+
   it("종료일이 30일을 넘으면 입력 오류를 보여준다", async () => {
     const user = userEvent.setup();
     renderOffice(<CoordinationCreateScreen />, { role: "OWNER" });

@@ -6,11 +6,12 @@ import type { ReactNode } from "react";
 import { useCustomerList } from "@/features/customer/hooks/customer-queries";
 import { usePropertyList } from "@/features/property/hooks/property-queries";
 import { Badge } from "@/shared/components/ui/badge";
+import { ScrollArea } from "@/shared/components/ui/scroll-more-hint";
 import { SearchField } from "@/shared/components/ui/search-field";
 import { Checkbox, Radio } from "@/shared/components/ui/select-field";
 import { useReceivedGrants } from "../hooks/visit-queries";
 
-const EMPTY_LINK_CLASS = "font-semibold text-primary hover:underline";
+const EMPTY_LINK_CLASS = "font-semibold text-primary clickable-link";
 
 export type CandidateChoice = { propertyId: number; name: string; officeName?: string };
 
@@ -91,24 +92,29 @@ export function CustomerPicker({
         }
         onRetry={() => void query.refetch()}
       />
-      <ul className="flex max-h-56 flex-col gap-1 overflow-auto">
-        {items.map((item) => (
-          <li key={item.customerId}>
-            <Radio
-              name="visit-customer"
-              checked={value?.customerId === item.customerId}
-              onSelect={() => onChange({ customerId: item.customerId, name: item.name })}
-              className="w-full rounded-control px-3 hover:bg-surface"
-              label={
-                <>
-                  <span className="font-semibold">{item.name}</span>
-                  <span className="text-caption text-ink-2">{item.phone ?? "-"}</span>
-                </>
-              }
-            />
-          </li>
-        ))}
-      </ul>
+      <ScrollArea
+        label="고객 목록"
+        className="max-h-[224px] rounded-control border border-line p-1"
+      >
+        <ul className="flex flex-col gap-1">
+          {items.map((item) => (
+            <li key={item.customerId}>
+              <Radio
+                name="visit-customer"
+                checked={value?.customerId === item.customerId}
+                onSelect={() => onChange({ customerId: item.customerId, name: item.name })}
+                className="w-full rounded-control px-3 hover:bg-primary-soft"
+                label={
+                  <>
+                    <span className="font-semibold">{item.name}</span>
+                    <span className="text-caption text-ink-2">{item.phone ?? "-"}</span>
+                  </>
+                }
+              />
+            </li>
+          ))}
+        </ul>
+      </ScrollArea>
       {error ? (
         <p role="alert" className="text-caption text-danger">
           {error}
@@ -152,7 +158,7 @@ export function CandidatePicker({
           checked={checked || isAdded}
           disabled={isAdded || (!checked && isFull)}
           onCheckedChange={() => onToggle(choice)}
-          className="w-full flex-wrap rounded-control px-3 hover:bg-surface"
+          className="w-full flex-wrap rounded-control px-3 hover:bg-primary-soft"
           label={
             <>
               <span className="font-semibold">{choice.name}</span>
@@ -184,7 +190,7 @@ export function CandidatePicker({
         onValueChange={setDraft}
         onSearch={() => setKeyword(draft)}
       />
-      <h2 className="text-caption font-semibold text-ink-2">우리 사무소 매물</h2>
+      <h2 className="mt-3 text-caption font-semibold text-ink-2">우리 사무소 매물</h2>
       <ListState
         isPending={own.isPending}
         isError={own.isError}
@@ -197,12 +203,17 @@ export function CandidatePicker({
         }
         onRetry={() => void own.refetch()}
       />
-      <ul className="flex max-h-56 flex-col gap-1 overflow-auto">
-        {ownItems.map((item) =>
-          row({ propertyId: item.propertyId, name: item.name }, item.address ?? ""),
-        )}
-      </ul>
-      <h2 className="text-caption font-semibold text-ink-2">허용받은 매물</h2>
+      <ScrollArea
+        label="우리 사무소 매물 목록"
+        className="max-h-[224px] rounded-control border border-line p-1"
+      >
+        <ul className="flex flex-col gap-1">
+          {ownItems.map((item) =>
+            row({ propertyId: item.propertyId, name: item.name }, item.address ?? ""),
+          )}
+        </ul>
+      </ScrollArea>
+      <h2 className="mt-3 text-caption font-semibold text-ink-2">허용받은 매물</h2>
       <ListState
         isPending={grants.isPending}
         isError={grants.isError}
@@ -210,18 +221,23 @@ export function CandidatePicker({
         emptyText="허용받은 매물이 없습니다."
         onRetry={() => void grants.refetch()}
       />
-      <ul className="flex max-h-56 flex-col gap-1 overflow-auto">
-        {grantItems.map((item) =>
-          row(
-            {
-              propertyId: item.propertyId,
-              name: item.propertyName,
-              officeName: item.ownerOfficeName,
-            },
-            item.propertyAddress,
-          ),
-        )}
-      </ul>
+      <ScrollArea
+        label="허용받은 매물 목록"
+        className="max-h-[224px] rounded-control border border-line p-1"
+      >
+        <ul className="flex flex-col gap-1">
+          {grantItems.map((item) =>
+            row(
+              {
+                propertyId: item.propertyId,
+                name: item.propertyName,
+                officeName: item.ownerOfficeName,
+              },
+              item.propertyAddress,
+            ),
+          )}
+        </ul>
+      </ScrollArea>
       {error ? (
         <p role="alert" className="text-caption text-danger">
           {error}

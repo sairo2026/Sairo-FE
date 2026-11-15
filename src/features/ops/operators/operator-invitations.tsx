@@ -243,7 +243,10 @@ export function OperatorInvitationsScreen() {
       description="새 운영자를 초대하고 초대 상태를 봅니다. 같은 이메일로 대기 중인 초대가 있으면 새로 만들 수 없습니다."
       roles={["SECURITY_ADMIN"]}
       actions={
-        <Link href="/ops/operators" className="text-body font-semibold text-primary underline">
+        <Link
+          href="/ops/operators"
+          className="text-body font-semibold text-primary underline clickable-link"
+        >
           운영자 목록
         </Link>
       }

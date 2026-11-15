@@ -243,7 +243,7 @@ export function GrantsScreen() {
       actions={
         <Link
           href="/ops/privacy-requests"
-          className="text-body font-semibold text-primary underline"
+          className="text-body font-semibold text-primary underline clickable-link"
         >
           개인정보 요청 큐
         </Link>

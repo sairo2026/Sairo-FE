@@ -123,7 +123,7 @@ export function RequestStatusScreen({
         actions={
           <Link
             href={`/coordinations/${coordinationId}`}
-            className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 hover:border-primary hover:text-primary"
+            className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 clickable-control"
           >
             조율 상세
           </Link>

@@ -45,7 +45,7 @@ export function Modal({ isOpen, title, onClose, children, footer, size = "defaul
         <div
           className={cn(
             "mt-8 text-body text-ink-2",
-            size === "wide" && "min-h-0 flex-1 overflow-y-auto",
+            size === "wide" && "scroll-area min-h-0 flex-1 overflow-y-auto",
           )}
         >
           {children}

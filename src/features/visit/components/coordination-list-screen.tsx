@@ -78,20 +78,20 @@ export function CoordinationListScreen({ initialStatus }: { initialStatus?: stri
           </Link>
           <Link
             href="/granted-properties"
-            className="inline-flex h-14 items-center justify-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 hover:border-primary hover:text-primary"
+            className="inline-flex h-14 items-center justify-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 clickable-control"
           >
             허용받은 매물
           </Link>
           <Link
             href="/coordinations/trust"
-            className="inline-flex h-14 items-center justify-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 hover:border-primary hover:text-primary"
+            className="inline-flex h-14 items-center justify-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 clickable-control"
           >
             신뢰 요약·받은 평가
           </Link>
           {role === "OWNER" ? (
             <Link
               href="/coordinations/supervision"
-              className="inline-flex h-14 items-center justify-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 hover:border-primary hover:text-primary"
+              className="inline-flex h-14 items-center justify-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 clickable-control"
             >
               보조원 고지 감독
             </Link>

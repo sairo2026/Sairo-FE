@@ -200,3 +200,174 @@ html[data-splash="play"] .logo-splash-mark {
     display: none;
   }
 }
+
+/*
+ * 클릭 가능한 요소 공통 상태. 눌러서 이동하거나 동작하는 요소에만 쓰고, 표시만 하는 요소에는 쓰지 않는다.
+ * 유틸리티 클래스보다 우선하도록 레이어 밖에 둔다. 값은 기존 색상 토큰만 쓴다.
+ * 기본 → 호버(연한 브랜드 배경·브랜드 테두리·약한 그림자) → 눌림(한 단계 진한 배경) → 키보드 포커스(굵은 윤곽선).
+ */
+:root {
+  --clickable-shadow: 0 4px 14px rgb(51 53 166 / 0.16);
+  --clickable-shadow-sm: 0 2px 8px rgb(51 53 166 / 0.14);
+}
+
+.clickable-card,
+.clickable-row,
+.clickable-control,
+.clickable-link,
+.clickable-tile,
+.clickable-table-row {
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease,
+    box-shadow 150ms ease,
+    text-decoration-color 150ms ease;
+}
+
+.clickable-card:focus-visible,
+.clickable-row:focus-visible,
+.clickable-control:focus-visible,
+.clickable-link:focus-visible,
+a:focus-visible > .clickable-tile {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.clickable-card:hover {
+  border-color: var(--primary);
+  background-color: var(--primary-soft);
+  box-shadow: var(--clickable-shadow);
+}
+.clickable-card:active {
+  background-color: var(--primary-line);
+  box-shadow: none;
+}
+
+.clickable-row:hover {
+  border-color: var(--primary);
+  background-color: var(--primary-soft);
+  box-shadow: var(--clickable-shadow-sm);
+}
+.clickable-row:active {
+  background-color: var(--primary-line);
+  box-shadow: none;
+}
+
+.clickable-control:hover:not(:disabled):not([aria-disabled="true"]) {
+  border-color: var(--primary);
+  background-color: var(--primary-soft);
+  color: var(--primary);
+  box-shadow: var(--clickable-shadow-sm);
+}
+.clickable-control:active:not(:disabled):not([aria-disabled="true"]) {
+  background-color: var(--primary-line);
+  box-shadow: none;
+}
+
+.clickable-link {
+  text-underline-offset: 4px;
+  border-radius: 4px;
+}
+.clickable-link:hover {
+  color: var(--primary-hover);
+  background-color: var(--primary-soft);
+  text-decoration-line: underline;
+  text-decoration-thickness: 2px;
+}
+.clickable-link:active {
+  color: var(--primary-pressed);
+  background-color: var(--primary-line);
+}
+
+/* 표 행: 행 전체가 링크일 때 쓴다. 왼쪽 띠로 호버 위치를 알린다. */
+.clickable-table-row:hover {
+  background-color: var(--primary-soft);
+  box-shadow: inset 4px 0 0 var(--primary);
+}
+.clickable-table-row:active {
+  background-color: var(--primary-line);
+}
+.clickable-table-row:focus-within {
+  box-shadow: inset 4px 0 0 var(--primary);
+}
+
+/* 오른쪽 화살표: 카드·행 안에 두면 호버와 포커스 때 브랜드 색으로 바뀌며 조금 움직인다. */
+.clickable-arrow {
+  display: inline-block;
+  color: var(--text-secondary);
+  transition:
+    color 150ms ease,
+    transform 150ms ease;
+}
+.clickable-card:hover .clickable-arrow,
+.clickable-row:hover .clickable-arrow,
+.clickable-table-row:hover .clickable-arrow,
+.clickable-card:focus-visible .clickable-arrow,
+.clickable-row:focus-visible .clickable-arrow {
+  color: var(--primary);
+  transform: translateX(3px);
+}
+
+/* 색 타일: 타일 색을 한 단계 진하게 하고 안쪽 테두리를 더한다. 기본 색은 바꾸지 않는다. */
+.clickable-tile[data-tone="blue"] {
+  --tile-hover: #b1c3db;
+  --tile-active: #a4b5cc;
+}
+.clickable-tile[data-tone="red"] {
+  --tile-hover: #dbb1b1;
+  --tile-active: #cca4a4;
+}
+.clickable-tile[data-tone="yellow"] {
+  --tile-hover: #c8db76;
+  --tile-active: #b9cb6d;
+}
+.clickable-tile[data-tone="green"] {
+  --tile-hover: #79db88;
+  --tile-active: #70cc7e;
+}
+.clickable-tile[data-tone="amber"] {
+  --tile-hover: #dbc87e;
+  --tile-active: #ccba75;
+}
+.clickable-tile[data-tone="teal"] {
+  --tile-hover: #b1dbd2;
+  --tile-active: #a4ccc4;
+}
+.clickable-tile[data-tone="gray"] {
+  --tile-hover: #dfe2ea;
+  --tile-active: #cdd1dc;
+}
+a:hover > .clickable-tile,
+a:focus-visible > .clickable-tile {
+  background-color: var(--tile-hover);
+  box-shadow: inset 0 0 0 2px currentColor;
+}
+a:active > .clickable-tile {
+  background-color: var(--tile-active);
+}
+
+/* 안쪽 스크롤 영역: 스크롤바를 항상 보이게 하고(막대 색 대비 3:1 이상) 항목 단위로 멈춘다. */
+.scroll-area {
+  scrollbar-width: thin;
+  scrollbar-color: #6b7280 #eef0f6;
+  scroll-snap-type: y proximity;
+  scroll-padding-block: 4px;
+}
+.scroll-area li,
+.scroll-area tr {
+  scroll-snap-align: start;
+}
+.scroll-area::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.scroll-area::-webkit-scrollbar-track {
+  background: #eef0f6;
+  border-radius: 8px;
+}
+.scroll-area::-webkit-scrollbar-thumb {
+  background: #6b7280;
+  border: 2px solid #eef0f6;
+  border-radius: 8px;
+}

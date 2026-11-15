@@ -68,7 +68,7 @@ function PrivacyTable() {
             render: (row) => (
               <Link
                 href={`/ops/privacy-requests/${row.requestId}`}
-                className="font-semibold text-primary underline"
+                className="font-semibold text-primary underline clickable-link"
               >
                 {row.requestId}
               </Link>
@@ -136,7 +136,7 @@ export function PrivacyQueueScreen() {
       actions={
         <Link
           href="/ops/privacy-requests/grants"
-          className="text-body font-semibold text-primary underline"
+          className="text-body font-semibold text-primary underline clickable-link"
         >
           반환·보관 권한 현황
         </Link>

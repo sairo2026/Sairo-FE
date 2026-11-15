@@ -157,7 +157,10 @@ function RecordCard({ detail }: { detail: OpsRefundDetailResponse }) {
           {
             label: "사무소",
             value: (
-              <Link href={`/ops/offices/${detail.officeId}`} className="text-primary underline">
+              <Link
+                href={`/ops/offices/${detail.officeId}`}
+                className="text-primary underline clickable-link"
+              >
                 {detail.officeId}
               </Link>
             ),
@@ -167,7 +170,7 @@ function RecordCard({ detail }: { detail: OpsRefundDetailResponse }) {
             value: (
               <Link
                 href={`/ops/billing/invoices/${detail.invoiceId}`}
-                className="text-primary underline"
+                className="text-primary underline clickable-link"
               >
                 {detail.invoiceId}
               </Link>

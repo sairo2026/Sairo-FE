@@ -579,7 +579,7 @@ function InquiryBody({ detail, refetch }: { detail: InquiryDetail; refetch: () =
       </Card>
       <p className="text-caption text-ink-2">
         이 문의의 조회와 처리는 운영자 감사 로그에 남습니다.{" "}
-        <Link href="/ops/inquiries" className="font-semibold text-primary underline">
+        <Link href="/ops/inquiries" className="font-semibold text-primary underline clickable-link">
           목록으로
         </Link>
       </p>

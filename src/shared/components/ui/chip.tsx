@@ -27,12 +27,12 @@ export function Chip({
       type={type}
       aria-pressed={isSelected}
       className={cn(
-        "inline-flex items-center justify-center rounded-control border font-medium transition-colors disabled:cursor-not-allowed disabled:border-line disabled:bg-surface disabled:text-ink-3",
+        "inline-flex items-center justify-center rounded-control border font-medium transition-[color,background-color,border-color,box-shadow] duration-150 disabled:cursor-not-allowed disabled:border-line disabled:bg-surface disabled:text-ink-3",
         size === "lg" ? "min-h-[58px] px-6 text-body" : "min-h-11 px-4 text-caption",
         isSelected
-          ? "border-primary bg-primary font-semibold text-white enabled:hover:border-primary-hover enabled:hover:bg-primary-hover"
+          ? "border-primary bg-primary font-semibold text-white enabled:hover:border-primary-hover enabled:hover:bg-primary-hover enabled:hover:shadow-[0_2px_8px_rgb(51_53_166/0.3)] enabled:active:bg-primary-pressed"
           : cn(
-              "bg-white text-ink enabled:cursor-pointer enabled:hover:border-primary enabled:hover:bg-primary-soft enabled:hover:text-primary",
+              "bg-white text-ink enabled:cursor-pointer enabled:hover:border-primary enabled:hover:bg-primary-soft enabled:hover:text-primary enabled:hover:shadow-[0_2px_8px_rgb(51_53_166/0.14)] enabled:active:bg-primary-line",
               isInvalid ? "border-danger" : "border-control",
             ),
         className,

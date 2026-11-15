@@ -182,12 +182,23 @@ export function PriceSchedulesScreen() {
     >
       <SuccessNotice message={notice} />
       <p className="text-caption text-ink-2">
-        시작 고객 합의는 <Link href="/ops/start-customer-agreements">시작 고객 합의</Link>에서, 가격
-        변경 안내는 <Link href="/ops/price-changes">가격 변경 안내</Link>에서 처리합니다.
+        시작 고객 합의는{" "}
+        <Link href="/ops/start-customer-agreements" className="underline clickable-link">
+          시작 고객 합의
+        </Link>
+        에서, 가격 변경 안내는{" "}
+        <Link href="/ops/price-changes" className="underline clickable-link">
+          가격 변경 안내
+        </Link>
+        에서 처리합니다.
         {canSeePolicy ? (
           <>
             {" "}
-            체험 이벤트는 <Link href="/ops/trial-events">체험 이벤트</Link>에서 설정합니다.
+            체험 이벤트는{" "}
+            <Link href="/ops/trial-events" className="underline clickable-link">
+              체험 이벤트
+            </Link>
+            에서 설정합니다.
           </>
         ) : null}
       </p>

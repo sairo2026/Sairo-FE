@@ -74,7 +74,7 @@ export function InvoiceDetailScreen({ invoiceId }: { invoiceId: number }) {
                       value: (
                         <Link
                           href={`/ops/offices/${detail.officeId}`}
-                          className="text-primary underline"
+                          className="text-primary underline clickable-link"
                         >
                           {detail.officeId}
                         </Link>
@@ -158,7 +158,7 @@ export function InvoiceDetailScreen({ invoiceId }: { invoiceId: number }) {
                       render: (row) => (
                         <Link
                           href={`/ops/billing/refunds/${row.refundId}`}
-                          className="font-semibold text-primary underline"
+                          className="font-semibold text-primary underline clickable-link"
                         >
                           {row.refundId}
                         </Link>
@@ -190,7 +190,10 @@ export function InvoiceDetailScreen({ invoiceId }: { invoiceId: number }) {
               <Card title="증빙">
                 <p className="text-body text-ink-2">
                   세금계산서와 현금영수증 발급 기록은{" "}
-                  <Link href="/ops/billing/tax-documents" className="text-primary underline">
+                  <Link
+                    href="/ops/billing/tax-documents"
+                    className="text-primary underline clickable-link"
+                  >
                     증빙 발급 화면
                   </Link>
                   에서 확인하고 기록합니다.

@@ -236,7 +236,11 @@ export function TrialEventsScreen() {
       <SuccessNotice message={notice} />
       {canSeePrice ? (
         <p className="text-caption text-ink-2">
-          요금표 설정은 <Link href="/ops/price-schedules">요금표</Link>에서 합니다.
+          요금표 설정은{" "}
+          <Link href="/ops/price-schedules" className="underline clickable-link">
+            요금표
+          </Link>
+          에서 합니다.
         </p>
       ) : null}
       <CreateCard />

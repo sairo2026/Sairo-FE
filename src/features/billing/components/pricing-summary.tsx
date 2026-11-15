@@ -12,7 +12,7 @@ import { COPY, describeBillingError } from "../model/messages";
 import { tierFormula, tierRange } from "../model/pricing-tier";
 
 const DETAIL_LINK_CLASS =
-  "inline-flex min-h-12 items-center rounded-control border border-primary bg-primary-soft px-6 text-body font-semibold text-primary hover:bg-primary-line";
+  "inline-flex min-h-12 items-center rounded-control border border-primary bg-primary-soft px-6 text-body font-semibold text-primary hover:bg-primary-line hover:shadow-[0_2px_8px_rgb(51_53_166/0.18)] active:bg-primary-line active:shadow-none";
 
 export function PricingSummary() {
   const query = usePublicPricing();
@@ -47,7 +47,7 @@ export function PricingSummary() {
           </Button>
           <Link
             href="/pricing"
-            className="text-body font-semibold text-primary underline hover:text-primary-hover active:text-primary-pressed"
+            className="text-body font-semibold text-primary underline clickable-link"
           >
             요금 안내로 이동
           </Link>

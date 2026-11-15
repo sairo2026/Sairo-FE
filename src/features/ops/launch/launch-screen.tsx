@@ -47,7 +47,7 @@ function ReadinessCard({
         ) : null}
         <p className="text-body text-ink-2">
           회사 정보 게시와 실제 문의 수신 시험은{" "}
-          <Link href="/ops/company-info" className="text-primary underline">
+          <Link href="/ops/company-info" className="text-primary underline clickable-link">
             회사 정보
           </Link>
           에서 기록합니다.
@@ -177,7 +177,7 @@ function ActivationCard({ companyMissingItems }: { companyMissingItems: readonly
         />
         <p className="text-caption text-ink-2">
           계약 상태, 동의 상태, 계약·고지 점검은{" "}
-          <Link href="/ops/integrations" className="text-primary underline">
+          <Link href="/ops/integrations" className="text-primary underline clickable-link">
             연동 설정
           </Link>
           에서 바꿉니다.

@@ -49,7 +49,7 @@ export function OfficesListScreen() {
         canOpenDetail ? (
           <Link
             href={`/ops/offices/${row.officeId}`}
-            className="font-semibold text-primary underline"
+            className="font-semibold text-primary underline clickable-link"
           >
             {row.name}
           </Link>
