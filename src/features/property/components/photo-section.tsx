@@ -51,7 +51,7 @@ function PhotoPicker({
   onPick: (files: File[]) => void;
 }) {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex w-[276px] max-w-full shrink-0 flex-col gap-2">
       <label className="relative flex h-[207px] w-[276px] max-w-full cursor-pointer items-center justify-center rounded-[6.5px] bg-primary-soft text-body font-medium text-primary hover:bg-primary-line">
         사진 추가
         <input

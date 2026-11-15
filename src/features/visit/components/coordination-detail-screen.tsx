@@ -78,8 +78,8 @@ const SCHEDULE_UNAVAILABLE_COPY: Record<string, string> = {
   CONFIRMED:
     "확정된 방문의 일정은 변경 신청이나 재조율로 바꿉니다. 일정 구성은 다시 저장할 수 없습니다.",
   CANCELLED: "취소된 조율이라 일정을 구성할 수 없습니다.",
-  VISIT_COMPLETED: "임장이 끝난 조율이라 일정을 구성할 수 없습니다.",
-  VISIT_INCOMPLETE: "임장이 끝난 조율이라 일정을 구성할 수 없습니다.",
+  VISIT_COMPLETED: "방문이 끝난 조율이라 일정을 구성할 수 없습니다.",
+  VISIT_INCOMPLETE: "방문이 끝난 조율이라 일정을 구성할 수 없습니다.",
 };
 const SCHEDULE_WAITING_COPY =
   "고객이 가능 시간을 제출해 조율 가능 상태가 되면 일정을 구성할 수 있습니다.";

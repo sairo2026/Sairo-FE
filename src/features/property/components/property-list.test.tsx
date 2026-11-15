@@ -35,7 +35,8 @@ describe("매물 목록", () => {
     const row = (await screen.findByRole("link", { name: "국민대 앞 아파트" })).closest("tr");
     expect(row).not.toBeNull();
     const cells = within(row as HTMLElement);
-    expect(cells.getByText("월세 2,000만원 / 90만원")).not.toBeNull();
+    expect(cells.getByText("월세")).not.toBeNull();
+    expect(cells.getByText("2,000만원 / 90만원")).not.toBeNull();
     expect(cells.getByText("활성")).not.toBeNull();
     expect(cells.getByText("김소유")).not.toBeNull();
     expect(cells.getByText("아파트")).not.toBeNull();

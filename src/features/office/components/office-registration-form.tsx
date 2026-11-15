@@ -130,7 +130,7 @@ export function OfficeRegistrationForm() {
 
   if (step === "lookup") {
     return (
-      <FlowFrame title="신규 사무소 등록을 위한 등록번호를 입력해 주십시오.">
+      <FlowFrame title={"신규 사무소를 등록합니다.\n중개사무소 등록번호를 입력해 주십시오."}>
         <form
           noValidate
           className="flex flex-col gap-11"
@@ -141,7 +141,7 @@ export function OfficeRegistrationForm() {
         >
           <div className="flex flex-col gap-7">
             <TextField
-              label="사업자등록번호"
+              label="중개사무소 사업자등록번호"
               kind="number"
               value={businessNumber}
               onValueChange={(next) => {
@@ -152,7 +152,7 @@ export function OfficeRegistrationForm() {
               error={errors.businessRegistrationNumber}
             />
             <TextField
-              label="등록관청"
+              label="중개사무소 등록관청"
               value={authority}
               onValueChange={(next) => {
                 setAuthority(next);
@@ -163,7 +163,7 @@ export function OfficeRegistrationForm() {
               maxLength={100}
             />
             <TextField
-              label="개설등록번호"
+              label="중개사무소 개설등록번호"
               value={license}
               onValueChange={(next) => {
                 setLicense(next);

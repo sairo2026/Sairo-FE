@@ -88,7 +88,7 @@ export function OfficeStartScreen() {
                     className="flex h-[312px] w-[260px] flex-col items-center justify-between rounded-card-flat px-4 pt-9 pb-9 text-center"
                   >
                     <span className="text-h3 font-semibold">{item.title}</span>
-                    <span className="w-[179px] text-body font-medium">{item.description}</span>
+                    <span className="w-[165px] text-body font-medium">{item.description}</span>
                   </SelectableCard>
                 );
               })}

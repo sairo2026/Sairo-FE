@@ -46,7 +46,7 @@ export function useMyMembership() {
   });
 }
 
-const FIRST_USE_PROBE = { page: 0, size: 1 } as const;
+const FIRST_USE_PROBE = { page: 0, size: 25 } as const;
 
 /** 매물과 고객이 모두 하나도 없는 새 사무소인지 확인한다. 둘 다 불러온 뒤에만 참이 된다. */
 export function useIsEmptyOffice(enabled: boolean) {

@@ -101,7 +101,7 @@ export function OfficeHeaderActions() {
         aria-label={unreadCount > 0 ? `알림 열기, 읽지 않은 알림 ${unreadCount}건` : "알림 열기"}
         aria-expanded={panelOpen}
         onClick={() => setPanelOpen((open) => !open)}
-        className="relative flex h-9 w-9 items-center justify-center rounded-control text-ink clickable-control"
+        className="relative flex h-9 w-9 items-center justify-center rounded-control text-ink-2 clickable-control"
       >
         <svg
           aria-hidden="true"

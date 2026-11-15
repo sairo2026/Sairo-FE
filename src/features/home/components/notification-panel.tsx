@@ -36,7 +36,7 @@ function Chevron() {
 export function NotificationPanel({ onClose }: NotificationPanelProps) {
   const queryClient = useQueryClient();
   const closeRef = useRef<HTMLButtonElement>(null);
-  const query = useNotifications({ unreadOnly: false, page: 0, size: 20 });
+  const query = useNotifications({ unreadOnly: false, page: 0, size: 25 });
   const read = useMutation({
     mutationFn: (notificationId: number) => markNotificationRead(notificationId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: homeKeys.all }),

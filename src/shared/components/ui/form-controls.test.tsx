@@ -37,6 +37,16 @@ describe("Button", () => {
     expect(onClick).not.toHaveBeenCalled();
   });
 
+  it("비활성 제출 버튼은 흰 배경에 회색 글자로 라벨이 보인다", () => {
+    render(<Button disabled>다음</Button>);
+    const className = screen.getByRole("button", { name: "다음" }).className;
+    expect(className).toContain("text-ink-3");
+    expect(className).toContain("bg-white");
+    expect(className).toContain("border-ink-3");
+    expect(className).not.toContain("bg-primary");
+    expect(className).not.toContain("text-white");
+  });
+
   it("기본 상태에서 클릭을 전달하고 키보드로 누를 수 있다", async () => {
     const onClick = vi.fn();
     render(<Button onClick={onClick}>다음</Button>);

@@ -1,10 +1,18 @@
-import { test } from "@playwright/test";
+import { test, type Page } from "@playwright/test";
 import { settle, useMockOfficeRole, type MockOfficeRole } from "../support/app";
 import { fixMockClock } from "../support/scenario";
 
 const CAPTURE = Boolean(process.env.VISUAL_CAPTURE);
 
-type Shot = { name: string; path: string; role: MockOfficeRole | null };
+type Shot = {
+  name: string;
+  path: string;
+  role: MockOfficeRole | null;
+  /** 화면 전체 길이를 찍는다(긴 입력 화면). */
+  full?: boolean;
+  /** 화면이 열린 뒤 모달이나 패널을 여는 동작. */
+  act?: (page: Page) => Promise<void>;
+};
 
 const SHOTS: readonly Shot[] = [
   { name: "01-시작-로그인", path: "/login", role: null },
@@ -35,6 +43,43 @@ const SHOTS: readonly Shot[] = [
   { name: "26-구독-결제", path: "/billing", role: "OWNER" },
   { name: "27-요금", path: "/pricing", role: null },
   { name: "28-이용약관", path: "/legal/terms", role: null },
+  { name: "29-비밀번호-재설정", path: "/password/reset?token=valid-token-0000000000", role: null },
+  {
+    name: "30-이메일-인증-완료",
+    path: "/signup/verify-email?token=valid-token-0000000000",
+    role: null,
+  },
+  { name: "31-이메일-가입-전체", path: "/signup/email", role: null, full: true },
+  {
+    name: "32-홈-알림-패널",
+    path: "/home",
+    role: "OWNER",
+    act: async (page) => {
+      await page.getByRole("button", { name: /알림 열기/ }).click();
+    },
+  },
+  {
+    name: "33-홈-업무-만들기",
+    path: "/home",
+    role: "OWNER",
+    act: async (page) => {
+      await page
+        .getByRole("button", { name: /업무 만들기/ })
+        .first()
+        .click();
+    },
+  },
+  { name: "34-매물-상세", path: "/properties/1", role: "OWNER" },
+  { name: "35-고객-상세", path: "/customers/1", role: "OWNER" },
+  { name: "36-매물-등록-전체", path: "/properties/new", role: "OWNER", full: true },
+  { name: "37-고객-등록-전체", path: "/customers/new", role: "OWNER", full: true },
+  { name: "38-사무소-등록-전체", path: "/office/register", role: "NEW", full: true },
+  {
+    name: "39-사무소-증빙-전체",
+    path: "/office/register/evidence?registrationId=31",
+    role: "NEW",
+    full: true,
+  },
 ];
 
 test.describe("화면 캡처(디자인 비교용)", () => {
@@ -47,7 +92,14 @@ test.describe("화면 캡처(디자인 비교용)", () => {
       await useMockOfficeRole(page, shot.role);
       await page.goto(shot.path);
       await settle(page);
-      await page.screenshot({ path: `visual-captures/${shot.name}.png`, fullPage: false });
+      if (shot.act) {
+        await shot.act(page).catch(() => undefined);
+        await page.waitForTimeout(400);
+      }
+      await page.screenshot({
+        path: `visual-captures/${shot.name}.png`,
+        fullPage: shot.full === true,
+      });
     });
   }
 });

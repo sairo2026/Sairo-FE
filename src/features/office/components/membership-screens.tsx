@@ -143,8 +143,36 @@ export function OfficeSearchScreen() {
   const searchError = resultQuery.error ? fieldErrorMap(resultQuery.error) : {};
 
   return (
-    <FlowFrame title="참여할 사무소를 찾아 주세요.">
+    <FlowFrame
+      title={"기존에 등록된 사무소에 참여합니다.\n참여를 요청할 사무소의 정보를 입력해 주십시오."}
+    >
       <div className="flex flex-col gap-6">
+        <div
+          role="radiogroup"
+          aria-label="검색 방법"
+          className="flex flex-wrap items-center justify-center gap-2"
+        >
+          {(
+            [
+              ["business", "사업자등록번호"],
+              ["name", "사무소명과 지역"],
+            ] as const
+          ).map(([key, label]) => (
+            <SelectableCard
+              key={key}
+              selectionRole="radio"
+              isSelected={mode === key}
+              onClick={() => setMode(key)}
+              className={cn(
+                "h-9 rounded-control px-3.5 text-caption",
+                mode === key ? "font-semibold text-primary" : "text-ink-2",
+              )}
+            >
+              {label}
+            </SelectableCard>
+          ))}
+        </div>
+
         <form
           noValidate
           className="flex flex-col gap-11"
@@ -199,32 +227,6 @@ export function OfficeSearchScreen() {
             </Button>
           </ButtonRow>
         </form>
-
-        <div
-          role="radiogroup"
-          aria-label="검색 방법"
-          className="flex flex-wrap items-center justify-center gap-2"
-        >
-          {(
-            [
-              ["business", "사업자등록번호"],
-              ["name", "사무소명과 지역"],
-            ] as const
-          ).map(([key, label]) => (
-            <SelectableCard
-              key={key}
-              selectionRole="radio"
-              isSelected={mode === key}
-              onClick={() => setMode(key)}
-              className={cn(
-                "h-9 rounded-control px-3.5 text-caption",
-                mode === key ? "font-semibold text-primary" : "text-ink-2",
-              )}
-            >
-              {label}
-            </SelectableCard>
-          ))}
-        </div>
 
         <MutedNote>
           인증이 끝난 사무소만 검색됩니다. 사업자등록번호는 검색 조건으로만 쓰이고 결과에는 표시되지
