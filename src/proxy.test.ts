@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { proxy } from "./proxy";
+import { config, proxy } from "./proxy";
 
 afterEach(() => vi.unstubAllEnvs());
 
@@ -155,5 +155,14 @@ describe("서비스 첫 화면 프록시", () => {
     expect(home.headers.get("x-middleware-next")).toBe("1");
     const signedIn = proxy(new NextRequest("https://app.sairo.agency/", sessionCookie));
     expect(signedIn.headers.get("location")).toBe("https://app.sairo.agency/home");
+  });
+});
+
+describe("프록시 적용 범위", () => {
+  it("메일 로고 같은 공개 정적 파일 경로는 프록시를 거치지 않는다", () => {
+    const pattern = new RegExp(`^${config.matcher[0]}$`);
+    expect(pattern.test("/email/sairo-logo.png")).toBe(false);
+    expect(pattern.test("/brand/sairo-logo-horizontal.png")).toBe(false);
+    expect(pattern.test("/properties")).toBe(true);
   });
 });
