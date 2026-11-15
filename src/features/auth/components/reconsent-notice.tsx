@@ -22,8 +22,16 @@ import { MARKETING_TERMS_CODE } from "./terms-agreement-section";
 
 const reconsentQueryKey = ["auth", "terms-reconsent"] as const;
 
-async function agreeToAll(items: TermsReconsentResponse["items"]) {
-  for (const item of items) {
+type ReconsentSelection = {
+  items: TermsReconsentResponse["items"];
+  optionalSelected: Record<string, boolean>;
+};
+
+async function agreeToSelected({ items, optionalSelected }: ReconsentSelection) {
+  for (const item of items.filter(
+    (candidate) =>
+      candidate.required || optionalSelected[`${candidate.termsCode}:${candidate.version}`],
+  )) {
     await recordTermsAgreement({
       termsCode: item.termsCode,
       version: item.version,
@@ -38,6 +46,7 @@ export function ReconsentNotice() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isDeclined, setIsDeclined] = useState(false);
+  const [optionalSelected, setOptionalSelected] = useState<Record<string, boolean>>({});
   const query = useQuery({ queryKey: reconsentQueryKey, queryFn: fetchTermsReconsent });
   const logoutMutation = useMutation({
     mutationFn: logout,
@@ -47,7 +56,7 @@ export function ReconsentNotice() {
     },
   });
   const agreeMutation = useMutation({
-    mutationFn: agreeToAll,
+    mutationFn: agreeToSelected,
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: authContextQueryKey });
       router.replace("/home");
@@ -106,6 +115,22 @@ export function ReconsentNotice() {
                 이전 버전 {item.previousVersion ?? "없음"}, 새 버전 {item.version}
               </p>
               <p className="text-caption text-ink-2">시행일 {formatSeoulDate(item.effectiveAt)}</p>
+              {!item.required ? (
+                <label className="mt-2 flex items-center gap-2 text-body text-ink">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(optionalSelected[`${item.termsCode}:${item.version}`])}
+                    onChange={(event) =>
+                      setOptionalSelected((current) => ({
+                        ...current,
+                        [`${item.termsCode}:${item.version}`]: event.target.checked,
+                      }))
+                    }
+                  />
+                  {findLegalDocumentByTermsCode(item.termsCode)?.title ?? item.termsCode}에
+                  동의합니다(선택).
+                </label>
+              ) : null}
               {item.changeSummary ? (
                 <p className="mt-1 text-caption text-ink-2">{item.changeSummary}</p>
               ) : null}
@@ -150,8 +175,11 @@ export function ReconsentNotice() {
           </p>
         ) : null}
         <div className="mt-6 flex flex-wrap gap-2">
-          <Button isLoading={agreeMutation.isPending} onClick={() => agreeMutation.mutate(items)}>
-            동의하고 계속
+          <Button
+            isLoading={agreeMutation.isPending}
+            onClick={() => agreeMutation.mutate({ items, optionalSelected })}
+          >
+            필수 약관에 동의하고 계속
           </Button>
           <Button variant="cancel" onClick={() => setIsDeclined(true)}>
             동의하지 않음

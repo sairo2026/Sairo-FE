@@ -402,8 +402,57 @@ describe("약관 개정 재동의", () => {
     setMockAuthContext(reconsentContext);
     const user = userEvent.setup();
     renderWithQuery(<ReconsentNotice />);
-    await user.click(await screen.findByRole("button", { name: "동의하고 계속" }));
+    await user.click(await screen.findByRole("button", { name: "필수 약관에 동의하고 계속" }));
     await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/home"));
+  });
+
+  it("선택 약관은 체크하지 않으면 재동의 요청에 포함하지 않는다", async () => {
+    setMockAuthContext(reconsentContext);
+    const recorded: string[] = [];
+    server.use(
+      http.get("/api/me/terms-reconsent", () =>
+        Response.json({
+          reconsentRequired: true,
+          items: [
+            {
+              termsCode: "TOS",
+              previousVersion: "1.0",
+              version: "1.1",
+              category: "TERMS",
+              required: true,
+              effectiveAt: "2026-12-01T04:00:00+09:00",
+              changeSummary: null,
+              documentUrl: "/legal/terms",
+              previousDocumentUrl: null,
+            },
+            {
+              termsCode: "MARKETING",
+              previousVersion: "1.0",
+              version: "1.1",
+              category: "TERMS",
+              required: false,
+              effectiveAt: "2026-12-01T04:00:00+09:00",
+              changeSummary: null,
+              documentUrl: "/legal/marketing",
+              previousDocumentUrl: null,
+            },
+          ],
+        }),
+      ),
+      http.post("/api/me/terms-agreements", async ({ request }) => {
+        const body = (await request.json()) as { termsCode: string };
+        recorded.push(body.termsCode);
+        return new Response(null, { status: 204 });
+      }),
+    );
+    const user = userEvent.setup();
+    renderWithQuery(<ReconsentNotice />);
+    expect(
+      await screen.findByRole("checkbox", { name: /이메일 공지·혜택 안내 수신 동의/ }),
+    ).toHaveProperty("checked", false);
+    await user.click(screen.getByRole("button", { name: "필수 약관에 동의하고 계속" }));
+    await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/home"));
+    expect(recorded).toEqual(["TOS"]);
   });
 
   it("그 사이 약관이 또 바뀌면 안내하고 다시 불러온다", async () => {
@@ -418,7 +467,7 @@ describe("약관 개정 재동의", () => {
     );
     const user = userEvent.setup();
     renderWithQuery(<ReconsentNotice />);
-    await user.click(await screen.findByRole("button", { name: "동의하고 계속" }));
+    await user.click(await screen.findByRole("button", { name: "필수 약관에 동의하고 계속" }));
     expect((await screen.findByRole("alert")).textContent).toContain("약관이 다시 바뀌었습니다");
   });
 
