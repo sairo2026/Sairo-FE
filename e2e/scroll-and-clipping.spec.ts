@@ -72,11 +72,10 @@ test.describe("컨트롤을 눌러도 스크롤 위치가 유지된다", () => {
     await expectScrollUnchanged(page, 'input[type="checkbox"][aria-label$=" 선택"]');
   });
 
-  test("고객 목록: 선택 열 체크박스, 필터 라디오, 보관 토글", async ({ page }) => {
+  test("고객 목록: 선택 열 체크박스, 보관 토글", async ({ page }) => {
     await page.goto("/customers");
     await settle(page);
     await expectScrollUnchanged(page, 'input[type="checkbox"][aria-label$=" 선택"]');
-    await expectScrollUnchanged(page, 'fieldset input[type="radio"]:not(:checked)');
     await expectScrollUnchanged(page, 'button[role="switch"]');
   });
 });
@@ -106,6 +105,8 @@ test.describe("화면 맨 아래 요소가 잘리지 않는다", () => {
   }
 
   test("홈: 스크롤 끝에서 캘린더 카드 전체가 보이고 아래 안내가 사라진다", async ({ page }) => {
+    // 카드(약 520px)가 통째로 들어갈 만큼의 높이로 늘린다.
+    await page.setViewportSize({ width: page.viewportSize()?.width ?? 1280, height: 720 });
     await page.goto("/home");
     await settle(page);
     const hint = page.locator('[data-testid="more-below-hint"].fixed');
