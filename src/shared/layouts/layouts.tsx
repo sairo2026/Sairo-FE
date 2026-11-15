@@ -122,7 +122,7 @@ export function OfficeLayout({
         </aside>
         <div className="min-w-0">
           <header className="flex min-h-[88px] flex-wrap items-center justify-between gap-x-6 gap-y-3 border-b border-line bg-white px-8 py-4 text-caption font-semibold text-ink-2">
-            <span>{officeName ?? "사무소"}</span>
+            <span className="text-h2 font-bold text-ink">{officeName ?? "사무소"}</span>
             {headerActions}
           </header>
           <main

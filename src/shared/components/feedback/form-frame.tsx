@@ -44,7 +44,7 @@ export function AuthFrame({
         className={width === "sm" ? "w-full max-w-md" : "w-full max-w-[676px]"}
       >
         {isForm ? null : <BrandLogo className="mb-6 w-28" />}
-        <h1 className="text-h1 font-bold text-ink">{title}</h1>
+        <h1 className="whitespace-pre-line text-h1 font-bold text-ink">{title}</h1>
         {description ? (
           <p
             className={
@@ -68,11 +68,22 @@ export function FormAlert({ children }: { children: ReactNode }) {
   );
 }
 
-export function FormNotice({ children }: { children: ReactNode }) {
+export function FormNotice({
+  children,
+  variant = "boxed",
+}: {
+  children: ReactNode;
+  /** inline은 박스 없이 파란 캡션만 둔다. 메일 발송 직후 안내에 쓴다. */
+  variant?: "boxed" | "inline";
+}) {
   return (
     <p
       role="status"
-      className="whitespace-pre-line rounded-control bg-primary-soft px-4 py-3 text-caption text-ink-2"
+      className={
+        variant === "inline"
+          ? "whitespace-pre-line text-caption text-primary"
+          : "whitespace-pre-line rounded-control bg-primary-soft px-4 py-3 text-caption text-ink-2"
+      }
     >
       {breakSentencesIn(children)}
     </p>

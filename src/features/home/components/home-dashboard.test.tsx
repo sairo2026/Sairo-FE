@@ -44,7 +44,7 @@ describe("홈 대시보드", () => {
     renderOffice(<HomeDashboard />, { role: "OWNER" });
     expect(document.querySelector("[aria-busy=true]")).not.toBeNull();
     expect(await screen.findByText("서울특별시 성북구 정릉로 77")).not.toBeNull();
-    expect(screen.getByRole("button", { name: "업무 임장 안내 문자 확인 열기" })).not.toBeNull();
+    expect(screen.getByRole("button", { name: "업무 방문 안내 문자 확인 열기" })).not.toBeNull();
     expect(screen.getByRole("link", { name: "계약 만기 D-90 2건" })).not.toBeNull();
     expect(screen.getByRole("link", { name: "오늘 방문 목록 1건" })).not.toBeNull();
     expect(screen.getByRole("link", { name: "방문 조율 중 1건" })).not.toBeNull();

@@ -44,9 +44,9 @@ describe("폼 라벨 규격", () => {
       expect(input.parentElement?.className).toContain("px-5");
     }
     expect(screen.getByText("오류입니다.").className).toContain("text-danger");
-    expect(screen.getByText("오류입니다.").className).toContain("text-center");
+    expect(screen.getByText("오류입니다.").className).not.toContain("text-center");
     expect(screen.getByText("인증이 완료되었습니다.").className).toContain("text-primary");
-    expect(screen.getByText("인증이 완료되었습니다.").className).toContain("text-center");
+    expect(screen.getByText("인증이 완료되었습니다.").className).not.toContain("text-center");
     expect(screen.getByText("안내입니다.").className).toContain("text-ink-2");
     expect(screen.getByText("안내입니다.").className).not.toContain("text-center");
   });

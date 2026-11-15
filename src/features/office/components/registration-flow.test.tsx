@@ -94,9 +94,9 @@ async function fillLookup(
   license = "11110-2026-00002",
   businessNumber = "1234567890",
 ) {
-  await user.type(screen.getByLabelText("사업자등록번호"), businessNumber);
-  await user.type(screen.getByLabelText("등록관청"), "서울특별시 종로구");
-  await user.type(screen.getByLabelText("개설등록번호"), license);
+  await user.type(screen.getByLabelText("중개사무소 사업자등록번호"), businessNumber);
+  await user.type(screen.getByLabelText("중개사무소 등록관청"), "서울특별시 종로구");
+  await user.type(screen.getByLabelText("중개사무소 개설등록번호"), license);
   await user.click(screen.getByRole("button", { name: "다음" }));
 }
 
@@ -124,8 +124,8 @@ describe("사무소 등록 신청", () => {
   it("사업자등록번호는 등록번호 단계에서 하이픈 형식으로 받는다", async () => {
     const user = userEvent.setup();
     renderOffice(<OfficeRegistrationForm />);
-    await user.type(screen.getByLabelText("사업자등록번호"), "1234567890");
-    expect((screen.getByLabelText("사업자등록번호") as HTMLInputElement).value).toBe(
+    await user.type(screen.getByLabelText("중개사무소 사업자등록번호"), "1234567890");
+    expect((screen.getByLabelText("중개사무소 사업자등록번호") as HTMLInputElement).value).toBe(
       "123-45-67890",
     );
   });
@@ -242,7 +242,7 @@ describe("사무소 등록 신청", () => {
     await fillLookup(user);
     await screen.findByLabelText("사무소명");
     await user.click(screen.getByRole("button", { name: "이전" }));
-    expect(screen.getByLabelText("등록관청")).not.toBeNull();
+    expect(screen.getByLabelText("중개사무소 등록관청")).not.toBeNull();
   });
 });
 

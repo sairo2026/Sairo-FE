@@ -38,9 +38,9 @@ test.describe("시나리오 1 이메일 가입부터 사무소 승인 뒤 로그
       await page.getByRole("radio", { name: /새 사무소 생성/ }).click();
       await page.getByRole("button", { name: "다음" }).click();
       await expect(page).toHaveURL(/\/office\/register/);
-      await page.getByLabel("사업자등록번호").fill("1234567890");
-      await page.getByLabel("등록관청").fill("서울특별시 종로구");
-      await page.getByLabel("개설등록번호").fill("11110-2026-00099");
+      await page.getByLabel("중개사무소 사업자등록번호").fill("1234567890");
+      await page.getByLabel("중개사무소 등록관청").fill("서울특별시 종로구");
+      await page.getByLabel("중개사무소 개설등록번호").fill("11110-2026-00099");
       await page.getByRole("button", { name: "다음" }).click();
       await page.getByLabel("사무소명").fill("새사무소");
       await page.getByLabel("사무소 대표자명").fill("김대표");

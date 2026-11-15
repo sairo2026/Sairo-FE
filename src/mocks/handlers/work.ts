@@ -105,7 +105,7 @@ function initialState(): WorkMockState {
   return {
     callerRole: "OWNER",
     callerMembershipId: 2,
-    tasks: [buildMockTask({ taskId: 6001, title: "임장 안내 문자 확인", dueDate: todayKst() })],
+    tasks: [buildMockTask({ taskId: 6001, title: "방문 안내 문자 확인", dueDate: todayKst() })],
     notifications: [
       buildMockNotification({ notificationId: 9001 }),
       buildMockNotification({

@@ -54,10 +54,9 @@ export function Button({
         size === "md" ? "h-12 min-w-[120px] px-10" : "h-9 px-3.5 text-caption",
         fullWidth && "w-full",
         isWide && !fullWidth && "w-[230px]",
-        variantClass[variant],
+        !disabled && variantClass[variant],
         isLoading && "cursor-progress opacity-80",
-        disabled &&
-          "cursor-not-allowed border border-ink-3 bg-white font-semibold text-ink-3 hover:bg-white hover:text-ink-3 hover:border-ink-3 active:bg-white",
+        disabled && "cursor-not-allowed border border-ink-3 bg-white font-semibold text-ink-3",
         className,
       )}
     >
