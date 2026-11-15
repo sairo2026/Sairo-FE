@@ -38,6 +38,7 @@ test.describe("시나리오 1 이메일 가입부터 사무소 승인 뒤 로그
       await page.getByRole("radio", { name: /새 사무소 생성/ }).click();
       await page.getByRole("button", { name: "다음" }).click();
       await expect(page).toHaveURL(/\/office\/register/);
+      await page.getByLabel("사업자등록번호").fill("1234567890");
       await page.getByLabel("등록관청").fill("서울특별시 종로구");
       await page.getByLabel("개설등록번호").fill("11110-2026-00099");
       await page.getByRole("button", { name: "다음" }).click();
@@ -45,7 +46,6 @@ test.describe("시나리오 1 이메일 가입부터 사무소 승인 뒤 로그
       await page.getByLabel("사무소 대표자명").fill("김대표");
       await page.getByLabel("사무소 대표 연락처").fill("01011112222");
       await page.getByLabel("중개사무소 주소").fill("서울시 종로구 1");
-      await page.getByLabel("사업자등록번호").fill("1234567890");
       await page.getByLabel("신청자의 등록관계").selectOption({ label: "대표 본인" });
       await page.getByRole("button", { name: "다음" }).click();
       await expect(page).toHaveURL(/\/office\/register\/evidence\?registrationId=31/);
@@ -65,7 +65,7 @@ test.describe("시나리오 1 이메일 가입부터 사무소 승인 뒤 로그
       }
       await page.getByRole("button", { name: "등록", exact: true }).click();
       await expect(page).toHaveURL(/\/office\/review/);
-      await expect(page.getByText("심사 중").first()).toBeVisible();
+      await expect(page.getByText("신규 사무소 등록 심사 진행 중입니다.")).toBeVisible();
       await expect(page.getByText("서류를 확인하고 있습니다.", { exact: true })).toBeVisible();
     });
   });

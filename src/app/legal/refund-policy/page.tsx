@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: "환불정책",
   description: "사이로의 환불정책 안내입니다.",
   robots: INDEXABLE_ROBOTS,
-  ...publicPageSocialMetadata("환불정책", "사이로의 환불정책 안내입니다."),
+  ...publicPageSocialMetadata("환불정책", "사이로의 환불정책 안내입니다.", "/legal/refund-policy"),
 };
 
 export default function Page() {

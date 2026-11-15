@@ -83,7 +83,7 @@ function CsvDownload({ yearMonth }: { yearMonth: string }) {
 
   return (
     <div className="ml-auto flex flex-col items-end gap-1">
-      <Button variant="ghost" size="sm" isLoading={isPending} onClick={() => void download()}>
+      <Button variant="ghost" isLoading={isPending} onClick={() => void download()}>
         CSV 내려받기
       </Button>
       {error ? <FormAlert>{error}</FormAlert> : null}
@@ -149,9 +149,9 @@ function SettlementBody({ yearMonth }: { yearMonth: string }) {
               <li key={group.id}>
                 <section
                   aria-label={group.title}
-                  className="flex h-full flex-col gap-3 rounded-card-flat border border-line bg-white px-6 py-5"
+                  className="flex h-full flex-col gap-3 rounded-card border border-line bg-white px-6 py-6"
                 >
-                  <h2 className="text-body font-semibold text-ink-2">{group.title}</h2>
+                  <h2 className="text-h2 font-semibold text-ink">{group.title}</h2>
                   {group.metrics.map((def) => (
                     <Link
                       key={def.key}
@@ -159,7 +159,7 @@ function SettlementBody({ yearMonth }: { yearMonth: string }) {
                       aria-label={`${def.label} ${formatValue(def, data[def.key])} 상세 내역`}
                       className="flex items-baseline justify-between gap-3 rounded-control px-2 py-1 hover:bg-primary-soft"
                     >
-                      <span className="text-caption text-ink-2">{def.label}</span>
+                      <span className="text-body text-ink-2">{def.label}</span>
                       <span className="text-h2 font-bold text-primary">
                         {formatValue(def, data[def.key])}
                       </span>

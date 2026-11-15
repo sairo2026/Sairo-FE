@@ -52,3 +52,5 @@ Thumbs.db
 # playwright
 /playwright-report
 /test-results
+
+/visual-captures

@@ -8,7 +8,7 @@ import {
 
 function NoticeBlock({ title, children }: { title?: string; children: ReactNode }) {
   return (
-    <section className="flex flex-col gap-1 rounded-card-flat border border-line bg-surface px-5 py-4">
+    <section className="flex flex-col gap-1 rounded-control bg-primary-soft px-4 py-3">
       {title ? <h2 className="text-body font-semibold text-ink">{title}</h2> : null}
       <div className="flex flex-col gap-2 text-caption text-ink-2">{children}</div>
     </section>

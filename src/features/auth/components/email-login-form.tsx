@@ -15,7 +15,7 @@ import { authContextQueryKey } from "../hooks/use-auth-context";
 import { formatClock, useCountdown } from "../hooks/use-countdown";
 import { describeAuthError } from "@/shared/lib/api-messages";
 import { landingPathFor, safeNextPath } from "../model/landing";
-import { AuthFrame, FormAlert } from "@/shared/components/feedback/form-frame";
+import { AuthFrame } from "@/shared/components/feedback/form-frame";
 
 const loginSchema = z.object({
   email: z
@@ -62,54 +62,73 @@ export function EmailLoginForm({ next }: { next?: string }) {
   const isLocked = lock.remaining > 0;
 
   return (
-    <AuthFrame title="이메일로 로그인" width="sm">
-      <form noValidate onSubmit={submit} className="flex flex-col gap-5">
-        <Controller
-          name="email"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              label="이메일"
-              value={field.value}
-              onValueChange={field.onChange}
-              inputMode="email"
-              autoComplete="username"
-              placeholder="email@email.com"
-              error={errors.email?.message}
-            />
-          )}
-        />
-        <Controller
-          name="password"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              label="비밀번호"
-              kind="password"
-              value={field.value}
-              onValueChange={field.onChange}
-              autoComplete="current-password"
-              error={errors.password?.message}
-            />
-          )}
-        />
+    <AuthFrame
+      title="이메일로 로그인"
+      width="sm"
+      variant="login"
+      tagline="공인중개사의 업무를 돕는 사이로입니다."
+    >
+      <form noValidate onSubmit={submit} className="flex flex-col">
+        <div className="flex flex-col gap-7">
+          <Controller
+            name="email"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                label="이메일"
+                value={field.value}
+                onValueChange={field.onChange}
+                inputMode="email"
+                autoComplete="username"
+                placeholder="email@email.com"
+                error={errors.email?.message}
+              />
+            )}
+          />
+          <Controller
+            name="password"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                label="비밀번호"
+                kind="password"
+                value={field.value}
+                onValueChange={field.onChange}
+                autoComplete="current-password"
+                error={errors.password?.message}
+              />
+            )}
+          />
+        </div>
         {isLocked ? (
-          <FormAlert>
+          <p role="alert" className="mt-3 text-center text-caption text-primary">
             로그인에 5회 실패해 잠시 막았습니다.{" "}
             <span role="timer">{formatClock(lock.remaining)}</span> 뒤에 다시 시도해 주세요.
-          </FormAlert>
+          </p>
         ) : null}
-        {formError ? <FormAlert>{formError}</FormAlert> : null}
-        <Button type="submit" fullWidth isLoading={isSubmitting} disabled={isLocked}>
-          로그인
-        </Button>
-        <div className="flex justify-between text-caption">
-          <Link href="/signup" className="font-semibold text-primary hover:underline">
-            회원가입
-          </Link>
-          <Link href="/password/forgot" className="font-semibold text-primary hover:underline">
+        {formError ? (
+          <p role="alert" className="mt-3 text-center text-caption text-primary">
+            {formError}
+          </p>
+        ) : null}
+        <div className="mt-8 flex justify-center gap-8 text-caption underline">
+          <Link href="/password/forgot" className="text-ink-2 hover:text-primary">
             비밀번호 찾기
           </Link>
+          <Link href="/signup" className="font-semibold text-primary hover:text-primary-hover">
+            회원가입
+          </Link>
+        </div>
+        <div className="mt-11 flex items-center justify-center gap-4">
+          <Link
+            href="/login"
+            className="inline-flex h-12 min-w-[120px] items-center justify-center rounded-control bg-primary-soft px-10 font-medium text-ink-2 hover:bg-primary-line"
+          >
+            뒤로
+          </Link>
+          <Button type="submit" isLoading={isSubmitting} disabled={isLocked}>
+            로그인
+          </Button>
         </div>
       </form>
     </AuthFrame>

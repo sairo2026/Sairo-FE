@@ -2,6 +2,7 @@ import { CONSENT_HISTORY_COPY } from "@/shared/consent/consent-copy";
 
 export const SIGNUP_TERMS_COPY = {
   sectionTitle: "약관 동의",
+  selectAllRequiredLabel: "필수 약관 전체 동의",
   tosLabel: "만 14세 이상이며 사이로 이용약관에 동의합니다.",
   privacyLabel: "개인정보처리방침을 확인했습니다.",
   marketingLabel: "이메일로 공지·혜택 안내를 받고, 이를 위한 개인정보 수집·이용에 동의합니다.",

@@ -8,6 +8,7 @@ import {
   fetchLatestRegistration,
   fetchMembershipDetail,
   fetchMyMembership,
+  fetchRequesterName,
   fetchTransfer,
   listChangeRequests,
   listMemberships,
@@ -24,6 +25,7 @@ export const officeKeys = {
   changeRequests: (page: number, size: number) =>
     ["office", "change-requests", page, size] as const,
   myMembership: ["office", "my-membership"] as const,
+  requesterName: ["office", "requester-name"] as const,
   memberships: ["office", "memberships"] as const,
   membershipList: (params: MembershipListParams) => ["office", "memberships", params] as const,
   membershipDetail: (id: number) => ["office", "memberships", "detail", id] as const,
@@ -50,6 +52,14 @@ export function useChangeRequests(page: number, size: number) {
 
 export function useMyMembership() {
   return useQuery({ queryKey: officeKeys.myMembership, queryFn: fetchMyMembership });
+}
+
+export function useRequesterName(enabled: boolean) {
+  return useQuery({
+    queryKey: officeKeys.requesterName,
+    queryFn: fetchRequesterName,
+    enabled,
+  });
 }
 
 export function useMemberships(params: MembershipListParams, enabled = true) {

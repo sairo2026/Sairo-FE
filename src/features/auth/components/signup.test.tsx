@@ -181,7 +181,14 @@ describe("이메일 가입 기본 정보", () => {
     await user.click(marketing);
     expect(tos.checked).toBe(false);
     expect(marketing.checked).toBe(true);
-    expect(screen.queryByLabelText(/약관 전체 동의/)).toBeNull();
+    const allRequired = screen.getByLabelText(/필수 약관 전체 동의/) as HTMLInputElement;
+    expect(allRequired.checked).toBe(false);
+    await user.click(allRequired);
+    expect(tos.checked).toBe(true);
+    expect(marketing.checked).toBe(true);
+    await user.click(allRequired);
+    expect(tos.checked).toBe(false);
+    expect(marketing.checked).toBe(true);
   });
 
   it("개인정보처리방침은 체크 없는 열람 고지로 보여준다", async () => {

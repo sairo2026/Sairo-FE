@@ -39,7 +39,7 @@ export function ExistingAccountNotice({
 
   return (
     <AuthFrame
-      width="sm"
+      variant="form"
       title={existingAccountFound ? "이미 가입된 계정이 있습니다" : "계정을 찾지 못했습니다"}
       description={
         existingAccountFound
@@ -47,17 +47,17 @@ export function ExistingAccountNotice({
           : "확인한 정보로 가입한 계정은 없습니다. 입력한 내용을 다시 확인해 주세요."
       }
     >
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col items-center gap-6">
         {existingAccountFound && methods.length > 0 ? (
           <FormNotice>로그인 방식: {methods.join(", ")}</FormNotice>
         ) : null}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col items-center gap-3">
           {existingAccountFound ? (
             <>
               {availableLoginMethods.includes("EMAIL") ? (
                 <Link
                   href="/login/email"
-                  className="inline-flex h-12 items-center justify-center rounded-control bg-primary px-10 font-bold text-white hover:bg-primary-hover"
+                  className="inline-flex h-12 w-[230px] items-center justify-center rounded-control bg-primary px-10 font-bold text-white hover:bg-primary-hover"
                 >
                   이메일로 로그인
                 </Link>
@@ -65,25 +65,25 @@ export function ExistingAccountNotice({
               {availableLoginMethods.includes("KAKAO") ? (
                 <a
                   href="/api/auth/kakao/start"
-                  className="inline-flex h-12 items-center justify-center rounded-control bg-[#FEE500] px-10 font-semibold text-ink transition hover:brightness-95 active:brightness-90"
+                  className="inline-flex h-12 w-[230px] items-center justify-center rounded-control bg-[#ffee52] px-10 font-semibold text-ink transition hover:brightness-95 active:brightness-90"
                 >
                   카카오로 로그인
                 </a>
               ) : null}
-              {passwordResetAvailable ? (
-                <Link
-                  href="/password/forgot"
-                  className="inline-flex h-12 items-center justify-center rounded-control border border-line px-10 font-medium text-ink-2 clickable-control"
-                >
-                  비밀번호 찾기
-                </Link>
-              ) : null}
             </>
           ) : null}
-          <Button variant="cancel" onClick={onBack}>
+          <Button variant="cancel" isWide onClick={onBack}>
             가입 화면으로 돌아가기
           </Button>
         </div>
+        {existingAccountFound && passwordResetAvailable ? (
+          <p className="text-caption text-ink-2">
+            비밀번호를 잊으셨나요?{" "}
+            <Link href="/password/forgot" className="text-primary underline">
+              비밀번호 찾기
+            </Link>
+          </p>
+        ) : null}
       </div>
     </AuthFrame>
   );

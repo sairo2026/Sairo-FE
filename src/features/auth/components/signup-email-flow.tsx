@@ -28,7 +28,7 @@ import {
   validatePasswordInput,
 } from "../model/password-policy";
 import { clearSignupDraft, saveSignupDraft, useSignupDraft } from "../model/signup-draft";
-import { AuthFrame, FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
+import { AuthFrame, FormAlert } from "@/shared/components/feedback/form-frame";
 import { ExistingAccountNotice } from "./existing-account-notice";
 import { PHONE_PATTERN, PhoneVerificationField } from "./phone-verification-field";
 import {
@@ -306,7 +306,7 @@ export function SignupEmailFlow({ token }: { token?: string }) {
 
   return (
     <>
-      <AuthFrame title={step === "info" ? "기본 가입 정보 입력" : "비밀번호 설정"}>
+      <AuthFrame variant="form" title={step === "info" ? "기본 가입 정보 입력" : "비밀번호 설정"}>
         {tokenState === "failed" ? (
           <div className="mb-4">
             <FormAlert>{tokenMessage}</FormAlert>
@@ -315,7 +315,7 @@ export function SignupEmailFlow({ token }: { token?: string }) {
         {step === "info" ? (
           <form
             noValidate
-            className="flex flex-col gap-6"
+            className="flex flex-col gap-7"
             onSubmit={(event) => {
               event.preventDefault();
               goToPassword();
@@ -401,7 +401,7 @@ export function SignupEmailFlow({ token }: { token?: string }) {
             />
             <CollectionNoticeTable />
             {submitError ? <FormAlert>{submitError}</FormAlert> : null}
-            <div className="flex justify-center gap-3">
+            <div className="mt-4 flex justify-center gap-4">
               <Link
                 href="/login"
                 className="inline-flex h-12 min-w-[120px] items-center justify-center rounded-control bg-primary-soft px-10 font-medium text-ink-2 hover:bg-primary-line"
@@ -414,15 +414,19 @@ export function SignupEmailFlow({ token }: { token?: string }) {
         ) : (
           <form
             noValidate
-            className="flex flex-col gap-5"
+            className="flex flex-col gap-7"
             onSubmit={(event) => {
               event.preventDefault();
               void submit();
             }}
           >
-            <FormNotice>
-              비밀번호는 8자 이상 12자 이하로 만들어 주세요. 공백도 사용할 수 있습니다.
-            </FormNotice>
+            <TextField
+              label="이메일 주소"
+              value={email}
+              onValueChange={() => {}}
+              readOnly
+              autoComplete="email"
+            />
             <TextField
               label="비밀번호"
               kind="password"
@@ -432,8 +436,10 @@ export function SignupEmailFlow({ token }: { token?: string }) {
                 setPasswordError(undefined);
               }}
               autoComplete="new-password"
+              placeholder="8~12자 이내의 비밀번호를 입력해 주세요."
               error={passwordError}
               statusText={password ? `강도 ${PASSWORD_STRENGTH_LABEL[strength]}` : undefined}
+              hint="8자 이상 12자 이하로 만들어 주세요. 공백도 사용할 수 있습니다."
               required
             />
             <TextField
@@ -445,11 +451,12 @@ export function SignupEmailFlow({ token }: { token?: string }) {
                 setConfirmError(undefined);
               }}
               autoComplete="new-password"
+              placeholder="설정한 비밀번호를 다시 입력해 주세요."
               error={confirmError}
               required
             />
             {submitError ? <FormAlert>{submitError}</FormAlert> : null}
-            <div className="flex justify-center gap-3">
+            <div className="mt-4 flex justify-center gap-4">
               <Button variant="cancel" onClick={() => setStep("info")}>
                 이전
               </Button>

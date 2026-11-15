@@ -6,9 +6,10 @@ import type { ExportListResponse } from "@/lib/api/contracts/migration.schema";
 import { ErrorScreen } from "@/shared/components/feedback/error-screen";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
-import { StatusBadge, TextLink } from "@/shared/components/feedback/page-parts";
+import { StatusBadge } from "@/shared/components/feedback/page-parts";
 import { Button } from "@/shared/components/ui/button";
-import { Card } from "@/shared/components/ui/card";
+import { FieldLabel } from "@/shared/components/ui/field-label";
+import { SecondaryLink } from "@/shared/components/ui/secondary-link";
 import { DataTable } from "@/shared/components/ui/data-table";
 import type { PageSize } from "@/shared/components/ui/data-table";
 import { PageHeader } from "@/shared/components/ui/page-header";
@@ -138,7 +139,10 @@ function CreateForm({
 
   const noTables = tables.length === 0;
   return (
-    <Card title={COPY.createTitle}>
+    <section aria-labelledby="export-section-1" className="flex flex-col gap-4">
+      <h2 id="export-section-1" className="text-h2 font-semibold text-ink">
+        {COPY.createTitle}
+      </h2>
       <div className="flex flex-col gap-5">
         {isOwner ? (
           <RadioGroup
@@ -157,9 +161,7 @@ function CreateForm({
             <FormNotice>{COPY.noAllowedTables}</FormNotice>
           ) : (
             <fieldset className="min-w-0 flex flex-col gap-2">
-              <legend className="mb-2 text-caption font-semibold text-ink">
-                {COPY.tablesLabel}
-              </legend>
+              <FieldLabel as="legend">{COPY.tablesLabel}</FieldLabel>
               <div className="flex flex-wrap gap-4">
                 {tables.map((table) => (
                   <Checkbox
@@ -189,7 +191,7 @@ function CreateForm({
           </Button>
         </div>
       </div>
-    </Card>
+    </section>
   );
 }
 
@@ -223,7 +225,10 @@ function PolicyPanel({ tables }: { tables: ExportAllowedTablesResponse["tables"]
   });
 
   return (
-    <Card title={COPY.policyTitle}>
+    <section aria-labelledby="export-section-2" className="flex flex-col gap-4">
+      <h2 id="export-section-2" className="text-h2 font-semibold text-ink">
+        {COPY.policyTitle}
+      </h2>
       <div className="flex flex-col gap-4">
         <p className="text-caption text-ink-2">{COPY.policyIntro}</p>
         <div className="flex flex-wrap gap-4">
@@ -259,7 +264,7 @@ function PolicyPanel({ tables }: { tables: ExportAllowedTablesResponse["tables"]
           </Button>
         </div>
       </div>
-    </Card>
+    </section>
   );
 }
 
@@ -268,7 +273,10 @@ function History({ onSelect }: { onSelect: (exportId: number) => void }) {
   const [size, setSize] = useState<PageSize>(25);
   const query = useExports({ page: page - 1, size });
   return (
-    <Card title={COPY.historyTitle}>
+    <section aria-labelledby="export-section-3" className="flex flex-col gap-4">
+      <h2 id="export-section-3" className="text-h2 font-semibold text-ink">
+        {COPY.historyTitle}
+      </h2>
       <p className="mb-3 text-caption text-ink-2">{COPY.historyNote}</p>
       <DataTable<Row>
         caption={COPY.historyTitle}
@@ -322,7 +330,7 @@ function History({ onSelect }: { onSelect: (exportId: number) => void }) {
           },
         ]}
       />
-    </Card>
+    </section>
   );
 }
 
@@ -344,16 +352,19 @@ export function ExportsScreen() {
       <PageHeader
         title={COPY.title}
         description={COPY.description}
-        actions={<TextLink href="/billing/return-guide">자료 반환 안내</TextLink>}
+        actions={<SecondaryLink href="/billing/return-guide">자료 반환 안내</SecondaryLink>}
       />
       <DataExportNotice />
       <QueryGate query={tables} loadingLabel="내보낼 수 있는 표를 불러오는 중입니다.">
         {(data) => <CreateForm tables={data.tables} isOwner={isOwner} onCreated={setExportId} />}
       </QueryGate>
       {exportId !== null ? (
-        <Card title="내보내기 진행">
+        <section aria-labelledby="export-section-4" className="flex flex-col gap-4">
+          <h2 id="export-section-4" className="text-h2 font-semibold text-ink">
+            {"내보내기 진행"}
+          </h2>
           <ExportStatusPanel exportId={exportId} />
-        </Card>
+        </section>
       ) : null}
       {isOwner && tables.data ? <PolicyPanel tables={tables.data.tables} /> : null}
       <History onSelect={selectExport} />

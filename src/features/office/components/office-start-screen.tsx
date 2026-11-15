@@ -38,7 +38,7 @@ export function OfficeStartScreen() {
         const isBlocked = hasRegistration || hasMembership || hasOffice;
 
         return (
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-11">
             {hasRegistration ? (
               <div
                 role="status"
@@ -73,7 +73,7 @@ export function OfficeStartScreen() {
             <div
               role="radiogroup"
               aria-label="사무소 시작 방법"
-              className="grid grid-cols-1 gap-4 sm:grid-cols-2"
+              className="flex flex-wrap justify-center gap-[52px]"
             >
               {CHOICES.map((item) => {
                 const selected = choice === item.key;
@@ -81,13 +81,14 @@ export function OfficeStartScreen() {
                   <SelectableCard
                     key={item.key}
                     selectionRole="radio"
+                    variant="outline-card"
                     isSelected={selected}
                     disabled={isBlocked}
                     onClick={() => setChoice(item.key)}
-                    className="flex min-h-48 flex-col items-center justify-between gap-6 rounded-card-flat px-4 py-6 text-center"
+                    className="flex h-[312px] w-[260px] flex-col items-center justify-between rounded-card-flat px-4 pt-9 pb-9 text-center"
                   >
-                    <span className="text-h2 font-semibold text-primary">{item.title}</span>
-                    <span className="text-caption text-ink-2">{item.description}</span>
+                    <span className="text-h3 font-semibold">{item.title}</span>
+                    <span className="w-[179px] text-body font-medium">{item.description}</span>
                   </SelectableCard>
                 );
               })}

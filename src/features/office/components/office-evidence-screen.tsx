@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useId, useRef, useState } from "react";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { Button } from "@/shared/components/ui/button";
+import { FieldLabel } from "@/shared/components/ui/field-label";
 import { RadioGroup } from "@/shared/components/ui/select-field";
 import { cn } from "@/shared/lib/cn";
 import { submitEvidence } from "../api/office.api";
@@ -20,6 +21,26 @@ import { EVIDENCE_NOTICE_COPY } from "../model/legal-copy";
 function formatSize(bytes: number): string {
   if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
   return `${Math.max(1, Math.round(bytes / 1024))}KB`;
+}
+
+function FolderUploadIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="shrink-0 text-ink-2"
+    >
+      <path d="M4 7a1 1 0 0 1 1-1h4.5l2 2.5H19a1 1 0 0 1 1 1V18a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7Z" />
+      <path d="M12 16v-5m0 0-2 2m2-2 2 2" />
+    </svg>
+  );
 }
 
 function EvidenceFileField({
@@ -40,33 +61,29 @@ function EvidenceFileField({
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   return (
-    <div className="flex flex-col gap-2">
-      <label htmlFor={inputId} className="text-caption font-semibold text-ink">
-        {label}
-      </label>
-      <div
-        className={cn(
-          "relative flex h-14 items-center justify-between gap-2 rounded-control border bg-surface px-4",
-          error ? "border-danger" : "border-line",
-        )}
-      >
-        <span
-          className={cn(
-            "min-w-0 flex-1 truncate text-body",
-            file ? "font-medium text-ink" : "text-ink-3",
-          )}
-        >
-          {file ? `${file.name} (${formatSize(file.size)})` : "컴퓨터에서 파일 선택"}
-        </span>
-        <Button
-          variant="outlined"
-          size="sm"
+    <div className="flex flex-col gap-5">
+      <FieldLabel htmlFor={inputId}>{label}</FieldLabel>
+      <div className="relative">
+        <button
+          type="button"
           disabled={disabled}
           onClick={() => inputRef.current?.click()}
           aria-label={`${label} 파일 선택`}
+          className={cn(
+            "flex h-[58px] w-full items-center gap-4 rounded-control border bg-surface px-5 text-left text-body disabled:cursor-not-allowed",
+            error ? "border-danger" : "border-line",
+          )}
         >
-          {file ? "변경" : "선택"}
-        </Button>
+          <span
+            className={cn(
+              "min-w-0 flex-1 truncate",
+              file ? "font-medium text-primary" : "font-normal text-ink-3",
+            )}
+          >
+            {file ? file.name : "컴퓨터에서 파일 선택"}
+          </span>
+          <FolderUploadIcon />
+        </button>
         <input
           ref={inputRef}
           id={inputId}
@@ -78,13 +95,14 @@ function EvidenceFileField({
           onChange={(event) => onSelect(event.target.files?.[0])}
         />
       </div>
+      <p className="sr-only">
+        {file ? `선택됨 ${formatSize(file.size)}` : "아직 선택하지 않았습니다."}
+      </p>
       {error ? (
         <p role="alert" className="text-caption text-danger">
           {error}
         </p>
-      ) : (
-        <p className="text-caption text-ink-3">{file ? "선택됨" : "아직 선택하지 않았습니다."}</p>
-      )}
+      ) : null}
     </div>
   );
 }
@@ -184,55 +202,50 @@ export function OfficeEvidenceScreen({
   }
 
   return (
-    <FlowFrame
-      title="신규 사무소 등록을 위한 증빙 자료를 업로드해 주십시오."
-      description="PDF, JPG, PNG 파일을 한 장당 최대 10MB까지 올릴 수 있습니다."
-    >
+    <FlowFrame title="신규 사무소 등록을 위한 증빙 자료를 업로드해 주십시오.">
       <form
         noValidate
-        className="flex flex-col gap-5"
+        className="flex flex-col gap-11"
         onSubmit={(event) => {
           event.preventDefault();
           submit();
         }}
       >
-        <MutedNote>{EVIDENCE_NOTICE_COPY.masking}</MutedNote>
-        <MutedNote>{EVIDENCE_NOTICE_COPY.retention}</MutedNote>
-        {warning === "DUPLICATE_BUSINESS_NUMBER" ? (
-          <FormNotice>
-            같은 사업자등록번호의 사무소가 이미 있습니다. 신청은 계속 진행되며 운영자가 확인합니다.
-          </FormNotice>
-        ) : null}
-        <RadioGroup
-          legend="신청 유형"
-          name="evidenceEntityType"
-          value={entityType}
-          options={(Object.keys(ENTITY_TYPE_LABEL) as EntityType[]).map((value) => ({
-            value,
-            label: ENTITY_TYPE_LABEL[value],
-          }))}
-          onValueChange={(next) => setEntityType(next as EntityType)}
-        />
-        {requiredEvidenceTypes(entityType).map((item) => (
-          <EvidenceFileField
-            key={item.type}
-            type={item.type}
-            label={item.label}
-            file={files[item.type]}
-            error={errors[item.type]}
-            disabled={mutation.isPending}
-            onSelect={(file) => select(item.type, file)}
+        <div className="flex flex-col gap-7">
+          {requiredEvidenceTypes(entityType).map((item) => (
+            <EvidenceFileField
+              key={item.type}
+              type={item.type}
+              label={item.label}
+              file={files[item.type]}
+              error={errors[item.type]}
+              disabled={mutation.isPending}
+              onSelect={(file) => select(item.type, file)}
+            />
+          ))}
+          <RadioGroup
+            legend="신청 유형"
+            name="evidenceEntityType"
+            value={entityType}
+            options={(Object.keys(ENTITY_TYPE_LABEL) as EntityType[]).map((value) => ({
+              value,
+              label: ENTITY_TYPE_LABEL[value],
+            }))}
+            onValueChange={(next) => setEntityType(next as EntityType)}
           />
-        ))}
-        {entityType === "CORPORATION" ? (
-          <MutedNote>법인 신청은 대표권한과 등록관계 확인자료도 모두 올려야 합니다.</MutedNote>
-        ) : null}
-        {formError ? (
-          <div className="flex flex-col gap-2">
-            <FormAlert>{formError}</FormAlert>
-            {reviewLink ? <TextLink href="/office/review">심사 상태 확인하기</TextLink> : null}
-          </div>
-        ) : null}
+          {warning === "DUPLICATE_BUSINESS_NUMBER" ? (
+            <FormNotice>
+              같은 사업자등록번호의 사무소가 이미 있습니다. 신청은 계속 진행되며 운영자가
+              확인합니다.
+            </FormNotice>
+          ) : null}
+          {formError ? (
+            <div className="flex flex-col gap-2">
+              <FormAlert>{formError}</FormAlert>
+              {reviewLink ? <TextLink href="/office/review">심사 상태 확인하기</TextLink> : null}
+            </div>
+          ) : null}
+        </div>
         <ButtonRow>
           <Button variant="cancel" onClick={() => router.push("/office/review")}>
             나중에 하기
@@ -241,6 +254,14 @@ export function OfficeEvidenceScreen({
             등록
           </Button>
         </ButtonRow>
+        <div className="flex flex-col gap-2">
+          <MutedNote>PDF, JPG, PNG 파일을 한 장당 최대 10MB까지 올릴 수 있습니다.</MutedNote>
+          <MutedNote>{EVIDENCE_NOTICE_COPY.masking}</MutedNote>
+          <MutedNote>{EVIDENCE_NOTICE_COPY.retention}</MutedNote>
+          {entityType === "CORPORATION" ? (
+            <MutedNote>법인 신청은 대표권한과 등록관계 확인자료도 모두 올려야 합니다.</MutedNote>
+          ) : null}
+        </div>
       </form>
     </FlowFrame>
   );

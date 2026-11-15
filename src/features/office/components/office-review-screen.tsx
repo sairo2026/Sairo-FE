@@ -100,6 +100,39 @@ function StatusBody({ registration }: { registration: OfficeRegistrationStatusRe
 
   const isRejectedOpen = status === "REJECTED" && registration.resolved !== true;
 
+  const cancelDialog = (
+    <ConfirmDialog
+      isOpen={confirmingCancel}
+      title="신청을 철회할까요"
+      message="철회하면 지금까지 올린 서류로는 심사를 이어갈 수 없고 새로 신청해야 합니다."
+      confirmLabel="철회"
+      isPending={cancelMutation.isPending}
+      onConfirm={() => cancelMutation.mutate()}
+      onCancel={() => setConfirmingCancel(false)}
+    />
+  );
+
+  if (status === "PENDING_REVIEW") {
+    return (
+      <div className="flex flex-col gap-11">
+        <ButtonRow>
+          <Button onClick={() => router.push("/access")}>확인</Button>
+        </ButtonRow>
+        <div className="flex flex-col items-center gap-3 text-center">
+          <MutedNote>{headline[status]}</MutedNote>
+          <MutedNote>{REVIEW_TARGET_NOTE}</MutedNote>
+          <MutedNote>{REREVIEW_NOTE}</MutedNote>
+          {notice ? <FormNotice>{notice}</FormNotice> : null}
+          {error ? <FormAlert>{error}</FormAlert> : null}
+          <Button variant="ghost" size="sm" onClick={() => setConfirmingCancel(true)}>
+            신청 철회
+          </Button>
+        </div>
+        {cancelDialog}
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center gap-3">
@@ -120,12 +153,10 @@ function StatusBody({ registration }: { registration: OfficeRegistrationStatusRe
       ) : null}
       {status === "REJECTED" ? <MutedNote>{REVIEW_STATUS_COPY.rejectedTail}</MutedNote> : null}
       {status === "REVOKED" ? <MutedNote>{REVIEW_STATUS_COPY.revokedTail}</MutedNote> : null}
-      {status === "PENDING_REVIEW" || status === "DRAFT" || status === "SUPPLEMENT_REQUESTED" ? (
+      {status === "DRAFT" || status === "SUPPLEMENT_REQUESTED" ? (
         <MutedNote>{REVIEW_TARGET_NOTE}</MutedNote>
       ) : null}
-      {status === "APPROVED" || status === "PENDING_REVIEW" ? (
-        <MutedNote>{REREVIEW_NOTE}</MutedNote>
-      ) : null}
+      {status === "APPROVED" ? <MutedNote>{REREVIEW_NOTE}</MutedNote> : null}
 
       {notice ? <FormNotice>{notice}</FormNotice> : null}
       {error ? <FormAlert>{error}</FormAlert> : null}
@@ -157,23 +188,18 @@ function StatusBody({ registration }: { registration: OfficeRegistrationStatusRe
         ) : null}
       </ButtonRow>
 
-      <ConfirmDialog
-        isOpen={confirmingCancel}
-        title="신청을 철회할까요"
-        message="철회하면 지금까지 올린 서류로는 심사를 이어갈 수 없고 새로 신청해야 합니다."
-        confirmLabel="철회"
-        isPending={cancelMutation.isPending}
-        onConfirm={() => cancelMutation.mutate()}
-        onCancel={() => setConfirmingCancel(false)}
-      />
+      {cancelDialog}
     </div>
   );
 }
 
 export function OfficeReviewScreen() {
   const query = useLatestRegistration();
+  const isPendingReview = query.data?.status === "PENDING_REVIEW";
   return (
-    <FlowFrame title="사무소 인증 심사 상태">
+    <FlowFrame
+      title={isPendingReview ? "신규 사무소 등록 심사 진행 중입니다." : "사무소 인증 심사 상태"}
+    >
       <QueryGate query={query} loadingLabel="심사 상태를 불러오는 중입니다.">
         {(registration) =>
           registration === null ? (

@@ -22,6 +22,8 @@ export type DataTableColumn<Row> = {
   render: (row: Row) => ReactNode;
   isSortable?: boolean;
   className?: string;
+  /** 열 폭 클래스. 머리글과 칸에 함께 적용한다. */
+  widthClass?: string;
   /** 숫자·금액 열은 오른쪽 정렬과 같은 폭 숫자를 쓴다. */
   align?: "left" | "right";
   /** 한 줄로 줄이고 넘치는 글은 말줄임으로 표시하며 전체 글은 title로 보여준다. */
@@ -107,10 +109,7 @@ export function DataTable<Row>({
   return (
     <div className="flex flex-col gap-4" aria-busy={isLoading || undefined}>
       <div ref={holderRef} style={isLoading && heldHeight ? { minHeight: heldHeight } : undefined}>
-        <TableScroll
-          label={caption}
-          className="max-h-[70vh] rounded-card-flat border border-line bg-white"
-        >
+        <TableScroll label={caption} className="max-h-[70vh] bg-white">
           <table
             className={cn(
               "w-full border-collapse text-left",
@@ -126,7 +125,8 @@ export function DataTable<Row>({
                     scope="col"
                     aria-sort={column.isSortable ? ariaSort(column.key) : undefined}
                     className={cn(
-                      "sticky top-0 z-20 border-b border-line bg-surface px-4 py-3.5 text-caption font-semibold text-ink-2",
+                      "sticky top-0 z-20 h-[60px] border-b border-brand-border bg-white py-0 pr-5 text-body font-bold text-ink",
+                      column.widthClass,
                       column.align === "right" && "text-right",
                     )}
                   >
@@ -155,7 +155,7 @@ export function DataTable<Row>({
                   ? Array.from({ length: 5 }, (_, index) => (
                       <tr key={`loading-${index}`} aria-hidden="true">
                         {columns.map((column) => (
-                          <td key={column.key} className="px-4 py-4">
+                          <td key={column.key} className="py-4 pr-5">
                             <span className="block h-4 animate-pulse rounded-small bg-surface" />
                           </td>
                         ))}
@@ -167,7 +167,7 @@ export function DataTable<Row>({
                         <tr
                           key={getRowId(row)}
                           className={cn(
-                            "border-b border-line last:border-b-0",
+                            "border-b border-primary-line last:border-b-0",
                             href && "clickable-table-row group relative",
                           )}
                         >
@@ -175,7 +175,8 @@ export function DataTable<Row>({
                             <td
                               key={column.key}
                               className={cn(
-                                "px-4 py-4 text-body text-ink",
+                                "h-[72px] py-0 pr-5 text-body leading-none font-medium text-ink",
+                                column.widthClass,
                                 column.align === "right" && "text-right tabular-nums",
                                 column.className,
                               )}

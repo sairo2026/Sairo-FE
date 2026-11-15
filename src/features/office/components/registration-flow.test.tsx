@@ -89,7 +89,12 @@ describe("사무소 생성/참여 선택", () => {
   });
 });
 
-async function fillLookup(user: ReturnType<typeof userEvent.setup>, license = "11110-2026-00002") {
+async function fillLookup(
+  user: ReturnType<typeof userEvent.setup>,
+  license = "11110-2026-00002",
+  businessNumber = "1234567890",
+) {
+  await user.type(screen.getByLabelText("사업자등록번호"), businessNumber);
   await user.type(screen.getByLabelText("등록관청"), "서울특별시 종로구");
   await user.type(screen.getByLabelText("개설등록번호"), license);
   await user.click(screen.getByRole("button", { name: "다음" }));
@@ -97,16 +102,12 @@ async function fillLookup(user: ReturnType<typeof userEvent.setup>, license = "1
 
 async function fillDetails(
   user: ReturnType<typeof userEvent.setup>,
-  overrides: { officeName?: string; businessNumber?: string; address?: string } = {},
+  overrides: { officeName?: string; address?: string } = {},
 ) {
   await user.type(screen.getByLabelText("사무소명"), overrides.officeName ?? "새사무소");
   await user.type(screen.getByLabelText("사무소 대표자명"), "김대표");
   await user.type(screen.getByLabelText("사무소 대표 연락처"), "01011112222");
   await user.type(screen.getByLabelText("중개사무소 주소"), overrides.address ?? "서울시 종로구 1");
-  await user.type(
-    screen.getByLabelText("사업자등록번호"),
-    overrides.businessNumber ?? "1234567890",
-  );
   await user.selectOptions(screen.getByLabelText("신청자의 등록관계"), "대표 본인");
 }
 
@@ -117,6 +118,16 @@ describe("사무소 등록 신청", () => {
     await user.click(screen.getByRole("button", { name: "다음" }));
     expect(screen.getByText("등록관청을 입력해 주세요.")).not.toBeNull();
     expect(screen.getByText("개설등록번호를 입력해 주세요.")).not.toBeNull();
+    expect(screen.getByText("사업자등록번호 10자리를 입력해 주세요.")).not.toBeNull();
+  });
+
+  it("사업자등록번호는 등록번호 단계에서 하이픈 형식으로 받는다", async () => {
+    const user = userEvent.setup();
+    renderOffice(<OfficeRegistrationForm />);
+    await user.type(screen.getByLabelText("사업자등록번호"), "1234567890");
+    expect((screen.getByLabelText("사업자등록번호") as HTMLInputElement).value).toBe(
+      "123-45-67890",
+    );
   });
 
   it("이미 등록된 사무소면 신규 등록을 막고 참여 화면으로 안내한다", async () => {
@@ -157,7 +168,6 @@ describe("사무소 등록 신청", () => {
     await screen.findByLabelText("사무소명");
     await user.click(screen.getByRole("button", { name: "다음" }));
     expect(screen.getByText("사무소명을 입력해 주세요.")).not.toBeNull();
-    expect(screen.getByText("사업자등록번호 10자리를 입력해 주세요.")).not.toBeNull();
     expect(screen.getByText("연락처를 010-0000-0000 형식으로 입력해 주세요.")).not.toBeNull();
     expect(screen.getByText("신청자의 등록관계를 선택해 주세요.")).not.toBeNull();
   });
@@ -168,9 +178,6 @@ describe("사무소 등록 신청", () => {
     await fillLookup(user);
     await screen.findByLabelText("사무소명");
     await fillDetails(user);
-    expect((screen.getByLabelText("사업자등록번호") as HTMLInputElement).value).toBe(
-      "123-45-67890",
-    );
     expect((screen.getByLabelText("사무소 대표 연락처") as HTMLInputElement).value).toBe(
       "010-1111-2222",
     );
@@ -185,9 +192,9 @@ describe("사무소 등록 신청", () => {
   it("사업자번호가 겹치면 경고 값을 증빙 화면에 넘긴다", async () => {
     const user = userEvent.setup();
     renderOffice(<OfficeRegistrationForm />);
-    await fillLookup(user);
+    await fillLookup(user, undefined, "1111111111");
     await screen.findByLabelText("사무소명");
-    await fillDetails(user, { businessNumber: "1111111111" });
+    await fillDetails(user);
     await user.click(screen.getByRole("button", { name: "다음" }));
     await waitFor(() =>
       expect(navigation.push.mock.calls[0]?.[0]).toContain("warning=DUPLICATE_BUSINESS_NUMBER"),
@@ -271,6 +278,17 @@ describe("증빙 업로드", () => {
     expect(screen.queryByLabelText("법인 대표권한 확인자료")).toBeNull();
     await user.click(screen.getByRole("button", { name: "등록" }));
     expect(screen.getAllByText("파일을 선택해 주세요.")).toHaveLength(3);
+  });
+
+  it("선택한 파일 이름을 칸에 보여주고 선택 상태를 보조기기에 알린다", async () => {
+    const user = userEvent.setup();
+    renderOffice(<OfficeEvidenceScreen registrationId={31} entity="INDIVIDUAL" />);
+    expect(screen.getAllByText("컴퓨터에서 파일 선택")).toHaveLength(3);
+    expect(screen.getAllByText("아직 선택하지 않았습니다.")).toHaveLength(3);
+    await user.upload(screen.getByLabelText("중개사무소 개설등록증"), pngFile("a.png"));
+    expect(screen.getByText("a.png")).not.toBeNull();
+    expect(screen.getAllByText("아직 선택하지 않았습니다.")).toHaveLength(2);
+    expect(screen.getByText(/^선택됨/)).not.toBeNull();
   });
 
   it("법인 신청이면 두 종류를 더 받는다", async () => {
@@ -429,6 +447,25 @@ describe("심사 상태", () => {
       await screen.findByText(/접수 후 2영업일 안에 결과를 안내하는 것을 목표로 합니다/),
     ).not.toBeNull();
     expect(screen.getByText(/재심사하거나 인증이 회수될 수 있습니다/)).not.toBeNull();
+  });
+
+  it("심사 중에는 상태 배지 없이 확인 버튼으로 접근 안내에 돌아간다", async () => {
+    setMockOfficeState({
+      registration: {
+        registrationId: 31,
+        status: "PENDING_REVIEW",
+        currentRevisionNo: 1,
+        entityType: "INDIVIDUAL",
+      },
+    });
+    const user = userEvent.setup();
+    renderOffice(<OfficeReviewScreen />);
+    expect(
+      await screen.findByRole("heading", { name: "신규 사무소 등록 심사 진행 중입니다." }),
+    ).not.toBeNull();
+    expect(screen.queryByText("심사 중")).toBeNull();
+    await user.click(screen.getByRole("button", { name: "확인" }));
+    expect(navigation.push).toHaveBeenCalledWith("/access");
   });
 
   it("보완 요청이면 사유와 기한과 재제출 버튼을 보여준다", async () => {

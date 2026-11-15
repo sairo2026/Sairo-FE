@@ -5,11 +5,11 @@ import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { ErrorScreen } from "@/shared/components/feedback/error-screen";
 import { Badge } from "@/shared/components/ui/badge";
-import { Checkbox } from "@/shared/components/ui/select-field";
+import { CreateLink } from "@/shared/components/ui/create-link";
+import { Toggle } from "@/shared/components/ui/select-field";
 import { DataTable } from "@/shared/components/ui/data-table";
 import type { PageSize } from "@/shared/components/ui/data-table";
 import { PageHeader } from "@/shared/components/ui/page-header";
-import { SearchField } from "@/shared/components/ui/search-field";
 import { Tabs } from "@/shared/components/ui/tabs";
 import { formatSeoulDate } from "@/shared/lib/format";
 import { ApiError } from "@/shared/api/client";
@@ -70,30 +70,61 @@ function ContractTable({ tab }: { tab: string }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-        <SearchField
-          label="당사자 이름"
-          placeholder="당사자 이름"
-          value={partyName}
-          onValueChange={setPartyName}
-          onSearch={search}
-        />
-        <SearchField
-          label="매물 주소"
-          placeholder="매물 주소"
-          value={propertyAddress}
-          onValueChange={setPropertyAddress}
-          onSearch={search}
-        />
+      <div className="flex flex-wrap items-center gap-6">
+        <CreateLink href="/contracts/new">계약 등록</CreateLink>
+        <form
+          role="search"
+          onSubmit={(event) => {
+            event.preventDefault();
+            search();
+          }}
+          className="flex h-[58px] min-w-[260px] max-w-[856px] flex-1 items-center gap-4 rounded-control border border-line bg-surface px-5 focus-within:border-primary focus-within:bg-white"
+        >
+          <label htmlFor="contract-party-search" className="sr-only">
+            당사자 이름
+          </label>
+          <input
+            id="contract-party-search"
+            type="search"
+            value={partyName}
+            placeholder="당사자 이름"
+            maxLength={100}
+            onChange={(event) => setPartyName(event.target.value)}
+            className="min-w-0 flex-1 bg-transparent text-body font-medium text-ink outline-none placeholder:font-normal placeholder:text-ink-3"
+          />
+          <label htmlFor="contract-address-search" className="sr-only">
+            매물 주소
+          </label>
+          <input
+            id="contract-address-search"
+            type="search"
+            value={propertyAddress}
+            placeholder="매물 주소"
+            maxLength={100}
+            onChange={(event) => setPropertyAddress(event.target.value)}
+            className="min-w-0 flex-1 bg-transparent text-body font-medium text-ink outline-none placeholder:font-normal placeholder:text-ink-3"
+          />
+          <button
+            type="submit"
+            className="h-9 w-14 shrink-0 rounded-small bg-primary text-caption font-semibold text-white hover:bg-primary-hover"
+          >
+            검색
+          </button>
+        </form>
       </div>
-      <Checkbox
-        label="중복 제외 포함"
-        checked={includeExcluded}
-        onCheckedChange={(next) => {
-          setIncludeExcluded(next);
-          setPage(1);
-        }}
-      />
+      <div className="flex items-center gap-3">
+        <Toggle
+          label="중복 제외 포함"
+          checked={includeExcluded}
+          onCheckedChange={(next) => {
+            setIncludeExcluded(next);
+            setPage(1);
+          }}
+        />
+        <span aria-hidden="true" className="text-body font-medium text-ink">
+          중복 제외 포함
+        </span>
+      </div>
       <DataTable
         caption="계약 목록"
         rows={query.data?.items ?? []}
@@ -125,6 +156,7 @@ function ContractTable({ tab }: { tab: string }) {
           {
             key: "address",
             header: "매물 주소",
+            widthClass: "w-[300px]",
             render: (row) => (
               <span className="flex flex-col gap-1">
                 <Link
@@ -148,13 +180,15 @@ function ContractTable({ tab }: { tab: string }) {
           {
             key: "deal",
             header: "거래유형",
+            widthClass: "w-[96px]",
             render: (row) => labelOf(DEAL_TYPE_LABEL, row.dealType),
           },
           {
             key: "parties",
             header: "당사자",
+            widthClass: "w-[110px]",
             render: (row) => (
-              <span className="flex flex-col text-caption">
+              <span className="flex flex-col text-body">
                 <span>{partyText(row.sellerLandlordName, row.sellerLandlordPartyCount)}</span>
                 <span className="text-ink-2">
                   {partyText(row.buyerTenantName, row.buyerTenantPartyCount)}
@@ -165,22 +199,22 @@ function ContractTable({ tab }: { tab: string }) {
           {
             key: "signed",
             header: "체결일",
+            widthClass: "w-[120px]",
             render: (row) => (row.signedDate ? formatSeoulDate(row.signedDate) : "-"),
           },
           {
             key: "lease",
             header: "임대 만기일",
+            widthClass: "w-[120px]",
             render: (row) => (row.leaseEndDate ? formatSeoulDate(row.leaseEndDate) : "-"),
           },
           {
             key: "status",
             header: "상태",
+            widthClass: "w-[140px]",
             render: (row) => (
               <span className="flex flex-col items-start gap-1">
-                <Badge
-                  tone={CONTRACT_STATUS_TONE[row.contractStatus] ?? "gray"}
-                  className="h-7 min-w-0 px-3 text-caption"
-                >
+                <Badge tone={CONTRACT_STATUS_TONE[row.contractStatus] ?? "gray"}>
                   {labelOf(CONTRACT_STATUS_LABEL, row.contractStatus)}
                 </Badge>
                 {row.leasePeriodStatus ? (
@@ -214,14 +248,6 @@ export function ContractListScreen() {
       <PageHeader
         title="계약 관리"
         description="사무소의 계약을 한곳에서 봅니다. 서류가 빠진 계약은 경고로 표시합니다."
-        actions={
-          <Link
-            href="/contracts/new"
-            className="inline-flex h-12 items-center rounded-control bg-primary px-6 text-body font-bold text-white hover:bg-primary-hover"
-          >
-            + 계약 등록
-          </Link>
-        }
       />
       <Tabs
         label="계약 보기"

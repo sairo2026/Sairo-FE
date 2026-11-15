@@ -97,13 +97,21 @@ describe("사이트 기본 메타데이터", () => {
       expect(metadata.description).not.toMatch(EXAGGERATION);
       expect(metadata.robots).toEqual({ index: true, follow: true });
       expect(metadata.openGraph).toMatchObject({
+        type: "website",
+        url: `/${path}`,
+        siteName: "사이로(SAIRO)",
+        locale: "ko_KR",
         title: `${title} | 사이로`,
         description: metadata.description,
+        images: [{ url: "/brand/sairo-og.png", width: 1200, height: 630 }],
       });
       expect(metadata.twitter).toMatchObject({
+        card: "summary_large_image",
         title: `${title} | 사이로`,
         description: metadata.description,
+        images: ["/brand/sairo-og.png"],
       });
+      expect(metadata.alternates).toEqual({ canonical: `/${path}` });
     },
   );
 

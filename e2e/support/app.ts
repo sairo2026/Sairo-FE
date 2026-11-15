@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test";
 
-export type MockOfficeRole = "OWNER" | "AGENT" | "DEPUTY";
+export type MockOfficeRole = "OWNER" | "AGENT" | "DEPUTY" | "NEW";
 
 export const MOCK_ROLE_STORAGE_KEY = "sairo-mock-office-role";
 

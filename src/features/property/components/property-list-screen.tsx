@@ -2,14 +2,15 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import type { ReactNode } from "react";
 import { ApiError } from "@/shared/api/client";
 import { toErrorScreenKind } from "@/shared/api/error-kind";
 import { ErrorScreen } from "@/shared/components/feedback/error-screen";
 import { FormAlert } from "@/shared/components/feedback/form-frame";
 import { Badge, DDayTag } from "@/shared/components/ui/badge";
+import { CreateLink } from "@/shared/components/ui/create-link";
 import { DataTable } from "@/shared/components/ui/data-table";
 import type { PageSize } from "@/shared/components/ui/data-table";
+import { SecondaryLink } from "@/shared/components/ui/secondary-link";
 import { PageHeader } from "@/shared/components/ui/page-header";
 import { SearchField } from "@/shared/components/ui/search-field";
 import { SelectField } from "@/shared/components/ui/select-field";
@@ -102,17 +103,6 @@ function toParams(filters: Filters, page: number, size: number): PropertyListPar
   };
 }
 
-function SecondaryLink({ href, children }: { href: string; children: ReactNode }) {
-  return (
-    <Link
-      href={href}
-      className="inline-flex h-12 items-center justify-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 clickable-control"
-    >
-      {children}
-    </Link>
-  );
-}
-
 export function PropertyListScreen() {
   const [draft, setDraft] = useState<Filters>(EMPTY_FILTERS);
   const [applied, setApplied] = useState<Filters>(EMPTY_FILTERS);
@@ -162,10 +152,11 @@ export function PropertyListScreen() {
     {
       key: "name",
       header: "매물명",
+      widthClass: "w-[156px]",
       render: (row: Row) => (
         <Link
           href={`/properties/${row.propertyId}`}
-          className="font-semibold text-ink hover:text-primary hover:underline"
+          className="font-bold text-ink hover:text-primary hover:underline"
         >
           {row.name}
         </Link>
@@ -174,41 +165,43 @@ export function PropertyListScreen() {
     {
       key: "address",
       header: "주소",
+      widthClass: "w-[300px]",
       truncate: true,
       render: (row: Row) =>
         row.address ? `${row.address}${row.addressDetail ? ` ${row.addressDetail}` : ""}` : "-",
     },
     {
+      key: "owner",
+      header: "소유자",
+      widthClass: "w-16",
+      render: (row: Row) => joinNames(row.ownerNames),
+    },
+    {
+      key: "occupant",
+      header: "현재 점유자",
+      widthClass: "w-24",
+      render: (row: Row) => joinNames(row.occupantNames),
+    },
+    {
       key: "offers",
       header: "거래유형·가격",
+      widthClass: "w-[150px]",
       render: (row: Row) => {
         const lines = summarizeOffers(row);
         if (lines.length === 0) return <span className="text-ink-3">제안 없음</span>;
         return (
           <ul className="flex flex-col gap-1">
             {lines.map((line) => (
-              <li key={line} className="text-caption">
-                {line}
-              </li>
+              <li key={line}>{line}</li>
             ))}
           </ul>
         );
       },
     },
     {
-      key: "stage",
-      header: "상태",
-      render: (row: Row) => (
-        <Badge tone={toneOf(STAGE_TONE, row.registrationStage)}>
-          {labelOf(STAGE_LABEL, row.registrationStage)}
-        </Badge>
-      ),
-    },
-    { key: "owner", header: "소유자", render: (row: Row) => joinNames(row.ownerNames) },
-    { key: "occupant", header: "현재 점유자", render: (row: Row) => joinNames(row.occupantNames) },
-    {
       key: "lease",
       header: "임대 만기",
+      widthClass: "w-[120px]",
       render: (row: Row) => (
         <div className="flex flex-col items-start gap-1">
           <DDayTag daysLeft={daysUntil(row.leaseEndDate, now)} />
@@ -216,6 +209,16 @@ export function PropertyListScreen() {
             <span className="text-caption text-ink-2">참고 만기일</span>
           ) : null}
         </div>
+      ),
+    },
+    {
+      key: "stage",
+      header: "상태",
+      widthClass: "w-[120px]",
+      render: (row: Row) => (
+        <Badge tone={toneOf(STAGE_TONE, row.registrationStage)}>
+          {labelOf(STAGE_LABEL, row.registrationStage)}
+        </Badge>
       ),
     },
     { key: "category", header: "카테고리", render: (row: Row) => row.categoryName },
@@ -235,63 +238,23 @@ export function PropertyListScreen() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader
-        title="매물 관리"
-        description="등록된 매물을 관리할 수 있습니다."
-        actions={
-          <>
-            <SecondaryLink href="/properties/categories">카테고리 관리</SecondaryLink>
-            <Link
-              href="/properties/new"
-              className="inline-flex h-12 items-center justify-center rounded-control bg-primary px-6 text-body font-bold text-white hover:bg-primary-hover"
-            >
-              + 매물 등록
-            </Link>
-          </>
-        }
-      />
-      <SearchField
-        label="매물 검색"
-        placeholder="매물명, 주소, 연결 고객명으로 검색하세요."
-        value={draft.keyword}
-        onValueChange={(value) => update("keyword", value)}
-        onSearch={search}
-      />
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <PageHeader title="매물 관리" description="등록된 매물을 관리할 수 있습니다." />
+      <div className="flex flex-wrap items-center gap-6">
+        <CreateLink href="/properties/new">매물 등록</CreateLink>
+        <div className="min-w-[260px] max-w-[856px] flex-1">
+          <SearchField
+            label="매물 검색"
+            placeholder="매물명, 주소, 연결 고객명으로 검색하세요."
+            value={draft.keyword}
+            onValueChange={(value) => update("keyword", value)}
+            onSearch={search}
+          />
+        </div>
+        <SecondaryLink href="/properties/categories">카테고리 관리</SecondaryLink>
+      </div>
+      <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
         <SelectField
-          label="거래유형"
-          value={draft.dealType}
-          options={[
-            { value: "", label: "전체" },
-            ...DEAL_TYPES.map((value) => ({ value, label: DEAL_TYPE_LABEL[value] })),
-          ]}
-          onValueChange={(value) =>
-            changeImmediate("dealType", value, value === "" ? { priceMin: "", priceMax: "" } : {})
-          }
-        />
-        <SelectField
-          label="카테고리"
-          value={draft.categoryId}
-          options={[
-            { value: "", label: "전체" },
-            ...(categories.data?.items ?? []).map((item) => ({
-              value: String(item.categoryId),
-              label: item.active ? item.name : `${item.name} (비활성)`,
-            })),
-          ]}
-          onValueChange={(value) => changeImmediate("categoryId", value)}
-        />
-        <SelectField
-          label="등록 단계"
-          value={draft.registrationStage}
-          options={[
-            { value: "", label: "전체" },
-            { value: "DRAFT", label: STAGE_LABEL.DRAFT },
-            { value: "ACTIVE", label: STAGE_LABEL.ACTIVE },
-          ]}
-          onValueChange={(value) => changeImmediate("registrationStage", value)}
-        />
-        <SelectField
+          layout="inline"
           label="담당자"
           value={draft.managingMembershipId}
           options={[
@@ -304,54 +267,92 @@ export function PropertyListScreen() {
           onValueChange={(value) => changeImmediate("managingMembershipId", value)}
         />
         <SelectField
-          label="면적 종류"
-          value={draft.areaType}
+          layout="inline"
+          label="등록 단계"
+          value={draft.registrationStage}
           options={[
-            { value: "", label: "선택 안 함" },
-            ...AREA_TYPES.map((value) => ({ value, label: AREA_TYPE_LABEL[value] })),
+            { value: "", label: "전체" },
+            { value: "DRAFT", label: STAGE_LABEL.DRAFT },
+            { value: "ACTIVE", label: STAGE_LABEL.ACTIVE },
           ]}
-          onValueChange={(value) => update("areaType", value)}
+          onValueChange={(value) => changeImmediate("registrationStage", value)}
         />
-        <TextField
-          label="면적 하한(㎡)"
-          kind="number"
-          value={draft.areaMin}
-          onValueChange={(value) => update("areaMin", value)}
+        <SelectField
+          layout="inline"
+          label="거래유형"
+          value={draft.dealType}
+          options={[
+            { value: "", label: "전체" },
+            ...DEAL_TYPES.map((value) => ({ value, label: DEAL_TYPE_LABEL[value] })),
+          ]}
+          onValueChange={(value) =>
+            changeImmediate("dealType", value, value === "" ? { priceMin: "", priceMax: "" } : {})
+          }
         />
-        <TextField
-          label="면적 상한(㎡)"
-          kind="number"
-          value={draft.areaMax}
-          onValueChange={(value) => update("areaMax", value)}
+        <SelectField
+          layout="inline"
+          label="카테고리"
+          value={draft.categoryId}
+          options={[
+            { value: "", label: "전체" },
+            ...(categories.data?.items ?? []).map((item) => ({
+              value: String(item.categoryId),
+              label: item.active ? item.name : `${item.name} (비활성)`,
+            })),
+          ]}
+          onValueChange={(value) => changeImmediate("categoryId", value)}
         />
-        <div className="flex flex-col gap-2">
-          <div className="grid grid-cols-2 gap-2">
-            <TextField
-              label={`${priceBasisLabel(draft.dealType)} 하한(만원)`}
-              kind="number"
-              disabled={draft.dealType === ""}
-              value={draft.priceMin}
-              onValueChange={(value) => update("priceMin", value)}
-            />
-            <TextField
-              label={`${priceBasisLabel(draft.dealType)} 상한(만원)`}
-              kind="number"
-              disabled={draft.dealType === ""}
-              value={draft.priceMax}
-              onValueChange={(value) => update("priceMax", value)}
-            />
-          </div>
-          <p className="text-caption text-ink-2">{priceHint(draft.dealType)}</p>
-        </div>
-      </div>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3 text-body text-ink">
+        <div className="flex items-center gap-5 text-body font-semibold text-ink-2">
+          <span>보관된 매물만 보기</span>
           <Toggle
             label="보관된 매물만 보기"
             checked={draft.archived}
             onCheckedChange={(value) => changeImmediate("archived", value)}
           />
-          <span>보관된 매물만 보기</span>
+        </div>
+      </div>
+      <div className="flex flex-col gap-3 text-caption text-ink-2">
+        <div className="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2 lg:grid-cols-4">
+          <SelectField
+            label="면적 종류"
+            value={draft.areaType}
+            options={[
+              { value: "", label: "선택 안 함" },
+              ...AREA_TYPES.map((value) => ({ value, label: AREA_TYPE_LABEL[value] })),
+            ]}
+            onValueChange={(value) => update("areaType", value)}
+          />
+          <TextField
+            label="면적 하한(㎡)"
+            kind="number"
+            value={draft.areaMin}
+            onValueChange={(value) => update("areaMin", value)}
+          />
+          <TextField
+            label="면적 상한(㎡)"
+            kind="number"
+            value={draft.areaMax}
+            onValueChange={(value) => update("areaMax", value)}
+          />
+          <div className="flex flex-col gap-2">
+            <div className="grid grid-cols-2 gap-2">
+              <TextField
+                label={`${priceBasisLabel(draft.dealType)} 하한(만원)`}
+                kind="number"
+                disabled={draft.dealType === ""}
+                value={draft.priceMin}
+                onValueChange={(value) => update("priceMin", value)}
+              />
+              <TextField
+                label={`${priceBasisLabel(draft.dealType)} 상한(만원)`}
+                kind="number"
+                disabled={draft.dealType === ""}
+                value={draft.priceMax}
+                onValueChange={(value) => update("priceMax", value)}
+              />
+            </div>
+            <p>{priceHint(draft.dealType)}</p>
+          </div>
         </div>
         <div className="flex gap-2">
           <button

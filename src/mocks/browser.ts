@@ -11,6 +11,14 @@ function applyStoredRole(): void {
     if (role === "OWNER" || role === "AGENT" || role === "DEPUTY") {
       setMockAuthContext({ ...MOCK_ACTIVE_CONTEXT, role });
     }
+    if (role === "NEW") {
+      setMockAuthContext({
+        ...MOCK_ACTIVE_CONTEXT,
+        accessCondition: "PRE_VERIFICATION",
+        officeId: null,
+        role: null,
+      });
+    }
   } catch {
     return;
   }

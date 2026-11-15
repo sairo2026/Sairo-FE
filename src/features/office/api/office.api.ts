@@ -36,6 +36,7 @@ import {
   OwnerTransferWithdrawResponseSchema,
   ReapplicationStartResponseSchema,
 } from "@/lib/api/contracts/office.schema";
+import { MeResponseSchema } from "@/lib/api/contracts/auth.schema";
 import type {
   EmploymentRosterCreateRequest,
   EmploymentRosterUpdateRequest,
@@ -177,6 +178,11 @@ export function createMembership(officeId: number, request: MembershipCreateRequ
 
 export function fetchMyMembership() {
   return nullOn404(apiFetch("/api/memberships/me", { schema: MembershipStatusWireSchema }));
+}
+
+export async function fetchRequesterName() {
+  const me = await apiFetch("/api/me", { schema: MeResponseSchema, skipAuthEvents: true });
+  return me.displayName;
 }
 
 export function cancelMembership(membershipId: number) {

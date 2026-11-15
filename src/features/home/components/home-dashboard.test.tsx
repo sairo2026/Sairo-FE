@@ -46,7 +46,7 @@ describe("홈 대시보드", () => {
     expect(await screen.findByText("서울특별시 성북구 정릉로 77")).not.toBeNull();
     expect(screen.getByRole("button", { name: "업무 임장 안내 문자 확인 열기" })).not.toBeNull();
     expect(screen.getByRole("link", { name: "계약 만기 D-90 2건" })).not.toBeNull();
-    expect(screen.getByRole("link", { name: "오늘 임장 목록 1건" })).not.toBeNull();
+    expect(screen.getByRole("link", { name: "오늘 방문 목록 1건" })).not.toBeNull();
     expect(screen.getByRole("link", { name: "방문 조율 중 1건" })).not.toBeNull();
     expect(screen.getByText("임대 만기 90일 전 후속업무")).not.toBeNull();
     expect(screen.getByText("전세 계약 D-90 후속업무")).not.toBeNull();
@@ -83,11 +83,17 @@ describe("홈 대시보드", () => {
     expect(link.className).toContain("clickable-row");
   });
 
-  it("읽지 않은 알림 수 배지가 알림함으로 이어진다", async () => {
+  it("업무 만들기 버튼은 오늘 업무 리스트 카드 머리에 있고 알림함 버튼은 홈 본문에 없다", async () => {
     renderOffice(<HomeDashboard />, { role: "OWNER" });
-    const link = await screen.findByRole("link", { name: /알림함/ });
-    expect(link.getAttribute("href")).toBe("/notifications");
-    expect(within(link).getByLabelText("읽지 않은 알림 1건")).not.toBeNull();
+    const tasks = await screen.findByRole("region", { name: "오늘 업무 리스트" });
+    expect(within(tasks).getByRole("button", { name: "+ 업무 만들기" })).not.toBeNull();
+    expect(screen.queryByRole("link", { name: /알림함/ })).toBeNull();
+  });
+
+  it("읽기 전용 상태에서는 업무 만들기 버튼이 꺼진다", async () => {
+    renderOffice(<HomeDashboard />, { role: "OWNER", isReadOnly: true });
+    const button = await screen.findByRole("button", { name: "+ 업무 만들기" });
+    expect((button as HTMLButtonElement).disabled).toBe(true);
   });
 
   it("대표 홈에는 카드 등록 안내 링크가 있고 직원 홈에는 없다", async () => {

@@ -81,10 +81,13 @@ export function OfficeRegistrationForm() {
   function lookup() {
     setFormError(undefined);
     setExistingOffice(false);
-    const problems = validateLookup({
+    const problems: FieldErrors<RegistrationField | LookupField> = validateLookup({
       registrationAuthority: authority,
       realEstateLicenseNumber: license,
     });
+    if (businessNumber.replace(/\D/g, "").length !== 10) {
+      problems.businessRegistrationNumber = "사업자등록번호 10자리를 입력해 주세요.";
+    }
     setErrors(problems);
     if (Object.keys(problems).length > 0) return;
     lookupMutation.mutate({
@@ -127,59 +130,69 @@ export function OfficeRegistrationForm() {
 
   if (step === "lookup") {
     return (
-      <FlowFrame
-        title="신규 사무소 등록을 위한 등록번호를 입력해 주십시오."
-        description="같은 등록관청과 개설등록번호의 사무소가 이미 있으면 새로 등록하지 않고 참여를 신청합니다."
-      >
+      <FlowFrame title="신규 사무소 등록을 위한 등록번호를 입력해 주십시오.">
         <form
           noValidate
-          className="flex flex-col gap-5"
+          className="flex flex-col gap-11"
           onSubmit={(event) => {
             event.preventDefault();
             lookup();
           }}
         >
-          <RadioGroup
-            legend="사업자 구분"
-            name="entityType"
-            value={entityType}
-            options={ENTITY_OPTIONS}
-            onValueChange={(next) => setEntityType(next as EntityType)}
-          />
-          <TextField
-            label="등록관청"
-            value={authority}
-            onValueChange={(next) => {
-              setAuthority(next);
-              clear("registrationAuthority");
-            }}
-            placeholder="서울특별시 종로구"
-            error={errors.registrationAuthority}
-            maxLength={100}
-          />
-          <TextField
-            label="개설등록번호"
-            value={license}
-            onValueChange={(next) => {
-              setLicense(next);
-              clear("realEstateLicenseNumber");
-            }}
-            placeholder="11110-2026-00001"
-            error={errors.realEstateLicenseNumber}
-            maxLength={30}
-          />
-          {existingOffice ? (
-            <div
-              role="alert"
-              className="flex flex-col gap-2 rounded-control bg-tag-yellow px-4 py-3"
-            >
-              <p className="text-caption text-tag-yellow-ink">
-                이미 등록된 사무소입니다. 새로 등록하지 않고 기존 사무소에 참여를 신청해 주세요.
-              </p>
-              <TextLink href="/office/join">기존 사무소 참여하기</TextLink>
-            </div>
-          ) : null}
-          {formError ? <FormAlert>{formError}</FormAlert> : null}
+          <div className="flex flex-col gap-7">
+            <TextField
+              label="사업자등록번호"
+              kind="number"
+              value={businessNumber}
+              onValueChange={(next) => {
+                setBusinessNumber(formatBusinessNumber(next));
+                clear("businessRegistrationNumber");
+              }}
+              placeholder="중개사무소의 사업자등록번호를 입력해 주세요."
+              error={errors.businessRegistrationNumber}
+            />
+            <TextField
+              label="등록관청"
+              value={authority}
+              onValueChange={(next) => {
+                setAuthority(next);
+                clear("registrationAuthority");
+              }}
+              placeholder="중개사무소를 등록한 관청을 입력해 주세요."
+              error={errors.registrationAuthority}
+              maxLength={100}
+            />
+            <TextField
+              label="개설등록번호"
+              value={license}
+              onValueChange={(next) => {
+                setLicense(next);
+                clear("realEstateLicenseNumber");
+              }}
+              placeholder="중개사무소의 개설등록번호를 입력해 주세요."
+              error={errors.realEstateLicenseNumber}
+              maxLength={30}
+            />
+            <RadioGroup
+              legend="사업자 구분"
+              name="entityType"
+              value={entityType}
+              options={ENTITY_OPTIONS}
+              onValueChange={(next) => setEntityType(next as EntityType)}
+            />
+            {existingOffice ? (
+              <div
+                role="alert"
+                className="flex flex-col gap-2 rounded-control bg-tag-yellow px-4 py-3"
+              >
+                <p className="text-caption text-tag-yellow-ink">
+                  이미 등록된 사무소입니다. 새로 등록하지 않고 기존 사무소에 참여를 신청해 주세요.
+                </p>
+                <TextLink href="/office/join">기존 사무소 참여하기</TextLink>
+              </div>
+            ) : null}
+            {formError ? <FormAlert>{formError}</FormAlert> : null}
+          </div>
           <ButtonRow>
             <Button variant="cancel" onClick={() => router.push("/office/start")}>
               이전
@@ -188,106 +201,102 @@ export function OfficeRegistrationForm() {
               다음
             </Button>
           </ButtonRow>
+          <div className="flex flex-col gap-2">
+            <MutedNote>
+              같은 등록관청과 개설등록번호의 사무소가 이미 있으면 새로 등록하지 않고 참여를
+              신청합니다.
+            </MutedNote>
+            <MutedNote>
+              기존 사무소와 사업자등록번호가 겹치면 경고가 표시되지만 신청은 막히지 않습니다.
+            </MutedNote>
+          </div>
         </form>
       </FlowFrame>
     );
   }
 
   return (
-    <FlowFrame
-      title="신규 사무소 등록을 위한 기본 정보를 입력해 주십시오."
-      description="대표 자격은 다음 단계에서 자격증 사본으로 확인합니다."
-    >
+    <FlowFrame title="신규 사무소 등록을 위한 기본 정보를 입력해 주십시오.">
       <form
         noValidate
-        className="flex flex-col gap-5"
+        className="flex flex-col gap-11"
         onSubmit={(event) => {
           event.preventDefault();
           submit();
         }}
       >
-        <TextField
-          label="사무소명"
-          value={officeName}
-          onValueChange={(next) => {
-            setOfficeName(next);
-            clear("requestedOfficeName");
-          }}
-          error={errors.requestedOfficeName}
-          maxLength={100}
-        />
-        <TextField
-          label="사무소 대표자명"
-          value={representativeName}
-          onValueChange={(next) => {
-            setRepresentativeName(next);
-            clear("requestedRepresentativeName");
-          }}
-          error={errors.requestedRepresentativeName}
-          maxLength={50}
-        />
-        <TextField
-          label="사무소 대표 연락처"
-          kind="tel"
-          value={phone}
-          onValueChange={(next) => {
-            setPhone(next);
-            clear("requestedRepresentativePhone");
-          }}
-          placeholder="010-0000-0000"
-          error={errors.requestedRepresentativePhone}
-        />
-        <TextField
-          label="중개사무소 주소"
-          value={address}
-          onValueChange={(next) => {
-            setAddress(next);
-            clear("requestedAddress");
-          }}
-          error={errors.requestedAddress}
-          maxLength={300}
-        />
-        <TextField
-          label="사업자등록번호"
-          kind="number"
-          value={businessNumber}
-          onValueChange={(next) => {
-            setBusinessNumber(formatBusinessNumber(next));
-            clear("businessRegistrationNumber");
-          }}
-          placeholder="000-00-00000"
-          error={errors.businessRegistrationNumber}
-          hint="기존 사무소와 번호가 겹치면 경고가 표시되지만 신청은 막히지 않습니다."
-        />
-        <SelectField
-          label="신청자의 등록관계"
-          value={relation}
-          options={[...APPLICANT_RELATION_OPTIONS]}
-          placeholder="선택해 주세요"
-          onValueChange={(next) => {
-            setRelation(next);
-            clear("applicantRegistrationRelation");
-          }}
-          error={errors.applicantRegistrationRelation}
-        />
-        <MutedNote>{REGISTRATION_NOTICE_COPY.intro}</MutedNote>
-        <MutedNote>{REGISTRATION_NOTICE_COPY.scope}</MutedNote>
-        <MutedNote>
-          제출하면 작성 중 상태의 신청이 만들어지고 증빙 업로드 화면으로 이동합니다.
-        </MutedNote>
-        {formError ? (
-          <div className="flex flex-col gap-2">
-            <FormAlert>{formError}</FormAlert>
-            {conflictLink ? (
-              <TextLink href={conflictLink}>
-                {conflictLink === "/office/review" ? "심사 상태 확인하기" : "기존 사무소 참여하기"}
-              </TextLink>
-            ) : null}
-          </div>
-        ) : null}
-        {createMutation.isSuccess ? (
-          <FormNotice>신청을 만들었습니다. 이동하는 중입니다.</FormNotice>
-        ) : null}
+        <div className="flex flex-col gap-7">
+          <TextField
+            label="사무소명"
+            value={officeName}
+            onValueChange={(next) => {
+              setOfficeName(next);
+              clear("requestedOfficeName");
+            }}
+            placeholder="예시: 김땡땡사무소"
+            error={errors.requestedOfficeName}
+            maxLength={100}
+          />
+          <TextField
+            label="사무소 대표자명"
+            value={representativeName}
+            onValueChange={(next) => {
+              setRepresentativeName(next);
+              clear("requestedRepresentativeName");
+            }}
+            placeholder="예시: 김땡땡"
+            error={errors.requestedRepresentativeName}
+            maxLength={50}
+          />
+          <TextField
+            label="사무소 대표 연락처"
+            kind="tel"
+            value={phone}
+            onValueChange={(next) => {
+              setPhone(next);
+              clear("requestedRepresentativePhone");
+            }}
+            placeholder="예시: 010-0000-0000"
+            error={errors.requestedRepresentativePhone}
+          />
+          <TextField
+            label="중개사무소 주소"
+            value={address}
+            onValueChange={(next) => {
+              setAddress(next);
+              clear("requestedAddress");
+            }}
+            placeholder="예시: 서울시 땡땡구 땡땡동"
+            error={errors.requestedAddress}
+            maxLength={300}
+          />
+          <SelectField
+            label="신청자의 등록관계"
+            value={relation}
+            options={[...APPLICANT_RELATION_OPTIONS]}
+            placeholder="선택해 주세요"
+            onValueChange={(next) => {
+              setRelation(next);
+              clear("applicantRegistrationRelation");
+            }}
+            error={errors.applicantRegistrationRelation}
+          />
+          {formError ? (
+            <div className="flex flex-col gap-2">
+              <FormAlert>{formError}</FormAlert>
+              {conflictLink ? (
+                <TextLink href={conflictLink}>
+                  {conflictLink === "/office/review"
+                    ? "심사 상태 확인하기"
+                    : "기존 사무소 참여하기"}
+                </TextLink>
+              ) : null}
+            </div>
+          ) : null}
+          {createMutation.isSuccess ? (
+            <FormNotice>신청을 만들었습니다. 이동하는 중입니다.</FormNotice>
+          ) : null}
+        </div>
         <ButtonRow>
           <Button
             variant="cancel"
@@ -303,6 +312,14 @@ export function OfficeRegistrationForm() {
             다음
           </Button>
         </ButtonRow>
+        <div className="flex flex-col gap-2">
+          <MutedNote>대표 자격은 다음 단계에서 자격증 사본으로 확인합니다.</MutedNote>
+          <MutedNote>{REGISTRATION_NOTICE_COPY.intro}</MutedNote>
+          <MutedNote>{REGISTRATION_NOTICE_COPY.scope}</MutedNote>
+          <MutedNote>
+            제출하면 작성 중 상태의 신청이 만들어지고 증빙 업로드 화면으로 이동합니다.
+          </MutedNote>
+        </div>
       </form>
     </FlowFrame>
   );

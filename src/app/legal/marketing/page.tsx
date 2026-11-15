@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   ...publicPageSocialMetadata(
     "이메일 공지·혜택 안내 수신 동의",
     "사이로의 이메일 공지·혜택 안내 수신 동의 안내입니다.",
+    "/legal/marketing",
   ),
 };
 

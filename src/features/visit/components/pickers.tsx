@@ -5,6 +5,7 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import { useCustomerList } from "@/features/customer/hooks/customer-queries";
 import { usePropertyList } from "@/features/property/hooks/property-queries";
+import { FieldLabel } from "@/shared/components/ui/field-label";
 import { Badge } from "@/shared/components/ui/badge";
 import { ScrollArea } from "@/shared/components/ui/scroll-more-hint";
 import { SearchField } from "@/shared/components/ui/search-field";
@@ -72,7 +73,7 @@ export function CustomerPicker({
   const items = query.data?.items ?? [];
   return (
     <fieldset className="min-w-0 flex flex-col gap-3">
-      <legend className="mb-1 text-caption font-semibold text-ink">고객 선택</legend>
+      <FieldLabel as="legend">고객 선택</FieldLabel>
       <SearchField
         label="고객 검색"
         placeholder="고객 이름이나 연락처로 검색하세요."
@@ -176,9 +177,9 @@ export function CandidatePicker({
   const grantItems = grants.data?.items ?? [];
   return (
     <fieldset className="min-w-0 flex flex-col gap-3">
-      <legend className="mb-1 text-caption font-semibold text-ink">
+      <FieldLabel as="legend">
         후보 매물 선택 ({selected.length}/{max})
-      </legend>
+      </FieldLabel>
       <p className="text-caption text-ink-2">
         자기 사무소 매물과 허용받은 매물을 합쳐 {max}개까지 고를 수 있습니다. 활성 등록된 매물만
         선택할 수 있고, 신청 권한이 없는 매물은 고를 수 없습니다.
@@ -190,7 +191,7 @@ export function CandidatePicker({
         onValueChange={setDraft}
         onSearch={() => setKeyword(draft)}
       />
-      <h2 className="mt-3 text-caption font-semibold text-ink-2">우리 사무소 매물</h2>
+      <h2 className="mt-3 text-body font-semibold text-ink">우리 사무소 매물</h2>
       <ListState
         isPending={own.isPending}
         isError={own.isError}
@@ -213,7 +214,7 @@ export function CandidatePicker({
           )}
         </ul>
       </ScrollArea>
-      <h2 className="mt-3 text-caption font-semibold text-ink-2">허용받은 매물</h2>
+      <h2 className="mt-3 text-body font-semibold text-ink">허용받은 매물</h2>
       <ListState
         isPending={grants.isPending}
         isError={grants.isError}

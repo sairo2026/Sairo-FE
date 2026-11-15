@@ -7,7 +7,11 @@ export const metadata: Metadata = {
   title: "로그인",
   description: "카카오 또는 이메일 계정으로 사이로에 로그인합니다.",
   robots: INDEXABLE_ROBOTS,
-  ...publicPageSocialMetadata("로그인", "카카오 또는 이메일 계정으로 사이로에 로그인합니다."),
+  ...publicPageSocialMetadata(
+    "로그인",
+    "카카오 또는 이메일 계정으로 사이로에 로그인합니다.",
+    "/login",
+  ),
 };
 
 type LoginPageProps = {

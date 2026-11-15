@@ -26,20 +26,20 @@ export function AuthEntry({
     : "/signup/email";
   return (
     <div className="flex flex-1 items-center justify-center bg-surface px-4 py-16">
-      <Card tone="elevated" className="w-full max-w-[460px]">
+      <Card tone="elevated" className="min-h-[451px] w-full max-w-[460px]">
         <div className="flex flex-col items-center gap-10">
           <BrandLogo variant="vertical" className="w-48" />
           <div className="mx-auto flex w-full max-w-[360px] flex-col gap-3">
             {errorMessage ? <FormAlert>{errorMessage}</FormAlert> : null}
             <a
               href="/api/auth/kakao/start"
-              className="flex h-14 w-full items-center justify-center rounded-xl bg-[#FEE500] text-h2 font-semibold text-ink transition hover:brightness-95 active:brightness-90"
+              className="flex h-[68px] w-full items-center justify-center rounded-xl bg-[#ffee52] text-h2 font-semibold text-ink transition hover:brightness-95 active:brightness-90"
             >
               카카오로 시작하기
             </a>
             <Link
               href={emailHref}
-              className="flex h-14 w-full items-center justify-center rounded-xl bg-primary-soft text-h2 font-semibold text-primary transition-colors hover:bg-primary-line active:bg-primary-line"
+              className="flex h-[68px] w-full items-center justify-center rounded-xl bg-primary-soft text-h2 font-semibold text-ink transition-colors hover:bg-primary-line active:bg-primary-line"
             >
               이메일로 시작하기
             </Link>

@@ -9,6 +9,8 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   isLoading?: boolean;
   size?: "md" | "sm";
   fullWidth?: boolean;
+  /** 안내 화면의 긴 단일 버튼. 폭 230을 쓴다. */
+  isWide?: boolean;
 };
 
 const variantClass: Record<ButtonVariant, string> = {
@@ -24,6 +26,7 @@ export function Button({
   isLoading = false,
   size = "md",
   fullWidth = false,
+  isWide = false,
   type = "button",
   disabled,
   className,
@@ -50,6 +53,7 @@ export function Button({
         "inline-flex items-center justify-center gap-1.5 rounded-control text-body transition-[color,background-color,border-color,box-shadow] duration-150",
         size === "md" ? "h-12 min-w-[120px] px-10" : "h-9 px-3.5 text-caption",
         fullWidth && "w-full",
+        isWide && !fullWidth && "w-[230px]",
         variantClass[variant],
         isLoading && "cursor-progress opacity-80",
         disabled &&
