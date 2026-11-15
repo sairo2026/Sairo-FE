@@ -2,7 +2,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { act, cleanup, render, waitFor } from "@testing-library/react";
 import axe from "axe-core";
 import type { ReactElement, ReactNode } from "react";
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthEventsProvider } from "@/features/auth/components/auth-events-provider";
 import OpsConsoleLayout from "@/app/ops/(console)/layout";
 import { createQueryClient } from "@/shared/api/query-client";
@@ -12,6 +12,20 @@ import { resetMockOpsSession } from "@/mocks/handlers/ops-session";
 import { MOCK_PRIMARY_TOKEN } from "@/mocks/handlers/visit-approver";
 import { startMockServer } from "@/mocks/server";
 import { RouteInterrupt, navigationState } from "./navigation-mock";
+
+// 서버 컴포넌트는 jsdom에서 렌더할 수 없으므로 서버 조회 없이 클라이언트 조회로 대체한다.
+vi.mock("@/features/billing/components/public-business-footer.server", async () => ({
+  PublicBusinessFooterServer: (await import("@/features/billing/components/public-business-footer"))
+    .PublicBusinessFooter,
+}));
+vi.mock("@/features/billing/components/pricing-summary.server", async () => ({
+  PricingSummaryServer: (await import("@/features/billing/components/pricing-summary"))
+    .PricingSummary,
+}));
+vi.mock("@/features/billing/components/public-pricing-screen.server", async () => ({
+  PublicPricingScreenServer: (await import("@/features/billing/components/public-pricing-screen"))
+    .PublicPricingScreen,
+}));
 
 type PageModule = {
   default: (props: {

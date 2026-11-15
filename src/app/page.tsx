@@ -1,30 +1,32 @@
 import type { Metadata } from "next";
-import { PricingSummary } from "@/features/billing/components/pricing-summary";
-import { PublicBusinessFooter } from "@/features/billing/components/public-business-footer";
+import { PricingSummaryServer } from "@/features/billing/components/pricing-summary.server";
+import { PublicBusinessFooterServer } from "@/features/billing/components/public-business-footer.server";
 import { LandingPage } from "@/features/landing/components/landing-page";
 import { LANDING_META } from "@/features/landing/model/landing-copy";
+import { INDEXABLE_ROBOTS, SITE_OG_IMAGE, SITE_URL } from "@/shared/lib/site-metadata";
 
 export const metadata: Metadata = {
-  title: LANDING_META.title,
+  title: { absolute: LANDING_META.title },
   description: LANDING_META.description,
-  alternates: { canonical: "/" },
+  alternates: { canonical: SITE_URL },
+  robots: INDEXABLE_ROBOTS,
   openGraph: {
     type: "website",
-    url: "/",
-    siteName: "사이로",
+    url: SITE_URL,
+    siteName: "사이로(SAIRO)",
     locale: "ko_KR",
     title: LANDING_META.title,
     description: LANDING_META.description,
-    images: [{ url: "/brand/sairo-og.png", width: 1200, height: 630, alt: "사이로" }],
+    images: [SITE_OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
     title: LANDING_META.title,
     description: LANDING_META.description,
-    images: ["/brand/sairo-og.png"],
+    images: [SITE_OG_IMAGE.url],
   },
 };
 
 export default function Page() {
-  return <LandingPage pricing={<PricingSummary />} footer={<PublicBusinessFooter />} />;
+  return <LandingPage pricing={<PricingSummaryServer />} footer={<PublicBusinessFooterServer />} />;
 }

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { MarketingUnsubscribe } from "@/features/auth/components/marketing-unsubscribe";
 import { normalizeLinkToken } from "@/shared/lib/link-token";
 
-export const metadata: Metadata = { title: "수신 거부 | 사이로", referrer: "no-referrer" };
+export const metadata: Metadata = { title: "수신 거부", referrer: "no-referrer" };
 
 type Props = { searchParams: Promise<{ token?: string }> };
 
