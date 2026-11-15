@@ -126,7 +126,6 @@ export function TextField({
           role={error ? "alert" : undefined}
           className={cn(
             "-mt-2 text-caption",
-            error || statusText ? "text-center" : "",
             error ? "text-danger" : statusText ? "text-primary" : "text-ink-2",
           )}
         >

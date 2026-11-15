@@ -91,7 +91,7 @@ describe("이메일 로그인", () => {
   it("이메일 형식이 틀리면 안내한다", async () => {
     const user = userEvent.setup();
     renderWithQuery(<EmailLoginForm />);
-    await user.type(screen.getByLabelText("이메일"), "not-an-email");
+    await user.type(screen.getByLabelText("이메일 주소"), "not-an-email");
     await user.type(screen.getByLabelText("비밀번호"), "mock-password-1");
     await user.click(screen.getByRole("button", { name: "로그인" }));
     expect(await screen.findByText("이메일 주소를 올바르게 입력해 주세요.")).not.toBeNull();
@@ -100,7 +100,7 @@ describe("이메일 로그인", () => {
   it("성공하면 접근 상태에 맞는 화면으로 이동한다", async () => {
     const user = userEvent.setup();
     renderWithQuery(<EmailLoginForm />);
-    await user.type(screen.getByLabelText("이메일"), "agent@example.com");
+    await user.type(screen.getByLabelText("이메일 주소"), "agent@example.com");
     await user.type(screen.getByLabelText("비밀번호"), "mock-password-1");
     await user.click(screen.getByRole("button", { name: "로그인" }));
     await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/home"));
@@ -109,7 +109,7 @@ describe("이메일 로그인", () => {
   it("돌아갈 주소가 안전하면 그곳으로 이동한다", async () => {
     const user = userEvent.setup();
     renderWithQuery(<EmailLoginForm next="/properties" />);
-    await user.type(screen.getByLabelText("이메일"), "agent@example.com");
+    await user.type(screen.getByLabelText("이메일 주소"), "agent@example.com");
     await user.type(screen.getByLabelText("비밀번호"), "mock-password-1");
     await user.click(screen.getByRole("button", { name: "로그인" }));
     await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/properties"));
@@ -118,7 +118,7 @@ describe("이메일 로그인", () => {
   it("바깥 주소로 돌려보내는 next는 무시한다", async () => {
     const user = userEvent.setup();
     renderWithQuery(<EmailLoginForm next="//evil.example" />);
-    await user.type(screen.getByLabelText("이메일"), "agent@example.com");
+    await user.type(screen.getByLabelText("이메일 주소"), "agent@example.com");
     await user.type(screen.getByLabelText("비밀번호"), "mock-password-1");
     await user.click(screen.getByRole("button", { name: "로그인" }));
     await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/home"));
@@ -127,7 +127,7 @@ describe("이메일 로그인", () => {
   it("미가입과 비밀번호 오류는 같은 문구로 안내한다", async () => {
     const user = userEvent.setup();
     renderWithQuery(<EmailLoginForm />);
-    await user.type(screen.getByLabelText("이메일"), "nobody@example.com");
+    await user.type(screen.getByLabelText("이메일 주소"), "nobody@example.com");
     await user.type(screen.getByLabelText("비밀번호"), "wrong-password");
     await user.click(screen.getByRole("button", { name: "로그인" }));
     expect((await screen.findByRole("alert")).textContent).toBe(
@@ -140,7 +140,7 @@ describe("이메일 로그인", () => {
     server.use(http.post("/api/auth/login", () => mockErrors.loginLocked(900)));
     const user = userEvent.setup();
     renderWithQuery(<EmailLoginForm />);
-    await user.type(screen.getByLabelText("이메일"), "agent@example.com");
+    await user.type(screen.getByLabelText("이메일 주소"), "agent@example.com");
     await user.type(screen.getByLabelText("비밀번호"), "mock-password-1");
     await user.click(screen.getByRole("button", { name: "로그인" }));
     const timer = await screen.findByRole("timer");
@@ -154,7 +154,7 @@ describe("이메일 로그인", () => {
     server.use(http.post("/api/auth/login", () => mockErrors.rateLimited(90)));
     const user = userEvent.setup();
     renderWithQuery(<EmailLoginForm />);
-    await user.type(screen.getByLabelText("이메일"), "agent@example.com");
+    await user.type(screen.getByLabelText("이메일 주소"), "agent@example.com");
     await user.type(screen.getByLabelText("비밀번호"), "mock-password-1");
     await user.click(screen.getByRole("button", { name: "로그인" }));
     expect((await screen.findByRole("alert")).textContent).toContain("1분 30초 뒤에 다시 시도");
@@ -164,7 +164,7 @@ describe("이메일 로그인", () => {
     server.use(http.post("/api/auth/login", () => mockErrors.server()));
     const user = userEvent.setup();
     renderWithQuery(<EmailLoginForm />);
-    await user.type(screen.getByLabelText("이메일"), "agent@example.com");
+    await user.type(screen.getByLabelText("이메일 주소"), "agent@example.com");
     await user.type(screen.getByLabelText("비밀번호"), "mock-password-1");
     await user.click(screen.getByRole("button", { name: "로그인" }));
     expect((await screen.findByRole("alert")).textContent).toContain("일시적인 오류");
@@ -183,7 +183,7 @@ describe("비밀번호 찾기와 재설정", () => {
   it("이메일 형식이 틀리면 요청하지 않는다", async () => {
     const user = userEvent.setup();
     render(<PasswordResetRequestForm />);
-    await user.type(screen.getByLabelText("이메일"), "bad");
+    await user.type(screen.getByLabelText("이메일 인증"), "bad");
     await user.click(screen.getByRole("button", { name: "재설정 링크 받기" }));
     expect(await screen.findByText("이메일 주소를 올바르게 입력해 주세요.")).not.toBeNull();
   });
@@ -191,17 +191,19 @@ describe("비밀번호 찾기와 재설정", () => {
   it("가입 여부와 관계없이 같은 안내를 보여주고 재요청 대기를 건다", async () => {
     const user = userEvent.setup();
     render(<PasswordResetRequestForm />);
-    await user.type(screen.getByLabelText("이메일"), "someone@example.com");
+    await user.type(screen.getByLabelText("이메일 인증"), "someone@example.com");
     await user.click(screen.getByRole("button", { name: "재설정 링크 받기" }));
     expect((await screen.findByRole("status")).textContent).toContain("가입한 계정이 있다면");
-    expect(screen.getByRole("button", { name: /초 뒤 다시 보내기/ })).not.toBeNull();
+    expect(screen.getByRole("timer").textContent).toMatch(/^\d{2}:\d{2}$/);
+    const resend = screen.getByRole("button", { name: "재발송" }) as HTMLButtonElement;
+    expect(resend.disabled).toBe(true);
   });
 
   it("요청이 몰리면 기다릴 시간을 알려준다", async () => {
     server.use(http.post("/api/auth/password/reset-request", () => mockErrors.rateLimited(120)));
     const user = userEvent.setup();
     render(<PasswordResetRequestForm />);
-    await user.type(screen.getByLabelText("이메일"), "someone@example.com");
+    await user.type(screen.getByLabelText("이메일 인증"), "someone@example.com");
     await user.click(screen.getByRole("button", { name: "재설정 링크 받기" }));
     expect((await screen.findByRole("alert")).textContent).toContain("2분 뒤에 다시 시도");
   });
@@ -243,7 +245,7 @@ describe("비밀번호 찾기와 재설정", () => {
     await user.type(screen.getByLabelText("새 비밀번호 확인"), "abcd1234!");
     await user.click(screen.getByRole("button", { name: "비밀번호 바꾸기" }));
     expect(await screen.findByText("링크를 사용할 수 없습니다")).not.toBeNull();
-    expect(screen.getByLabelText("이메일")).not.toBeNull();
+    expect(screen.getByLabelText("이메일 인증")).not.toBeNull();
   });
 
   it("토큰 형식이 맞지 않는 링크는 처음부터 재요청 화면을 보여준다", () => {

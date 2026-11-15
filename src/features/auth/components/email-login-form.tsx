@@ -75,12 +75,12 @@ export function EmailLoginForm({ next }: { next?: string }) {
             control={control}
             render={({ field }) => (
               <TextField
-                label="이메일"
+                label="이메일 주소"
                 value={field.value}
                 onValueChange={field.onChange}
                 inputMode="email"
                 autoComplete="username"
-                placeholder="email@email.com"
+                placeholder="이메일 주소를 입력해 주세요."
                 error={errors.email?.message}
               />
             )}
@@ -95,7 +95,8 @@ export function EmailLoginForm({ next }: { next?: string }) {
                 value={field.value}
                 onValueChange={field.onChange}
                 autoComplete="current-password"
-                error={errors.password?.message}
+                placeholder="비밀번호를 입력해 주세요."
+                error={errors.password?.message ?? formError}
               />
             )}
           />
@@ -104,11 +105,6 @@ export function EmailLoginForm({ next }: { next?: string }) {
           <p role="alert" className="mt-3 text-center text-caption text-primary">
             로그인에 5회 실패해 잠시 막았습니다.{" "}
             <span role="timer">{formatClock(lock.remaining)}</span> 뒤에 다시 시도해 주세요.
-          </p>
-        ) : null}
-        {formError ? (
-          <p role="alert" className="mt-3 text-center text-caption text-primary">
-            {formError}
           </p>
         ) : null}
         <div className="mt-8 flex justify-center gap-8 text-caption underline">

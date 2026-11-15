@@ -6,7 +6,7 @@ import { ApiError } from "@/shared/api/client";
 import { Button } from "@/shared/components/ui/button";
 import { TextField } from "@/shared/components/ui/text-field";
 import { requestPasswordReset, resetPassword } from "../api/account.api";
-import { useCountdown } from "../hooks/use-countdown";
+import { formatClock, useCountdown } from "../hooks/use-countdown";
 import { describeAuthError, fieldErrorMap } from "@/shared/lib/api-messages";
 import {
   PASSWORD_STRENGTH_LABEL,
@@ -65,7 +65,7 @@ export function PasswordResetRequestForm({
       >
         <p className="text-body text-ink-2">{description}</p>
         <TextField
-          label="이메일"
+          label="이메일 인증"
           value={email}
           onValueChange={(next) => {
             setEmail(next);
@@ -75,9 +75,14 @@ export function PasswordResetRequestForm({
           autoComplete="email"
           placeholder="email@email.com"
           error={error}
+          timerText={isSent && cooldown.remaining > 0 ? formatClock(cooldown.remaining) : undefined}
+          actionLabel={isSent ? "재발송" : undefined}
+          onAction={() => void submit()}
+          isActionDisabled={isBusy || cooldown.remaining > 0}
+          statusText={isSent && !error ? "입력한 주소로 안내를 보냈습니다." : undefined}
         />
         {isSent ? (
-          <FormNotice>
+          <FormNotice variant="inline">
             입력한 주소로 가입한 계정이 있다면 재설정 링크를 보냈습니다. 링크는 30분 동안 한 번만
             사용할 수 있고, 다시 요청하면 이전 링크는 사라집니다.
           </FormNotice>
@@ -89,13 +94,11 @@ export function PasswordResetRequestForm({
           >
             뒤로
           </Link>
-          <Button type="submit" isLoading={isBusy} disabled={cooldown.remaining > 0}>
-            {cooldown.remaining > 0
-              ? `${cooldown.remaining}초 뒤 다시 보내기`
-              : isSent
-                ? "다시 보내기"
-                : "재설정 링크 받기"}
-          </Button>
+          {isSent ? null : (
+            <Button type="submit" isLoading={isBusy} disabled={cooldown.remaining > 0}>
+              재설정 링크 받기
+            </Button>
+          )}
         </div>
       </form>
     </AuthFrame>

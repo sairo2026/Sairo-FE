@@ -6,7 +6,8 @@ import { ApiError } from "@/shared/api/client";
 import { toErrorScreenKind } from "@/shared/api/error-kind";
 import { ErrorScreen } from "@/shared/components/feedback/error-screen";
 import { FormAlert } from "@/shared/components/feedback/form-frame";
-import { Badge, DDayTag } from "@/shared/components/ui/badge";
+import { Badge, DDayTag, TradeTypeTag } from "@/shared/components/ui/badge";
+import type { TradeType } from "@/shared/components/ui/badge";
 import { CreateLink } from "@/shared/components/ui/create-link";
 import { DataTable } from "@/shared/components/ui/data-table";
 import type { PageSize } from "@/shared/components/ui/data-table";
@@ -20,7 +21,7 @@ import { useAssignableMembers } from "@/shared/session/assignable-members";
 import type { PropertyListResponse } from "@/lib/api/contracts/property.schema";
 import type { PropertyListParams } from "../api/property.api";
 import { usePropertyCategories, usePropertyList } from "../hooks/property-queries";
-import { daysUntil, joinNames, summarizeOffers } from "../model/format";
+import { daysUntil, formatOfferPrice, joinNames } from "../model/format";
 import {
   AREA_TYPES,
   AREA_TYPE_LABEL,
@@ -33,6 +34,12 @@ import {
   toneOf,
 } from "../model/labels";
 import { describePropertyError } from "../model/messages";
+
+const TRADE_TYPE_BY_DEAL: Record<string, TradeType> = {
+  MONTHLY: "monthly",
+  JEONSE: "jeonse",
+  SALE: "sale",
+};
 
 type Row = PropertyListResponse["items"][number];
 
@@ -185,14 +192,24 @@ export function PropertyListScreen() {
     {
       key: "offers",
       header: "거래유형·가격",
-      widthClass: "w-[150px]",
+      widthClass: "w-[260px]",
       render: (row: Row) => {
-        const lines = summarizeOffers(row);
-        if (lines.length === 0) return <span className="text-ink-3">제안 없음</span>;
+        const offers = row.activeOfferSummary;
+        if (offers.length === 0) return <span className="text-ink-3">제안 없음</span>;
         return (
           <ul className="flex flex-col gap-1">
-            {lines.map((line) => (
-              <li key={line}>{line}</li>
+            {offers.map((offer) => (
+              <li
+                key={`${offer.dealType}-${formatOfferPrice(offer)}`}
+                className="flex items-center gap-2"
+              >
+                {TRADE_TYPE_BY_DEAL[offer.dealType] ? (
+                  <TradeTypeTag type={TRADE_TYPE_BY_DEAL[offer.dealType] as TradeType} />
+                ) : (
+                  <span>{offer.dealType}</span>
+                )}
+                <span>{formatOfferPrice(offer)}</span>
+              </li>
             ))}
           </ul>
         );
