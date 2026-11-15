@@ -8,7 +8,11 @@ export const metadata: Metadata = {
   title: "개인정보 처리위탁 안내",
   description: "사이로의 개인정보 처리위탁 안내입니다.",
   robots: INDEXABLE_ROBOTS,
-  ...publicPageSocialMetadata("개인정보 처리위탁 안내", "사이로의 개인정보 처리위탁 안내입니다.", "/legal/processing-outsourcing"),
+  ...publicPageSocialMetadata(
+    "개인정보 처리위탁 안내",
+    "사이로의 개인정보 처리위탁 안내입니다.",
+    "/legal/processing-outsourcing",
+  ),
 };
 
 export default function Page() {

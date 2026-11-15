@@ -6,7 +6,11 @@ export const metadata: Metadata = {
   title: "회원가입",
   description: "카카오 또는 이메일로 사이로 회원가입을 시작합니다.",
   robots: INDEXABLE_ROBOTS,
-  ...publicPageSocialMetadata("회원가입", "카카오 또는 이메일로 사이로 회원가입을 시작합니다.", "/signup"),
+  ...publicPageSocialMetadata(
+    "회원가입",
+    "카카오 또는 이메일로 사이로 회원가입을 시작합니다.",
+    "/signup",
+  ),
 };
 
 export default function SignupPage() {
