@@ -170,6 +170,47 @@ describe("알림함", () => {
   });
 });
 
+describe("알림 종류 확장", () => {
+  it("임대 만기 알림은 계약 상세로 이어진다", async () => {
+    setMockWorkState({
+      notifications: [
+        buildMockNotification({
+          notificationId: 9101,
+          type: "CONTRACT_EXPIRY",
+          message: "정릉 아파트 계약의 임대차 만기가 90일 남았습니다.",
+          targetType: "CONTRACT",
+          targetId: 601,
+        }),
+      ],
+    });
+    renderOffice(<NotificationListScreen />, { role: "OWNER" });
+    expect(
+      await screen.findByText("정릉 아파트 계약의 임대차 만기가 90일 남았습니다."),
+    ).not.toBeNull();
+    expect(screen.getByText("임대 만기")).not.toBeNull();
+    const link = screen.getByRole("link", { name: "관련 화면으로 이동" });
+    expect(link.getAttribute("href")).toBe("/contracts/601");
+  });
+
+  it("알 수 없는 알림 종류와 이동 대상은 일반 알림으로 표시하고 링크를 달지 않는다", async () => {
+    setMockWorkState({
+      notifications: [
+        buildMockNotification({
+          notificationId: 9102,
+          type: "FUTURE_KIND",
+          message: "새 종류의 알림입니다.",
+          targetType: "FUTURE_TARGET",
+          targetId: 5,
+        }),
+      ],
+    });
+    renderOffice(<NotificationListScreen />, { role: "OWNER" });
+    expect(await screen.findByText("새 종류의 알림입니다.")).not.toBeNull();
+    expect(screen.getByText("알림")).not.toBeNull();
+    expect(screen.queryByRole("link", { name: "관련 화면으로 이동" })).toBeNull();
+  });
+});
+
 describe("알림 이동 경로", () => {
   it("지원 답변 알림은 문의 상세로 보낸다", () => {
     expect(notificationHref("CONTRACT", 7)).toBe("/contracts/7");

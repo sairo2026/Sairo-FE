@@ -54,6 +54,29 @@ describe("홈 대시보드", () => {
     }
   });
 
+  it("후속업무 항목은 계약 ID가 있으면 해당 계약 상세로 이어진다", async () => {
+    renderOffice(<HomeDashboard />, { role: "OWNER" });
+    const list = await screen.findByRole("list", { name: "계약 후속업무" });
+    const link = within(list).getByRole("link", { name: /전세 계약 D-90 후속업무/ });
+    expect(link.getAttribute("href")).toBe("/contracts/601");
+  });
+
+  it("계약 ID가 없는 응답이어도 화면이 깨지지 않고 만기 계약 목록으로 이어진다", async () => {
+    setMockWorkState({
+      followupTasks: [{ taskId: 7002, title: "ID 없는 후속업무", dueDate: "2026-12-02" }],
+    });
+    renderOffice(<HomeDashboard />, { role: "OWNER" });
+    const link = await screen.findByRole("link", { name: /ID 없는 후속업무/ });
+    expect(link.getAttribute("href")).toBe("/contracts?tab=maturity");
+  });
+
+  it("후속업무 항목에 호버·누름 상태 클래스가 있다", async () => {
+    renderOffice(<HomeDashboard />, { role: "OWNER" });
+    const link = await screen.findByRole("link", { name: /전세 계약 D-90 후속업무/ });
+    expect(link.className).toContain("hover:bg-primary-soft");
+    expect(link.className).toContain("active:bg-primary-line");
+  });
+
   it("읽지 않은 알림 수 배지가 알림함으로 이어진다", async () => {
     renderOffice(<HomeDashboard />, { role: "OWNER" });
     const link = await screen.findByRole("link", { name: /알림함/ });

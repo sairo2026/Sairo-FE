@@ -1,5 +1,4 @@
 import {
-  HomeSummaryResponseSchema,
   NotificationListResponseSchema,
   TaskCreateResponseSchema,
   TaskListResponseSchema,
@@ -7,6 +6,7 @@ import {
 } from "@/lib/api/contracts/work.schema";
 import type { TaskCreateRequest, TaskUpdateRequest } from "@/lib/api/contracts/work.schema";
 import { apiFetch, withQuery } from "@/shared/api/client";
+import { HomeSummaryWireSchema } from "./wire";
 
 export type TaskListParams = {
   status?: string;
@@ -18,7 +18,7 @@ export type TaskListParams = {
 export type NotificationListParams = { unreadOnly: boolean; page: number; size: number };
 
 export function getHomeSummary() {
-  return apiFetch("/api/home", { schema: HomeSummaryResponseSchema });
+  return apiFetch("/api/home", { schema: HomeSummaryWireSchema });
 }
 
 export function listTasks(params: TaskListParams) {

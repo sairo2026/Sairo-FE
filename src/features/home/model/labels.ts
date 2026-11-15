@@ -42,6 +42,7 @@ export const NOTIFICATION_TYPE_LABEL: Record<string, string> = {
   DELETION_SCHEDULED: "삭제 예정",
   SUPPORT_REPLY: "지원 답변",
   TERMS_CHANGED: "약관·방침 변경",
+  CONTRACT_EXPIRY: "임대 만기",
 };
 
 export function notificationHref(targetType: string, targetId: number | null | undefined) {
