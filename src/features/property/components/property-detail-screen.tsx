@@ -14,14 +14,21 @@ import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import { Modal } from "@/shared/components/ui/modal";
 import { Tabs } from "@/shared/components/ui/tabs";
-import { formatArea, formatKrw, formatSeoulDate, formatSeoulDateTime } from "@/shared/lib/format";
+import {
+  formatArea,
+  formatDDay,
+  formatKrw,
+  formatSeoulDate,
+  formatSeoulDateTime,
+} from "@/shared/lib/format";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { archiveProperty, restoreProperty } from "../api/property.api";
+import { CoordinationStatusBadge } from "@/features/visit/components/coordination-status-badge";
+import { statusLabel } from "@/features/visit/model/labels";
 import { propertyKeys, usePropertyDetail } from "../hooks/property-queries";
 import { dealTypeLabel, daysUntil } from "../model/format";
 import {
   CONTRACT_STATUS_LABEL,
-  COORDINATION_STATUS_LABEL,
   LEASE_SOURCE_LABEL,
   OCCUPANCY_LABEL,
   OWNER_OCCUPANT_ROLE_LABEL,
@@ -89,7 +96,7 @@ function BasicInfo({ property }: { property: PropertyDetailResponse }) {
           {
             label: "임대 만기",
             value: property.leaseEndDate
-              ? `${formatSeoulDate(property.leaseEndDate)} · ${labelOf(LEASE_SOURCE_LABEL, property.leaseEndSource)}${days === null ? "" : ` · D-${Math.max(0, days)}`}`
+              ? `${formatSeoulDate(property.leaseEndDate)} · ${labelOf(LEASE_SOURCE_LABEL, property.leaseEndSource)}${days === null ? "" : ` · ${formatDDay(days)}`}`
               : property.referenceLeaseEndDate
                 ? `${formatSeoulDate(property.referenceLeaseEndDate)} · 참고 (${property.referenceLeaseEndSource ?? "출처 없음"})`
                 : "-",
@@ -146,7 +153,7 @@ function RelationPanel({ property }: { property: PropertyDetailResponse }) {
                 key={item.linkId}
                 className="flex flex-wrap items-center gap-3 text-body text-ink"
               >
-                <Badge tone={item.role === "OWNER" ? "blue" : "teal"}>
+                <Badge tone={item.role === "OWNER" ? "green" : "teal"}>
                   {OWNER_OCCUPANT_ROLE_LABEL[item.role]}
                 </Badge>
                 <Link
@@ -171,8 +178,11 @@ function RelationPanel({ property }: { property: PropertyDetailResponse }) {
         ) : (
           <ul className="flex flex-col gap-2">
             {property.activeCoordinations.map((item) => (
-              <li key={item.coordinationId} className="text-body text-ink">
-                {item.customerName} · {labelOf(COORDINATION_STATUS_LABEL, item.status)}
+              <li
+                key={item.coordinationId}
+                className="flex flex-wrap items-center gap-2 text-body text-ink"
+              >
+                {item.customerName} <CoordinationStatusBadge status={item.status} compact />
               </li>
             ))}
           </ul>
@@ -300,7 +310,7 @@ function ArchiveDialog({
             <ul className="flex list-disc flex-col gap-1 pl-5">
               {blockers.coordinations.map((item) => (
                 <li key={`c-${item.coordinationId}`}>
-                  임장 조율 {item.customerName} · {labelOf(COORDINATION_STATUS_LABEL, item.status)}
+                  임장 조율 {item.customerName} · {statusLabel(item.status)}
                 </li>
               ))}
               {blockers.contracts.map((item) => (

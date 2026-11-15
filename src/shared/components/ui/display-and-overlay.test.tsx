@@ -29,11 +29,26 @@ describe("Badge 계열", () => {
     expect(screen.getByText("전세")).toBeTruthy();
   });
 
+  it("D-90 이하(D-0 포함)만 강조하고 91일 이상과 지난 건은 강조하지 않는다", () => {
+    const toneOf = (days: number) => {
+      const { container, unmount } = render(<DDayTag daysLeft={days} />);
+      const className = container.firstElementChild?.className ?? "";
+      unmount();
+      return className.includes("bg-primary-soft");
+    };
+    expect(toneOf(90)).toBe(true);
+    expect(toneOf(0)).toBe(true);
+    expect(toneOf(91)).toBe(false);
+    expect(toneOf(-1)).toBe(false);
+  });
+
   it("만기 일수는 D-숫자로 표시하고 당일은 0, 값이 없으면 없음이다", () => {
     const { rerender } = render(<DDayTag daysLeft={0} />);
     expect(screen.getByText("D-0")).toBeTruthy();
     rerender(<DDayTag daysLeft={110} />);
     expect(screen.getByText("D-110")).toBeTruthy();
+    rerender(<DDayTag daysLeft={-3} />);
+    expect(screen.getByText("D+3").getAttribute("aria-label")).toBe("만기 3일 지남");
     rerender(<DDayTag daysLeft={null} />);
     expect(screen.getByText("없음")).toBeTruthy();
   });

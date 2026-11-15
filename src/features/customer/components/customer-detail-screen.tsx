@@ -16,11 +16,11 @@ import { Tabs } from "@/shared/components/ui/tabs";
 import { formatSeoulDate } from "@/shared/lib/format";
 import { useAssignableMembers } from "@/shared/session/assignable-members";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
+import { CoordinationStatusBadge } from "@/features/visit/components/coordination-status-badge";
 import { deleteCustomer, restoreCustomer } from "../api/customer.api";
 import { customerKeys, useCustomerDetail } from "../hooks/customer-queries";
 import {
   CONTRACT_STATUS_LABEL,
-  COORDINATION_STATUS_LABEL,
   CUSTOMER_ROLE_LABEL,
   CUSTOMER_ROLE_TONE,
   DEAL_TYPE_LABEL,
@@ -122,8 +122,11 @@ function ActivityPanel({ customer }: { customer: CustomerDetail }) {
         ) : (
           <ul className="flex flex-col gap-2">
             {customer.visits.map((visit) => (
-              <li key={visit.coordinationId} className="text-body text-ink">
-                {labelOf(COORDINATION_STATUS_LABEL, visit.status)} ·{" "}
+              <li
+                key={visit.coordinationId}
+                className="flex flex-wrap items-center gap-2 text-body text-ink"
+              >
+                <CoordinationStatusBadge status={visit.status} compact />{" "}
                 {formatSeoulDate(visit.periodStartDate)} ~ {formatSeoulDate(visit.periodEndDate)} ·
                 후보 매물 {visit.candidatePropertyCount}개
               </li>

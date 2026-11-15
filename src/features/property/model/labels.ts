@@ -86,18 +86,6 @@ export const CONTRACT_STATUS_LABEL = {
   VOID: "무효",
 } as const;
 
-export const COORDINATION_STATUS_LABEL = {
-  TIME_COLLECTING: "시간 수집 중",
-  COORDINATABLE: "조율 가능",
-  FINAL_CONFIRMATION_REQUIRED: "최종 확인 필요",
-  APPLYING: "신청 중",
-  CONFIRMED: "확정",
-  RESCHEDULE_REQUIRED: "재조율 필요",
-  VISIT_COMPLETED: "방문 완료",
-  VISIT_INCOMPLETE: "방문 미완료",
-  CANCELLED: "취소",
-} as const;
-
 export const SALE_PREMIUM_CATEGORY_NAME = "분양권";
 
 export function labelOf(map: Readonly<Record<string, string>>, key: string | null | undefined) {

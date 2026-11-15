@@ -3,6 +3,7 @@ import {
   countCodePoints,
   formatArea,
   formatCount,
+  formatDDay,
   formatKrw,
   formatPhone,
   formatSeoulDate,
@@ -50,5 +51,13 @@ describe("format", () => {
     expect(isValidTitle("가".repeat(100))).toBe(true);
     expect(isValidTitle("가".repeat(101))).toBe(false);
     expect(countCodePoints("😀a")).toBe(2);
+  });
+});
+
+describe("formatDDay", () => {
+  it("만기 전은 D-n, 당일은 D-0, 지난 뒤는 D+n으로 쓴다", () => {
+    expect(formatDDay(90)).toBe("D-90");
+    expect(formatDDay(0)).toBe("D-0");
+    expect(formatDDay(-1)).toBe("D+1");
   });
 });

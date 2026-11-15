@@ -19,7 +19,11 @@ import { cn } from "@/shared/lib/cn";
 import { formatSeoulDateTime, formatTimeSlot } from "@/shared/lib/format";
 import { normalizeLinkToken } from "@/shared/lib/link-token";
 import { fetchCustomerConfirmed, fetchCustomerLink, submitCustomerTimes } from "../api/follow.api";
-import { LEGAL_ROLE_LABEL, PUBLIC_VISIT_STATE_LABEL, labelOf } from "../model/labels";
+import {
+  LEGAL_ROLE_LABEL,
+  PUBLIC_VISIT_STATE_LABEL,
+  PUBLIC_VISIT_STATE_TONE,
+} from "../model/labels";
 import { LINK_COMMON_COPY, linkExpiredNotice } from "../model/legal-copy";
 import type { LinkNoticeContext } from "../model/legal-copy";
 import { describeVisitError, isApiCode } from "../model/messages";
@@ -285,8 +289,8 @@ function ConfirmedView({ data, contact }: { data: PublicConfirmedVisitResponse; 
   return (
     <div className="flex flex-col gap-4">
       <p className="flex items-center gap-2">
-        <Badge tone={isValid ? "green" : "red"}>
-          {labelOf(PUBLIC_VISIT_STATE_LABEL, data.state)}
+        <Badge tone={PUBLIC_VISIT_STATE_TONE[data.state]}>
+          {PUBLIC_VISIT_STATE_LABEL[data.state]}
         </Badge>
       </p>
       <ManagerLine name={data.managerDisplayName} role={data.managerLegalRole} />

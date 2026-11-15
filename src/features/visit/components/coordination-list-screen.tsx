@@ -7,21 +7,20 @@ import { ApiError } from "@/shared/api/client";
 import { toErrorScreenKind } from "@/shared/api/error-kind";
 import { ErrorScreen } from "@/shared/components/feedback/error-screen";
 import { FormNotice } from "@/shared/components/feedback/form-frame";
-import { Badge } from "@/shared/components/ui/badge";
+
 import { DataTable } from "@/shared/components/ui/data-table";
 import type { PageSize } from "@/shared/components/ui/data-table";
 import { PageHeader } from "@/shared/components/ui/page-header";
 import { SelectableCard } from "@/shared/components/ui/selectable-card";
 import { formatSeoulDate } from "@/shared/lib/format";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
+import { CoordinationStatusBadge } from "./coordination-status-badge";
 import { useCoordinationList } from "../hooks/visit-queries";
 import {
   COORDINATION_STATUSES,
-  COORDINATION_STATUS_LABEL,
   NEXT_ACTION_HASH,
   isCoordinationStatus,
   statusLabel,
-  statusTone,
 } from "../model/labels";
 import { describeVisitError } from "../model/messages";
 
@@ -105,7 +104,7 @@ export function CoordinationListScreen() {
               onClick={() => select(key)}
               className="flex w-full flex-col items-start gap-1 rounded-card-flat px-4 py-3 text-left"
             >
-              <span className="text-caption text-ink-2">{COORDINATION_STATUS_LABEL[key]}</span>
+              <CoordinationStatusBadge status={key} compact />
               <span className="text-h2 font-bold text-ink">{counts ? counts[key] : "-"}</span>
             </SelectableCard>
           </li>
@@ -181,7 +180,7 @@ export function CoordinationListScreen() {
                   aria-label={`${row.customerName} ${statusLabel(row.status)} 상세로 이동`}
                   onClick={() => router.push(`/coordinations/${row.coordinationId}${hash ?? ""}`)}
                 >
-                  <Badge tone={statusTone(row.status)}>{statusLabel(row.status)}</Badge>
+                  <CoordinationStatusBadge status={row.status} />
                 </button>
               );
             },

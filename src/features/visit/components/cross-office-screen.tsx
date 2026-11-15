@@ -13,7 +13,12 @@ import { Tabs } from "@/shared/components/ui/tabs";
 import { formatSeoulDateTime } from "@/shared/lib/format";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { useCrossOfficeRequests, useCrossOfficeSchedules } from "../hooks/request-queries";
-import { ITEM_RESULT_LABEL, labelOf } from "../model/labels";
+import {
+  ITEM_RESULT_LABEL,
+  PUBLIC_VISIT_STATE_LABEL,
+  PUBLIC_VISIT_STATE_TONE,
+  labelOf,
+} from "../model/labels";
 import {
   CLOSE_REASON_LABEL,
   REQUEST_KIND_LABEL,
@@ -104,8 +109,8 @@ function SchedulesTab({ propertyId }: { propertyId: number }) {
                 </div>
                 <span className="flex items-center gap-2">
                   <Badge tone="gray">{labelOf(ITEM_RESULT_LABEL, item.result)}</Badge>
-                  <Badge tone={item.state === "VALID" ? "green" : "red"}>
-                    {item.state === "VALID" ? "유효" : "재조율 필요"}
+                  <Badge tone={PUBLIC_VISIT_STATE_TONE[item.state]}>
+                    {PUBLIC_VISIT_STATE_LABEL[item.state]}
                   </Badge>
                 </span>
               </li>

@@ -97,7 +97,8 @@ describe("고객 상세", () => {
     expect(screen.getByText(/국민대 앞 아파트 · 전세 · 초안/)).not.toBeNull();
     expect(screen.getByText("지난 계약")).not.toBeNull();
     await openTab(user, "방문·업무");
-    expect(screen.getByText(/확정 · 2026-11-12 ~ 2026-11-14 · 후보 매물 3개/)).not.toBeNull();
+    expect(screen.getByText("확정 완료")).not.toBeNull();
+    expect(screen.getByText(/2026-11-12 ~ 2026-11-14 · 후보 매물 3개/)).not.toBeNull();
     expect(screen.getByText(/계약서 초안 확인 · 기한 2026-11-15 · 할 일/)).not.toBeNull();
   });
 

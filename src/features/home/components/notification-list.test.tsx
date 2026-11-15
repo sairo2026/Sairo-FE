@@ -39,7 +39,7 @@ describe("알림함", () => {
     renderOffice(<NotificationListScreen />, { role: "OWNER" });
     expect(document.querySelector("[aria-busy=true]")).not.toBeNull();
     expect(await screen.findByText("방문 일정이 확정되었습니다.")).not.toBeNull();
-    expect(screen.getByText("방문 확정")).not.toBeNull();
+    expect(screen.getByText("확정 완료")).not.toBeNull();
     expect(screen.getByText("읽지 않음")).not.toBeNull();
     const link = screen.getAllByRole("link", { name: "관련 화면으로 이동" })[0];
     expect(link?.getAttribute("href")).toBe("/coordinations/801");
