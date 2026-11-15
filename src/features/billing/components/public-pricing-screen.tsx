@@ -118,13 +118,19 @@ export function PublicPricingScreen() {
         <p className="text-body text-ink">{PRICING_COPY.payment}</p>
         <p className="mt-3 text-body text-ink">
           {COPY.pricingRefundSummary}{" "}
-          <Link href="/legal/refund-policy" className="font-semibold text-primary underline">
+          <Link
+            href="/legal/refund-policy"
+            className="font-semibold text-primary underline hover:text-primary-hover active:text-primary-pressed"
+          >
             {COPY.pricingRefundLink}
           </Link>
         </p>
         <p className="mt-3 text-caption text-ink-2">
           {COPY.enterpriseNote}{" "}
-          <Link href="/support/enterprise" className="font-semibold text-primary underline">
+          <Link
+            href="/support/enterprise"
+            className="font-semibold text-primary underline hover:text-primary-hover active:text-primary-pressed"
+          >
             도입 문의
           </Link>
         </p>
@@ -132,7 +138,7 @@ export function PublicPricingScreen() {
           {PRICING_COPY.links.map((item, index) => (
             <span key={item.href}>
               {index > 0 ? <span aria-hidden>· </span> : null}
-              <Link href={item.href} className="underline">
+              <Link href={item.href} className="underline hover:opacity-70 active:opacity-50">
                 {item.label}
               </Link>
             </span>

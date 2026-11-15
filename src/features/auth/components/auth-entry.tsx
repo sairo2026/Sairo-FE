@@ -25,22 +25,22 @@ export function AuthEntry({
     : "/signup/email";
   return (
     <div className="flex flex-1 items-center justify-center bg-surface px-4 py-16">
-      <Card className="w-full max-w-sm">
+      <Card tone="elevated" className="w-full max-w-[460px]">
         <div className="flex flex-col items-center gap-10">
           <BrandLogo variant="vertical" className="w-48" />
-          <div className="flex w-full flex-col gap-3">
+          <div className="mx-auto flex w-full max-w-[360px] flex-col gap-3">
             {errorMessage ? <FormAlert>{errorMessage}</FormAlert> : null}
             <a
               href="/api/auth/kakao/start"
-              className="flex h-14 w-full items-center justify-center rounded-control bg-[#FEE500] text-body font-semibold text-ink transition hover:brightness-95"
+              className="flex h-14 w-full items-center justify-center rounded-xl bg-[#FEE500] text-h2 font-semibold text-ink transition hover:brightness-95 active:brightness-90"
             >
               카카오로 시작하기
             </a>
             <Link
               href={emailHref}
-              className="flex h-14 w-full items-center justify-center rounded-control border border-line bg-white text-body font-semibold text-ink hover:border-primary hover:text-primary"
+              className="flex h-14 w-full items-center justify-center rounded-xl bg-primary-soft text-h2 font-semibold text-primary transition-colors hover:bg-primary-line active:bg-primary-line"
             >
-              이메일로 계속하기
+              이메일로 시작하기
             </Link>
             {isLogin ? null : <p className="mt-1 text-caption text-ink-2">{KAKAO_LINK_NOTICE}</p>}
           </div>
@@ -48,14 +48,20 @@ export function AuthEntry({
             {isLogin ? (
               <>
                 아직 계정이 없나요?{" "}
-                <Link href="/signup" className="font-semibold text-primary hover:underline">
+                <Link
+                  href="/signup"
+                  className="font-semibold text-primary hover:text-primary-hover hover:underline active:text-primary-pressed"
+                >
                   회원가입
                 </Link>
               </>
             ) : (
               <>
                 이미 계정이 있나요?{" "}
-                <Link href="/login" className="font-semibold text-primary hover:underline">
+                <Link
+                  href="/login"
+                  className="font-semibold text-primary hover:text-primary-hover hover:underline active:text-primary-pressed"
+                >
                   로그인
                 </Link>
               </>

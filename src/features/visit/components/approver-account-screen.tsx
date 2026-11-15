@@ -41,7 +41,10 @@ export function SessionExpiredScreen() {
       title="로그인이 만료되었습니다"
       description="번호 인증으로 다시 로그인해 주세요."
       actions={
-        <Link href="/approver/account/login" className="font-semibold text-primary underline">
+        <Link
+          href="/approver/account/login"
+          className="font-semibold text-primary underline hover:text-primary-hover active:text-primary-pressed"
+        >
           로그인으로 이동
         </Link>
       }
@@ -328,7 +331,7 @@ export function ApproverAccountScreen() {
           {selected.length > 0 ? (
             <Link
               href={`/approver/account/bulk?ids=${selected.join(",")}`}
-              className="inline-flex h-10 items-center rounded-control bg-primary px-4 text-caption font-bold text-white"
+              className="inline-flex h-10 items-center rounded-control bg-primary px-4 text-caption font-bold text-white hover:bg-primary-hover active:bg-primary-pressed"
             >
               선택한 {selected.length}개에 조건 일괄 적용
             </Link>
@@ -354,7 +357,7 @@ export function ApproverAccountScreen() {
         )}
         <Link
           href="/approver/account/bulk"
-          className="text-caption font-semibold text-primary underline"
+          className="text-caption font-semibold text-primary underline hover:text-primary-hover active:text-primary-pressed"
         >
           조건 일괄 적용으로 이동
         </Link>

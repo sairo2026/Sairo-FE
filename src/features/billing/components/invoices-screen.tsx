@@ -35,6 +35,7 @@ export function InvoicesScreen() {
         caption="결제 내역"
         rows={query.data?.items ?? []}
         getRowId={(row) => String(row.invoiceId)}
+        getRowHref={(row) => `/billing/invoices/${row.invoiceId}`}
         totalCount={query.data?.totalElements ?? 0}
         page={page}
         pageSize={size}
@@ -65,14 +66,29 @@ export function InvoicesScreen() {
             ),
           },
           { key: "members", header: "인원", render: (row) => `${row.memberCount}명` },
-          { key: "amount", header: "금액(VAT 포함)", render: (row) => formatKrw(row.amount) },
-          { key: "limit", header: "동의 한도", render: (row) => formatKrw(row.consentAmountLimit) },
+          {
+            key: "amount",
+            header: "금액(VAT 포함)",
+            align: "right",
+            render: (row) => formatKrw(row.amount),
+          },
+          {
+            key: "limit",
+            header: "동의 한도",
+            align: "right",
+            render: (row) => formatKrw(row.consentAmountLimit),
+          },
           {
             key: "status",
             header: "상태",
             render: (row) => <InvoiceStatusBadge status={row.status} />,
           },
-          { key: "refund", header: "환불 가능", render: (row) => formatKrw(row.refundableAmount) },
+          {
+            key: "refund",
+            header: "환불 가능",
+            align: "right",
+            render: (row) => formatKrw(row.refundableAmount),
+          },
         ]}
       />
     </div>

@@ -73,10 +73,11 @@ test.describe("시나리오 4 방문 조율 생성부터 결과 기록까지", (
 
   test("고객이 공개 링크에서 가능한 시간을 제출한다", async ({ page }) => {
     await page.goto("/visit-responses/customer-token-0000001");
-    await page.getByRole("button", { name: "가능한 시간 추가" }).click();
-    await page.getByLabel("1번째 날짜").fill("2026-11-12");
-    await page.getByLabel("1번째 시작").fill("10:00");
-    await page.getByLabel("1번째 종료").fill("12:00");
+    await page.getByRole("button", { name: "11월 12일 (목)" }).click();
+    for (const time of ["10:00", "10:30", "11:00", "11:30"]) {
+      await page.getByRole("button", { name: time, exact: true }).click();
+    }
+    await expect(page.getByText("선택한 시간 · 11월 12일 10:00~12:00")).toBeVisible();
     await page.getByRole("button", { name: "가능한 시간 제출" }).click();
     await expect(page.getByText("가능한 시간을 제출했습니다.")).toBeVisible();
   });

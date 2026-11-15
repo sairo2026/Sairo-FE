@@ -46,7 +46,7 @@ describe("진입 화면", () => {
     expect(screen.getByRole("link", { name: "카카오로 시작하기" }).getAttribute("href")).toBe(
       "/api/auth/kakao/start",
     );
-    expect(screen.getByRole("link", { name: "이메일로 계속하기" }).getAttribute("href")).toBe(
+    expect(screen.getByRole("link", { name: "이메일로 시작하기" }).getAttribute("href")).toBe(
       "/login/email",
     );
     expect(screen.getByRole("link", { name: "회원가입" }).getAttribute("href")).toBe("/signup");
@@ -64,14 +64,14 @@ describe("진입 화면", () => {
 
   it("돌아갈 주소가 있으면 이메일 로그인 링크에 붙인다", () => {
     render(<AuthEntry mode="login" next="/properties" />);
-    expect(screen.getByRole("link", { name: "이메일로 계속하기" }).getAttribute("href")).toBe(
+    expect(screen.getByRole("link", { name: "이메일로 시작하기" }).getAttribute("href")).toBe(
       "/login/email?next=%2Fproperties",
     );
   });
 
   it("가입 진입은 이메일 가입으로 이어지고 로그인 링크를 둔다", () => {
     render(<AuthEntry mode="signup" />);
-    expect(screen.getByRole("link", { name: "이메일로 계속하기" }).getAttribute("href")).toBe(
+    expect(screen.getByRole("link", { name: "이메일로 시작하기" }).getAttribute("href")).toBe(
       "/signup/email",
     );
     expect(screen.getByRole("link", { name: "로그인" }).getAttribute("href")).toBe("/login");

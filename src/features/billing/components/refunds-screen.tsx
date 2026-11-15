@@ -49,6 +49,7 @@ export function RefundsScreen({ invoiceId }: { invoiceId?: number }) {
         caption="환불 신청 내역"
         rows={query.data?.items ?? []}
         getRowId={(row) => String(row.refundId)}
+        getRowHref={(row) => `/billing/refunds/${row.refundId}`}
         totalCount={query.data?.totalElements ?? 0}
         page={page}
         pageSize={size}
@@ -87,6 +88,7 @@ export function RefundsScreen({ invoiceId }: { invoiceId?: number }) {
           {
             key: "amount",
             header: "환불액",
+            align: "right",
             render: (row) =>
               isMissing(row.refundAmount) ? "산정 전" : formatKrw(row.refundAmount),
           },

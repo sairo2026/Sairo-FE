@@ -115,6 +115,7 @@ export function CoordinationListScreen() {
         caption="방문 조율 목록"
         rows={rows}
         getRowId={(row) => String(row.coordinationId)}
+        getRowHref={(row) => `/coordinations/${row.coordinationId}`}
         totalCount={query.data?.totalElements ?? 0}
         page={page}
         pageSize={size}

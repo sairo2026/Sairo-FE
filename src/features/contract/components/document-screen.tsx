@@ -223,7 +223,7 @@ function DownloadButton({ contractId, document }: { contractId: number; document
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-semibold text-primary underline"
+            className="font-semibold text-primary underline hover:text-primary-hover active:text-primary-pressed"
           >
             파일 열기
           </a>{" "}

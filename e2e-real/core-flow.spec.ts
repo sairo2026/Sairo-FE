@@ -178,6 +178,14 @@ test("카드 등록 결과로 돌아오고 구매 동의를 마치면 체험이 
   await expect(page.getByRole("heading", { name: "결제를 기다리고 있습니다" })).toHaveCount(0);
 });
 
+function seoulDateChipName(offsetDays: number): string {
+  const [year = 0, month = 1, day = 1] = seoulDate(offsetDays).split("-").map(Number);
+  const weekday = ["일", "월", "화", "수", "목", "금", "토"][
+    new Date(Date.UTC(year, month - 1, day)).getUTCDay()
+  ];
+  return `${month}월 ${day}일 (${weekday})`;
+}
+
 function seoulDate(offsetDays: number): string {
   const moment = new Date(Date.now() + offsetDays * 86_400_000);
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(moment);
@@ -291,10 +299,11 @@ test("고객 링크를 발급하고 고객이 공개 링크에서 가능한 시�
 
   const { context: customerContext, page: customerPage } = await openPublicPage(browser);
   await customerPage.goto(customerLink);
-  await customerPage.getByRole("button", { name: "가능한 시간 추가" }).click();
-  await customerPage.getByLabel("1번째 날짜").fill(seoulDate(2));
-  await customerPage.getByLabel("1번째 시작").fill("10:00");
-  await customerPage.getByLabel("1번째 종료").fill("18:00");
+  await customerPage.getByRole("button", { name: seoulDateChipName(2) }).click();
+  for (let minutes = 10 * 60; minutes < 18 * 60; minutes += 30) {
+    const time = `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
+    await customerPage.getByRole("button", { name: time, exact: true }).click();
+  }
   await customerPage.getByRole("button", { name: "가능한 시간 제출" }).click();
   await expect(customerPage.getByText("가능한 시간을 제출했습니다.")).toBeVisible();
   await customerContext.close();

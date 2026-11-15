@@ -28,7 +28,11 @@ function ListState({
     return (
       <p role="alert" className="text-caption text-danger">
         목록을 불러오지 못했습니다.{" "}
-        <button type="button" className="font-semibold underline" onClick={onRetry}>
+        <button
+          type="button"
+          className="font-semibold underline hover:text-primary active:text-primary-pressed"
+          onClick={onRetry}
+        >
           다시 시도
         </button>
       </p>
