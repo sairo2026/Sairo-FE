@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { PricingSummary } from "@/features/billing/components/pricing-summary";
-import { PublicBusinessFooter } from "@/features/billing/components/public-business-footer";
+import { PricingSummaryServer } from "@/features/billing/components/pricing-summary.server";
+import { PublicBusinessFooterServer } from "@/features/billing/components/public-business-footer.server";
 import { LandingPage } from "@/features/landing/components/landing-page";
 import { LANDING_META } from "@/features/landing/model/landing-copy";
 import { INDEXABLE_ROBOTS, SITE_OG_IMAGE, SITE_URL } from "@/shared/lib/site-metadata";
@@ -28,5 +28,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <LandingPage pricing={<PricingSummary />} footer={<PublicBusinessFooter />} />;
+  return <LandingPage pricing={<PricingSummaryServer />} footer={<PublicBusinessFooterServer />} />;
 }

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { PublicBusinessFooter } from "@/features/billing/components/public-business-footer";
-import { PublicPricingScreen } from "@/features/billing/components/public-pricing-screen";
+import { PublicBusinessFooterServer } from "@/features/billing/components/public-business-footer.server";
+import { PublicPricingScreenServer } from "@/features/billing/components/public-pricing-screen.server";
 import { PublicSiteLayout } from "@/shared/layouts/layouts";
 import { INDEXABLE_ROBOTS } from "@/shared/lib/site-metadata";
 
@@ -12,8 +12,8 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <PublicSiteLayout footer={<PublicBusinessFooter />}>
-      <PublicPricingScreen />
+    <PublicSiteLayout footer={<PublicBusinessFooterServer />}>
+      <PublicPricingScreenServer />
     </PublicSiteLayout>
   );
 }

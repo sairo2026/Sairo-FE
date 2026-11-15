@@ -6,6 +6,7 @@ import { Skeleton } from "@/shared/components/feedback/skeleton";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { formatKrw } from "@/shared/lib/format";
+import type { PublicPricing } from "../api/wire";
 import { usePublicPricing } from "../hooks/billing-queries";
 import { PRICING_COPY, trialNoticeText } from "../model/legal-copy";
 import { COPY, describeBillingError } from "../model/messages";
@@ -14,8 +15,8 @@ import { tierFormula, tierRange } from "../model/pricing-tier";
 const DETAIL_LINK_CLASS =
   "inline-flex min-h-12 items-center rounded-control border border-primary bg-primary-soft px-6 text-body font-semibold text-primary hover:bg-primary-line hover:shadow-[0_2px_8px_rgb(51_53_166/0.18)] active:bg-primary-line active:shadow-none";
 
-export function PricingSummary() {
-  const query = usePublicPricing();
+export function PricingSummary({ initialData }: { initialData?: PublicPricing }) {
+  const query = usePublicPricing(initialData);
 
   if (query.isPending) {
     return (

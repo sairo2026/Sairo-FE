@@ -13,11 +13,12 @@ import { PRICING_COPY, trialNoticeText } from "../model/legal-copy";
 import { tierFormula, tierRange } from "../model/pricing-tier";
 import { describeBillingError, COPY } from "../model/messages";
 import { CommerceNotice } from "./commerce-notice";
+import type { PublicPricing } from "../api/wire";
 import { usePublicPricing } from "../hooks/billing-queries";
 import { breakSentences } from "@/shared/lib/sentences";
 
-export function PublicPricingScreen() {
-  const query = usePublicPricing();
+export function PublicPricingScreen({ initialData }: { initialData?: PublicPricing }) {
+  const query = usePublicPricing(initialData);
 
   if (query.isPending) return <PageSkeleton label="요금표를 불러오는 중입니다." />;
   if (query.isError) {

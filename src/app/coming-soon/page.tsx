@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PublicBusinessFooter } from "@/features/billing/components/public-business-footer";
+import { PublicBusinessFooterServer } from "@/features/billing/components/public-business-footer.server";
 import { BrandLogo } from "@/shared/components/ui/brand-logo";
 
 export const metadata: Metadata = {
@@ -35,7 +35,7 @@ export default function ComingSoonPage() {
         </div>
       </main>
       <footer className="border-t border-line bg-white px-4 py-8 sm:px-8">
-        <PublicBusinessFooter />
+        <PublicBusinessFooterServer />
       </footer>
     </div>
   );
