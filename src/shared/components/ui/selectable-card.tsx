@@ -30,11 +30,11 @@ export function SelectableCard({
       {...roleProps}
       type={type}
       className={cn(
-        "border transition-colors disabled:cursor-not-allowed disabled:border-line disabled:bg-surface disabled:text-ink-3",
+        "border transition-[color,background-color,border-color,box-shadow] duration-150 disabled:cursor-not-allowed disabled:border-line disabled:bg-surface disabled:text-ink-3",
         isSelected
-          ? "border-primary bg-primary-soft ring-1 ring-inset ring-primary enabled:hover:bg-primary-line"
+          ? "border-primary bg-primary-soft ring-1 ring-inset ring-primary enabled:hover:bg-primary-line enabled:hover:shadow-[0_2px_8px_rgb(51_53_166/0.14)] enabled:active:ring-2 enabled:active:shadow-none"
           : cn(
-              "bg-white enabled:cursor-pointer enabled:hover:border-primary enabled:hover:bg-primary-soft",
+              "bg-white enabled:cursor-pointer enabled:hover:border-primary enabled:hover:bg-primary-soft enabled:hover:shadow-[0_2px_8px_rgb(51_53_166/0.14)] enabled:active:bg-primary-line",
               isInvalid ? "border-danger" : "border-control",
             ),
         className,

@@ -73,7 +73,7 @@ function DeletionTable() {
             render: (row) => (
               <Link
                 href={`/ops/deletion-queue/${row.queueId}`}
-                className="font-semibold text-primary underline"
+                className="font-semibold text-primary underline clickable-link"
               >
                 {row.queueId}
               </Link>

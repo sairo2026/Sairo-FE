@@ -97,8 +97,7 @@ describe("표 규칙", () => {
   it("진입 주소가 있는 행은 호버 배경과 화살표를 갖고 행 전체가 링크 영역이다", () => {
     renderTable({ getRowHref: (row) => `/items/${row.id}` });
     const row = screen.getByText("아주아주 긴 매물 이름입니다").closest("tr");
-    expect(row?.className).toContain("hover:bg-primary-soft");
-    expect(row?.className).toContain("active:bg-primary-line");
+    expect(row?.className).toContain("clickable-table-row");
     expect(row?.querySelector('a[href="/items/1"]')).not.toBeNull();
     expect(row?.textContent).toContain("›");
   });
@@ -106,7 +105,7 @@ describe("표 규칙", () => {
   it("진입 주소가 없으면 호버 효과와 화살표를 두지 않는다", () => {
     renderTable();
     const row = screen.getByText("아주아주 긴 매물 이름입니다").closest("tr");
-    expect(row?.className).not.toContain("hover:bg-primary-soft");
+    expect(row?.className).not.toContain("clickable-table-row");
     expect(row?.textContent).not.toContain("›");
   });
 

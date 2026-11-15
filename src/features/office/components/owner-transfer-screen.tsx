@@ -270,7 +270,7 @@ export function OwnerTransferScreen() {
         actions={
           <Link
             href="/members"
-            className="inline-flex h-9 items-center rounded-control border border-line px-3.5 text-caption text-ink-2 hover:border-primary hover:text-primary"
+            className="inline-flex h-9 items-center rounded-control border border-line px-3.5 text-caption text-ink-2 clickable-control"
           >
             구성원 목록
           </Link>

@@ -9,7 +9,7 @@ import { logout } from "../api/auth-context.api";
 import { AUTH_ROUTES } from "../model/routes";
 
 const HEADER_LINK_CLASS =
-  "inline-flex h-9 items-center gap-1.5 rounded-control border border-line bg-white px-3.5 text-caption font-medium text-ink-2 transition-colors hover:border-primary hover:bg-primary-soft hover:text-primary active:bg-primary-line";
+  "inline-flex h-9 items-center gap-1.5 rounded-control border border-line bg-white px-3.5 text-caption font-medium text-ink-2 transition-colors clickable-control";
 
 /** 사무소 화면 상단의 알림, 내 계정, 지원, 로그아웃. 좁은 화면에서는 줄을 바꿔 그대로 보인다. */
 export function OfficeHeaderActions() {

@@ -58,7 +58,7 @@ export function Tabs({ label, items, activeKey, onActiveKeyChange }: TabsProps) 
                 "-mb-px border-b-2 pb-3 text-body font-semibold transition-colors disabled:cursor-not-allowed disabled:text-ink-3",
                 isActive
                   ? "border-primary text-primary"
-                  : "border-transparent text-ink hover:text-primary",
+                  : "border-transparent text-ink transition-colors hover:border-primary-line hover:bg-primary-soft hover:text-primary active:bg-primary-line",
               )}
             >
               {item.label}

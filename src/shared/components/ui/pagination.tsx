@@ -32,7 +32,7 @@ export function pageItems(page: number, pageCount: number): Array<number | null>
 }
 
 const stepClass =
-  "inline-flex h-9 min-w-[64px] items-center justify-center rounded-control border border-line bg-white px-3 text-caption font-medium text-ink-2 hover:border-primary hover:bg-primary-soft hover:text-primary active:bg-primary-line disabled:cursor-not-allowed disabled:border-line disabled:bg-surface disabled:text-ink-3 disabled:hover:bg-surface disabled:hover:text-ink-3";
+  "inline-flex h-9 min-w-[64px] items-center justify-center rounded-control border border-line bg-white px-3 text-caption font-medium text-ink-2 clickable-control disabled:cursor-not-allowed disabled:border-line disabled:bg-surface disabled:text-ink-3 disabled:hover:bg-surface disabled:hover:text-ink-3";
 
 /** 이전·다음과 쪽 번호. 현재 쪽은 채움색과 aria-current로 구분한다. */
 export function Pagination({ label, page, pageCount, onPageChange }: PaginationProps) {
@@ -63,7 +63,7 @@ export function Pagination({ label, page, pageCount, onPageChange }: PaginationP
                   "inline-flex h-9 min-w-9 items-center justify-center rounded-control px-2 text-caption tabular-nums",
                   item === page
                     ? "bg-primary font-semibold text-white"
-                    : "border border-line bg-white font-medium text-ink-2 hover:border-primary hover:bg-primary-soft hover:text-primary active:bg-primary-line",
+                    : "border border-line bg-white font-medium text-ink-2 clickable-control",
                 )}
               >
                 {item}

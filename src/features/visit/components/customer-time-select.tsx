@@ -89,7 +89,7 @@ export function CustomerTimeSelect({
                 "relative flex h-[58px] min-w-[72px] flex-1 items-center justify-center rounded-control border px-3 text-body font-medium transition-colors",
                 isActive
                   ? "border-primary bg-primary text-white hover:bg-primary-hover active:bg-primary-pressed"
-                  : "border-line bg-surface text-ink hover:border-primary hover:bg-primary-soft hover:text-primary active:bg-primary-line",
+                  : "border-line bg-surface text-ink clickable-control",
                 hasSelection && !isActive && "border-primary",
               )}
             >

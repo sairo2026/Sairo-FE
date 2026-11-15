@@ -258,10 +258,10 @@ export function OperatorListScreen() {
       roles={["SECURITY_ADMIN"]}
       actions={
         <span className="flex gap-4 text-body font-semibold text-primary">
-          <Link href="/ops/operators/invitations" className="underline">
+          <Link href="/ops/operators/invitations" className="underline clickable-link">
             운영자 초대 관리
           </Link>
-          <Link href="/ops/audit-log" className="underline">
+          <Link href="/ops/audit-log" className="underline clickable-link">
             감사 이력
           </Link>
         </span>

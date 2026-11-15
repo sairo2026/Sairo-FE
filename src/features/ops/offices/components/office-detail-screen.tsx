@@ -438,7 +438,10 @@ export function OfficeDetailScreen({ officeId }: { officeId: number }) {
       title="고객사 상세"
       roles={OPS_WORK_ROLES}
       actions={
-        <Link href="/ops/offices" className="text-body font-semibold text-primary underline">
+        <Link
+          href="/ops/offices"
+          className="text-body font-semibold text-primary underline clickable-link"
+        >
           목록으로
         </Link>
       }

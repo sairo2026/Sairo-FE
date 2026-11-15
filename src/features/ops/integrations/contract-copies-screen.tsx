@@ -214,7 +214,10 @@ export function ContractCopiesScreen({ integrationId }: { integrationId: number 
       description={`연동 ${integrationId}의 공급자 계약서와 처리 조건 사본을 보관합니다.`}
       roles={["PRIVACY"]}
       actions={
-        <Link href="/ops/integrations" className="text-body font-semibold text-primary underline">
+        <Link
+          href="/ops/integrations"
+          className="text-body font-semibold text-primary underline clickable-link"
+        >
           연동 목록으로
         </Link>
       }

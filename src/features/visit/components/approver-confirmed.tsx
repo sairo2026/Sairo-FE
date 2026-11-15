@@ -41,7 +41,7 @@ export function ApproverConfirmed({
         </p>
         <a
           href={`tel:${data.officeContactPhone}`}
-          className="text-body font-semibold text-primary underline hover:text-primary-hover active:text-primary-pressed"
+          className="text-body font-semibold text-primary underline clickable-link"
         >
           {data.officeContactPhone}
         </a>

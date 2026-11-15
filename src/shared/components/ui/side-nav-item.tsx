@@ -18,7 +18,9 @@ export function SideNavItem({ href, label, isActive = false, size = "lg" }: Side
       className={cn(
         "inline-block w-fit border-b-2 py-2 font-semibold transition-colors active:text-primary-pressed",
         size === "lg" ? "text-h3" : "text-h2",
-        isActive ? "border-primary text-primary" : "border-transparent text-ink hover:text-primary",
+        isActive
+          ? "border-primary text-primary"
+          : "border-transparent text-ink hover:border-primary-line hover:bg-primary-soft hover:text-primary",
       )}
     >
       {label}

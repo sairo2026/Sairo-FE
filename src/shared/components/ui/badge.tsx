@@ -76,17 +76,20 @@ export type ScheduleTagProps = {
   tone: BadgeTone;
   label: string;
   count: number;
+  /** 링크 안에 놓아 눌러서 이동하는 타일일 때만 켠다. 호버·눌림에서 타일 색이 한 단계 진해진다. */
+  isInteractive?: boolean;
   className?: string;
 };
 
 /** 홈의 조율 현황 칸. 상태 이름과 건수를 한 덩어리로 보여준다. 색만으로 뜻을 전하지 않도록 이름을 함께 쓴다. */
-export function ScheduleTag({ tone, label, count, className }: ScheduleTagProps) {
+export function ScheduleTag({ tone, label, count, isInteractive, className }: ScheduleTagProps) {
   return (
     <span
       data-tone={tone}
       className={cn(
         "flex min-h-[92px] min-w-[132px] flex-col justify-between rounded-control px-4 py-3",
-        toneClass[tone],
+        tone === "gray" ? "border border-line bg-white text-ink-2" : toneClass[tone],
+        isInteractive && "clickable-tile",
         className,
       )}
     >

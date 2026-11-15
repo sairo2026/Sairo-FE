@@ -193,3 +193,32 @@ describe("선택형 칩과 카드 상태", () => {
     expect(button.className).toContain("enabled:hover:border-primary");
   });
 });
+
+describe("숨긴 입력의 위치 기준", () => {
+  it("체크박스의 숨긴 입력은 relative 라벨 안에 고정되고 sr-only를 쓰지 않는다", () => {
+    render(<Checkbox label="동의" checked={false} onCheckedChange={() => {}} />);
+    const input = screen.getByRole("checkbox", { name: "동의" });
+    expect(input.closest("label")?.className).toContain("relative");
+    for (const name of ["absolute", "inset-0", "h-full", "w-full", "opacity-0"]) {
+      expect(input.className.split(" ")).toContain(name);
+    }
+    expect(input.className).not.toContain("sr-only");
+  });
+
+  it("라디오의 숨긴 입력도 relative 라벨 안에 고정된다", () => {
+    render(<Radio name="r" label="가" checked={false} onSelect={() => {}} />);
+    const input = screen.getByRole("radio", { name: "가" });
+    expect(input.closest("label")?.className).toContain("relative");
+    for (const name of ["absolute", "inset-0", "h-full", "w-full", "opacity-0"]) {
+      expect(input.className.split(" ")).toContain(name);
+    }
+    expect(input.className).not.toContain("sr-only");
+  });
+
+  it("토글은 숨긴 입력 없이 relative 단추 하나다", () => {
+    render(<Toggle label="보관 고객 보기" checked={false} onCheckedChange={() => {}} />);
+    const toggle = screen.getByRole("switch", { name: "보관 고객 보기" });
+    expect(toggle.tagName).toBe("BUTTON");
+    expect(toggle.className).toContain("relative");
+  });
+});

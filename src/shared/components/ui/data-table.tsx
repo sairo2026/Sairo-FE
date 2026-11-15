@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { cn } from "@/shared/lib/cn";
 import { Button } from "./button";
@@ -81,6 +82,16 @@ export function DataTable<Row>({
   getRowHref,
 }: DataTableProps<Row>) {
   const pageCount = Math.max(1, Math.ceil(totalCount / pageSize));
+  const holderRef = useRef<HTMLDivElement>(null);
+  const [heldHeight, setHeldHeight] = useState(0);
+
+  // 필터·토글로 다시 불러오는 동안 표가 자리표시 행 5개로 줄면 문서가 짧아져 브라우저가 스크롤 위치를 맨 위나 아래로 당긴다.
+  // 마지막으로 그려진 높이를 로딩 중에도 유지해 스크롤 위치가 바뀌지 않게 한다.
+  useEffect(() => {
+    if (isLoading) return;
+    const height = holderRef.current?.offsetHeight ?? 0;
+    setHeldHeight((previous) => (previous === height ? previous : height));
+  }, [isLoading, rows, errorMessage]);
 
   function handleSort(key: string) {
     if (!onSortChange) return;
@@ -95,138 +106,136 @@ export function DataTable<Row>({
 
   return (
     <div className="flex flex-col gap-4" aria-busy={isLoading || undefined}>
-      <TableScroll
-        label={caption}
-        className="max-h-[70vh] rounded-card-flat border border-line bg-white"
-      >
-        <table
-          className={cn(
-            "w-full border-collapse text-left",
-            columns.length >= WIDE_TABLE_COLUMNS && "min-w-[40rem]",
-          )}
+      <div ref={holderRef} style={isLoading && heldHeight ? { minHeight: heldHeight } : undefined}>
+        <TableScroll
+          label={caption}
+          className="max-h-[70vh] rounded-card-flat border border-line bg-white"
         >
-          <caption className="sr-only">{caption}</caption>
-          <thead>
-            <tr>
-              {columns.map((column) => (
-                <th
-                  key={column.key}
-                  scope="col"
-                  aria-sort={column.isSortable ? ariaSort(column.key) : undefined}
-                  className={cn(
-                    "sticky top-0 z-20 border-b border-line bg-surface px-4 py-3.5 text-caption font-semibold text-ink-2",
-                    column.align === "right" && "text-right",
-                  )}
-                >
-                  {column.isSortable ? (
-                    <button
-                      type="button"
-                      onClick={() => handleSort(column.key)}
-                      className="inline-flex items-center gap-1 hover:text-primary"
-                    >
-                      {column.header}
-                      <span aria-hidden="true">
-                        {sort?.key === column.key ? (sort.direction === "asc" ? "▲" : "▼") : "↕"}
-                      </span>
-                    </button>
-                  ) : (
-                    column.header
-                  )}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {errorMessage
-              ? null
-              : isLoading
-                ? Array.from({ length: 5 }, (_, index) => (
-                    <tr key={`loading-${index}`} aria-hidden="true">
-                      {columns.map((column) => (
-                        <td key={column.key} className="px-4 py-4">
-                          <span className="block h-4 animate-pulse rounded-small bg-surface" />
-                        </td>
-                      ))}
-                    </tr>
-                  ))
-                : rows.map((row) => {
-                    const href = getRowHref?.(row);
-                    return (
-                      <tr
-                        key={getRowId(row)}
-                        className={cn(
-                          "border-b border-line last:border-b-0",
-                          href &&
-                            "group relative transition-colors hover:bg-primary-soft active:bg-primary-line",
-                        )}
+          <table
+            className={cn(
+              "w-full border-collapse text-left",
+              columns.length >= WIDE_TABLE_COLUMNS && "min-w-[40rem]",
+            )}
+          >
+            <caption className="sr-only">{caption}</caption>
+            <thead>
+              <tr>
+                {columns.map((column) => (
+                  <th
+                    key={column.key}
+                    scope="col"
+                    aria-sort={column.isSortable ? ariaSort(column.key) : undefined}
+                    className={cn(
+                      "sticky top-0 z-20 border-b border-line bg-surface px-4 py-3.5 text-caption font-semibold text-ink-2",
+                      column.align === "right" && "text-right",
+                    )}
+                  >
+                    {column.isSortable ? (
+                      <button
+                        type="button"
+                        onClick={() => handleSort(column.key)}
+                        className="inline-flex items-center gap-1 hover:text-primary"
                       >
-                        {columns.map((column, columnIndex) => (
-                          <td
-                            key={column.key}
-                            className={cn(
-                              "px-4 py-4 text-body text-ink",
-                              column.align === "right" && "text-right tabular-nums",
-                              column.className,
-                            )}
-                          >
-                            {href && columnIndex === 0 ? (
-                              <Link
-                                href={href}
-                                aria-hidden="true"
-                                tabIndex={-1}
-                                className="absolute inset-0 z-0"
-                              />
-                            ) : null}
-                            <div
-                              className={cn(
-                                "flex items-center justify-between gap-3",
-                                href &&
-                                  "pointer-events-none relative z-10 [&_a]:pointer-events-auto [&_button]:pointer-events-auto [&_input]:pointer-events-auto [&_label]:pointer-events-auto [&_select]:pointer-events-auto",
-                              )}
-                            >
-                              <div
-                                className={cn(
-                                  "min-w-0",
-                                  column.align === "right" && "flex-1 text-right",
-                                )}
-                              >
-                                {cellContent(column, row)}
-                              </div>
-                              {href && columnIndex === columns.length - 1 ? (
-                                <span
-                                  aria-hidden="true"
-                                  className="text-ink-3 group-hover:text-primary"
-                                >
-                                  ›
-                                </span>
-                              ) : null}
-                            </div>
+                        {column.header}
+                        <span aria-hidden="true">
+                          {sort?.key === column.key ? (sort.direction === "asc" ? "▲" : "▼") : "↕"}
+                        </span>
+                      </button>
+                    ) : (
+                      column.header
+                    )}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {errorMessage
+                ? null
+                : isLoading
+                  ? Array.from({ length: 5 }, (_, index) => (
+                      <tr key={`loading-${index}`} aria-hidden="true">
+                        {columns.map((column) => (
+                          <td key={column.key} className="px-4 py-4">
+                            <span className="block h-4 animate-pulse rounded-small bg-surface" />
                           </td>
                         ))}
                       </tr>
-                    );
-                  })}
-          </tbody>
-        </table>
-        {isLoading ? (
-          <p role="status" className="sr-only">
-            불러오는 중입니다.
-          </p>
-        ) : null}
-        {errorMessage ? (
-          <div role="alert" className="flex flex-col items-center gap-3 px-4 py-12 text-center">
-            <p className="text-body text-ink">{errorMessage}</p>
-            {onRetry ? (
-              <Button variant="outlined" size="sm" onClick={onRetry}>
-                다시 시도
-              </Button>
-            ) : null}
-          </div>
-        ) : null}
-        {!errorMessage && !isLoading && rows.length === 0 ? (
-          <p className="px-4 py-12 text-center text-body text-ink-2">{emptyMessage}</p>
-        ) : null}
-      </TableScroll>
+                    ))
+                  : rows.map((row) => {
+                      const href = getRowHref?.(row);
+                      return (
+                        <tr
+                          key={getRowId(row)}
+                          className={cn(
+                            "border-b border-line last:border-b-0",
+                            href && "clickable-table-row group relative",
+                          )}
+                        >
+                          {columns.map((column, columnIndex) => (
+                            <td
+                              key={column.key}
+                              className={cn(
+                                "px-4 py-4 text-body text-ink",
+                                column.align === "right" && "text-right tabular-nums",
+                                column.className,
+                              )}
+                            >
+                              {href && columnIndex === 0 ? (
+                                <Link
+                                  href={href}
+                                  aria-hidden="true"
+                                  tabIndex={-1}
+                                  className="absolute inset-0 z-0"
+                                />
+                              ) : null}
+                              <div
+                                className={cn(
+                                  "flex items-center justify-between gap-3",
+                                  href &&
+                                    "pointer-events-none relative z-10 [&_a]:pointer-events-auto [&_button]:pointer-events-auto [&_input]:pointer-events-auto [&_label]:pointer-events-auto [&_select]:pointer-events-auto",
+                                )}
+                              >
+                                <div
+                                  className={cn(
+                                    "min-w-0",
+                                    column.align === "right" && "flex-1 text-right",
+                                  )}
+                                >
+                                  {cellContent(column, row)}
+                                </div>
+                                {href && columnIndex === columns.length - 1 ? (
+                                  <span aria-hidden="true" className="clickable-arrow">
+                                    ›
+                                  </span>
+                                ) : null}
+                              </div>
+                            </td>
+                          ))}
+                        </tr>
+                      );
+                    })}
+            </tbody>
+          </table>
+          {isLoading ? (
+            <p role="status" className="sr-only">
+              불러오는 중입니다.
+            </p>
+          ) : null}
+          {errorMessage ? (
+            <div role="alert" className="flex flex-col items-center gap-3 px-4 py-12 text-center">
+              <p className="text-body text-ink">{errorMessage}</p>
+              {onRetry ? (
+                <Button variant="outlined" size="sm" onClick={onRetry}>
+                  다시 시도
+                </Button>
+              ) : null}
+            </div>
+          ) : null}
+          {!errorMessage && !isLoading && rows.length === 0 ? (
+            <p className="px-4 py-12 text-center text-body text-ink-2">{emptyMessage}</p>
+          ) : null}
+        </TableScroll>
+      </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3 text-caption text-ink-2">
         <p>총 {formatCount(totalCount)}건</p>

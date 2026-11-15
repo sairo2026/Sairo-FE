@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 const GUIDE_LINK_CLASS =
-  "inline-flex min-h-12 items-center justify-center rounded-control border border-primary bg-primary-soft px-6 text-body font-semibold text-primary hover:bg-primary-line";
+  "inline-flex min-h-12 items-center justify-center rounded-control border border-primary bg-primary-soft px-6 text-body font-semibold text-primary hover:bg-primary-line hover:shadow-[0_2px_8px_rgb(51_53_166/0.18)] active:bg-primary-line active:shadow-none";
 
 export default function ComingSoonPage() {
   return (

@@ -315,7 +315,10 @@ function LeadBody({ lead, refetch }: { lead: LeadDetail; refetch: () => void }) 
         />
       ) : null}
       <p className="text-caption text-ink-2">
-        <Link href="/ops/enterprise-leads" className="font-semibold text-primary underline">
+        <Link
+          href="/ops/enterprise-leads"
+          className="font-semibold text-primary underline clickable-link"
+        >
           목록으로
         </Link>
       </p>

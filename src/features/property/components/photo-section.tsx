@@ -52,7 +52,7 @@ function PhotoPicker({
 }) {
   return (
     <div className="flex flex-col gap-2">
-      <label className="inline-flex w-fit cursor-pointer items-center rounded-control border border-primary bg-primary-soft px-4 py-2 text-caption font-semibold text-primary hover:bg-primary-line">
+      <label className="relative inline-flex w-fit cursor-pointer items-center rounded-control border border-primary bg-primary-soft px-4 py-2 text-caption font-semibold text-primary hover:bg-primary-line">
         사진 추가
         <input
           type="file"

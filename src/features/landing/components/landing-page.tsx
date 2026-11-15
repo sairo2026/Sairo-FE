@@ -23,9 +23,8 @@ const SECTION_LEAD = "mt-3 max-w-2xl text-body text-ink-2";
 const ENTRY_TONE = {
   primary: "bg-primary font-bold text-white hover:bg-primary-hover active:bg-primary-pressed",
   outlined:
-    "border border-primary bg-primary-soft font-semibold text-primary hover:bg-primary-line",
-  ghost:
-    "border border-line bg-white font-medium text-ink-2 hover:border-primary hover:text-primary",
+    "border border-primary bg-primary-soft font-semibold text-primary hover:bg-primary-line hover:shadow-[0_2px_8px_rgb(51_53_166/0.18)] active:bg-primary-line active:shadow-none",
+  ghost: "border border-line bg-white font-medium text-ink-2 clickable-control",
 } as const;
 
 function EntryLink({
@@ -286,7 +285,7 @@ export function LandingPage({ pricing, footer }: LandingPageProps) {
                       <p className="mt-3">
                         <Link
                           href={item.link.href}
-                          className="font-semibold text-primary underline"
+                          className="font-semibold text-primary underline clickable-link"
                         >
                           {item.link.label}
                         </Link>

@@ -390,7 +390,7 @@ function DetailBody({ property }: { property: PropertyDetailResponse }) {
         <div className="flex flex-wrap gap-2">
           <Link
             href="/properties"
-            className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 hover:border-primary hover:text-primary"
+            className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 clickable-control"
           >
             목록
           </Link>
@@ -406,25 +406,25 @@ function DetailBody({ property }: { property: PropertyDetailResponse }) {
             <>
               <Link
                 href={`/properties/${property.propertyId}/access-approvals`}
-                className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 hover:border-primary hover:text-primary"
+                className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 clickable-control"
               >
                 출입승인
               </Link>
               <Link
                 href={`/properties/${property.propertyId}/cross-office`}
-                className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 hover:border-primary hover:text-primary"
+                className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 clickable-control"
               >
                 다른 사무소 신청 현황
               </Link>
               <Link
                 href={`/coordinations/new?propertyId=${property.propertyId}`}
-                className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 hover:border-primary hover:text-primary"
+                className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 clickable-control"
               >
                 방문 조율 시작
               </Link>
               <Link
                 href={`/contracts/new?propertyId=${property.propertyId}`}
-                className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 hover:border-primary hover:text-primary"
+                className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 clickable-control"
               >
                 계약 등록
               </Link>

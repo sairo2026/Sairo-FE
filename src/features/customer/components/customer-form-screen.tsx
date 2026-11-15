@@ -424,7 +424,7 @@ export function CustomerEditScreen({ customerId }: { customerId: number }) {
             {detail.mergedIntoCustomerId ? (
               <Link
                 href={`/customers/${detail.mergedIntoCustomerId}`}
-                className="underline hover:opacity-70 active:opacity-50"
+                className="underline clickable-link"
               >
                 남은 고객으로 이동
               </Link>
@@ -433,10 +433,7 @@ export function CustomerEditScreen({ customerId }: { customerId: number }) {
         ) : detail.deletedAt ? (
           <FormAlert>
             보관된 고객은 수정할 수 없습니다. 고객 상세에서 복원한 뒤 수정해 주세요.{" "}
-            <Link
-              href={`/customers/${customerId}`}
-              className="underline hover:opacity-70 active:opacity-50"
-            >
+            <Link href={`/customers/${customerId}`} className="underline clickable-link">
               상세로 돌아가기
             </Link>
           </FormAlert>

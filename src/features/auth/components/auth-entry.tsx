@@ -48,20 +48,14 @@ export function AuthEntry({
             {isLogin ? (
               <>
                 아직 계정이 없나요?{" "}
-                <Link
-                  href="/signup"
-                  className="font-semibold text-primary hover:text-primary-hover hover:underline active:text-primary-pressed"
-                >
+                <Link href="/signup" className="font-semibold text-primary clickable-link">
                   회원가입
                 </Link>
               </>
             ) : (
               <>
                 이미 계정이 있나요?{" "}
-                <Link
-                  href="/login"
-                  className="font-semibold text-primary hover:text-primary-hover hover:underline active:text-primary-pressed"
-                >
+                <Link href="/login" className="font-semibold text-primary clickable-link">
                   로그인
                 </Link>
               </>

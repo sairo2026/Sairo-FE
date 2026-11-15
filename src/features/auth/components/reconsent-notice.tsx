@@ -157,29 +157,23 @@ export function ReconsentNotice() {
           </Button>
           <Link
             href={AUTH_ROUTES.withdrawal}
-            className="inline-flex h-12 items-center rounded-control border border-line px-6 font-medium text-ink-2 hover:border-primary hover:text-primary"
+            className="inline-flex h-12 items-center rounded-control border border-line px-6 font-medium text-ink-2 clickable-control"
           >
             회원 탈퇴
           </Link>
         </div>
         <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-caption font-semibold text-ink-2">
-          <Link
-            href={AUTH_ROUTES.privacyRequests}
-            className="hover:text-primary hover:underline active:text-primary-pressed"
-          >
+          <Link href={AUTH_ROUTES.privacyRequests} className="clickable-link">
             개인정보 권리 요청
           </Link>
-          <Link
-            href={AUTH_ROUTES.support}
-            className="hover:text-primary hover:underline active:text-primary-pressed"
-          >
+          <Link href={AUTH_ROUTES.support} className="clickable-link">
             지원 문의
           </Link>
           <button
             type="button"
             disabled={logoutMutation.isPending}
             onClick={() => logoutMutation.mutate()}
-            className="font-semibold hover:text-primary hover:underline active:text-primary-pressed"
+            className="font-semibold clickable-link"
           >
             로그아웃
           </button>
