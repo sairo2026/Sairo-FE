@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import type { BillingPlanListResponse } from "@/lib/api/contracts/billing.schema";
-import { MutedNote, StatusBadge } from "@/shared/components/feedback/page-parts";
+import { MutedNote, StatusBadge, TextLink } from "@/shared/components/feedback/page-parts";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
 import { Card } from "@/shared/components/ui/card";
 import { PageHeader } from "@/shared/components/ui/page-header";
@@ -91,6 +91,16 @@ function PlansView({ data }: { data: BillingPlanListResponse }) {
           실제 청구는 결제 심사 완료 후 시작합니다. 요금제는 연 결제 없이 월 선불 자동결제입니다.
         </MutedNote>
       </Card>
+      <Card title="결제 준비">
+        <p className="mb-3 text-body text-ink">
+          카드 등록과 구독 구매 동의를 마치면 결제 준비가 끝납니다. 두 단계 모두 그 자리에서
+          결제되지 않습니다.
+        </p>
+        <div className="flex flex-wrap gap-4">
+          <TextLink href="/billing/card">카드 등록하기</TextLink>
+          <TextLink href="/billing/consent">구독 구매 동의하기</TextLink>
+        </div>
+      </Card>
     </div>
   );
 }
@@ -102,6 +112,7 @@ export function BillingPlansScreen() {
       <PageHeader
         title="요금제 안내"
         description="사무소 단위 월 구독 요금과 현재 인원 기준 예상 금액입니다."
+        actions={<TextLink href="/billing">구독 현황으로</TextLink>}
       />
       <QueryGate query={query} loadingLabel="요금제를 불러오는 중입니다.">
         {(data) => <PlansView data={data} />}

@@ -840,7 +840,13 @@ export function PropertyEditScreen({ propertyId }: { propertyId: number }) {
       {(detail) =>
         detail.deletedAt ? (
           <FormAlert>
-            보관된 매물은 수정할 수 없습니다. 매물 상세에서 복원한 뒤 수정해 주세요.
+            보관된 매물은 수정할 수 없습니다. 매물 상세에서 복원한 뒤 수정해 주세요.{" "}
+            <Link
+              href={`/properties/${propertyId}`}
+              className="underline hover:opacity-70 active:opacity-50"
+            >
+              상세로 돌아가기
+            </Link>
           </FormAlert>
         ) : (
           <PropertyForm

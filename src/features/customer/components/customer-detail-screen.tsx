@@ -47,8 +47,13 @@ function ContractList({ title, items }: { title: string; items: Contract[] }) {
         <ul className="flex flex-col gap-2">
           {items.map((item) => (
             <li key={item.contractId} className="text-body text-ink">
-              {item.propertyName} ·{" "}
-              {isDealType(item.dealType) ? DEAL_TYPE_LABEL[item.dealType] : item.dealType} ·{" "}
+              <Link
+                href={`/contracts/${item.contractId}`}
+                className="font-semibold text-primary hover:underline"
+              >
+                {item.propertyName}
+              </Link>{" "}
+              · {isDealType(item.dealType) ? DEAL_TYPE_LABEL[item.dealType] : item.dealType} ·{" "}
               {labelOf(CONTRACT_STATUS_LABEL, item.contractStatus)} ·{" "}
               {item.signedDate ? `체결 ${formatSeoulDate(item.signedDate)}` : "체결일 미정"}
             </li>
@@ -126,9 +131,14 @@ function ActivityPanel({ customer }: { customer: CustomerDetail }) {
                 key={visit.coordinationId}
                 className="flex flex-wrap items-center gap-2 text-body text-ink"
               >
-                <CoordinationStatusBadge status={visit.status} compact />{" "}
-                {formatSeoulDate(visit.periodStartDate)} ~ {formatSeoulDate(visit.periodEndDate)} ·
-                후보 매물 {visit.candidatePropertyCount}개
+                <CoordinationStatusBadge status={visit.status} compact />
+                <Link
+                  href={`/coordinations/${visit.coordinationId}`}
+                  className="font-semibold text-primary hover:underline"
+                >
+                  {formatSeoulDate(visit.periodStartDate)} ~ {formatSeoulDate(visit.periodEndDate)}
+                </Link>
+                <span>후보 매물 {visit.candidatePropertyCount}개</span>
               </li>
             ))}
           </ul>
@@ -276,6 +286,12 @@ function DetailBody({ customer }: { customer: CustomerDetail }) {
             </Button>
           ) : (
             <>
+              <Link
+                href={`/coordinations/new?customerId=${customer.customerId}`}
+                className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 hover:border-primary hover:text-primary"
+              >
+                방문 조율 시작
+              </Link>
               <Link
                 href={`/customers/${customer.customerId}/edit`}
                 className="inline-flex h-12 items-center rounded-control bg-primary px-6 text-body font-bold text-white hover:bg-primary-hover"

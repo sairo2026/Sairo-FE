@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { http } from "msw";
+import { HttpResponse, http } from "msw";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { errorResponse, mockErrors } from "@/mocks/error-responses";
 import { migrationState, resetMigrationState } from "@/mocks/handlers/migration";
@@ -136,6 +136,80 @@ describe("데이터 내보내기", () => {
     const link = await screen.findByRole("link", { name: "파일 내려받기" });
     expect(link.getAttribute("href")).toBe("https://files.example.test/signed/901");
   });
+
+  it("같은 이력의 받기를 다시 누르면 새 내려받기 주소를 받는다", async () => {
+    let calls = 0;
+    server.use(
+      http.get("/api/exports/:exportId", ({ params }) => {
+        if (params.exportId === "allowed-tables") return undefined;
+        calls += 1;
+        return HttpResponse.json({
+          exportId: 901,
+          status: "COMPLETED",
+          downloadUrl: `https://files.example.test/signed/901-${calls}`,
+          expiresAt: "2026-11-10T09:10:00+09:00",
+          fileExpiresAt: "2026-11-11T09:00:00+09:00",
+          failureReason: null,
+        });
+      }),
+    );
+    const user = userEvent.setup();
+    renderOffice(<ExportsScreen />, { role: "OWNER" });
+    await user.click(await screen.findByRole("button", { name: "내려받기 주소 받기" }));
+    expect((await screen.findByRole("link", { name: "파일 내려받기" })).getAttribute("href")).toBe(
+      "https://files.example.test/signed/901-1",
+    );
+    await user.click(screen.getByRole("button", { name: "내려받기 주소 받기" }));
+    await waitFor(() =>
+      expect(screen.getByRole("link", { name: "파일 내려받기" }).getAttribute("href")).toBe(
+        "https://files.example.test/signed/901-2",
+      ),
+    );
+  });
+
+  it("진행 중이던 내보내기가 끝나면 이력도 다시 불러온다", async () => {
+    let detailCalls = 0;
+    let finished = false;
+    server.use(
+      http.get("/api/exports/:exportId", ({ params }) => {
+        if (params.exportId === "allowed-tables") return undefined;
+        detailCalls += 1;
+        finished = detailCalls >= 2;
+        return HttpResponse.json({
+          exportId: 920,
+          status: finished ? "COMPLETED" : "PROCESSING",
+          downloadUrl: finished ? "https://files.example.test/signed/920" : null,
+          expiresAt: finished ? "2026-11-10T09:10:00+09:00" : null,
+          fileExpiresAt: "2026-11-11T09:00:00+09:00",
+          failureReason: null,
+        });
+      }),
+      http.get("/api/exports", () =>
+        HttpResponse.json({
+          items: finished
+            ? [
+                {
+                  exportId: 920,
+                  scope: "FULL",
+                  status: "COMPLETED",
+                  createdAt: "2026-11-10T09:00:00+09:00",
+                  fileExpiresAt: "2026-11-11T09:00:00+09:00",
+                },
+              ]
+            : [],
+          page: 0,
+          size: 25,
+          totalElements: finished ? 1 : 0,
+        }),
+      ),
+    );
+    const user = userEvent.setup();
+    renderOffice(<ExportsScreen />, { role: "OWNER" });
+    await user.click(await screen.findByRole("button", { name: "내보내기 만들기" }));
+    await screen.findByRole("link", { name: "파일 내려받기" }, { timeout: 8000 });
+    const table = await screen.findByRole("table", { name: "최근 내보내기" });
+    expect(await within(table).findByText("완료")).not.toBeNull();
+  }, 15000);
 
   it("만료된 내보내기는 다시 만들라고 안내한다", async () => {
     const first = supportState.exports[0];

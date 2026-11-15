@@ -78,7 +78,7 @@ function initialState(): MockMigrationState {
       buildMockBatch({
         batchId: 301,
         status: "COMPLETED",
-        counts: { total: 60, succeeded: 55, failed: 5, unprocessed: 0 },
+        counts: { total: 60, succeeded: 55, failed: 5, skippedDuplicate: 0, unprocessed: 0 },
         executedAt: "2026-11-09T10:30:00+09:00",
         cancellableUntil: futureIso(48),
         failureReason: "5건이 형식 오류로 실패했습니다.",
@@ -158,6 +158,7 @@ function previewRow(index: number): PreviewRow {
   const number = index + 1;
   const hasError = number % 7 === 0;
   const hasWarning = !hasError && number % 5 === 0;
+  const isDuplicate = number === 11;
   return {
     sourceRowNumber: number + 1,
     sourceValues: { 고객번호: `C-${number}`, 성명: hasError ? null : `고객${number}` },
@@ -189,6 +190,8 @@ function previewRow(index: number): PreviewRow {
             },
           ]
         : [],
+    duplicateJudgement: isDuplicate ? "DUPLICATE_EXISTING" : "NEW",
+    matchedTargetId: isDuplicate ? 88 : null,
   };
 }
 
@@ -234,7 +237,14 @@ function advanceExecution(batch: MockBatch) {
   batch.executeTicks += 1;
   const done = Math.min(total, batch.executeTicks * 30);
   const failed = Math.floor(done / 12);
-  batch.detail.counts = { total, succeeded: done - failed, failed, unprocessed: total - done };
+  const skippedDuplicate = done > 0 ? 1 : 0;
+  batch.detail.counts = {
+    total,
+    succeeded: done - failed - skippedDuplicate,
+    failed,
+    skippedDuplicate,
+    unprocessed: total - done,
+  };
   if (done >= total) {
     batch.detail.status = "COMPLETED";
     batch.detail.executedAt = NOW;
@@ -412,6 +422,8 @@ export const migrationHandlers = [
           sourceType: "CUSTOMER",
           sourceId: "C-11",
           existingTargetId: 88,
+          reason: "DUPLICATE_EXISTING",
+          existingArchived: false,
         },
       ],
       summary: {
@@ -419,6 +431,10 @@ export const migrationHandlers = [
         errorRowCount: errorRows,
         warningCount: warningRows,
         duplicateCount: 1,
+        newCount: total - errorRows - 1,
+        alreadyImportedCount: 0,
+        duplicateInFileCount: 0,
+        duplicateExistingCount: 1,
         relationMatchCount: all.filter((row) => (row.relationMatches?.length ?? 0) > 0).length,
       },
       page,
@@ -448,6 +464,7 @@ export const migrationHandlers = [
       total: migrationState.previewRowCount,
       succeeded: 0,
       failed: 0,
+      skippedDuplicate: 0,
       unprocessed: migrationState.previewRowCount,
     };
     batch.executeTicks = 0;

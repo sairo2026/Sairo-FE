@@ -220,7 +220,9 @@ function monthProblem(yearMonth: string | readonly string[] | undefined) {
     return mockErrors.validation([{ field: "yearMonth", message: "형식이 올바르지 않습니다." }]);
   }
   if (value > currentMonthKst() || value < state.officeCreatedYearMonth) {
-    return mockErrors.validation([{ field: "yearMonth", message: "조회할 수 없는 월입니다." }]);
+    return mockErrors.validation([
+      { field: "yearMonth", code: "OUT_OF_RANGE", message: "조회할 수 없는 월입니다." },
+    ]);
   }
   return null;
 }

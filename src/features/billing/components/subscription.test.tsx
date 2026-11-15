@@ -1,12 +1,13 @@
 // @vitest-environment jsdom
 import { cleanup, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { http } from "msw";
+import { http, HttpResponse } from "msw";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { errorResponse, mockErrors } from "@/mocks/error-responses";
 import { billingState, buildSubscription, resetBillingState } from "@/mocks/handlers/billing";
 import { server, startMockServer } from "@/mocks/server";
 import { renderOffice } from "@/shared/testing/office-render";
+import { subscriptionRefetchInterval } from "../hooks/billing-queries";
 import { SubscriptionScreen, trialReminder } from "./subscription-screen";
 
 vi.mock("next/navigation", () => ({
@@ -99,6 +100,10 @@ describe("구독 현황", () => {
     expect(await screen.findByText(/실제 청구가 시작된 것이 아닙니다/)).not.toBeNull();
     expect(screen.getByText(/결제 전 상태 시작 2027-01-09 00:00/)).not.toBeNull();
     await user.click(screen.getByRole("button", { name: "지금 결제" }));
+    expect(billingState.subscription.status).toBe("PRE_PAYMENT");
+    await user.click(
+      within(await screen.findByRole("dialog")).getByRole("button", { name: "결제하기" }),
+    );
     await waitFor(() => expect(billingState.subscription.status).toBe("ACTIVE"));
     expect(await screen.findByText("결제가 완료됐습니다.")).not.toBeNull();
   });
@@ -123,6 +128,9 @@ describe("구독 현황", () => {
     const user = userEvent.setup();
     show();
     await user.click(await screen.findByRole("button", { name: "지금 결제" }));
+    await user.click(
+      within(await screen.findByRole("dialog")).getByRole("button", { name: "결제하기" }),
+    );
     expect((await screen.findByRole("alert")).textContent).toContain("결제된 금액은 없습니다");
   });
 
@@ -215,7 +223,10 @@ describe("구독 현황", () => {
     });
     show();
     expect(await screen.findByText("2027-04-10까지 자료를 내보낼 수 있습니다.")).not.toBeNull();
-    expect(screen.getByRole("button", { name: "지금 재결제" })).not.toBeNull();
+    expect(screen.getByRole("button", { name: "다시 구독하기" })).not.toBeNull();
+    expect(screen.queryByRole("button", { name: "지금 재결제" })).toBeNull();
+    expect(screen.getByRole("list", { name: "결제 준비 상태" })).not.toBeNull();
+    expect(screen.getByRole("link", { name: "자료 내보내기 안내 보기" })).not.toBeNull();
   });
 
   it("해지를 예약하면 종료 시각을 알리고 예약 취소 버튼으로 바뀐다", async () => {
@@ -313,5 +324,164 @@ describe("무료 종료 안내 시점", () => {
 
   it("종료 시각이 없으면 안내하지 않는다", () => {
     expect(trialReminder(null)).toBeNull();
+  });
+});
+
+const READY = {
+  readiness: { hasBillingKey: true, hasValidConsent: true },
+  paymentMethod: {
+    cardIssuer: "신한카드",
+    cardLast4: "1234",
+    registeredAt: "2026-11-10T09:00:00+09:00",
+  },
+};
+
+describe("구독 흐름 보완", () => {
+  it("무료 종료 시각을 서버 시각 그대로 보여준다", async () => {
+    billingState.subscription = buildSubscription({ trialEndsAt: "2027-01-08T00:00:00+09:00" });
+    show();
+    expect(await screen.findByText(/무료 종료 예정 2027-01-08 00:00 ·/)).not.toBeNull();
+  });
+
+  it("결제 전 상태는 결제 예정 금액과 카드와 결제 기한을 보여주고 결제 전에 확인창을 거친다", async () => {
+    billingState.subscription = buildSubscription({
+      status: "PRE_PAYMENT",
+      prePaymentSince: "2027-01-09T00:00:00+09:00",
+      currentPeriodEnd: "2027-02-08T00:00:00+09:00",
+      ...READY,
+    });
+    const user = userEvent.setup();
+    show();
+    expect(await screen.findByText("59,900원 (VAT 포함)")).not.toBeNull();
+    expect(screen.getAllByText("신한카드 끝자리 1234").length).toBeGreaterThan(0);
+    expect(screen.getByText("2027-02-08 00:00")).not.toBeNull();
+    expect(screen.getByText(/기한까지 결제하지 않으면 구독이 종료됩니다/)).not.toBeNull();
+    await user.click(screen.getByRole("button", { name: "지금 결제" }));
+    const dialog = await screen.findByRole("dialog");
+    expect(dialog.textContent).toContain("59,900원(부가가치세 포함)을 지금 결제합니다");
+    await user.click(within(dialog).getByRole("button", { name: "취소" }));
+    expect(billingState.subscription.status).toBe("PRE_PAYMENT");
+  });
+
+  it("결제 결과를 확인 중이면 완료라고 하지 않고 확인 중 안내를 보이며 결제 버튼을 막는다", async () => {
+    billingState.subscription = buildSubscription({ status: "PRE_PAYMENT", ...READY });
+    server.use(
+      http.post("/api/subscriptions/first-payment", () => {
+        billingState.subscription = {
+          ...billingState.subscription,
+          latestInvoice: { invoiceId: 9, status: "VERIFYING" },
+        };
+        return HttpResponse.json({ status: "PRE_PAYMENT" });
+      }),
+    );
+    const user = userEvent.setup();
+    show();
+    await user.click(await screen.findByRole("button", { name: "지금 결제" }));
+    await user.click(
+      within(await screen.findByRole("dialog")).getByRole("button", { name: "결제하기" }),
+    );
+    expect(await screen.findByText(/결제사에 결제 결과를 확인하고 있습니다/)).not.toBeNull();
+    expect(screen.queryByText("결제가 완료됐습니다.")).toBeNull();
+    expect(screen.getByText(/지금은 다시 결제할 수 없습니다/)).not.toBeNull();
+    expect(screen.getByRole("button", { name: "지금 결제" }).getAttribute("aria-disabled")).toBe(
+      "true",
+    );
+  });
+
+  it("미납 상태의 재결제도 확인 중이면 완료라고 하지 않는다", async () => {
+    billingState.subscription = buildSubscription({
+      status: "PAST_DUE_GRACE",
+      canRetryPayment: true,
+    });
+    server.use(
+      http.post("/api/subscriptions/retry-payment", () => {
+        billingState.subscription = {
+          ...billingState.subscription,
+          latestInvoice: { invoiceId: 9, status: "VERIFYING" },
+        };
+        return HttpResponse.json({ status: "PAST_DUE_GRACE" });
+      }),
+    );
+    const user = userEvent.setup();
+    show();
+    await user.click(await screen.findByRole("button", { name: "지금 재결제" }));
+    expect(await screen.findByText(/결제사에 결제 결과를 확인하고 있습니다/)).not.toBeNull();
+    expect(screen.queryByText("결제가 완료됐습니다.")).toBeNull();
+  });
+
+  it("처리 중이거나 확인 중인 청구서가 있을 때만 구독 현황을 다시 조회한다", () => {
+    const base = buildSubscription();
+    const withInvoice = (status: string) => ({ ...base, latestInvoice: { invoiceId: 1, status } });
+    expect(subscriptionRefetchInterval(undefined)).toBe(false);
+    expect(subscriptionRefetchInterval(base)).toBe(false);
+    expect(subscriptionRefetchInterval(withInvoice("PAID"))).toBe(false);
+    expect(subscriptionRefetchInterval(withInvoice("VERIFYING"))).toBe(10_000);
+    expect(subscriptionRefetchInterval(withInvoice("PROCESSING"))).toBe(10_000);
+  });
+
+  it("미납 상태에서도 해지할 수 있고 즉시 종료임을 확인창에서 알린다", async () => {
+    billingState.subscription = buildSubscription({
+      status: "PAST_DUE_RESTRICTED",
+      canRetryPayment: true,
+    });
+    const user = userEvent.setup();
+    show();
+    await user.click(await screen.findByRole("button", { name: "구독 해지" }));
+    const dialog = await screen.findByRole("dialog");
+    expect(dialog.textContent).toContain("구독이 지금 바로 종료됩니다");
+    expect(within(dialog).queryByRole("link", { name: "지금 바로 종료" })).toBeNull();
+    await user.click(within(dialog).getByRole("button", { name: "지금 해지" }));
+    expect(await screen.findByText(/구독이 종료됐습니다. 종료 후 30일 동안/)).not.toBeNull();
+  });
+
+  it("결제 전 상태의 해지 버튼도 즉시 종료 확인창을 연다", async () => {
+    billingState.subscription = buildSubscription({ status: "PRE_PAYMENT" });
+    const user = userEvent.setup();
+    show();
+    await user.click(await screen.findByRole("button", { name: "구독 해지" }));
+    expect((await screen.findByRole("dialog")).textContent).toContain("지금 바로 종료됩니다");
+  });
+
+  it("해지 예약 확인창에서 사무소 바로 종료로 갈 수 있다", async () => {
+    billingState.subscription = buildSubscription({ status: "ACTIVE", ...READY });
+    const user = userEvent.setup();
+    show();
+    await user.click(await screen.findByRole("button", { name: "해지 예약" }));
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByRole("link", { name: "지금 바로 종료" }).getAttribute("href")).toBe(
+      "/office/close",
+    );
+  });
+
+  it("구독 중에 카드나 동의가 없으면 준비 상태와 경고를 보여준다", async () => {
+    billingState.subscription = buildSubscription({
+      status: "ACTIVE",
+      readiness: { hasBillingKey: true, hasValidConsent: false },
+      paymentMethod: READY.paymentMethod,
+    });
+    show();
+    expect(await screen.findByText(/자동결제 준비가 끝나지 않아/)).not.toBeNull();
+    const list = screen.getByRole("list", { name: "결제 준비 상태" });
+    expect(within(list).getAllByText("필요")).toHaveLength(1);
+    expect(screen.getByText(/다시 동의가 필요한 상태입니다/)).not.toBeNull();
+    expect(screen.getByRole("link", { name: "구독 구매 동의하기" })).not.toBeNull();
+  });
+
+  it("구독 중에 준비가 끝났으면 경고를 숨긴다", async () => {
+    billingState.subscription = buildSubscription({ status: "ACTIVE", ...READY });
+    show();
+    await screen.findByText("구독 중");
+    expect(screen.queryByText(/자동결제 준비가 끝나지 않아/)).toBeNull();
+  });
+
+  it("카드를 쓸 수 없으면 카드 교체 링크를 같은 자리에 보여준다", async () => {
+    billingState.subscription = buildSubscription({
+      status: "PAST_DUE_GRACE",
+      latestInvoice: { invoiceId: 5, status: "FAILED", lastFailureCategory: "CARD_UNUSABLE" },
+    });
+    show();
+    expect((await screen.findByRole("link", { name: "카드 교체" })).getAttribute("href")).toBe(
+      "/billing/card",
+    );
   });
 });

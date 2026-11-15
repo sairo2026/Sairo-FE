@@ -27,7 +27,7 @@ import {
 } from "../model/labels";
 import { describeOfficeError, fieldErrorMap, isApiCode } from "../model/messages";
 import { formatBusinessNumber, isValidPhone, validateChangeRequest } from "../model/validation";
-import { DetailList, MutedNote } from "@/shared/components/feedback/page-parts";
+import { DetailList, MutedNote, TextLink } from "@/shared/components/feedback/page-parts";
 
 const CHANGE_FIELDS: Record<
   string,
@@ -44,6 +44,21 @@ const CHANGE_FIELDS: Record<
     { key: "representativePhone", label: "새 대표자 연락처", kind: "tel" },
   ],
 };
+
+const OWNER_TOOL_LINKS = [
+  {
+    href: "/billing",
+    label: "구독·결제",
+    description: "구독 상태와 결제수단, 청구 내역을 봅니다.",
+  },
+  { href: "/exports", label: "데이터 내보내기", description: "사무소 자료를 파일로 내려받습니다." },
+  { href: "/import", label: "데이터 이전", description: "예전에 쓰던 엑셀 자료를 옮겨 옵니다." },
+  {
+    href: "/office/close",
+    label: "사무소 종료",
+    description: "사무소를 종료하고 자료 반환 기간을 시작합니다.",
+  },
+] as const;
 
 const CHANGE_STATUS_TONE = { PENDING_REVIEW: "blue", APPROVED: "green", REJECTED: "red" } as const;
 
@@ -390,6 +405,18 @@ export function OfficeInfoScreen() {
                     </div>
                   ) : null}
                   <ChangeRequestList />
+                </div>
+              </Card>
+            ) : null}
+            {isOwner ? (
+              <Card title="사무소 운영">
+                <div className="flex flex-col gap-3">
+                  {OWNER_TOOL_LINKS.map((item) => (
+                    <div key={item.href} className="flex flex-col gap-0.5">
+                      <TextLink href={item.href}>{item.label}</TextLink>
+                      <MutedNote>{item.description}</MutedNote>
+                    </div>
+                  ))}
                 </div>
               </Card>
             ) : null}

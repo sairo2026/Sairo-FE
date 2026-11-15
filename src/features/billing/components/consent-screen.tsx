@@ -23,6 +23,7 @@ import { PLAN_LABEL } from "../model/labels";
 import { CONSENT_COPY, consentSummaryLine } from "../model/legal-copy";
 import { COPY, describeBillingError } from "../model/messages";
 import { CommerceNotice } from "./commerce-notice";
+import { ReadinessNextStep } from "./readiness-next-step";
 
 const REFETCH_CODES = ["CONSENT_TERMS_MISMATCH", "TERMS_VERSION_CHANGED"];
 
@@ -80,9 +81,9 @@ function ConsentForm({
         agreed: true,
       }),
     onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: billingKeys.subscription });
       setError(undefined);
       setDone(true);
-      await queryClient.invalidateQueries({ queryKey: billingKeys.subscription });
     },
     onError: (caught) => {
       const message = consentErrorMessage(caught, preview.errorMessages);
@@ -117,7 +118,7 @@ function ConsentForm({
               : null,
           )}
         </FormNotice>
-        <TextLink href="/billing">구독 현황으로</TextLink>
+        <ReadinessNextStep subscription={subscription.data} completed="consent" />
       </div>
     );
   }

@@ -162,7 +162,7 @@ export function OfficeCloseScreen() {
             <Button isLoading={mutation.isPending} onClick={submit}>
               {COPY.closeSubmit}
             </Button>
-            <TextLink href="/account">취소</TextLink>
+            <TextLink href="/office">취소</TextLink>
           </div>
         </div>
       </Card>

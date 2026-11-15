@@ -144,7 +144,7 @@ function MemberListTab({ status, isOwner }: { status?: "SUSPENDED"; isOwner: boo
       columns={isOwner ? [...base, ...ownerColumns] : base}
       rows={query.data?.items ?? []}
       getRowId={(row) => String(row.membershipId)}
-      getRowHref={(row) => `/members/${row.membershipId}`}
+      getRowHref={isOwner ? (row) => `/members/${row.membershipId}` : undefined}
       totalCount={query.data?.totalElements ?? 0}
       page={table.page}
       pageSize={table.size}

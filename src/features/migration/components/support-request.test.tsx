@@ -270,7 +270,10 @@ describe("이전 지원 진행 화면", () => {
     const user = userEvent.setup();
     open();
     expect(await screen.findByText("93%")).not.toBeNull();
+    expect(screen.getByText("고객명")).not.toBeNull();
+    expect(screen.queryByText("customerName")).toBeNull();
     expect(screen.getByText("3000건")).not.toBeNull();
+    expect(screen.getByText("중복 제외").nextElementSibling?.textContent).toBe("4건");
     expect(screen.getByRole("link", { name: "행 단위 미리보기 보기" }).getAttribute("href")).toBe(
       "/import/302",
     );
@@ -327,13 +330,14 @@ describe("이전 지원 진행 화면", () => {
     seed({
       status: "APPROVED",
       approvedMappingVersionNo: 2,
-      executionResult: { succeeded: 2980, failed: 20, unprocessed: 0 },
+      executionResult: { succeeded: 2950, failed: 20, skippedDuplicate: 30, unprocessed: 0 },
     });
     open();
     expect(
       await screen.findByText(/매핑 버전 2을 승인했습니다. 승인한 뒤에는 매핑을 바꿀 수 없습니다/),
     ).not.toBeNull();
-    expect(screen.getByText("2980건")).not.toBeNull();
+    expect(screen.getByText("2950건")).not.toBeNull();
+    expect(screen.getByText("중복 제외").nextElementSibling?.textContent).toBe("30건");
   });
 
   it("납품 완료를 안내한다", async () => {
