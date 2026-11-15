@@ -19,7 +19,8 @@ import {
   listRefundRequests,
 } from "../api/billing.api";
 import type { PageParams } from "../api/billing.api";
-import type { SubscriptionCurrent } from "../api/wire";
+import type { PublicCompanyInfoResponse } from "@/lib/api/contracts/public-site.schema";
+import type { PublicPricing, SubscriptionCurrent } from "../api/wire";
 
 export const billingKeys = {
   all: ["billing"] as const,
@@ -48,12 +49,17 @@ export const billingKeys = {
     ["billing", "archive-export", grantId, exportId] as const,
 };
 
-export function usePublicPricing() {
-  return useQuery({ queryKey: billingKeys.publicPricing, queryFn: fetchPublicPricing });
+export function usePublicPricing(initialData?: PublicPricing) {
+  return useQuery({
+    queryKey: billingKeys.publicPricing,
+    queryFn: fetchPublicPricing,
+    initialData,
+  });
 }
 
-export function useCompanyInfo() {
+export function useCompanyInfo(initialData?: PublicCompanyInfoResponse) {
   return useQuery({
+    initialData,
     queryKey: billingKeys.companyInfo,
     queryFn: fetchPublicCompanyInfo,
     retry: false,

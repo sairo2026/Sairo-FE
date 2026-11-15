@@ -3,7 +3,7 @@ import { ApproverLayout } from "@/shared/layouts/layouts";
 import { ApproverAccountScreen } from "@/features/visit/components/approver-account-screen";
 
 export const metadata: Metadata = {
-  title: "내 매물 모아보기 | 사이로",
+  title: "내 매물 모아보기",
   referrer: "no-referrer",
   robots: { index: false, follow: false },
 };

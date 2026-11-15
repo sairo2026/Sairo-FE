@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { OfficeAccessShell } from "@/features/auth/components/office-access-gate";
 import { CustomerMergeScreen } from "@/features/customer/components/customer-merge-screen";
 
-export const metadata: Metadata = { title: "고객 병합 | 사이로" };
+export const metadata: Metadata = { title: "고객 병합" };
 
 function parseId(value: string | string[] | undefined): number {
   const id = Number(Array.isArray(value) ? value[0] : value);

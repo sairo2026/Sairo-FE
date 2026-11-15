@@ -3,7 +3,7 @@ import { ApproverLayout } from "@/shared/layouts/layouts";
 import { ApproverBulkScreen } from "@/features/visit/components/approver-bulk-screen";
 
 export const metadata: Metadata = {
-  title: "조건 일괄 적용 | 사이로",
+  title: "조건 일괄 적용",
   referrer: "no-referrer",
   robots: { index: false, follow: false },
 };

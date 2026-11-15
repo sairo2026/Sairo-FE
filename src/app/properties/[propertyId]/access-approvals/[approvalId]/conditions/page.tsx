@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { OfficeAccessShell } from "@/features/auth/components/office-access-gate";
 import { ProxyConditionsScreen } from "@/features/visit/components/proxy-conditions-screen";
 
-export const metadata: Metadata = { title: "승인자 조건 대리 입력 | 사이로" };
+export const metadata: Metadata = { title: "승인자 조건 대리 입력" };
 
 export default async function Page({
   params,

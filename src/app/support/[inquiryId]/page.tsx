@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { AccountScreenFrame } from "@/features/auth/components/account-screen-frame";
 import { InquiryDetailRoute } from "@/features/support/components/inquiry-detail-route";
 
-export const metadata: Metadata = { title: "문의 상세 | 사이로" };
+export const metadata: Metadata = { title: "문의 상세" };
 
 export default async function Page({ params }: { params: Promise<{ inquiryId: string }> }) {
   const { inquiryId } = await params;

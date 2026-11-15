@@ -1,13 +1,18 @@
 import type { Metadata } from "next";
 import { LegalDocumentScreen } from "@/features/billing/components/legal-document-screen";
-import { PublicBusinessFooter } from "@/features/billing/components/public-business-footer";
+import { PublicBusinessFooterServer } from "@/features/billing/components/public-business-footer.server";
 import { PublicSiteLayout } from "@/shared/layouts/layouts";
+import { INDEXABLE_ROBOTS } from "@/shared/lib/site-metadata";
 
-export const metadata: Metadata = { title: "이용약관 | 사이로" };
+export const metadata: Metadata = {
+  title: "이용약관",
+  description: "사이로의 이용약관 안내입니다.",
+  robots: INDEXABLE_ROBOTS,
+};
 
 export default function Page() {
   return (
-    <PublicSiteLayout footer={<PublicBusinessFooter />}>
+    <PublicSiteLayout footer={<PublicBusinessFooterServer />}>
       <LegalDocumentScreen slug="terms" />
     </PublicSiteLayout>
   );

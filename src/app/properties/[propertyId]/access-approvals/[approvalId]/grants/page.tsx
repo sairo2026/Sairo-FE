@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { OfficeAccessShell } from "@/features/auth/components/office-access-gate";
 import { ApplyGrantsScreen } from "@/features/visit/components/apply-grants-screen";
 
-export const metadata: Metadata = { title: "신청 허용 관리 | 사이로" };
+export const metadata: Metadata = { title: "신청 허용 관리" };
 
 export default async function Page({
   params,

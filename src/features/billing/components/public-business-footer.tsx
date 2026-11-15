@@ -30,8 +30,8 @@ function hasPublishedValue(data: PublicCompanyInfoResponse): boolean {
   ].some((value) => Boolean(value));
 }
 
-export function PublicBusinessFooter() {
-  const query = useCompanyInfo();
+export function PublicBusinessFooter({ initialData }: { initialData?: PublicCompanyInfoResponse }) {
+  const query = useCompanyInfo(initialData);
   const data = query.data;
   const info = data && hasPublishedValue(data) ? data : undefined;
   const links = data?.links?.length

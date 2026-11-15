@@ -4,7 +4,7 @@ import { ApproverLayout } from "@/shared/layouts/layouts";
 import { ApproverPortalApprovalScreen } from "@/features/visit/components/approver-link-screen";
 
 export const metadata: Metadata = {
-  title: "방문 조건과 신청 | 사이로",
+  title: "방문 조건과 신청",
   referrer: "no-referrer",
   robots: { index: false, follow: false },
 };

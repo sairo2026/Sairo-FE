@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { OfficeAccessShell } from "@/features/auth/components/office-access-gate";
 import { AccessApprovalScreen } from "@/features/visit/components/access-approval-screen";
 
-export const metadata: Metadata = { title: "출입승인 | 사이로" };
+export const metadata: Metadata = { title: "출입승인" };
 
 export default async function Page({ params }: { params: Promise<{ propertyId: string }> }) {
   const { propertyId } = await params;
