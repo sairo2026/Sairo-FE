@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchAllowedExportTables, fetchExport, listExports } from "../api/export.api";
 import { fetchImportSupportRequest, listImportSupportRequests } from "../api/support-request.api";
+import { SUPPORT_POLLING_STATUSES } from "../model/labels";
 
 export const supportRequestKeys = {
   all: ["migration", "support-requests"] as const,
@@ -12,6 +13,7 @@ export const supportRequestKeys = {
 
 export const exportKeys = {
   all: ["migration", "exports"] as const,
+  lists: ["migration", "exports", "list"] as const,
   list: (params: object) => ["migration", "exports", "list", params] as const,
   detail: (exportId: number) => ["migration", "exports", "detail", exportId] as const,
   allowedTables: ["migration", "exports", "allowed-tables"] as const,
@@ -24,10 +26,14 @@ export function useImportSupportRequests(params: { page: number; size: number; s
   });
 }
 
+const SUPPORT_POLL_MS = 15000;
+
 export function useImportSupportRequest(requestId: number) {
   return useQuery({
     queryKey: supportRequestKeys.detail(requestId),
     queryFn: () => fetchImportSupportRequest(requestId),
+    refetchInterval: (query) =>
+      SUPPORT_POLLING_STATUSES.includes(query.state.data?.status ?? "") ? SUPPORT_POLL_MS : false,
   });
 }
 

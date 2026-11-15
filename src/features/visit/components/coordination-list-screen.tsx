@@ -24,11 +24,13 @@ import {
 } from "../model/labels";
 import { describeVisitError } from "../model/messages";
 
-export function CoordinationListScreen() {
+export function CoordinationListScreen({ initialStatus }: { initialStatus?: string }) {
   const router = useRouter();
   const { role, isReadOnly } = useOfficeAccess();
   const isDeputy = role === "DEPUTY";
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState(
+    initialStatus !== undefined && isCoordinationStatus(initialStatus) ? initialStatus : "",
+  );
   const [page, setPage] = useState(1);
   const [size, setSize] = useState<PageSize>(25);
 

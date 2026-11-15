@@ -10,9 +10,9 @@ import { DataTable } from "@/shared/components/ui/data-table";
 import type { PageSize } from "@/shared/components/ui/data-table";
 import { PageHeader } from "@/shared/components/ui/page-header";
 import { formatKrw, formatSeoulDate, formatSeoulDateTime } from "@/shared/lib/format";
-import { describeWorkError } from "@/features/home/model/messages";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { useSettlementDetails } from "../hooks/settlement-queries";
+import { describeSettlementError } from "../model/errors";
 import {
   DETAIL_COLUMNS,
   METRIC_LABEL,
@@ -31,10 +31,16 @@ function cell(column: DetailColumn, raw: unknown): string {
   return detailValueText(column, raw);
 }
 
+type DetailRow = { rowNo: number; values: Record<string, unknown> };
+
 export function SettlementDetailsScreen({ yearMonth }: { yearMonth: string }) {
-  const { role } = useOfficeAccess();
   const params = useSearchParams();
   const metric = params.get("metric");
+  return <DetailsBody key={`${yearMonth}-${metric}`} yearMonth={yearMonth} metric={metric} />;
+}
+
+function DetailsBody({ yearMonth, metric }: { yearMonth: string; metric: string | null }) {
+  const { role } = useOfficeAccess();
   const [page, setPage] = useState(1);
   const [size, setSize] = useState<PageSize>(25);
   const valid = isYearMonth(yearMonth) && isMetricName(metric);
@@ -56,6 +62,10 @@ export function SettlementDetailsScreen({ yearMonth }: { yearMonth: string }) {
     );
   }
   const columns = DETAIL_COLUMNS[metric] ?? [];
+  const rows: DetailRow[] = (query.data?.items ?? []).map((values, index) => ({
+    rowNo: (page - 1) * size + index,
+    values,
+  }));
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
@@ -70,10 +80,10 @@ export function SettlementDetailsScreen({ yearMonth }: { yearMonth: string }) {
           </Link>
         }
       />
-      <DataTable
+      <DataTable<DetailRow>
         caption={`${METRIC_LABEL[metric]} 상세 내역`}
-        rows={query.data?.items ?? []}
-        getRowId={(row) => JSON.stringify(row)}
+        rows={rows}
+        getRowId={(row) => String(row.rowNo)}
         totalCount={query.data?.totalElements ?? 0}
         page={page}
         pageSize={size}
@@ -85,7 +95,7 @@ export function SettlementDetailsScreen({ yearMonth }: { yearMonth: string }) {
         isLoading={query.isPending}
         errorMessage={
           query.isError
-            ? describeWorkError(query.error, "상세 내역을 불러오지 못했습니다.")
+            ? describeSettlementError(query.error, "상세 내역을 불러오지 못했습니다.")
             : undefined
         }
         onRetry={() => void query.refetch()}
@@ -94,9 +104,9 @@ export function SettlementDetailsScreen({ yearMonth }: { yearMonth: string }) {
           ...columns.map((column, index) => ({
             key: column.key,
             header: column.header,
-            render: (row: Record<string, unknown>) => {
-              const text = cell(column, row[column.key]);
-              const href = index === 0 ? detailRowHref(metric, row) : null;
+            render: (row: DetailRow) => {
+              const text = cell(column, row.values[column.key]);
+              const href = index === 0 ? detailRowHref(metric, row.values) : null;
               return href ? (
                 <Link
                   href={href}

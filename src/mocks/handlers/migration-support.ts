@@ -4,7 +4,7 @@ import type {
   ExportListResponse,
   ExportResultResponse,
 } from "@/lib/api/contracts/migration.schema";
-import type { ImportSupportRequestDetailResponse as ImportSupportDetail } from "@/lib/api/contracts/migration.schema";
+import type { ImportSupportDetail } from "@/features/migration/api/wire";
 import { errorResponse, mockErrors } from "../error-responses";
 import { migrationState } from "./migration";
 

@@ -277,12 +277,18 @@ export function ResultSection({ detail }: { detail: Detail }) {
                   {item.result === "SCHEDULED" ? "결과 기록" : "결과 정정"}
                 </Button>
                 {item.result === "COMPLETED" && candidate ? (
-                  <Link
-                    href={`/properties/${candidate.propertyId}/access-approvals`}
-                    className="text-caption font-semibold text-primary hover:underline"
-                  >
-                    승인자 링크 발급 화면으로 이동
-                  </Link>
+                  candidate.crossOffice ? (
+                    <span className="text-caption text-ink-2">
+                      평가 링크는 매물을 가진 {candidate.ownerOfficeName}에서 발급합니다.
+                    </span>
+                  ) : (
+                    <Link
+                      href={`/properties/${candidate.propertyId}/access-approvals`}
+                      className="text-caption font-semibold text-primary hover:underline"
+                    >
+                      승인자 링크 발급 화면으로 이동
+                    </Link>
+                  )
                 ) : null}
               </span>
               {role === "DEPUTY" || role === "AGENT" || role === "OWNER" ? (

@@ -98,15 +98,26 @@ describe("매물 목록", () => {
     ).not.toBeNull();
   });
 
-  it("가격 범위만 입력하면 거래유형을 고르라고 안내한다", async () => {
+  it("거래유형을 고르기 전에는 가격 입력이 막히고 안내가 보인다", async () => {
+    renderOffice(<PropertyListScreen />, { role: "OWNER" });
+    await screen.findByRole("link", { name: "국민대 앞 아파트" });
+    expect(screen.getByLabelText("가격 하한(만원)").hasAttribute("disabled")).toBe(true);
+    expect(screen.getByLabelText("가격 상한(만원)").hasAttribute("disabled")).toBe(true);
+    expect(screen.getByText("가격은 거래유형을 먼저 선택하면 입력할 수 있습니다.")).not.toBeNull();
+  });
+
+  it("월세를 고르면 월세 금액 기준이라는 라벨과 안내로 바뀌고 입력할 수 있다", async () => {
     const user = userEvent.setup();
     renderOffice(<PropertyListScreen />, { role: "OWNER" });
     await screen.findByRole("link", { name: "국민대 앞 아파트" });
-    await user.type(screen.getByLabelText("가격 하한(만원)"), "1000");
-    await user.click(screen.getByRole("button", { name: "조건 적용" }));
-    expect(
-      await screen.findByText("가격 범위를 쓰려면 거래유형을 먼저 선택해 주세요."),
-    ).not.toBeNull();
+    await user.selectOptions(screen.getByLabelText("거래유형"), "MONTHLY");
+    const min = screen.getByLabelText("월세 하한(만원)");
+    expect(min.hasAttribute("disabled")).toBe(false);
+    expect(screen.getByLabelText("월세 상한(만원)")).not.toBeNull();
+    expect(screen.getByText("월세 매물은 보증금이 아닌 월세 금액으로 찾습니다.")).not.toBeNull();
+    await user.type(min, "50");
+    await user.selectOptions(screen.getByLabelText("거래유형"), "");
+    expect((screen.getByLabelText("가격 하한(만원)") as HTMLInputElement).value).toBe("");
   });
 
   it("서버가 면적 종류 누락을 검증 오류로 알려도 오류 문구를 보여준다", async () => {

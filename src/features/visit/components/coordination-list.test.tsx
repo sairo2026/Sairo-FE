@@ -71,6 +71,31 @@ describe("방문 조율 목록", () => {
     expect(navigation.push).toHaveBeenCalledWith("/coordinations/801#schedule");
   });
 
+  it("쿼리로 받은 조율 상태가 있으면 그 상태 카드를 선택한 채 목록을 거른다", async () => {
+    setMockVisitState({
+      coordinations: [
+        buildMockCoordination({ coordinationId: 1, customerName: "가고객", status: "APPLYING" }),
+        buildMockCoordination({ coordinationId: 2, customerName: "나고객", status: "CONFIRMED" }),
+      ],
+    });
+    renderOffice(<CoordinationListScreen initialStatus="APPLYING" />, { role: "OWNER" });
+    expect(await screen.findByText("가고객")).not.toBeNull();
+    expect(screen.queryByText("나고객")).toBeNull();
+    const card = screen.getAllByRole("button", { pressed: true })[0] as HTMLElement;
+    expect(card.textContent).toContain("신청 진행");
+  });
+
+  it("해당 상태의 조율이 없으면 상태 이름을 넣은 빈 문구를 보여준다", async () => {
+    renderOffice(<CoordinationListScreen initialStatus="CANCELLED" />, { role: "OWNER" });
+    expect(await screen.findByText("취소 상태의 조율이 없습니다.")).not.toBeNull();
+  });
+
+  it("알 수 없는 상태 쿼리는 무시하고 전체 목록을 보여준다", async () => {
+    renderOffice(<CoordinationListScreen initialStatus="NOPE" />, { role: "OWNER" });
+    expect(await screen.findByText("김수요")).not.toBeNull();
+    expect(screen.queryAllByRole("button", { pressed: true })).toHaveLength(0);
+  });
+
   it("조율이 없으면 빈 목록 문구를 보여준다", async () => {
     setMockVisitState({ coordinations: [] });
     renderOffice(<CoordinationListScreen />, { role: "OWNER" });

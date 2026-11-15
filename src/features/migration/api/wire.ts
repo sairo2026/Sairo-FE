@@ -2,6 +2,7 @@ import { z } from "zod";
 import {
   ImportBatchDetailResponseSchema,
   ImportPreviewResponseSchema,
+  ImportSupportRequestDetailResponseSchema,
 } from "@/lib/api/contracts/migration.schema";
 
 const PreviewRowSchema = z.object({
@@ -38,10 +39,20 @@ const PreviewRowSchema = z.object({
       }),
     )
     .nullish(),
+  duplicateJudgement: z.string().default("NEW"),
+  matchedTargetId: z.number().nullish(),
+});
+
+const PreviewSummaryWireSchema = ImportPreviewResponseSchema.shape.summary.extend({
+  newCount: z.number().optional(),
+  alreadyImportedCount: z.number().optional(),
+  duplicateInFileCount: z.number().optional(),
+  duplicateExistingCount: z.number().optional(),
 });
 
 export const PreviewWireSchema = ImportPreviewResponseSchema.extend({
   rows: z.array(PreviewRowSchema),
+  summary: PreviewSummaryWireSchema,
   duplicateWarnings: z
     .array(
       z.object({
@@ -50,6 +61,8 @@ export const PreviewWireSchema = ImportPreviewResponseSchema.extend({
         sourceType: z.string(),
         sourceId: z.string(),
         existingTargetId: z.number(),
+        reason: z.string().optional(),
+        existingArchived: z.boolean().optional(),
       }),
     )
     .nullish(),
@@ -57,7 +70,23 @@ export const PreviewWireSchema = ImportPreviewResponseSchema.extend({
 export type ImportPreview = z.infer<typeof PreviewWireSchema>;
 export type PreviewRow = ImportPreview["rows"][number];
 
+const SkippedByReasonWireSchema = z.object({
+  alreadyImported: z.number(),
+  duplicateInFile: z.number(),
+  duplicateExisting: z.number(),
+});
+
 export const BatchDetailWireSchema = ImportBatchDetailResponseSchema.extend({
+  counts: z
+    .object({
+      total: z.number(),
+      succeeded: z.number(),
+      failed: z.number(),
+      skippedDuplicate: z.number().default(0),
+      skippedByReason: SkippedByReasonWireSchema.nullish(),
+      unprocessed: z.number(),
+    })
+    .nullish(),
   cancelSummary: z
     .object({
       cancelledCount: z.number(),
@@ -68,3 +97,15 @@ export const BatchDetailWireSchema = ImportBatchDetailResponseSchema.extend({
     .nullish(),
 });
 export type ImportBatchDetail = z.infer<typeof BatchDetailWireSchema>;
+
+export const SupportDetailWireSchema = ImportSupportRequestDetailResponseSchema.extend({
+  executionResult: z
+    .object({
+      succeeded: z.number(),
+      failed: z.number(),
+      skippedDuplicate: z.number().default(0),
+      unprocessed: z.number(),
+    })
+    .nullish(),
+});
+export type ImportSupportDetail = z.infer<typeof SupportDetailWireSchema>;

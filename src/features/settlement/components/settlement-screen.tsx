@@ -2,18 +2,27 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
 import { ApiError } from "@/shared/api/client";
 import { toErrorScreenKind } from "@/shared/api/error-kind";
 import { ErrorScreen } from "@/shared/components/feedback/error-screen";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
-import { FormNotice } from "@/shared/components/feedback/form-frame";
+import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { PageHeader } from "@/shared/components/ui/page-header";
 import { formatCount, formatKrw, formatSeoulDateTime } from "@/shared/lib/format";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
+import { fetchSettlementCsv, saveBlob } from "../api/settlement.api";
 import { useSettlement, useSettlementList } from "../hooks/settlement-queries";
-import { METRIC_GROUPS, currentYearMonth, isYearMonth, shiftYearMonth } from "../model/metrics";
+import { describeSettlementError, isOutOfRangeMonth } from "../model/errors";
+import {
+  METRIC_GROUPS,
+  currentYearMonth,
+  isEmptySettlement,
+  isYearMonth,
+  shiftYearMonth,
+} from "../model/metrics";
 import type { MetricDef } from "../model/metrics";
 import { MemoPanel } from "./memo-panel";
 
@@ -56,8 +65,47 @@ function MonthNav({ yearMonth, earliest }: { yearMonth: string; earliest: string
   );
 }
 
+function CsvDownload({ yearMonth }: { yearMonth: string }) {
+  const [isPending, setIsPending] = useState(false);
+  const [error, setError] = useState<string>();
+
+  async function download() {
+    setIsPending(true);
+    setError(undefined);
+    try {
+      saveBlob(await fetchSettlementCsv(yearMonth), `settlement-${yearMonth}.csv`);
+    } catch (caught) {
+      setError(describeSettlementError(caught, "CSV를 내려받지 못했습니다."));
+    } finally {
+      setIsPending(false);
+    }
+  }
+
+  return (
+    <div className="ml-auto flex flex-col items-end gap-1">
+      <Button variant="ghost" size="sm" isLoading={isPending} onClick={() => void download()}>
+        CSV 내려받기
+      </Button>
+      {error ? <FormAlert>{error}</FormAlert> : null}
+    </div>
+  );
+}
+
 function SettlementBody({ yearMonth }: { yearMonth: string }) {
   const query = useSettlement(yearMonth);
+  if (query.isError && isOutOfRangeMonth(query.error)) {
+    return (
+      <div className="flex flex-col gap-3">
+        <FormAlert>{describeSettlementError(query.error, "")}</FormAlert>
+        <Link
+          href="/settlements"
+          className="w-fit text-caption font-semibold text-primary hover:underline"
+        >
+          이번 달 월말결산 보기
+        </Link>
+      </div>
+    );
+  }
   const isCurrent = yearMonth === currentYearMonth();
   const detailHref = (metric: string) => `/settlements/${yearMonth}/details?metric=${metric}`;
   return (
@@ -73,14 +121,14 @@ function SettlementBody({ yearMonth }: { yearMonth: string }) {
             <span className="text-caption text-ink-2">
               집계 기준 시각 {formatSeoulDateTime(data.asOf)}
             </span>
-            <a
-              href={`/api/settlements/${yearMonth}/export`}
-              download
-              className="ml-auto text-caption font-semibold text-primary hover:underline"
-            >
-              CSV 내려받기
-            </a>
+            <CsvDownload yearMonth={yearMonth} />
           </div>
+          {isEmptySettlement(data) ? (
+            <FormNotice>
+              이 달에는 아직 집계된 실적이 없습니다. 매물, 고객, 계약을 등록하면 다음 집계부터
+              반영됩니다.
+            </FormNotice>
+          ) : null}
           {data.agreedFeeUndatedCount > 0 ? (
             <FormNotice>
               잔금 예정일이 없어 잔금 기준 약정보수에서 빠진 계약이 {data.agreedFeeUndatedCount}건

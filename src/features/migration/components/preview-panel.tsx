@@ -12,8 +12,11 @@ import { Checkbox } from "@/shared/components/ui/select-field";
 import { ConfirmDialog } from "@/shared/components/ui/modal";
 import { executeImport } from "../api/migration.api";
 import type { ImportPreview, PreviewRow } from "../api/wire";
+import { StatusBadge } from "@/shared/components/feedback/page-parts";
 import { migrationKeys, useImportBatches, useImportPreview } from "../hooks/migration-queries";
+import { DUPLICATE_JUDGEMENT, targetFieldLabel } from "../model/labels";
 import { IMPORT_COPY, describeMigrationError } from "../model/messages";
+import { previewNewCount } from "../model/preview-counts";
 
 type Props = { batchId: number; isLocked: boolean };
 
@@ -21,14 +24,20 @@ function isErrorRow(row: PreviewRow): boolean {
   return (row.warnings ?? []).some((warning) => warning.severity === "ERROR");
 }
 
-function ValueList({ values }: { values: Record<string, string | number | boolean | null> }) {
+function ValueList({
+  values,
+  isTargetField = false,
+}: {
+  values: Record<string, string | number | boolean | null>;
+  isTargetField?: boolean;
+}) {
   const entries = Object.entries(values);
   if (entries.length === 0) return <>-</>;
   return (
     <dl className="flex flex-col gap-0.5">
       {entries.map(([key, value]) => (
         <div key={key} className="flex gap-2">
-          <dt className="text-ink-3">{key}</dt>
+          <dt className="text-ink-3">{isTargetField ? targetFieldLabel(key) : key}</dt>
           <dd className="text-ink">{value === null ? "(비어 있음)" : String(value)}</dd>
         </div>
       ))}
@@ -41,11 +50,12 @@ function Summary({ summary }: { summary: ImportPreview["summary"] }) {
     { label: "행 수", value: summary.rowCount },
     { label: "오류 행", value: summary.errorRowCount },
     { label: "경고", value: summary.warningCount },
-    { label: "중복", value: summary.duplicateCount },
+    { label: "새로 만들 행", value: previewNewCount(summary) },
+    { label: "중복 제외", value: summary.duplicateCount },
     { label: "연결 후보", value: summary.relationMatchCount },
   ];
   return (
-    <dl className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+    <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
       {items.map((item) => (
         <div key={item.label} className="rounded-control border border-line bg-surface px-4 py-3">
           <dt className="text-caption text-ink-2">{item.label}</dt>
@@ -93,7 +103,8 @@ function PreviewBody({
 
   const rows = onlyErrors ? data.rows.filter(isErrorRow) : data.rows;
   const isQuotaOut = remaining !== undefined && remaining <= 0;
-  const hasNothingToImport = data.summary.rowCount - data.summary.errorRowCount <= 0;
+  const newCount = previewNewCount(data.summary);
+  const hasNothingToImport = newCount <= 0;
 
   return (
     <div className="flex flex-col gap-5">
@@ -104,6 +115,11 @@ function PreviewBody({
           {IMPORT_COPY.errorRowNotice}
         </p>
       ) : null}
+      {data.summary.duplicateCount > 0 ? (
+        <p role="note" className="text-caption text-ink">
+          {IMPORT_COPY.skippedHint}
+        </p>
+      ) : null}
       {data.duplicateWarnings && data.duplicateWarnings.length > 0 ? (
         <section aria-label="중복 경고" className="flex flex-col gap-2">
           <h3 className="text-body font-semibold text-ink">중복 경고</h3>
@@ -111,7 +127,7 @@ function PreviewBody({
             {data.duplicateWarnings.map((item) => (
               <li key={`${item.sourceRowNumber}-${item.sourceId}`}>
                 {item.sourceRowNumber}행 · {item.sourceSystem} {item.sourceId}은 이미 사이로에 있는
-                자료(번호 {item.existingTargetId})와 연결됩니다.
+                자료(번호 {item.existingTargetId})와 겹쳐 새로 만들지 않습니다.
               </li>
             ))}
           </ul>
@@ -142,7 +158,20 @@ function PreviewBody({
           {
             key: "normalized",
             header: "바뀔 값",
-            render: (row) => <ValueList values={row.normalizedValues} />,
+            render: (row) => <ValueList values={row.normalizedValues} isTargetField />,
+          },
+          {
+            key: "judgement",
+            header: "중복 판정",
+            render: (row) => {
+              const judgement = DUPLICATE_JUDGEMENT[row.duplicateJudgement];
+              return (
+                <StatusBadge
+                  tone={judgement?.tone ?? "gray"}
+                  label={judgement?.label ?? row.duplicateJudgement}
+                />
+              );
+            },
           },
           {
             key: "warnings",
@@ -169,6 +198,7 @@ function PreviewBody({
       />
       {error ? <FormAlert>{error}</FormAlert> : null}
       {isQuotaOut ? <FormAlert>{IMPORT_COPY.quotaExhausted}</FormAlert> : null}
+      {hasNothingToImport ? <FormAlert>{IMPORT_COPY.nothingToImport}</FormAlert> : null}
       <div>
         <Button
           disabled={isLocked || isQuotaOut || hasNothingToImport}
@@ -181,7 +211,11 @@ function PreviewBody({
       <ConfirmDialog
         isOpen={isConfirming}
         title="이전을 실행할까요?"
-        message={IMPORT_COPY.executeConfirm(data.summary.rowCount, data.summary.errorRowCount)}
+        message={IMPORT_COPY.executeConfirm(
+          newCount,
+          data.summary.errorRowCount,
+          data.summary.duplicateCount,
+        )}
         confirmLabel="실행"
         isPending={mutation.isPending}
         onConfirm={() => mutation.mutate(batchId)}

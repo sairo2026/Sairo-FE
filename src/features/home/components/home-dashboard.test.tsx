@@ -1,12 +1,16 @@
 // @vitest-environment jsdom
-import { cleanup, screen, within } from "@testing-library/react";
+import { cleanup, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http } from "msw";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { mockErrors } from "@/mocks/error-responses";
+import { billingState, buildSubscription, resetBillingState } from "@/mocks/handlers/billing";
+import { resetMockCustomerState, setMockCustomerState } from "@/mocks/handlers/customer";
+import { resetMockPropertyState, setMockPropertyState } from "@/mocks/handlers/property";
 import { buildMockTask, resetMockWorkState, setMockWorkState } from "@/mocks/handlers/work";
 import { server, startMockServer } from "@/mocks/server";
 import { renderOffice } from "@/shared/testing/office-render";
+import { COORDINATION_STATUSES, statusLabel } from "@/features/visit/model/labels";
 import { HomeDashboard } from "./home-dashboard";
 
 vi.mock("next/navigation", () => ({
@@ -24,6 +28,9 @@ afterEach(() => {
   cleanup();
   server.resetHandlers();
   resetMockWorkState();
+  resetMockPropertyState();
+  resetMockCustomerState();
+  resetBillingState();
 });
 
 afterAll(() => stopServer());
@@ -54,11 +61,11 @@ describe("홈 대시보드", () => {
     }
   });
 
-  it("후속업무 항목은 계약 ID가 있으면 해당 계약 상세로 이어진다", async () => {
+  it("후속업무 항목은 계약 ID가 있으면 해당 계약의 후속업무 확인 화면으로 이어진다", async () => {
     renderOffice(<HomeDashboard />, { role: "OWNER" });
     const list = await screen.findByRole("list", { name: "계약 후속업무" });
     const link = within(list).getByRole("link", { name: /전세 계약 D-90 후속업무/ });
-    expect(link.getAttribute("href")).toBe("/contracts/601");
+    expect(link.getAttribute("href")).toBe("/contracts/601/followups");
   });
 
   it("계약 ID가 없는 응답이어도 화면이 깨지지 않고 만기 계약 목록으로 이어진다", async () => {
@@ -95,6 +102,74 @@ describe("홈 대시보드", () => {
     expect(screen.queryByRole("link", { name: "카드 등록 안내" })).toBeNull();
   });
 
+  it("매물과 고객이 모두 없으면 대표에게 첫 사용 안내 카드를 보여준다", async () => {
+    setMockPropertyState({ properties: [] });
+    setMockCustomerState({ customers: [] });
+    renderOffice(<HomeDashboard />, { role: "OWNER" });
+    const guide = await screen.findByRole("region", { name: "첫 사용 안내" });
+    expect(within(guide).getByRole("link", { name: "매물 등록" }).getAttribute("href")).toBe(
+      "/properties/new",
+    );
+    expect(within(guide).getByRole("link", { name: "고객 등록" }).getAttribute("href")).toBe(
+      "/customers/new",
+    );
+    expect(within(guide).getByRole("link", { name: "데이터 이전" }).getAttribute("href")).toBe(
+      "/import",
+    );
+    expect(
+      (await within(guide).findByRole("link", { name: "카드 등록 안내" })).getAttribute("href"),
+    ).toBe("/billing/card-guide");
+    expect(screen.getAllByRole("link", { name: "카드 등록 안내" })).toHaveLength(1);
+  });
+
+  it("직원에게는 첫 사용 안내 카드에 데이터 이전과 카드 안내가 없다", async () => {
+    setMockPropertyState({ properties: [] });
+    setMockCustomerState({ customers: [] });
+    const { queryClient } = renderOffice(<HomeDashboard />, { role: "AGENT" });
+    const guide = await screen.findByRole("region", { name: "첫 사용 안내" });
+    await waitFor(() => expect(queryClient.isFetching()).toBe(0));
+    expect(within(guide).getByRole("link", { name: "매물 등록" })).not.toBeNull();
+    expect(within(guide).queryByRole("link", { name: "데이터 이전" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "카드 등록 안내" })).toBeNull();
+  });
+
+  it("매물이나 고객이 하나라도 있으면 첫 사용 안내 카드를 숨긴다", async () => {
+    setMockCustomerState({ customers: [] });
+    const { queryClient } = renderOffice(<HomeDashboard />, { role: "OWNER" });
+    await screen.findByRole("link", { name: "신청 대기 0건" });
+    await waitFor(() => expect(queryClient.isFetching()).toBe(0));
+    expect(screen.queryByRole("region", { name: "첫 사용 안내" })).toBeNull();
+  });
+
+  it("중개보조원과 읽기 전용 상태에서는 첫 사용 안내 카드를 보여주지 않는다", async () => {
+    setMockPropertyState({ properties: [] });
+    setMockCustomerState({ customers: [] });
+    const deputy = renderOffice(<HomeDashboard />, { role: "DEPUTY" });
+    await screen.findByRole("link", { name: "신청 대기 0건" });
+    await waitFor(() => expect(deputy.queryClient.isFetching()).toBe(0));
+    expect(screen.queryByRole("region", { name: "첫 사용 안내" })).toBeNull();
+    cleanup();
+    const readOnly = renderOffice(<HomeDashboard />, { role: "OWNER", isReadOnly: true });
+    await screen.findByRole("link", { name: "신청 대기 0건" });
+    await waitFor(() => expect(readOnly.queryClient.isFetching()).toBe(0));
+    expect(screen.queryByRole("region", { name: "첫 사용 안내" })).toBeNull();
+  });
+
+  it("카드를 이미 등록한 대표 홈에는 카드 등록 안내 링크가 없다", async () => {
+    billingState.subscription = buildSubscription({
+      paymentMethod: {
+        cardIssuer: "신한카드",
+        cardLast4: "1234",
+        registeredAt: "2026-11-10T09:00:00+09:00",
+      },
+      readiness: { hasValidConsent: true, hasBillingKey: true },
+    });
+    const { queryClient } = renderOffice(<HomeDashboard />, { role: "OWNER" });
+    await screen.findByRole("link", { name: "신청 대기 0건" });
+    await waitFor(() => expect(queryClient.isFetching()).toBe(0));
+    expect(screen.queryByRole("link", { name: "카드 등록 안내" })).toBeNull();
+  });
+
   it("방문 신청 현황 건수와 읽지 않은 방문 신청 알림 수를 보여준다", async () => {
     setMockWorkState({
       unreadVisitRequestNoticeCount: 3,
@@ -105,6 +180,34 @@ describe("홈 대시보드", () => {
     expect(screen.getByRole("link", { name: "재검증 실패 1건" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "시간 마감 2건" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "읽지 않은 방문 신청 알림 3건" })).toBeTruthy();
+  });
+
+  it("방문 조율 현황의 상태 태그는 각 상태로 거른 조율 목록으로 이어진다", async () => {
+    renderOffice(<HomeDashboard />, { role: "OWNER" });
+    const status = await screen.findByRole("region", { name: "방문 조율 현황" });
+    const links = within(status).getAllByRole("link");
+    expect(links).toHaveLength(COORDINATION_STATUSES.length);
+    COORDINATION_STATUSES.forEach((value, index) => {
+      expect(links[index]?.getAttribute("href")).toBe(`/coordinations?status=${value}`);
+      expect(links[index]?.textContent).toContain(statusLabel(value));
+      expect(links[index]?.className).toContain("hover:opacity-80");
+      expect(links[index]?.className).toContain("active:opacity-65");
+    });
+  });
+
+  it("신청 현황 카드는 신청 상태가 조율 상태와 달라 필터 없는 조율 목록으로 이어진다", async () => {
+    renderOffice(<HomeDashboard />);
+    for (const name of ["신청 대기 0건", "재검증 실패 0건", "시간 마감 0건"]) {
+      const link = await screen.findByRole("link", { name });
+      expect(link.getAttribute("href")).toBe("/coordinations");
+      expect(link.className).toContain("hover:border-primary");
+    }
+  });
+
+  it("읽지 않은 방문 신청 알림 링크는 방문 신청 알림 탭을 연다", async () => {
+    renderOffice(<HomeDashboard />);
+    const link = await screen.findByRole("link", { name: /읽지 않은 방문 신청 알림 \d+건/ });
+    expect(link.getAttribute("href")).toBe("/notifications?tab=visit-request");
   });
 
   it("기한이 지난 미완료 업무를 오늘 업무와 따로 보여준다", async () => {

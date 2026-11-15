@@ -152,6 +152,9 @@ function InvoiceView({ invoice }: { invoice: InvoiceDetail }) {
             이 청구서의 환불 내역
           </Link>
         </div>
+        {canRefund ? null : (
+          <p className="mt-2 text-caption text-ink-2">{COPY.refundUnavailable}</p>
+        )}
       </Card>
       <Card title="결제 시도">
         {invoice.attempts.length === 0 ? (

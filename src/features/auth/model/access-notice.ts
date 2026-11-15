@@ -36,7 +36,9 @@ function describePreVerification(context: AuthContextResponse): AccessNotice {
       : "본인 인증과 사무소 인증 신청을 마치면 업무 화면을 사용할 수 있습니다. 작성 중인 신청은 이어서 작성하고 증빙을 제출할 수 있습니다.",
     details: describeRejection(context),
     actions: [
-      { label: "사무소 인증 신청", href: AUTH_ROUTES.officeVerification },
+      isWaitingMembership
+        ? { label: "참여 요청 상태 확인", href: "/office/membership" }
+        : { label: "사무소 인증 신청", href: AUTH_ROUTES.officeVerification },
       ...ACCOUNT_ACTIONS,
     ],
   };
@@ -106,7 +108,7 @@ export function describeAccess(context: AuthContextResponse): AccessNotice | nul
       };
     case "VERIFIED_UNPAID":
       return {
-        title: "결제를 기다리고 있습니다",
+        title: isOwner ? "결제를 기다리고 있습니다" : "대표의 결제를 기다리고 있습니다",
         description: isOwner
           ? "사무소 인증이 끝났습니다. 구독 결제를 마치면 업무 화면을 사용할 수 있습니다."
           : "사무소 인증은 끝났고 대표가 결제를 마치면 업무 화면을 사용할 수 있습니다. 결제는 대표만 할 수 있습니다.",

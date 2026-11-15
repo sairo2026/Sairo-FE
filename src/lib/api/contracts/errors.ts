@@ -40,6 +40,7 @@ export const ApiErrorBodySchema = z.object({
   currentVersion: z.number().optional(),
   changedItems: z.array(z.record(z.string(), z.unknown())).optional(),
   violatedRules: z.array(z.string()).optional(),
+  candidatePropertyIds: z.array(z.number()).optional(),
   affectedItems: z.array(z.record(z.string(), z.unknown())).optional(),
   missingItems: z.array(z.string()).optional(),
 });

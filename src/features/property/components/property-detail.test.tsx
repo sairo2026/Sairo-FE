@@ -61,6 +61,22 @@ describe("매물 상세", () => {
     expect(link.getAttribute("href")).toBe("/properties/501/access-approvals");
   });
 
+  it("방문 조율 시작 링크는 매물을 지정해 조율 생성으로 보낸다", async () => {
+    renderOffice(<PropertyDetailScreen propertyId={501} />, { role: "OWNER" });
+    const link = await screen.findByRole("link", { name: "방문 조율 시작" });
+    expect(link.getAttribute("href")).toBe("/coordinations/new?propertyId=501");
+    expect(screen.getByRole("link", { name: "다른 사무소 신청 현황" }).getAttribute("href")).toBe(
+      "/properties/501/cross-office",
+    );
+  });
+
+  it("보관된 매물에는 방문 조율 시작 링크가 없다", async () => {
+    withProperty({ propertyId: 501, name: "보관 매물", deletedAt: "2026-11-01T09:00:00+09:00" });
+    renderOffice(<PropertyDetailScreen propertyId={501} />, { role: "OWNER" });
+    await screen.findByText("보관됨");
+    expect(screen.queryByRole("link", { name: "방문 조율 시작" })).toBeNull();
+  });
+
   it("없는 매물이면 찾을 수 없음 화면을 보여준다", async () => {
     renderOffice(<PropertyDetailScreen propertyId={9999} />, { role: "OWNER" });
     expect(await screen.findByText("페이지를 찾을 수 없습니다")).not.toBeNull();
@@ -134,8 +150,28 @@ describe("매물 상세", () => {
     expect(screen.getByRole("link", { name: "김소유" }).getAttribute("href")).toBe(
       "/customers/301",
     );
+    expect(screen.getByRole("link", { name: "2026-09-12 14:00" }).getAttribute("href")).toBe(
+      "/coordinations/9",
+    );
     expect(screen.getByText(/이수요 · 방문 완료/)).not.toBeNull();
     expect(screen.getByText(/전세 · 체결/)).not.toBeNull();
+  });
+});
+
+describe("매물 진행 중인 방문 조율", () => {
+  it("진행 중인 방문 조율 고객명이 조율 상세 링크가 된다", async () => {
+    withProperty({
+      propertyId: 501,
+      name: "조율 매물",
+      activeCoordinations: [{ coordinationId: 9, status: "CONFIRMED", customerName: "이수요" }],
+    });
+    const user = userEvent.setup();
+    renderOffice(<PropertyDetailScreen propertyId={501} />, { role: "OWNER" });
+    await user.click(await screen.findByRole("tab", { name: "소유·점유·이력" }));
+    expect(screen.getByText("진행 중인 방문 조율")).not.toBeNull();
+    expect(screen.getByRole("link", { name: "이수요" }).getAttribute("href")).toBe(
+      "/coordinations/9",
+    );
   });
 });
 
@@ -210,6 +246,20 @@ describe("매물 보관과 복원", () => {
     renderOffice(<PropertyDetailScreen propertyId={501} />, { role: "OWNER" });
     await user.click(await screen.findByRole("button", { name: "복원" }));
     expect(await screen.findByText(/이미 활성 상태인 매물입니다/)).not.toBeNull();
+  });
+
+  it("임시저장으로 되돌아온 복원 결과에는 주소와 담당자를 채우라고 안내한다", async () => {
+    withProperty({
+      propertyId: 501,
+      name: "보관 매물",
+      registrationStage: "DRAFT",
+      deletedAt: "2026-11-01T09:00:00+09:00",
+    });
+    const user = userEvent.setup();
+    renderOffice(<PropertyDetailScreen propertyId={501} />, { role: "OWNER" });
+    await user.click(await screen.findByRole("button", { name: "복원" }));
+    expect(await screen.findByText(/임시저장 상태로 돌아왔습니다/)).not.toBeNull();
+    expect(screen.getByText(/주소와 담당 공인중개사를 채워/)).not.toBeNull();
   });
 
   it("읽기 전용 상태에서는 보관 버튼이 막힌다", async () => {

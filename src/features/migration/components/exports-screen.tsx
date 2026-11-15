@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ExportListResponse } from "@/lib/api/contracts/migration.schema";
 import { ErrorScreen } from "@/shared/components/feedback/error-screen";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
@@ -36,8 +36,20 @@ function ExportStatusBadge({ status }: { status: string }) {
   return <StatusBadge tone={item?.tone ?? "gray"} label={item?.label ?? status} />;
 }
 
+const RUNNING_EXPORT_STATUSES = ["PENDING", "PROCESSING"];
+
 function ExportStatusPanel({ exportId }: { exportId: number }) {
+  const queryClient = useQueryClient();
   const query = useExportStatus(exportId);
+  const status = query.data?.status;
+  const previousStatus = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    const wasRunning = RUNNING_EXPORT_STATUSES.includes(previousStatus.current ?? "");
+    if (wasRunning && status !== undefined && !RUNNING_EXPORT_STATUSES.includes(status)) {
+      void queryClient.invalidateQueries({ queryKey: exportKeys.lists });
+    }
+    previousStatus.current = status;
+  }, [status, queryClient]);
   if (query.isPending) return <p role="status">내보내기 상태를 확인하는 중입니다.</p>;
   if (query.isError) {
     const isExpired = query.error instanceof ApiError && query.error.code === "EXPORT_EXPIRED";
@@ -317,9 +329,15 @@ function History({ onSelect }: { onSelect: (exportId: number) => void }) {
 export function ExportsScreen() {
   const { role } = useOfficeAccess();
   const tables = useAllowedExportTables();
+  const queryClient = useQueryClient();
   const [exportId, setExportId] = useState<number | null>(null);
   if (role !== "OWNER" && role !== "AGENT") return <ErrorScreen kind="forbidden" />;
   const isOwner = role === "OWNER";
+
+  function selectExport(selectedId: number) {
+    void queryClient.invalidateQueries({ queryKey: exportKeys.detail(selectedId) });
+    setExportId(selectedId);
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -338,7 +356,7 @@ export function ExportsScreen() {
         </Card>
       ) : null}
       {isOwner && tables.data ? <PolicyPanel tables={tables.data.tables} /> : null}
-      <History onSelect={setExportId} />
+      <History onSelect={selectExport} />
       <p className="text-caption text-ink-2">{COPY.returnGuide}</p>
     </div>
   );

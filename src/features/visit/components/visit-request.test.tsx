@@ -363,11 +363,11 @@ describe("확정 방문 변경과 재승인", () => {
                   startAt: "2026-11-12T10:00:00+09:00",
                   endAt: "2026-11-12T10:30:00+09:00",
                   checks: {
-                    customer: "OK",
-                    broker: "OK",
-                    approverCondition: "OK",
-                    confirmedVisits: "OK",
-                    travel: "OK",
+                    customer: "PASSED",
+                    broker: "PASSED",
+                    approverCondition: "PASSED",
+                    confirmedVisits: "PASSED",
+                    travel: "PASSED",
                   },
                 },
               ]
@@ -384,6 +384,13 @@ describe("확정 방문 변경과 재승인", () => {
     expect(screen.getByText("영향 없이 고정")).not.toBeNull();
     expect(screen.getByText("다음 방문까지 이동이 어렵습니다.")).not.toBeNull();
     expect(screen.getByText(/재승인을 받기 전에는 기존 확정이 유지/)).not.toBeNull();
+  });
+
+  it("변경안의 점검 결과는 영문 값 대신 통과로 보여준다", async () => {
+    confirmed(true);
+    renderOffice(<CoordinationDetailScreen coordinationId={801} />, { role: "AGENT" });
+    expect(await screen.findByText(/고객 통과 · 중개사 통과/)).not.toBeNull();
+    expect(screen.queryByText(/PASSED/)).toBeNull();
   });
 
   it("변경안을 고르면 변경 신청이 올라가고 조율 상태는 그대로다", async () => {

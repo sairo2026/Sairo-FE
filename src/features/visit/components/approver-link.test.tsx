@@ -122,6 +122,38 @@ describe("승인자 링크 화면 조건 등록", () => {
     ).not.toBeNull();
   });
 
+  it("가능한 시간대가 하나도 없으면 요청 없이 막고 이유를 안내한다", async () => {
+    setMockApproverState({ conditions: [] });
+    const user = userEvent.setup();
+    renderLink();
+    await screen.findByLabelText("하루 최대 방문 횟수");
+    await user.click(screen.getByRole("button", { name: "조건 저장" }));
+    expect(await screen.findByText(/가능한 시간대를 1개 이상 입력해 주세요/)).not.toBeNull();
+    expect(getMockApproverState().conditions).toHaveLength(0);
+  });
+
+  it("제외할 시간대만 넣은 날짜는 그날 전체가 방문 불가로 처리된다고 경고한다", async () => {
+    setMockApproverState({ conditions: [] });
+    const user = userEvent.setup();
+    renderLink();
+    await screen.findByLabelText("하루 최대 방문 횟수");
+    await user.click(screen.getByRole("button", { name: "날짜 예외 추가" }));
+    fireEvent.change(screen.getByLabelText("날짜 예외 1 날짜"), {
+      target: { value: "2026-12-01" },
+    });
+    fireEvent.change(screen.getByLabelText("날짜 예외 1 종류"), { target: { value: "EXCLUDE" } });
+    expect(await screen.findByText(/2026-12-01에는 제외할 시간대만 있고/)).not.toBeNull();
+    fireEvent.change(screen.getByLabelText("날짜 예외 1 종류"), { target: { value: "AVAILABLE" } });
+    await waitFor(() =>
+      expect(screen.queryByText(/2026-12-01에는 제외할 시간대만 있고/)).toBeNull(),
+    );
+  });
+
+  it("연속·분산 선호는 아직 신청 목록 순서에 쓰이지 않는다고 안내한다", async () => {
+    renderLink();
+    expect(await screen.findByText(/아직 신청 목록의 순서에는 쓰이지 않으며/)).not.toBeNull();
+  });
+
   it("범위를 벗어난 값은 요청 없이 오류를 보여준다", async () => {
     const user = userEvent.setup();
     renderLink();
@@ -270,7 +302,7 @@ describe("승인자 링크 화면 신청 비교와 선택", () => {
     const dialog = await pickRequest(user, "김중개 신청 선택");
     await user.click(within(dialog).getByRole("button", { name: "선택하기" }));
     expect(await screen.findByText(/확정하지 못했습니다/)).not.toBeNull();
-    expect(screen.getByText(/다른 방문과의 최소 간격을 지키지 못합니다/)).not.toBeNull();
+    expect(screen.getByText(/방문 간 최소 간격을 지키지 못해 확정하지 못했습니다/)).not.toBeNull();
     expect(screen.getByText(/다른 신청을 선택해 주세요/)).not.toBeNull();
   });
 
@@ -284,6 +316,49 @@ describe("승인자 링크 화면 신청 비교와 선택", () => {
     await user.click(within(dialog).getByRole("button", { name: "선택하기" }));
     expect(await screen.findByText(/재검증에 실패해 신청을 확정하지 못했습니다/)).not.toBeNull();
     expect(screen.queryByText(/중개보조원 인원 한도/)).toBeNull();
+  });
+
+  it("재검증 실패에 중개사 일정 충돌이 있으면 승인자에게는 일반 표현만 보이고 영문 코드와 상세 원문은 숨긴다", async () => {
+    setMockApproverState({
+      revalidationFailure: {
+        code: "BROKER_CONFLICT",
+        detail: "위반한 규칙: BROKER_CONFLICT, CUSTOMER_CONFLICT, MIN_GAP",
+      },
+    });
+    const user = userEvent.setup();
+    renderLink();
+    const dialog = await pickRequest(user, "김중개 신청 선택");
+    await user.click(within(dialog).getByRole("button", { name: "선택하기" }));
+    expect(
+      await screen.findByText(/다른 일정과 겹치거나 신청 쪽 사정으로 확정하지 못했습니다/),
+    ).not.toBeNull();
+    expect(screen.getByText(/방문 간 최소 간격을 지키지 못해 확정하지 못했습니다/)).not.toBeNull();
+    expect(screen.queryByText(/BROKER_CONFLICT|CUSTOMER_CONFLICT|위반한 규칙/)).toBeNull();
+    expect(screen.queryByText(/담당 중개사|고객의 다른/)).toBeNull();
+  });
+
+  it("알 수 없는 재검증 실패 코드는 영문 그대로 보이지 않고 일반 문구로 안내한다", async () => {
+    setMockApproverState({
+      revalidationFailure: { code: "BRAND_NEW_RULE", detail: "위반한 규칙: BRAND_NEW_RULE" },
+    });
+    const user = userEvent.setup();
+    renderLink();
+    const dialog = await pickRequest(user, "김중개 신청 선택");
+    await user.click(within(dialog).getByRole("button", { name: "선택하기" }));
+    expect(await screen.findByText(/재검증에 실패해 신청을 확정하지 못했습니다/)).not.toBeNull();
+    expect(screen.queryByText(/BRAND_NEW_RULE/)).toBeNull();
+  });
+
+  it("조건이 변경되어 재검증에 실패하면 조건 변경 사유를 보여준다", async () => {
+    setMockApproverState({
+      revalidationFailure: { code: "CONDITION_CHANGED", detail: "위반한 규칙: WINDOW_MISMATCH" },
+    });
+    const user = userEvent.setup();
+    renderLink();
+    const dialog = await pickRequest(user, "김중개 신청 선택");
+    await user.click(within(dialog).getByRole("button", { name: "선택하기" }));
+    expect(await screen.findByText(/신청한 뒤 조건이 바뀌어 새 조건에 맞지 않아/)).not.toBeNull();
+    expect(screen.getByText(/가능한 시간대가 아니어서 확정하지 못했습니다/)).not.toBeNull();
   });
 
   it("버전이 어긋나면 안내하고 목록을 새로 불러온다", async () => {

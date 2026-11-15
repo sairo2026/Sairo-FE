@@ -94,6 +94,9 @@ describe("계약 목록", () => {
     await waitFor(() =>
       expect(screen.getAllByRole("link", { name: "서울특별시 성북구 정릉로 77" })).toHaveLength(1),
     );
+    await user.click(screen.getByRole("tab", { name: "초안 계약" }));
+    expect(await screen.findByText("초안당사자")).not.toBeNull();
+    expect(screen.getAllByRole("link", { name: "서울특별시 성북구 정릉로 77" })).toHaveLength(1);
     await user.click(screen.getByRole("tab", { name: "전체 계약" }));
     expect(await screen.findByText("초안당사자")).not.toBeNull();
   });

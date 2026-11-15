@@ -1,12 +1,16 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
+import type { ReactNode } from "react";
 import { useCustomerList } from "@/features/customer/hooks/customer-queries";
 import { usePropertyList } from "@/features/property/hooks/property-queries";
 import { Badge } from "@/shared/components/ui/badge";
 import { SearchField } from "@/shared/components/ui/search-field";
 import { Checkbox, Radio } from "@/shared/components/ui/select-field";
 import { useReceivedGrants } from "../hooks/visit-queries";
+
+const EMPTY_LINK_CLASS = "font-semibold text-primary hover:underline";
 
 export type CandidateChoice = { propertyId: number; name: string; officeName?: string };
 
@@ -15,12 +19,14 @@ function ListState({
   isError,
   isEmpty,
   emptyText,
+  emptyAction,
   onRetry,
 }: {
   isPending: boolean;
   isError: boolean;
   isEmpty: boolean;
   emptyText: string;
+  emptyAction?: ReactNode;
   onRetry: () => void;
 }) {
   if (isPending) return <p className="text-caption text-ink-2">목록을 불러오는 중입니다.</p>;
@@ -37,7 +43,12 @@ function ListState({
         </button>
       </p>
     );
-  if (isEmpty) return <p className="text-caption text-ink-2">{emptyText}</p>;
+  if (isEmpty)
+    return (
+      <p className="text-caption text-ink-2">
+        {emptyText} {emptyAction}
+      </p>
+    );
   return null;
 }
 
@@ -73,6 +84,11 @@ export function CustomerPicker({
         isError={query.isError}
         isEmpty={items.length === 0}
         emptyText="검색된 고객이 없습니다."
+        emptyAction={
+          <Link href="/customers/new" className={EMPTY_LINK_CLASS}>
+            고객 등록하기
+          </Link>
+        }
         onRetry={() => void query.refetch()}
       />
       <ul className="flex max-h-56 flex-col gap-1 overflow-auto">
@@ -158,8 +174,8 @@ export function CandidatePicker({
         후보 매물 선택 ({selected.length}/{max})
       </legend>
       <p className="text-caption text-ink-2">
-        자기 사무소 매물과 허용받은 매물을 합쳐 {max}개까지 고를 수 있습니다. 신청 권한이 없는
-        매물은 고를 수 없습니다.
+        자기 사무소 매물과 허용받은 매물을 합쳐 {max}개까지 고를 수 있습니다. 활성 등록된 매물만
+        선택할 수 있고, 신청 권한이 없는 매물은 고를 수 없습니다.
       </p>
       <SearchField
         label="매물 검색"
@@ -174,6 +190,11 @@ export function CandidatePicker({
         isError={own.isError}
         isEmpty={ownItems.length === 0}
         emptyText="고를 수 있는 매물이 없습니다."
+        emptyAction={
+          <Link href="/properties/new" className={EMPTY_LINK_CLASS}>
+            매물 등록하기
+          </Link>
+        }
         onRetry={() => void own.refetch()}
       />
       <ul className="flex max-h-56 flex-col gap-1 overflow-auto">

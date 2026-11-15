@@ -93,6 +93,14 @@ export const METRIC_GROUPS: MetricGroup[] = [
   },
 ];
 
+export function isEmptySettlement(data: MonthlySettlementResponse): boolean {
+  return (
+    METRIC_GROUPS.every((group) => group.metrics.every((def) => data[def.key] === 0)) &&
+    data.propertyCountNewMigrated === 0 &&
+    data.customerCountNewMigrated === 0
+  );
+}
+
 export const METRIC_LABEL: Record<string, string> = {
   ...Object.fromEntries(METRIC_GROUPS.flatMap((g) => g.metrics.map((m) => [m.key, m.label]))),
   propertyCountNewMigrated: "데이터 이전으로 등록된 신규 매물",

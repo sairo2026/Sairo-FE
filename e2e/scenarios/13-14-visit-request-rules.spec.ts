@@ -117,6 +117,7 @@ test.describe("시나리오 14 대리 입력 조건과 신청 상태 전이", ()
     });
 
     await test.step("대리 입력으로 저장하면 출처가 중개사 대리 입력인 1번 버전이 적용된다", async () => {
+      await page.getByRole("button", { name: "월요일 시간대 추가" }).click();
       await page.getByRole("button", { name: "대리 입력으로 저장" }).click();
       await expect(page.getByText("조건 1번 버전으로 저장했습니다.")).toBeVisible();
       await expect(page.getByText("1번 버전", { exact: true })).toBeVisible();

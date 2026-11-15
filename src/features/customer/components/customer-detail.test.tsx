@@ -94,11 +94,13 @@ describe("고객 상세", () => {
     const user = userEvent.setup();
     renderOffice(<CustomerDetailScreen customerId={301} />, { role: "AGENT" });
     await openTab(user, "계약");
-    expect(screen.getByText(/국민대 앞 아파트 · 전세 · 초안/)).not.toBeNull();
+    expect(screen.getByRole("link", { name: "국민대 앞 아파트" })).not.toBeNull();
+    expect(screen.getByText(/· 전세 · 초안/)).not.toBeNull();
     expect(screen.getByText("지난 계약")).not.toBeNull();
     await openTab(user, "방문·업무");
     expect(screen.getByText("확정 완료")).not.toBeNull();
-    expect(screen.getByText(/2026-11-12 ~ 2026-11-14 · 후보 매물 3개/)).not.toBeNull();
+    expect(screen.getByRole("link", { name: "2026-11-12 ~ 2026-11-14" })).not.toBeNull();
+    expect(screen.getByText("후보 매물 3개")).not.toBeNull();
     expect(screen.getByText(/계약서 초안 확인 · 기한 2026-11-15 · 할 일/)).not.toBeNull();
   });
 
@@ -118,7 +120,44 @@ describe("고객 상세", () => {
     const user = userEvent.setup();
     renderOffice(<CustomerDetailScreen customerId={301} />, { role: "AGENT" });
     await openTab(user, "계약");
-    expect(screen.getByText(/국민대 앞 아파트 · 전세 · 초안 · 체결일 미정/)).not.toBeNull();
+    expect(screen.getByText(/· 전세 · 초안 · 체결일 미정/)).not.toBeNull();
+  });
+});
+
+describe("고객 상세 연결 링크", () => {
+  it("방문 조율 시작 링크는 고객을 지정해 조율 생성으로 보낸다", async () => {
+    renderOffice(<CustomerDetailScreen customerId={301} />, { role: "AGENT" });
+    const link = await screen.findByRole("link", { name: "방문 조율 시작" });
+    expect(link.getAttribute("href")).toBe("/coordinations/new?customerId=301");
+  });
+
+  it("방문 이력과 계약 항목이 상세 화면으로 가는 링크가 된다", async () => {
+    const user = userEvent.setup();
+    renderOffice(<CustomerDetailScreen customerId={301} />, { role: "AGENT" });
+    await openTab(user, "계약");
+    expect(screen.getByRole("link", { name: "국민대 앞 아파트" }).getAttribute("href")).toBe(
+      "/contracts/7",
+    );
+    await openTab(user, "방문·업무");
+    expect(screen.getByRole("link", { name: "2026-11-12 ~ 2026-11-14" }).getAttribute("href")).toBe(
+      "/coordinations/9",
+    );
+  });
+
+  it("보관된 고객에게는 방문 조율 시작 링크가 없다", async () => {
+    setMockCustomerState({
+      customers: [
+        buildMockCustomer({
+          customerId: 301,
+          name: "보관고객",
+          status: "ARCHIVED",
+          deletedAt: "2026-11-01T09:00:00+09:00",
+        }),
+      ],
+    });
+    renderOffice(<CustomerDetailScreen customerId={301} />, { role: "AGENT" });
+    await screen.findByText("보관됨");
+    expect(screen.queryByRole("link", { name: "방문 조율 시작" })).toBeNull();
   });
 });
 

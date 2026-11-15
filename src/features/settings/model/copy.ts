@@ -2,6 +2,7 @@ import { describeAuthError, isApiCode } from "@/shared/lib/api-messages";
 
 export const SETTINGS_COPY = {
   title: "내 계정",
+  backHome: "홈으로",
   description: "본인 정보, 알림 수신, 동의 내역과 계정 설정을 관리합니다.",
   profileTitle: "내 정보",
   nameLabel: "표시 이름",

@@ -27,6 +27,7 @@ import {
   DEAL_TYPE_LABEL,
   STAGE_LABEL,
   STAGE_TONE,
+  isDealType,
   labelOf,
   toneOf,
 } from "../model/labels";
@@ -63,6 +64,18 @@ const EMPTY_FILTERS: Filters = {
 };
 
 const MAN_WON = 10_000;
+
+const PRICE_BASIS_LABEL = { SALE: "매매가", JEONSE: "보증금", MONTHLY: "월세" } as const;
+
+function priceBasisLabel(dealType: string): string {
+  return isDealType(dealType) ? PRICE_BASIS_LABEL[dealType] : "가격";
+}
+
+function priceHint(dealType: string): string {
+  if (dealType === "") return "가격은 거래유형을 먼저 선택하면 입력할 수 있습니다.";
+  if (dealType === "MONTHLY") return "월세 매물은 보증금이 아닌 월세 금액으로 찾습니다.";
+  return `${priceBasisLabel(dealType)} 기준으로 찾습니다.`;
+}
 
 function optionalNumber(value: string, multiplier = 1): number | undefined {
   const trimmed = value.trim();
@@ -126,16 +139,15 @@ export function PropertyListScreen() {
       setFilterError("면적 범위를 쓰려면 면적 종류를 먼저 선택해 주세요.");
       return;
     }
-    const hasPrice = draft.priceMin.trim() !== "" || draft.priceMax.trim() !== "";
-    if (hasPrice && draft.dealType === "") {
-      setFilterError("가격 범위를 쓰려면 거래유형을 먼저 선택해 주세요.");
-      return;
-    }
     applyNow(draft);
   }
 
-  function changeImmediate<K extends keyof Filters>(key: K, value: Filters[K]) {
-    const next = { ...draft, [key]: value };
+  function changeImmediate<K extends keyof Filters>(
+    key: K,
+    value: Filters[K],
+    extra: Partial<Filters> = {},
+  ) {
+    const next = { ...draft, ...extra, [key]: value };
     setDraft(next);
     applyNow(next);
   }
@@ -253,7 +265,9 @@ export function PropertyListScreen() {
             { value: "", label: "전체" },
             ...DEAL_TYPES.map((value) => ({ value, label: DEAL_TYPE_LABEL[value] })),
           ]}
-          onValueChange={(value) => changeImmediate("dealType", value)}
+          onValueChange={(value) =>
+            changeImmediate("dealType", value, value === "" ? { priceMin: "", priceMax: "" } : {})
+          }
         />
         <SelectField
           label="카테고리"
@@ -310,19 +324,24 @@ export function PropertyListScreen() {
           value={draft.areaMax}
           onValueChange={(value) => update("areaMax", value)}
         />
-        <div className="grid grid-cols-2 gap-2">
-          <TextField
-            label="가격 하한(만원)"
-            kind="number"
-            value={draft.priceMin}
-            onValueChange={(value) => update("priceMin", value)}
-          />
-          <TextField
-            label="가격 상한(만원)"
-            kind="number"
-            value={draft.priceMax}
-            onValueChange={(value) => update("priceMax", value)}
-          />
+        <div className="flex flex-col gap-2">
+          <div className="grid grid-cols-2 gap-2">
+            <TextField
+              label={`${priceBasisLabel(draft.dealType)} 하한(만원)`}
+              kind="number"
+              disabled={draft.dealType === ""}
+              value={draft.priceMin}
+              onValueChange={(value) => update("priceMin", value)}
+            />
+            <TextField
+              label={`${priceBasisLabel(draft.dealType)} 상한(만원)`}
+              kind="number"
+              disabled={draft.dealType === ""}
+              value={draft.priceMax}
+              onValueChange={(value) => update("priceMax", value)}
+            />
+          </div>
+          <p className="text-caption text-ink-2">{priceHint(draft.dealType)}</p>
         </div>
       </div>
       <div className="flex flex-wrap items-center justify-between gap-3">
