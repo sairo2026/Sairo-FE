@@ -56,7 +56,7 @@ function SessionExpired() {
       actions={
         <Link
           href="/approver/account/login"
-          className="font-semibold text-primary underline hover:text-primary-hover active:text-primary-pressed"
+          className="font-semibold text-primary underline clickable-link"
         >
           로그인으로 이동
         </Link>
@@ -190,7 +190,7 @@ export function ApproverWorkspace({
                 ? `/approver/account/login?token=${encodeURIComponent(linkToken)}`
                 : "/approver/account/login"
             }
-            className="font-semibold text-primary underline hover:text-primary-hover active:text-primary-pressed"
+            className="font-semibold text-primary underline clickable-link"
           >
             번호 인증 계정 만들기·로그인
           </Link>
@@ -198,7 +198,7 @@ export function ApproverWorkspace({
       ) : (
         <Link
           href="/approver/account"
-          className="text-caption font-semibold text-primary underline hover:text-primary-hover active:text-primary-pressed"
+          className="text-caption font-semibold text-primary underline clickable-link"
         >
           내 매물 모아보기로 돌아가기
         </Link>

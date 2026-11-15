@@ -127,7 +127,7 @@ export function TaxDocumentListScreen() {
             render: (row) => (
               <Link
                 href={`/ops/billing/invoices/${row.invoiceId}`}
-                className="text-primary underline"
+                className="text-primary underline clickable-link"
               >
                 {row.invoiceId}
               </Link>

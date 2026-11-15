@@ -272,7 +272,7 @@ function CandidateSummary({ link }: { link: PublicVisitLinkResponse }) {
           type="button"
           aria-expanded={isExpanded}
           onClick={() => setIsExpanded((current) => !current)}
-          className="self-start text-caption font-semibold text-primary underline-offset-4 hover:text-primary-hover hover:underline active:text-primary-pressed"
+          className="self-start text-caption font-semibold text-primary underline-offset-4 clickable-link"
         >
           {isExpanded ? "접기" : `${hiddenCount}개 더 보기`}
         </button>
@@ -323,10 +323,7 @@ function ConfirmedView({ data, contact }: { data: PublicConfirmedVisitResponse; 
       )}
       <p className="text-caption text-ink-2">
         문의{" "}
-        <a
-          href={`tel:${contact}`}
-          className="font-semibold text-primary underline hover:text-primary-hover active:text-primary-pressed"
-        >
+        <a href={`tel:${contact}`} className="font-semibold text-primary underline clickable-link">
           {contact}
         </a>
       </p>
@@ -420,7 +417,7 @@ export function CustomerLinkScreen({ token }: { token: string | undefined }) {
           문의{" "}
           <a
             href={`tel:${link.officeContactPhone}`}
-            className="font-semibold text-primary underline hover:text-primary-hover active:text-primary-pressed"
+            className="font-semibold text-primary underline clickable-link"
           >
             {link.officeContactPhone}
           </a>

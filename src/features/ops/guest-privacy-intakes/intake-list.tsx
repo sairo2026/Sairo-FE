@@ -79,7 +79,7 @@ export function IntakeListScreen() {
             render: (row) => (
               <Link
                 href={`/ops/guest-privacy-intakes/${row.intakeId}`}
-                className="font-semibold text-primary underline"
+                className="font-semibold text-primary underline clickable-link"
               >
                 {row.intakeId}
               </Link>

@@ -216,7 +216,7 @@ function PreviewCard({ detail }: { detail: ImportSupportDetail }) {
         <div>
           <Link
             href={`/ops/raw-access/new?targetType=IMPORT_BATCH&targetId=${detail.importBatchId}`}
-            className="text-body font-semibold text-primary underline"
+            className="text-body font-semibold text-primary underline clickable-link"
           >
             원문 접근 승인 요청
           </Link>

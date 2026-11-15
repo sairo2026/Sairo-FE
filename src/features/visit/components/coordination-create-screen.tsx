@@ -16,7 +16,7 @@ import { useAssignableMembers } from "@/shared/session/assignable-members";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { createCoordination } from "../api/visit.api";
 import { visitKeys } from "../hooks/visit-queries";
-import { MAX_CANDIDATES } from "../model/labels";
+import { MAX_CANDIDATES, MAX_PERIOD_DAYS } from "../model/labels";
 import {
   CUSTOMER_LINK_EXPIRY_RULE,
   CUSTOMER_LINK_SHORT_EXPIRY_NOTICE,
@@ -47,6 +47,7 @@ export function CoordinationCreateScreen({
   const isDeputy = role === "DEPUTY";
   const members = useAssignableMembers();
   const today = todayKst();
+  const maxEnd = addDays(today, MAX_PERIOD_DAYS);
   const preProperty = usePropertyDetail(initialPropertyId ?? 0);
   const preCustomer = useCustomerDetail(initialCustomerId ?? 0);
   const preselectedProperty: CandidateChoice | null =
@@ -164,6 +165,7 @@ export function CoordinationCreateScreen({
               kind="date"
               value={start}
               min={today}
+              max={maxEnd}
               onValueChange={setStart}
               error={errors.start}
             />
@@ -172,12 +174,15 @@ export function CoordinationCreateScreen({
               kind="date"
               value={end}
               min={start || today}
-              max={addDays(today, 30)}
+              max={maxEnd}
               onValueChange={setEnd}
               error={errors.end}
             />
           </div>
-          <p className="text-caption text-ink-2">방문 가능 기간은 오늘부터 최대 30일입니다.</p>
+          <p className="text-caption text-ink-2">
+            방문 가능 기간은 오늘부터 30일 안으로 정해 주세요. 종료일은 {maxEnd}까지 고를 수
+            있습니다.
+          </p>
           <p className="text-caption text-ink-2">{CUSTOMER_LINK_EXPIRY_RULE}</p>
           {startsSoon ? <FormNotice>{CUSTOMER_LINK_SHORT_EXPIRY_NOTICE}</FormNotice> : null}
           {isDeputy ? (

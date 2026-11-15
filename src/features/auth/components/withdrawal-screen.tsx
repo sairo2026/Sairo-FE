@@ -75,13 +75,10 @@ function LastOwnerRestriction() {
     >
       <p className="text-body">{WITHDRAWAL_COPY.lastOwner.body}</p>
       <div className="flex flex-wrap gap-4 text-body font-semibold">
-        <Link
-          href="/members/owner-transfer"
-          className="underline hover:opacity-70 active:opacity-50"
-        >
+        <Link href="/members/owner-transfer" className="underline clickable-link">
           {WITHDRAWAL_COPY.lastOwner.transfer}
         </Link>
-        <Link href="/office/close" className="underline hover:opacity-70 active:opacity-50">
+        <Link href="/office/close" className="underline clickable-link">
           {WITHDRAWAL_COPY.lastOwner.close}
         </Link>
       </div>

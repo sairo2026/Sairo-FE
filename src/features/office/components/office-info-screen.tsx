@@ -344,19 +344,19 @@ export function OfficeInfoScreen() {
             <div className="flex flex-wrap gap-2">
               <Link
                 href="/members"
-                className="inline-flex h-9 items-center rounded-control border border-line px-3.5 text-caption text-ink-2 hover:border-primary hover:text-primary"
+                className="inline-flex h-9 items-center rounded-control border border-line px-3.5 text-caption text-ink-2 clickable-control"
               >
                 구성원·고용명부
               </Link>
               <Link
                 href="/members/requests"
-                className="inline-flex h-9 items-center rounded-control border border-line px-3.5 text-caption text-ink-2 hover:border-primary hover:text-primary"
+                className="inline-flex h-9 items-center rounded-control border border-line px-3.5 text-caption text-ink-2 clickable-control"
               >
                 참여 요청·초대
               </Link>
               <Link
                 href="/members/owner-transfer"
-                className="inline-flex h-9 items-center rounded-control border border-line px-3.5 text-caption text-ink-2 hover:border-primary hover:text-primary"
+                className="inline-flex h-9 items-center rounded-control border border-line px-3.5 text-caption text-ink-2 clickable-control"
               >
                 대표 이전
               </Link>

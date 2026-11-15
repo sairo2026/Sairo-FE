@@ -106,7 +106,7 @@ function SecondaryLink({ href, children }: { href: string; children: ReactNode }
   return (
     <Link
       href={href}
-      className="inline-flex h-12 items-center justify-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 hover:border-primary hover:text-primary"
+      className="inline-flex h-12 items-center justify-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 clickable-control"
     >
       {children}
     </Link>
@@ -364,7 +364,7 @@ export function PropertyListScreen() {
           <button
             type="button"
             onClick={reset}
-            className="h-9 rounded-control border border-line bg-white px-4 text-caption text-ink-2 hover:border-primary hover:text-primary"
+            className="h-9 rounded-control border border-line bg-white px-4 text-caption text-ink-2 clickable-control"
           >
             초기화
           </button>

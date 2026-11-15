@@ -135,7 +135,7 @@ function SettlementBody({ yearMonth }: { yearMonth: string }) {
               있습니다.{" "}
               <Link
                 href={detailHref("agreedFeeUndatedCount")}
-                className="font-semibold underline hover:opacity-70 active:opacity-50"
+                className="font-semibold underline clickable-link"
               >
                 빠진 계약 보기
               </Link>
@@ -170,14 +170,14 @@ function SettlementBody({ yearMonth }: { yearMonth: string }) {
                       데이터 이전으로 등록: 매물{" "}
                       <Link
                         href={detailHref("propertyCountNewMigrated")}
-                        className="font-semibold underline hover:opacity-70 active:opacity-50"
+                        className="font-semibold underline clickable-link"
                       >
                         {data.propertyCountNewMigrated}건
                       </Link>
                       , 고객{" "}
                       <Link
                         href={detailHref("customerCountNewMigrated")}
-                        className="font-semibold underline hover:opacity-70 active:opacity-50"
+                        className="font-semibold underline clickable-link"
                       >
                         {data.customerCountNewMigrated}명
                       </Link>

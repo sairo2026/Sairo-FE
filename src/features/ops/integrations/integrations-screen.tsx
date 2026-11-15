@@ -189,7 +189,7 @@ function IntegrationTable() {
                 {canSeeCopies ? (
                   <Link
                     href={`/ops/integrations/${row.integrationId}/contract-copies`}
-                    className="text-caption font-semibold text-primary underline"
+                    className="text-caption font-semibold text-primary underline clickable-link"
                     aria-label={`연동 ${row.integrationId} 계약서 사본`}
                   >
                     계약서 사본

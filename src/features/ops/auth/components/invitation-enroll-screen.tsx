@@ -208,7 +208,7 @@ export function InvitationEnrollScreen() {
         {isOtpauth(enrollment.otpauthUri) ? (
           <a
             href={enrollment.otpauthUri}
-            className="mt-2 inline-block text-caption text-primary underline"
+            className="mt-2 inline-block text-caption text-primary underline clickable-link"
           >
             휴대폰의 인증 앱에서 바로 열기
           </a>

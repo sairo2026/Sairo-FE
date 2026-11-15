@@ -141,7 +141,7 @@ export function CrossOfficeScreen({ propertyId }: { propertyId: number }) {
         actions={
           <Link
             href={`/properties/${propertyId}`}
-            className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 hover:border-primary hover:text-primary"
+            className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 clickable-control"
           >
             매물 상세
           </Link>

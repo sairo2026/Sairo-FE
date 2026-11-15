@@ -141,7 +141,7 @@ export function MarketingConsent({ me, isReadOnly }: { me: MeResponse; isReadOnl
               <button
                 type="button"
                 onClick={() => setIsFullTextOpen(true)}
-                className="text-caption font-semibold text-primary underline hover:text-primary-hover active:text-primary-pressed"
+                className="text-caption font-semibold text-primary underline clickable-link"
               >
                 {COPY.marketingFullText}
               </button>

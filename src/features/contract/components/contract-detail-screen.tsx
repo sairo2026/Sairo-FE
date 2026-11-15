@@ -111,7 +111,7 @@ function DetailBody({ detail }: { detail: ContractDetailResponse }) {
           <>
             <Link
               href={`/properties/${detail.propertyId}`}
-              className="inline-flex h-12 items-center rounded-control border border-line px-5 text-body font-medium text-ink-2 hover:border-primary hover:text-primary"
+              className="inline-flex h-12 items-center rounded-control border border-line px-5 text-body font-medium text-ink-2 clickable-control"
             >
               매물 보기
             </Link>
@@ -143,7 +143,7 @@ function DetailBody({ detail }: { detail: ContractDetailResponse }) {
           {detail.duplicateOfContractId ? (
             <Link
               href={`/contracts/${detail.duplicateOfContractId}`}
-              className="font-semibold underline hover:opacity-70 active:opacity-50"
+              className="font-semibold underline clickable-link"
             >
               계약 {detail.duplicateOfContractId}
             </Link>

@@ -54,7 +54,7 @@ function RequestTable({ scope }: { scope: "MINE" | "APPROVABLE" }) {
             render: (row) => (
               <Link
                 href={`/ops/raw-access/${row.requestId}`}
-                className="font-semibold text-primary underline"
+                className="font-semibold text-primary underline clickable-link"
               >
                 {row.requestId}
               </Link>
@@ -118,7 +118,10 @@ export function RawAccessListScreen() {
       description="내 요청과 승인할 요청을 보고 실행·파일 받기·회수를 처리합니다."
       roles={[]}
       actions={
-        <Link href="/ops/raw-access/new" className="text-body font-semibold text-primary underline">
+        <Link
+          href="/ops/raw-access/new"
+          className="text-body font-semibold text-primary underline clickable-link"
+        >
           새 요청 만들기
         </Link>
       }

@@ -670,7 +670,7 @@ export function PropertyForm(props: FormProps) {
             전용 입력 항목을 불러오지 못했습니다.{" "}
             <button
               type="button"
-              className="underline hover:opacity-70 active:opacity-50"
+              className="underline clickable-link"
               onClick={() => void definitions.refetch()}
             >
               다시 시도
@@ -841,10 +841,7 @@ export function PropertyEditScreen({ propertyId }: { propertyId: number }) {
         detail.deletedAt ? (
           <FormAlert>
             보관된 매물은 수정할 수 없습니다. 매물 상세에서 복원한 뒤 수정해 주세요.{" "}
-            <Link
-              href={`/properties/${propertyId}`}
-              className="underline hover:opacity-70 active:opacity-50"
-            >
+            <Link href={`/properties/${propertyId}`} className="underline clickable-link">
               상세로 돌아가기
             </Link>
           </FormAlert>

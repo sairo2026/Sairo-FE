@@ -25,7 +25,7 @@ export function ContractSubNav({ contractId, active }: { contractId: number; act
     <nav aria-label="계약 하위 메뉴" className="flex flex-wrap gap-2">
       <Link
         href={`/contracts/${contractId}`}
-        className="inline-flex h-10 items-center rounded-control border border-line px-4 text-caption font-medium text-ink-2 hover:border-primary hover:text-primary"
+        className="inline-flex h-10 items-center rounded-control border border-line px-4 text-caption font-medium text-ink-2 clickable-control"
       >
         계약 상세
       </Link>
@@ -38,7 +38,7 @@ export function ContractSubNav({ contractId, active }: { contractId: number; act
             "inline-flex h-10 items-center rounded-control border px-4 text-caption font-medium",
             active === item.key
               ? "border-primary bg-primary-soft text-primary"
-              : "border-line text-ink-2 hover:border-primary hover:text-primary",
+              : "border-line text-ink-2 clickable-control",
           )}
         >
           {item.label}

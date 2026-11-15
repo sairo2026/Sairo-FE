@@ -63,7 +63,7 @@ function RegistrationList() {
             render: (row) => (
               <Link
                 href={`/ops/registrations/${row.registrationId}`}
-                className="font-semibold text-primary underline"
+                className="font-semibold text-primary underline clickable-link"
               >
                 {row.registrationId}
               </Link>

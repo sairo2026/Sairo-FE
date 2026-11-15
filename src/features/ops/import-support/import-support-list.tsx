@@ -63,7 +63,7 @@ function ImportSupportTable() {
             render: (row) => (
               <Link
                 href={`/ops/import-support/${row.requestId}`}
-                className="font-semibold text-primary underline"
+                className="font-semibold text-primary underline clickable-link"
               >
                 {row.requestId}
               </Link>

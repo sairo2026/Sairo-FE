@@ -136,7 +136,10 @@ function DisputeDetail({
         </section>
         <p role="note" className="text-caption text-ink-2">
           승인자 이름, 연락처, 매물 주소는 이 화면에 나오지 않습니다. 확인이 필요하면{" "}
-          <Link href="/ops/raw-access/new" className="font-semibold text-primary underline">
+          <Link
+            href="/ops/raw-access/new"
+            className="font-semibold text-primary underline clickable-link"
+          >
             원문 접근 요청
           </Link>
           으로 신청해 주세요.

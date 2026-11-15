@@ -144,7 +144,7 @@ export function InquiryListScreen() {
             render: (row) => (
               <Link
                 href={`/ops/inquiries/${row.inquiryId}`}
-                className="font-semibold text-primary underline"
+                className="font-semibold text-primary underline clickable-link"
               >
                 {row.inquiryId}
               </Link>

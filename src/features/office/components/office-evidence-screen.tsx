@@ -46,7 +46,7 @@ function EvidenceFileField({
       </label>
       <div
         className={cn(
-          "flex h-14 items-center justify-between gap-2 rounded-control border bg-surface px-4",
+          "relative flex h-14 items-center justify-between gap-2 rounded-control border bg-surface px-4",
           error ? "border-danger" : "border-line",
         )}
       >

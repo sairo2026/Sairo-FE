@@ -15,9 +15,8 @@ const variantClass: Record<ButtonVariant, string> = {
   submit: "bg-primary text-white font-bold hover:bg-primary-hover active:bg-primary-pressed",
   cancel: "bg-primary-soft text-ink-2 font-medium hover:bg-primary-line active:bg-primary-line",
   outlined:
-    "bg-primary-soft text-primary border border-primary font-semibold hover:bg-primary-line active:bg-primary-line",
-  ghost:
-    "bg-white text-ink-2 border border-line font-medium hover:border-primary hover:bg-primary-soft hover:text-primary active:bg-primary-line",
+    "bg-primary-soft text-primary border border-primary font-semibold hover:bg-primary-line hover:shadow-[0_2px_8px_rgb(51_53_166/0.18)] active:bg-primary-line active:shadow-none",
+  ghost: "bg-white text-ink-2 border border-line font-medium clickable-control",
 };
 
 export function Button({
@@ -48,7 +47,7 @@ export function Button({
         onClick?.(event);
       }}
       className={cn(
-        "inline-flex items-center justify-center gap-1.5 rounded-control text-body transition-colors",
+        "inline-flex items-center justify-center gap-1.5 rounded-control text-body transition-[color,background-color,border-color,box-shadow] duration-150",
         size === "md" ? "h-12 min-w-[120px] px-10" : "h-9 px-3.5 text-caption",
         fullWidth && "w-full",
         variantClass[variant],

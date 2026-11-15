@@ -36,3 +36,8 @@ export function kstParts(iso: string): { date: string; time: string } {
   const shifted = new Date(Date.parse(iso) + KST_OFFSET_MS).toISOString();
   return { date: shifted.slice(0, 10), time: shifted.slice(11, 16) };
 }
+
+/** 방문 시작 시각이 아직 오지 않았으면 완료·불참을 기록할 수 없다(서버 규칙). 취소만 기록할 수 있다. */
+export function hasNotStarted(scheduledStartAt: string | null, now: number = Date.now()): boolean {
+  return scheduledStartAt !== null && Date.parse(scheduledStartAt) > now;
+}

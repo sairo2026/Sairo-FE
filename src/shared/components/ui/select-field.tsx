@@ -75,6 +75,13 @@ export function SelectField({
 
 const CHECK_PATH = "M3 8.5l3.2 3L13 4.5";
 
+/**
+ * 시각적으로 숨긴 입력은 라벨(relative) 안에 고정한다. sr-only(위치 기준 없는 absolute)를 쓰면 스크롤 영역 안에서
+ * 라벨을 눌러 포커스가 옮겨질 때 브라우저가 그 입력을 화면에 보이려고 문서와 스크롤 영역을 맨 위나 아래로 움직인다.
+ */
+const HIDDEN_INPUT_CLASS =
+  "peer absolute inset-0 m-0 h-full w-full cursor-[inherit] appearance-none opacity-0";
+
 export type RadioProps = {
   label?: ReactNode;
   ariaLabel?: string;
@@ -104,7 +111,7 @@ export function Radio({
   return (
     <label
       className={cn(
-        "group inline-flex min-h-11 items-center gap-3 text-body text-ink",
+        "group relative inline-flex min-h-11 items-center gap-3 text-body text-ink",
         disabled ? "cursor-not-allowed text-ink-3" : "cursor-pointer",
         className,
       )}
@@ -118,7 +125,7 @@ export function Radio({
         disabled={disabled}
         aria-label={ariaLabel}
         onChange={onSelect}
-        className="peer sr-only"
+        className={HIDDEN_INPUT_CLASS}
       />
       <span
         aria-hidden="true"
@@ -214,7 +221,7 @@ export function Checkbox({
     <label
       htmlFor={inputId}
       className={cn(
-        "group inline-flex min-h-11 items-center gap-3 text-body text-ink",
+        "group relative inline-flex min-h-11 items-center gap-3 text-body text-ink",
         disabled ? "cursor-not-allowed text-ink-3" : "cursor-pointer",
         className,
       )}
@@ -228,7 +235,7 @@ export function Checkbox({
         aria-label={ariaLabel}
         aria-invalid={isInvalid ? true : undefined}
         onChange={(event) => onCheckedChange(event.target.checked)}
-        className="peer sr-only"
+        className={HIDDEN_INPUT_CLASS}
       />
       <span
         aria-hidden="true"

@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { http } from "msw";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { errorResponse, mockErrors } from "@/mocks/error-responses";
+import { ApiError } from "@/shared/api/client";
 import { resetMockCustomerState } from "@/mocks/handlers/customer";
 import { resetMockPropertyState } from "@/mocks/handlers/property";
 import {
@@ -23,7 +24,12 @@ import { renderOffice } from "@/shared/testing/office-render";
 import { cancelCoordination, recordItemResult, rescheduleCoordination } from "../api/follow.api";
 import { CoordinationDetailScreen } from "./coordination-detail-screen";
 import { SupervisionScreen } from "./supervision-screen";
-import { validateResult } from "./result-section";
+import {
+  CLOCK_AHEAD_NOTICE,
+  NOT_STARTED_NOTICE,
+  describeResultError,
+  validateResult,
+} from "./result-section";
 import { validateNotice, EMPTY_NOTICE_FORM } from "./assistant-notice-panel";
 
 vi.mock("next/navigation", () => ({
@@ -256,6 +262,80 @@ describe("방문 결과 기록", () => {
     fillCompleted();
     await user.click(screen.getByRole("button", { name: "결과 저장" }));
     expect(await screen.findByText("이 작업을 할 권한이 없습니다.")).not.toBeNull();
+  });
+
+  it("아직 시작하지 않은 방문은 안내를 보이고 완료·불참 선택지를 없애 취소만 기록하게 한다", async () => {
+    prepare({
+      scheduleItems: [
+        {
+          itemId: 9101,
+          candidatePropertyId: 8011,
+          scheduledStartAt: "2099-01-01T10:00:00+09:00",
+          scheduledEndAt: "2099-01-01T10:30:00+09:00",
+          result: "SCHEDULED",
+          state: "VALID",
+          resultRecordedAt: null,
+          correctionCount: 0,
+        },
+      ],
+    });
+    const user = userEvent.setup();
+    renderOffice(<CoordinationDetailScreen coordinationId={801} />, { role: "OWNER" });
+    expect(await screen.findByText(NOT_STARTED_NOTICE)).not.toBeNull();
+    await user.click(screen.getByRole("button", { name: "결과 기록" }));
+    const dialog = screen.getByRole("dialog");
+    const select = within(dialog).getByLabelText("방문 결과") as HTMLSelectElement;
+    expect(Array.from(select.options).map((option) => option.value)).toEqual(["CANCELLED"]);
+    expect(select.value).toBe("CANCELLED");
+    expect(within(dialog).queryByLabelText("실제 방문 날짜")).toBeNull();
+  });
+
+  it("이미 시작한 방문은 세 가지 결과를 모두 고를 수 있고 기본 시각은 예정 시작 시각이다", async () => {
+    prepare();
+    const user = userEvent.setup();
+    renderOffice(<CoordinationDetailScreen coordinationId={801} />, { role: "OWNER" });
+    await user.click(await screen.findByRole("button", { name: "결과 기록" }));
+    const dialog = screen.getByRole("dialog");
+    const select = within(dialog).getByLabelText("방문 결과") as HTMLSelectElement;
+    expect(Array.from(select.options).map((option) => option.value)).toEqual([
+      "COMPLETED",
+      "NO_SHOW",
+      "CANCELLED",
+    ]);
+    expect((within(dialog).getByLabelText("실제 방문 날짜") as HTMLInputElement).value).toBe(
+      "2026-11-12",
+    );
+    expect((within(dialog).getByLabelText("실제 방문 시각") as HTMLInputElement).value).toBe(
+      "10:00",
+    );
+    expect(screen.queryByText(NOT_STARTED_NOTICE)).toBeNull();
+  });
+
+  it("서버가 시각 범위로 거절하면 거절된 값에 맞는 안내를 보이고 서버 문장은 보이지 않는다", async () => {
+    prepare();
+    server.use(
+      http.patch("/api/visit-schedule-items/:itemId/result", () =>
+        mockErrors.validation([
+          { field: "actualVisitedAt", code: "OUT_OF_RANGE", message: "서버 원문 문장" },
+        ]),
+      ),
+    );
+    const user = userEvent.setup();
+    renderOffice(<CoordinationDetailScreen coordinationId={801} />, { role: "OWNER" });
+    await user.click(await screen.findByRole("button", { name: "결과 기록" }));
+    fillCompleted();
+    await user.click(screen.getByRole("button", { name: "결과 저장" }));
+    expect(await screen.findByText(CLOCK_AHEAD_NOTICE)).not.toBeNull();
+    expect(screen.queryByText(/서버 원문 문장/)).toBeNull();
+  });
+
+  it("결과 필드가 범위를 벗어나면 시작 시각 이후 기록 안내를 보인다", () => {
+    const error = new ApiError(400, {
+      code: "INVALID_REQUEST",
+      message: "원문",
+      fieldErrors: [{ field: "result", code: "OUT_OF_RANGE", message: "원문" }],
+    });
+    expect(describeResultError(error)).toBe(NOT_STARTED_NOTICE);
   });
 
   it("조율이 취소된 상태에서는 결과 버튼이 막힌다", async () => {

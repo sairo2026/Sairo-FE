@@ -181,13 +181,16 @@ function MemberDetailBody({ detail }: { detail: Detail }) {
         {membership ? (
           <Link
             href={`/ops/offices/${membership.officeId}`}
-            className="text-body font-semibold text-primary underline"
+            className="text-body font-semibold text-primary underline clickable-link"
           >
             소속 사무소 상세
           </Link>
         ) : null}
         {canBilling ? (
-          <Link href="/ops/billing" className="text-body font-semibold text-primary underline">
+          <Link
+            href="/ops/billing"
+            className="text-body font-semibold text-primary underline clickable-link"
+          >
             결제·환불
           </Link>
         ) : null}
@@ -241,7 +244,10 @@ export function MemberDetailScreen({ userId }: { userId: number }) {
       title="회원 상세"
       roles={OPS_WORK_ROLES}
       actions={
-        <Link href="/ops/members" className="text-body font-semibold text-primary underline">
+        <Link
+          href="/ops/members"
+          className="text-body font-semibold text-primary underline clickable-link"
+        >
           목록으로
         </Link>
       }

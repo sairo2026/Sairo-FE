@@ -80,8 +80,7 @@ describe("홈 대시보드", () => {
   it("후속업무 항목에 호버·누름 상태 클래스가 있다", async () => {
     renderOffice(<HomeDashboard />, { role: "OWNER" });
     const link = await screen.findByRole("link", { name: /전세 계약 D-90 후속업무/ });
-    expect(link.className).toContain("hover:bg-primary-soft");
-    expect(link.className).toContain("active:bg-primary-line");
+    expect(link.className).toContain("clickable-row");
   });
 
   it("읽지 않은 알림 수 배지가 알림함으로 이어진다", async () => {
@@ -190,8 +189,8 @@ describe("홈 대시보드", () => {
     COORDINATION_STATUSES.forEach((value, index) => {
       expect(links[index]?.getAttribute("href")).toBe(`/coordinations?status=${value}`);
       expect(links[index]?.textContent).toContain(statusLabel(value));
-      expect(links[index]?.className).toContain("hover:opacity-80");
-      expect(links[index]?.className).toContain("active:opacity-65");
+      const tile = links[index]?.querySelector("[data-tone]");
+      expect(tile?.className).toContain("clickable-tile");
     });
   });
 
@@ -200,7 +199,7 @@ describe("홈 대시보드", () => {
     for (const name of ["신청 대기 0건", "재검증 실패 0건", "시간 마감 0건"]) {
       const link = await screen.findByRole("link", { name });
       expect(link.getAttribute("href")).toBe("/coordinations");
-      expect(link.className).toContain("hover:border-primary");
+      expect(link.className).toContain("clickable-card");
     }
   });
 

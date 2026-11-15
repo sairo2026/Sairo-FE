@@ -144,7 +144,7 @@ function ApprovalFormModal({
     >
       <form
         noValidate
-        className="flex max-h-[60vh] flex-col gap-4 overflow-auto"
+        className="scroll-area flex max-h-[60vh] flex-col gap-4 overflow-auto"
         onSubmit={(event) => {
           event.preventDefault();
           submit();
@@ -416,7 +416,7 @@ function ApprovalBody({ propertyId, propertyName }: { propertyId: number; proper
           <div className="flex gap-2">
             <Link
               href={`/properties/${propertyId}`}
-              className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 hover:border-primary hover:text-primary"
+              className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 clickable-control"
             >
               매물 상세
             </Link>

@@ -120,7 +120,7 @@ export function PublicPricingScreen() {
           {COPY.pricingRefundSummary}{" "}
           <Link
             href="/legal/refund-policy"
-            className="font-semibold text-primary underline hover:text-primary-hover active:text-primary-pressed"
+            className="font-semibold text-primary underline clickable-link"
           >
             {COPY.pricingRefundLink}
           </Link>
@@ -129,7 +129,7 @@ export function PublicPricingScreen() {
           {COPY.enterpriseNote}{" "}
           <Link
             href="/support/enterprise"
-            className="font-semibold text-primary underline hover:text-primary-hover active:text-primary-pressed"
+            className="font-semibold text-primary underline clickable-link"
           >
             도입 문의
           </Link>
@@ -138,7 +138,7 @@ export function PublicPricingScreen() {
           {PRICING_COPY.links.map((item, index) => (
             <span key={item.href}>
               {index > 0 ? <span aria-hidden>· </span> : null}
-              <Link href={item.href} className="underline hover:opacity-70 active:opacity-50">
+              <Link href={item.href} className="underline clickable-link">
                 {item.label}
               </Link>
             </span>

@@ -82,7 +82,7 @@ export function LeadListScreen() {
             render: (row) => (
               <Link
                 href={`/ops/enterprise-leads/${row.leadId}`}
-                className="font-semibold text-primary underline"
+                className="font-semibold text-primary underline clickable-link"
               >
                 {row.companyName}
               </Link>

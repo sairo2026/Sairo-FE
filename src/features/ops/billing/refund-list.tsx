@@ -71,7 +71,7 @@ export function RefundListScreen() {
             render: (row) => (
               <Link
                 href={`/ops/billing/refunds/${row.refundId}`}
-                className="font-semibold text-primary underline"
+                className="font-semibold text-primary underline clickable-link"
               >
                 {row.refundId}
               </Link>
@@ -84,7 +84,7 @@ export function RefundListScreen() {
             render: (row) => (
               <Link
                 href={`/ops/billing/invoices/${row.invoiceId}`}
-                className="text-primary underline"
+                className="text-primary underline clickable-link"
               >
                 {row.invoiceId}
               </Link>

@@ -16,7 +16,7 @@ export function CookieNotice({ variant = "default", className }: CookieNoticePro
   return (
     <p className={`text-caption text-ink-2 ${className ?? ""}`} data-testid="cookie-notice">
       {COOKIE_NOTICE_COPY.body} {extra}{" "}
-      <Link href="/legal/privacy" className="font-semibold underline">
+      <Link href="/legal/privacy" className="font-semibold underline clickable-link">
         {COOKIE_NOTICE_COPY.linkLabel}
       </Link>
     </p>

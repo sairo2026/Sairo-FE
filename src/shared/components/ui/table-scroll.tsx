@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
+import { useMoreBelow } from "@/shared/hooks/use-more-below";
 import { cn } from "@/shared/lib/cn";
+import { MoreBelowHint } from "./scroll-more-hint";
 
 export type TableScrollProps = {
   label: string;
@@ -14,6 +16,7 @@ export type TableScrollProps = {
 export function TableScroll({ label, children, className }: TableScrollProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
+  const hasMoreBelow = useMoreBelow(ref);
 
   useEffect(() => {
     const element = ref.current;
@@ -26,14 +29,21 @@ export function TableScroll({ label, children, className }: TableScrollProps) {
   }, []);
 
   return (
-    <div
-      ref={ref}
-      role={isOverflowing ? "group" : undefined}
-      aria-label={isOverflowing ? `${label} 가로 스크롤` : undefined}
-      tabIndex={isOverflowing ? 0 : undefined}
-      className={cn("overflow-x-auto", className)}
-    >
-      {children}
+    <div className="relative">
+      <div
+        ref={ref}
+        role={isOverflowing ? "group" : undefined}
+        aria-label={isOverflowing ? `${label} 가로 스크롤` : undefined}
+        tabIndex={isOverflowing ? 0 : undefined}
+        className={cn("scroll-area overflow-x-auto", className)}
+      >
+        {children}
+      </div>
+      <MoreBelowHint
+        isVisible={hasMoreBelow}
+        placement="absolute"
+        className="rounded-b-card-flat"
+      />
     </div>
   );
 }

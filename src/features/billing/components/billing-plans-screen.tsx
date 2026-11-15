@@ -43,7 +43,7 @@ function PlansView({ data }: { data: BillingPlanListResponse }) {
               <MutedNote>{COPY.enterpriseNote}</MutedNote>
               <Link
                 href="/support/enterprise"
-                className="text-caption font-semibold text-primary underline hover:text-primary-hover active:text-primary-pressed"
+                className="text-caption font-semibold text-primary underline clickable-link"
               >
                 도입 문의
               </Link>
