@@ -18,6 +18,7 @@ import { Toggle } from "@/shared/components/ui/select-field";
 import { TextField } from "@/shared/components/ui/text-field";
 import { accountQueryKey } from "@/shared/consent/consent.api";
 import { useAccountMe } from "@/shared/consent/use-account-me";
+import { WORK_HOME_PATH } from "@/shared/lib/app-paths";
 import { countCodePoints, formatSeoulDateTime } from "@/shared/lib/format";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import {
@@ -379,7 +380,11 @@ export function AccountScreen() {
   const query = useAccountMe();
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-10">
-      <PageHeader title={COPY.title} description={COPY.description} />
+      <PageHeader
+        title={COPY.title}
+        description={COPY.description}
+        actions={<TextLink href={WORK_HOME_PATH}>{COPY.backHome}</TextLink>}
+      />
       <QueryGate query={query} loadingLabel="내 계정 정보를 불러오는 중입니다.">
         {(me) => (
           <>

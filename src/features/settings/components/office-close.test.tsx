@@ -41,6 +41,11 @@ describe("사무소 종료 확인", () => {
     );
   });
 
+  it("취소는 사무소 관리로 돌아간다", () => {
+    renderOffice(<OfficeCloseScreen />, { role: "OWNER" });
+    expect(screen.getByRole("link", { name: "취소" }).getAttribute("href")).toBe("/office");
+  });
+
   it("대표가 아니면 권한 없음을 보여준다", () => {
     renderOffice(<OfficeCloseScreen />, { role: "AGENT" });
     expect(screen.getByText("접근 권한이 없습니다")).not.toBeNull();

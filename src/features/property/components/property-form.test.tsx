@@ -310,6 +310,9 @@ describe("매물 수정", () => {
     );
     renderOffice(<PropertyEditScreen propertyId={501} />, { role: "OWNER" });
     expect(await screen.findByText(/보관된 매물은 수정할 수 없습니다/)).not.toBeNull();
+    expect(screen.getByRole("link", { name: "상세로 돌아가기" }).getAttribute("href")).toBe(
+      "/properties/501",
+    );
   });
 });
 

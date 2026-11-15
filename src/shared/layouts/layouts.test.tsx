@@ -22,6 +22,26 @@ describe("레이아웃", () => {
     ).toBeNull();
   });
 
+  it("사무소 레이아웃은 상단에 사무소명과 전달받은 동작을 보여준다", () => {
+    render(
+      <OfficeLayout officeName="사이로중개사무소" headerActions={<button>로그아웃</button>}>
+        <p>본문</p>
+      </OfficeLayout>,
+    );
+    const header = screen.getByRole("banner");
+    expect(header.textContent).toContain("사이로중개사무소");
+    expect(screen.getByRole("button", { name: "로그아웃" })).toBeTruthy();
+  });
+
+  it("사무소명이 없으면 기본 표시를 쓴다", () => {
+    render(
+      <OfficeLayout>
+        <p>본문</p>
+      </OfficeLayout>,
+    );
+    expect(screen.getByRole("banner").textContent).toBe("사무소");
+  });
+
   it("고객용 사이트는 사무소 메뉴 없이 본문과 하단 영역을 둔다", () => {
     render(
       <CustomerSiteLayout footer={<p>사업자 정보</p>}>

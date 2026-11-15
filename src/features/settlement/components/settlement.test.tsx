@@ -7,7 +7,7 @@ import { errorResponse, mockErrors } from "@/mocks/error-responses";
 import { getMockWorkState, resetMockWorkState, setMockWorkState } from "@/mocks/handlers/work";
 import { server, startMockServer } from "@/mocks/server";
 import { renderOffice } from "@/shared/testing/office-render";
-import { currentYearMonth, shiftYearMonth } from "../model/metrics";
+import { METRIC_GROUPS, currentYearMonth, shiftYearMonth } from "../model/metrics";
 import { SettlementDetailsScreen } from "./settlement-details-screen";
 import { SettlementScreen } from "./settlement-screen";
 
@@ -94,6 +94,60 @@ describe("월말결산 대시보드", () => {
     const link = await screen.findByRole("link", { name: /^체결 계약 2건/ });
     expect(link.getAttribute("href")).toBe(
       `/settlements/${THIS_MONTH}/details?metric=contractSignedCount`,
+    );
+  });
+
+  it("CSV 내려받기는 파일을 저장하고 실패하면 안내를 보여준다", async () => {
+    const createObjectURL = vi.fn(() => "blob:settlement");
+    const revokeObjectURL = vi.fn();
+    const click = vi
+      .spyOn(HTMLAnchorElement.prototype, "click")
+      .mockImplementation(() => undefined);
+    vi.stubGlobal("URL", Object.assign(URL, { createObjectURL, revokeObjectURL }));
+    server.use(
+      http.get(
+        `/api/settlements/${THIS_MONTH}/export`,
+        () => new Response("a,b", { headers: { "Content-Type": "text/csv" } }),
+      ),
+    );
+    const user = userEvent.setup();
+    renderOffice(<SettlementScreen />, { role: "OWNER" });
+    await user.click(await screen.findByRole("button", { name: "CSV 내려받기" }));
+    await waitFor(() => expect(createObjectURL).toHaveBeenCalledTimes(1));
+    expect(click).toHaveBeenCalledTimes(1);
+    server.use(http.get(`/api/settlements/${THIS_MONTH}/export`, () => mockErrors.server()));
+    await user.click(screen.getByRole("button", { name: "CSV 내려받기" }));
+    expect(await screen.findByRole("alert")).not.toBeNull();
+    vi.unstubAllGlobals();
+    click.mockRestore();
+  });
+
+  it("실적이 모두 0인 달은 빈 달 안내를 보여준다", async () => {
+    const zeros = Object.fromEntries(
+      METRIC_GROUPS.flatMap((group) => group.metrics.map((def) => [def.key, 0])),
+    );
+    setMockWorkState({
+      settlement: {
+        ...zeros,
+        propertyCountNewMigrated: 0,
+        customerCountNewMigrated: 0,
+        agreedFeeUndatedCount: 0,
+      },
+    });
+    renderOffice(<SettlementScreen />, { role: "OWNER" });
+    expect(await screen.findByText(/이 달에는 아직 집계된 실적이 없습니다/)).not.toBeNull();
+  });
+
+  it("조회 범위를 벗어난 달은 기간 안내와 이번 달 링크를 보여준다", async () => {
+    server.use(
+      http.get(`/api/settlements/${THIS_MONTH}`, () =>
+        mockErrors.validation([{ field: "yearMonth", code: "OUT_OF_RANGE", message: "범위" }]),
+      ),
+    );
+    renderOffice(<SettlementScreen />, { role: "OWNER" });
+    expect(await screen.findByText(/조회할 수 있는 기간을 벗어난 달입니다/)).not.toBeNull();
+    expect(screen.getByRole("link", { name: "이번 달 월말결산 보기" }).getAttribute("href")).toBe(
+      "/settlements",
     );
   });
 
@@ -286,6 +340,36 @@ describe("월말결산 상세 내역", () => {
     );
     renderOffice(<SettlementDetailsScreen yearMonth={THIS_MONTH} />, { role: "OWNER" });
     expect(await screen.findByText("이 지표에 해당하는 내역이 없습니다.")).not.toBeNull();
+  });
+
+  it("내용이 같은 행도 모두 보여준다", async () => {
+    navigation.search = "metric=contractSignedCount";
+    const row = { contractId: 9101, propertyAddress: "같은 주소", dealType: "JEONSE" };
+    server.use(
+      http.get(`/api/settlements/${THIS_MONTH}/details`, () =>
+        Response.json({
+          metric: "contractSignedCount",
+          yearMonth: THIS_MONTH,
+          items: [row, row],
+          page: 0,
+          size: 25,
+          totalElements: 2,
+        }),
+      ),
+    );
+    renderOffice(<SettlementDetailsScreen yearMonth={THIS_MONTH} />, { role: "OWNER" });
+    expect((await screen.findAllByText("같은 주소")).length).toBe(2);
+  });
+
+  it("조회 범위를 벗어난 달이면 기간 안내를 보여준다", async () => {
+    navigation.search = "metric=contractSignedCount";
+    server.use(
+      http.get(`/api/settlements/${THIS_MONTH}/details`, () =>
+        mockErrors.validation([{ field: "yearMonth", code: "OUT_OF_RANGE", message: "범위" }]),
+      ),
+    );
+    renderOffice(<SettlementDetailsScreen yearMonth={THIS_MONTH} />, { role: "OWNER" });
+    expect(await screen.findByText(/조회할 수 있는 기간을 벗어난 달입니다/)).not.toBeNull();
   });
 
   it("알 수 없는 지표나 잘못된 월은 찾을 수 없음 화면이다", async () => {

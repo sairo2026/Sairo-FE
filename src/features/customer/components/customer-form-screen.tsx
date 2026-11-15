@@ -432,7 +432,13 @@ export function CustomerEditScreen({ customerId }: { customerId: number }) {
           </FormAlert>
         ) : detail.deletedAt ? (
           <FormAlert>
-            보관된 고객은 수정할 수 없습니다. 고객 상세에서 복원한 뒤 수정해 주세요.
+            보관된 고객은 수정할 수 없습니다. 고객 상세에서 복원한 뒤 수정해 주세요.{" "}
+            <Link
+              href={`/customers/${customerId}`}
+              className="underline hover:opacity-70 active:opacity-50"
+            >
+              상세로 돌아가기
+            </Link>
           </FormAlert>
         ) : (
           <CustomerForm

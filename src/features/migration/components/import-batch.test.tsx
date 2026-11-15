@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { http } from "msw";
+import { HttpResponse, http } from "msw";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { errorResponse, mockErrors } from "@/mocks/error-responses";
 import { buildMockBatch, migrationState, resetMigrationState } from "@/mocks/handlers/migration";
@@ -282,7 +282,9 @@ describe("미리보기와 실행", () => {
     await toPreview(user);
     await user.click(screen.getByRole("button", { name: "이전 실행" }));
     expect(
-      screen.getByText(/60개 행을 이전합니다. 오류 행 8개는 이전되지 않습니다/),
+      screen.getByText(
+        /51개 행을 새로 이전합니다. 오류 행 8개와 중복으로 제외되는 행 1개는 이전되지 않습니다/,
+      ),
     ).not.toBeNull();
     await user.click(screen.getByRole("button", { name: "실행" }));
     const bar = await screen.findByRole("progressbar", { name: "이전 진행률" });
@@ -293,6 +295,46 @@ describe("미리보기와 실행", () => {
     expect(screen.getByText("실행 결과")).not.toBeNull();
     expect(migrationState.remainingThisMonth).toBe(2);
   }, 15000);
+
+  it("미리보기가 중복 제외 건수와 행별 중복 판정을 보여준다", async () => {
+    const user = userEvent.setup();
+    await toPreview(user);
+    expect(screen.getByText("새로 만들 행").nextElementSibling?.textContent).toBe("51");
+    expect(screen.getByText("중복 제외").nextElementSibling?.textContent).toBe("1");
+    expect(screen.getByText("기존 자료와 중복")).not.toBeNull();
+    expect(screen.getByText(/겹쳐 새로 만들지 않습니다/)).not.toBeNull();
+  });
+
+  it("새로 만들 행이 없으면 실행을 막고 이유를 안내한다", async () => {
+    server.use(
+      http.get("/api/import-batches/:batchId/preview", () =>
+        HttpResponse.json({
+          rows: [],
+          duplicateWarnings: [],
+          summary: {
+            rowCount: 3,
+            errorRowCount: 1,
+            warningCount: 0,
+            duplicateCount: 2,
+            relationMatchCount: 0,
+            newCount: 0,
+            alreadyImportedCount: 2,
+            duplicateInFileCount: 0,
+            duplicateExistingCount: 0,
+          },
+          page: 0,
+          size: 25,
+          totalElements: 3,
+        }),
+      ),
+    );
+    const user = userEvent.setup();
+    await toPreview(user);
+    expect(await screen.findByText(/새로 이전할 행이 없어 실행할 수 없습니다/)).not.toBeNull();
+    expect(screen.getByRole("button", { name: "이전 실행" }).getAttribute("aria-disabled")).toBe(
+      "true",
+    );
+  });
 
   it("횟수가 없으면 실행을 막고 안내한다", async () => {
     migrationState.remainingThisMonth = 0;
@@ -339,6 +381,46 @@ describe("실행 결과", () => {
     expect(await screen.findByText("실행 결과")).not.toBeNull();
     expect(screen.getByText("55건")).not.toBeNull();
     expect(screen.getByText("5건이 형식 오류로 실패했습니다.")).not.toBeNull();
+  });
+
+  it("중복 제외 건수와 사유를 보여주고 완료 뒤 고객 목록으로 이어진다", async () => {
+    migrationState.batches.push(
+      buildMockBatch({
+        batchId: 303,
+        status: "COMPLETED",
+        counts: {
+          total: 100,
+          succeeded: 60,
+          failed: 5,
+          skippedDuplicate: 30,
+          skippedByReason: { alreadyImported: 20, duplicateInFile: 4, duplicateExisting: 6 },
+          unprocessed: 5,
+        },
+        executedAt: "2026-11-09T10:30:00+09:00",
+        cancellableUntil: "2026-11-09T10:30:00+09:00",
+      }),
+    );
+    openBatch(303);
+    const reasons = await screen.findByRole("region", { name: "제외된 건수의 사유" });
+    expect(within(reasons).getByText("이미 이전된 자료")).not.toBeNull();
+    expect(within(reasons).getByText("20건")).not.toBeNull();
+    expect(within(reasons).getByText("기존 고객과 겹침")).not.toBeNull();
+    expect(screen.getByText("30건")).not.toBeNull();
+    expect(screen.getByRole("link", { name: "고객 목록 보기" }).getAttribute("href")).toBe(
+      "/customers",
+    );
+  });
+
+  it("실행 중 진행률은 중복 제외 건수까지 처리로 센다", async () => {
+    const executing = buildMockBatch({
+      batchId: 304,
+      status: "EXECUTING",
+      counts: { total: 100, succeeded: 30, failed: 10, skippedDuplicate: 10, unprocessed: 50 },
+    });
+    server.use(http.get("/api/import-batches/:batchId", () => HttpResponse.json(executing.detail)));
+    openBatch(304);
+    const bar = await screen.findByRole("progressbar", { name: "이전 진행률" });
+    expect(bar.getAttribute("aria-valuenow")).toBe("50");
   });
 
   it("실패한 줄만 다시 처리하면 월 횟수를 더 쓰지 않는다", async () => {

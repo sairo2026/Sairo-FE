@@ -1,9 +1,9 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
-import { DetailList } from "@/shared/components/feedback/page-parts";
+import { DetailList, TextLink } from "@/shared/components/feedback/page-parts";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import { ConfirmDialog } from "@/shared/components/ui/modal";
@@ -11,15 +11,37 @@ import { formatSeoulDateTime } from "@/shared/lib/format";
 import { cancelImport, retryFailedImport } from "../api/migration.api";
 import type { ImportBatchDetail } from "../api/wire";
 import { migrationKeys } from "../hooks/migration-queries";
-import { ENTITY_TYPE_LABEL, NOT_CANCELLED_REASONS } from "../model/labels";
+import { ENTITY_TYPE_LABEL, NOT_CANCELLED_REASONS, SKIP_REASON_LABEL } from "../model/labels";
 import { IMPORT_COPY, describeMigrationError } from "../model/messages";
 
 type Props = { batch: ImportBatchDetail; isLocked: boolean };
 
+const CLOCK_REFRESH_MS = 30_000;
+
+const CREATED_LIST_LINK: Record<string, { href: string; label: string }> = {
+  CUSTOMER: { href: "/customers", label: "고객 목록 보기" },
+  PROPERTY: { href: "/properties", label: "매물 목록 보기" },
+};
+
+function SkippedReasons({ counts }: { counts: NonNullable<ImportBatchDetail["counts"]> }) {
+  const reasons = counts.skippedByReason;
+  if (!reasons || counts.skippedDuplicate === 0) return null;
+  const items = (Object.keys(SKIP_REASON_LABEL) as Array<keyof typeof SKIP_REASON_LABEL>)
+    .filter((key) => reasons[key] > 0)
+    .map((key) => ({ label: SKIP_REASON_LABEL[key], value: `${reasons[key]}건` }));
+  if (items.length === 0) return null;
+  return (
+    <section aria-label={IMPORT_COPY.skippedReasonsTitle} className="flex flex-col gap-2">
+      <p className="text-caption text-ink-2">{IMPORT_COPY.skippedReasonsTitle}</p>
+      <DetailList items={items} />
+    </section>
+  );
+}
+
 function Progress({ batch }: { batch: ImportBatchDetail }) {
   const counts = batch.counts;
   const total = counts?.total ?? 0;
-  const done = counts ? counts.succeeded + counts.failed : 0;
+  const done = counts ? counts.succeeded + counts.failed + counts.skippedDuplicate : 0;
   const percent = total === 0 ? 0 : Math.round((done / total) * 100);
   return (
     <div className="flex flex-col gap-2">
@@ -43,7 +65,7 @@ function Progress({ batch }: { batch: ImportBatchDetail }) {
 export function ResultPanel({ batch, isLocked }: Props) {
   const queryClient = useQueryClient();
   const [isCancelling, setIsCancelling] = useState(false);
-  const [now] = useState(() => Date.now());
+  const [now, setNow] = useState(() => Date.now());
   const [error, setError] = useState<string>();
   const [message, setMessage] = useState<string>();
 
@@ -82,8 +104,16 @@ export function ResultPanel({ batch, isLocked }: Props) {
   const isExecuting = batch.status === "EXECUTING";
   const isCompleted = batch.status === "COMPLETED";
   const cancellableUntil = batch.cancellableUntil ?? null;
-  const canCancel =
-    isCompleted && cancellableUntil !== null && new Date(cancellableUntil).getTime() > now;
+  const isWindowOpen = cancellableUntil !== null && new Date(cancellableUntil).getTime() > now;
+
+  useEffect(() => {
+    if (!isCompleted || !isWindowOpen) return;
+    const timer = window.setInterval(() => setNow(Date.now()), CLOCK_REFRESH_MS);
+    return () => window.clearInterval(timer);
+  }, [isCompleted, isWindowOpen]);
+
+  const canCancel = isCompleted && isWindowOpen;
+  const createdLink = CREATED_LIST_LINK[batch.targetType];
 
   return (
     <Card title="실행 결과">
@@ -95,10 +125,12 @@ export function ResultPanel({ batch, isLocked }: Props) {
               { label: "전체", value: `${counts.total}건` },
               { label: "성공", value: `${counts.succeeded}건` },
               { label: "실패", value: `${counts.failed}건` },
+              { label: "중복 제외", value: `${counts.skippedDuplicate}건` },
               { label: "미처리", value: `${counts.unprocessed}건` },
             ]}
           />
         ) : null}
+        {counts ? <SkippedReasons counts={counts} /> : null}
         {batch.failureReason && !isExecuting ? (
           <FormNotice>{batch.failureReason}</FormNotice>
         ) : null}
@@ -139,6 +171,9 @@ export function ResultPanel({ batch, isLocked }: Props) {
           <p role="status" className="text-caption font-semibold text-primary">
             {message}
           </p>
+        ) : null}
+        {isCompleted && createdLink ? (
+          <TextLink href={createdLink.href}>{createdLink.label}</TextLink>
         ) : null}
         {isCompleted ? (
           <div className="flex flex-wrap gap-3">

@@ -29,8 +29,14 @@ export const IMPORT_COPY = {
   previewIntro: "이 단계에서는 아무 데이터도 만들어지지 않습니다.",
   errorRowNotice:
     "오류가 있는 행은 실행할 때 이전되지 않고 실패 건수로 남습니다. 원본 파일을 고쳐 새로 올리거나 실행 후 실패한 줄만 다시 처리할 수 있습니다.",
-  executeConfirm: (rows: number, errors: number) =>
-    `${rows}개 행을 이전합니다. 오류 행 ${errors}개는 이전되지 않습니다. 직접 실행은 이번 달 횟수를 사용하며 실행 전 대표의 확인이 필요합니다.`,
+  executeConfirm: (newCount: number, errors: number, skipped: number) =>
+    `${newCount}개 행을 새로 이전합니다. 오류 행 ${errors}개${
+      skipped > 0 ? `와 중복으로 제외되는 행 ${skipped}개` : ""
+    }는 이전되지 않습니다. 직접 실행은 이번 달 횟수를 사용하며 실행 전 대표의 확인이 필요합니다.`,
+  nothingToImport:
+    "새로 이전할 행이 없어 실행할 수 없습니다. 모든 행이 오류이거나 이미 사이로에 있는 자료와 겹칩니다. 원본 파일을 확인해 주세요.",
+  skippedHint: "중복으로 제외된 행은 새로 만들지 않고 건너뜁니다.",
+  skippedReasonsTitle: "제외된 건수의 사유",
   executeStarted: "이전을 시작했습니다. 진행 상태가 자동으로 갱신됩니다.",
   progress: (done: number, total: number) => `${done} / ${total}건 처리`,
   cancelConfirm:

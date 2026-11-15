@@ -52,6 +52,25 @@ describe("사무소 정보", () => {
     expect(await screen.findByText("낸 변경 신청이 없습니다.")).not.toBeNull();
   });
 
+  it("대표에게 구독, 내보내기, 데이터 이전, 사무소 종료로 가는 링크를 보여준다", async () => {
+    renderOffice(<OfficeInfoScreen />, { role: "OWNER" });
+    const expected = {
+      "구독·결제": "/billing",
+      "데이터 내보내기": "/exports",
+      "데이터 이전": "/import",
+      "사무소 종료": "/office/close",
+    };
+    for (const [name, href] of Object.entries(expected)) {
+      expect((await screen.findByRole("link", { name })).getAttribute("href")).toBe(href);
+    }
+  });
+
+  it("대표가 아니면 사무소 운영 링크를 숨긴다", async () => {
+    renderOffice(<OfficeInfoScreen />, { role: "DEPUTY" });
+    await screen.findByText("사이로 공인중개사사무소");
+    expect(screen.queryByRole("link", { name: "사무소 종료" })).toBeNull();
+  });
+
   it("조회가 실패하면 오류 화면을 보여준다", async () => {
     server.use(http.get("/api/offices/current", () => mockErrors.server()));
     renderOffice(<OfficeInfoScreen />, { role: "OWNER" });
@@ -240,6 +259,7 @@ describe("구성원 목록", () => {
     expect(screen.queryByRole("columnheader", { name: "자격번호" })).toBeNull();
     expect(screen.queryByRole("tab", { name: "고용명부" })).toBeNull();
     expect(screen.getByText(/대표만 볼 수 있습니다/)).not.toBeNull();
+    expect(screen.queryByRole("link", { name: "이중개 상세" })).toBeNull();
   });
 
   it("대표가 아닌 호출자에게 소속 메타 정보가 null이고 대표 행의 참여 경로가 등록이어도 목록을 보여준다", async () => {
@@ -422,6 +442,11 @@ describe("구성원 상세", () => {
     expect(screen.getByText(/확정된 방문 3건은 재조율 필요로 바뀝니다/)).not.toBeNull();
   });
 
+  it("대표가 아니면 접근 권한 없음 화면을 보여준다", () => {
+    renderOffice(<MemberDetailScreen membershipId={2} />, { role: "AGENT" });
+    expect(screen.getByText("접근 권한이 없습니다")).not.toBeNull();
+  });
+
   it("없는 구성원은 찾을 수 없음 화면을 보여준다", async () => {
     renderOffice(<MemberDetailScreen membershipId={999} />, { role: "OWNER" });
     expect(await screen.findByText("페이지를 찾을 수 없습니다")).not.toBeNull();
@@ -530,6 +555,11 @@ describe("참여 요청과 초대 관리", () => {
       ...partial,
     });
   }
+
+  it("대표가 아니면 접근 권한 없음 화면을 보여준다", () => {
+    renderOffice(<MemberRequestsScreen />, { role: "AGENT" });
+    expect(screen.getByText("접근 권한이 없습니다")).not.toBeNull();
+  });
 
   it("30일과 7일 안내와 빈 대기 목록을 보여준다", async () => {
     renderOffice(<MemberRequestsScreen />, { role: "OWNER" });

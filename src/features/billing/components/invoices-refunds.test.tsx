@@ -131,6 +131,13 @@ describe("청구서 상세와 환불 신청", () => {
     expect(screen.getByRole("button", { name: "환불 신청" }).getAttribute("aria-disabled")).toBe(
       "true",
     );
+    expect(screen.getByText(/환불 가능한 금액이 없어 환불을 신청할 수 없습니다/)).not.toBeNull();
+  });
+
+  it("환불할 수 있으면 비활성 사유를 보여주지 않는다", async () => {
+    renderOffice(<InvoiceDetailScreen invoiceId={501} />, { role: "OWNER" });
+    await screen.findByText("59,900원 (VAT 포함)");
+    expect(screen.queryByText(/환불 가능한 금액이 없어/)).toBeNull();
   });
 
   it("증빙 발급 실패와 발급 대상 아님을 백엔드 상태 값으로 표시한다", async () => {
@@ -318,6 +325,20 @@ describe("요금제 안내", () => {
     expect(screen.getByText("6명: 85,900원 / 월")).not.toBeNull();
     await user.clear(input);
     expect(screen.getByText("1명 이상의 인원을 입력해 주세요.")).not.toBeNull();
+  });
+
+  it("구독 현황으로 돌아가는 링크와 카드 등록, 동의로 이어지는 링크를 보여준다", async () => {
+    renderOffice(<BillingPlansScreen />, { role: "OWNER" });
+    await screen.findByText("표준 가격");
+    expect(screen.getByRole("link", { name: "구독 현황으로" }).getAttribute("href")).toBe(
+      "/billing",
+    );
+    expect(screen.getByRole("link", { name: "카드 등록하기" }).getAttribute("href")).toBe(
+      "/billing/card",
+    );
+    expect(screen.getByRole("link", { name: "구독 구매 동의하기" }).getAttribute("href")).toBe(
+      "/billing/consent",
+    );
   });
 
   it("조회가 실패하면 오류를 보여준다", async () => {

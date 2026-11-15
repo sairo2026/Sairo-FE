@@ -109,11 +109,14 @@ describe("시작 고객 합의", () => {
     );
   });
 
-  it("합의와 안내가 없으면 해당 영역을 보여주지 않는다", async () => {
+  it("시작 고객 합의가 없으면 합의 영역을 숨기고 가격 변경 안내 내역 링크는 항상 보여준다", async () => {
     renderOffice(<SubscriptionScreen />, { role: "OWNER" });
     await screen.findByText("무료 이용 중");
     expect(screen.queryByRole("link", { name: "합의 내용 확인" })).toBeNull();
-    expect(screen.queryByText(/처리할 가격 변경 안내/)).toBeNull();
+    expect(screen.getByText("처리할 가격 변경 안내가 없습니다.")).not.toBeNull();
+    expect(screen.getByRole("link", { name: "지난 안내 내역 보기" }).getAttribute("href")).toBe(
+      "/billing/price-changes",
+    );
   });
 });
 
