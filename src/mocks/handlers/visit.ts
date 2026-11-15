@@ -347,7 +347,11 @@ export const visitHandlers = [
     if (ids.length > 20)
       return errorResponse(422, "CANDIDATE_LIMIT_EXCEEDED", "후보 매물은 20개까지입니다.");
     if (daysBetween(today, body.periodEndDate) > 30)
-      return errorResponse(422, "PERIOD_TOO_LONG", "방문 가능 기간은 30일 이내입니다.");
+      return errorResponse(
+        422,
+        "PERIOD_TOO_LONG",
+        "방문 가능 기간은 오늘부터 30일 안으로 정해 주세요.",
+      );
     const customer = getMockCustomerState().customers.find(
       (item) => item.customerId === body.customerId,
     );

@@ -45,7 +45,11 @@ async function snapshot(page: Page): Promise<ScrollSnapshot> {
   });
 }
 
-async function expectScrollUnchanged(page: Page, selector: string) {
+async function expectScrollUnchanged(
+  page: Page,
+  selector: string,
+  options: { comparesContainers: boolean } = { comparesContainers: true },
+) {
   const center = await bringToCenter(page, selector);
   await page.waitForTimeout(100);
   const before = await snapshot(page);
@@ -54,8 +58,10 @@ async function expectScrollUnchanged(page: Page, selector: string) {
   await page.waitForTimeout(400);
   const after = await snapshot(page);
   expect(after.windowY).toBe(before.windowY);
-  // 같은 스크롤 컨테이너의 위치가 그대로여야 한다. 개수가 바뀌어도 앞쪽 값은 유지된다.
-  expect(after.containers.slice(0, before.containers.length)).toEqual(before.containers);
+  // 목록 자료가 바뀌는 컨트롤(보관 토글)은 스크롤 컨테이너 자체가 달라질 수 있어 window 위치만 본다.
+  if (options.comparesContainers) {
+    expect(after.containers.slice(0, before.containers.length)).toEqual(before.containers);
+  }
 }
 
 test.describe("컨트롤을 눌러도 스크롤 위치가 유지된다", () => {
@@ -76,7 +82,7 @@ test.describe("컨트롤을 눌러도 스크롤 위치가 유지된다", () => {
     await page.goto("/customers");
     await settle(page);
     await expectScrollUnchanged(page, 'input[type="checkbox"][aria-label$=" 선택"]');
-    await expectScrollUnchanged(page, 'button[role="switch"]');
+    await expectScrollUnchanged(page, 'button[role="switch"]', { comparesContainers: false });
   });
 });
 
@@ -146,5 +152,23 @@ test.describe("화면 맨 아래 요소가 잘리지 않는다", () => {
       (element) => getComputedStyle(element).scrollbarWidth,
     );
     expect(scrollbarWidth).toBe("thin");
+  });
+});
+
+test.describe("방문 가능 기간 입력", () => {
+  test("방문 조율 만들기: 종료일 상한(오늘 + 30일)과 안내 문구가 같은 날짜를 가리킨다", async ({
+    page,
+  }) => {
+    await fixMockClock(page);
+    await useMockOfficeRole(page, "OWNER");
+    await page.goto("/coordinations/new");
+    await settle(page);
+    const max = await page.getByLabel("방문 가능 종료일").getAttribute("max");
+    expect(max).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    await expect(
+      page.getByText(
+        `방문 가능 기간은 오늘부터 30일 안으로 정해 주세요. 종료일은 ${max}까지 고를 수 있습니다.`,
+      ),
+    ).toBeVisible();
   });
 });

@@ -249,7 +249,7 @@ export const ERROR_CODE_COPY: Record<string, string> = {
     "선택할 수 없는 후보 매물이 있습니다. 허용이 없거나 회수된 매물은 제외해 주세요.",
   CANDIDATE_LIMIT_EXCEEDED:
     "후보 매물 수가 허용 범위를 넘었습니다. 후보를 줄인 뒤 다시 시도해 주세요.",
-  PERIOD_TOO_LONG: "조율 기간이 허용 범위보다 깁니다. 기간을 줄여 다시 시도해 주세요.",
+  PERIOD_TOO_LONG: "방문 가능 기간은 오늘부터 30일 안으로 정해 주세요.",
   ACCESS_APPROVAL_MISSING: "출입승인이 없는 매물이 있습니다. 출입승인 상태를 먼저 확인해 주세요.",
   TIME_OUT_OF_RANGE: "선택한 시간이 가능한 범위를 벗어났습니다. 범위 안의 시간을 선택해 주세요.",
   TOKEN_EXPIRED: "인증 시간이 지났습니다. 다시 인증해 주세요.",

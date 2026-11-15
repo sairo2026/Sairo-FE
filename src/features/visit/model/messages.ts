@@ -13,7 +13,7 @@ const MESSAGE_BY_CODE: Record<string, string> = {
     "후보 매물은 자기 사무소 매물과 허용받은 매물을 합쳐 20개까지 고를 수 있습니다.",
   CANDIDATE_NOT_ALLOWED:
     "신청 권한이 없는 매물이 포함되어 있습니다. 허용이 없거나 회수된 매물은 후보로 고를 수 없습니다.",
-  PERIOD_TOO_LONG: "방문 가능 기간은 오늘부터 30일 안에서 정해 주세요.",
+  PERIOD_TOO_LONG: "방문 가능 기간은 오늘부터 30일 안으로 정해 주세요.",
   CUSTOMER_ARCHIVED: "보관된 고객은 선택할 수 없습니다. 고객을 복원한 뒤 다시 시도해 주세요.",
   DEPUTY_VISIT_LOCKED:
     "중개보조원 인원 한도를 넘어 방문 업무가 잠겼습니다. 한도를 시정한 뒤 다시 시도해 주세요.",
