@@ -134,7 +134,10 @@ function DetailBody({ detail }: { detail: ContractDetailResponse }) {
           </>
         }
       />
-      <ContractSubNav contractId={detail.contractId} />
+      <ContractSubNav
+        contractId={detail.contractId}
+        openFollowupTaskCount={detail.openFollowupTaskCount}
+      />
       {detail.duplicateExcluded ? (
         <FormNotice>
           중복 제외된 계약입니다. 제외 시각{" "}

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useSubscription } from "@/features/billing/hooks/billing-queries";
 import { COORDINATION_STATUSES, statusLabel, statusTone } from "@/features/visit/model/labels";
 import { coordinationListPath } from "@/features/visit/model/visit-routes";
-import { VISIT_REQUEST_NOTICES_HREF } from "../model/labels";
+import { VISIT_REQUEST_NOTICES_HREF, taskContractHref } from "../model/labels";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { ScheduleTag } from "@/shared/components/ui/badge";
@@ -303,6 +303,7 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
                       dueDate={task.dueDate}
                       assigneeName={task.assigneeName}
                       isOverdue
+                      href={taskContractHref(task.sourceType, task.sourceId)}
                       onOpen={() => setOpenTaskId(task.taskId)}
                     />
                   </li>
@@ -323,6 +324,7 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
                       dueDate={task.dueDate}
                       assigneeName={task.assigneeName}
                       isOverdue={false}
+                      href={taskContractHref(task.sourceType, task.sourceId)}
                       onOpen={() => setOpenTaskId(task.taskId)}
                     />
                   </li>
@@ -414,21 +416,21 @@ function TaskRow({
   dueDate,
   assigneeName,
   isOverdue,
+  href,
   onOpen,
 }: {
   title: string;
   dueDate: string;
   assigneeName: string;
   isOverdue: boolean;
+  /** 계약에서 생긴 업무면 그 계약 화면 주소다. 없으면 업무 상세 창을 연다. */
+  href: string | null;
   onOpen: () => void;
 }) {
-  return (
-    <button
-      type="button"
-      onClick={onOpen}
-      aria-label={`업무 ${title} 열기`}
-      className="group flex w-full items-center justify-between gap-3 rounded-control border border-line px-4 py-3 text-left clickable-row"
-    >
+  const className =
+    "group flex w-full items-center justify-between gap-3 rounded-control border border-line px-4 py-3 text-left clickable-row";
+  const content = (
+    <>
       <span className="flex min-w-0 flex-col">
         <span className="truncate-text font-semibold text-ink">{title}</span>
         <span className="text-caption text-ink-2">담당 {assigneeName}</span>
@@ -442,6 +444,15 @@ function TaskRow({
           ›
         </span>
       </span>
+    </>
+  );
+  return href ? (
+    <Link href={href} aria-label={`업무 ${title}의 계약 보기`} className={className}>
+      {content}
+    </Link>
+  ) : (
+    <button type="button" onClick={onOpen} aria-label={`업무 ${title} 열기`} className={className}>
+      {content}
     </button>
   );
 }

@@ -163,6 +163,25 @@ describe("업무 목록과 업무 팝업", () => {
     await waitFor(() => expect(getMockWorkState().tasks[0]?.memo).toBe("확인함"));
   });
 
+  it("계약에서 생긴 업무는 구분 칸에서 해당 계약으로 이동한다", async () => {
+    setMockWorkState({
+      tasks: [
+        buildMockTask({
+          taskId: 21,
+          title: "잔금 확인",
+          sourceType: "CONTRACT_BALANCE",
+          sourceId: 601,
+        }),
+        buildMockTask({ taskId: 22, title: "방문 확인", sourceType: "VISIT", sourceId: 5001 }),
+      ],
+    });
+    renderOffice(<TaskListScreen />, { role: "OWNER" });
+    const link = await screen.findByRole("link", { name: "업무 잔금 확인의 계약 보기" });
+    expect(link.getAttribute("href")).toBe("/contracts/601");
+    expect(screen.queryByRole("link", { name: "업무 방문 확인의 계약 보기" })).toBeNull();
+    expect(screen.getByRole("button", { name: "업무 방문 확인 열기" })).not.toBeNull();
+  });
+
   it("완료 처리와 완료 취소를 할 수 있다", async () => {
     setMockWorkState({ tasks: [buildMockTask({ taskId: 4, title: "전화하기" })] });
     const user = userEvent.setup();

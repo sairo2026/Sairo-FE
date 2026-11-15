@@ -224,6 +224,38 @@ describe("홈 대시보드", () => {
     expect(within(today).queryByText("지난 업무")).toBeNull();
   });
 
+  it("계약에서 생긴 업무는 그 계약으로 이동하고 그 외 업무는 업무 상세 창을 연다", async () => {
+    setMockWorkState({
+      tasks: [
+        buildMockTask({
+          taskId: 11,
+          title: "잔금 예정 확인",
+          sourceType: "CONTRACT_BALANCE",
+          sourceId: 601,
+        }),
+        buildMockTask({
+          taskId: 12,
+          title: "만기 확인",
+          sourceType: "CONTRACT_MATURITY",
+          sourceId: 602,
+        }),
+        buildMockTask({ taskId: 13, title: "방문 준비", sourceType: "VISIT", sourceId: 5001 }),
+        buildMockTask({ taskId: 14, title: "직접 만든 업무" }),
+      ],
+    });
+    const user = userEvent.setup();
+    renderOffice(<HomeDashboard />, { role: "OWNER" });
+    const balance = await screen.findByRole("link", { name: "업무 잔금 예정 확인의 계약 보기" });
+    expect(balance.getAttribute("href")).toBe("/contracts/601");
+    expect(
+      screen.getByRole("link", { name: "업무 만기 확인의 계약 보기" }).getAttribute("href"),
+    ).toBe("/contracts/602");
+    expect(screen.queryByRole("link", { name: "업무 방문 준비의 계약 보기" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "업무 직접 만든 업무의 계약 보기" })).toBeNull();
+    await user.click(screen.getByRole("button", { name: "업무 방문 준비 열기" }));
+    expect(await screen.findByRole("dialog")).not.toBeNull();
+  });
+
   it("방문과 업무가 없으면 빈 안내를 보여준다", async () => {
     setMockWorkState({ tasks: [], todayVisits: [], followupTasks: [], calendarDays: [] });
     renderOffice(<HomeDashboard />, { role: "OWNER" });

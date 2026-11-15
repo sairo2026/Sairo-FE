@@ -14,6 +14,7 @@ import { server, startMockServer } from "@/mocks/server";
 import { renderOffice } from "@/shared/testing/office-render";
 import {
   notificationHref,
+  notificationLink,
   notificationTypeLabel,
   parseNotificationTab,
   visitRequestNoticeHref,
@@ -120,7 +121,10 @@ describe("알림함", () => {
     first.unmount();
     server.use(http.get("/api/notifications", () => mockErrors.forbidden()));
     const second = renderOffice(<NotificationListScreen />, { role: "OWNER" });
-    expect(await screen.findByText("접근 권한이 없습니다")).not.toBeNull();
+    expect(await screen.findByText(/사무소 접근이 정지된 경우 정지가 풀릴 때까지/)).not.toBeNull();
+    expect(screen.getByRole("link", { name: "접근 상태 확인" }).getAttribute("href")).toBe(
+      "/access",
+    );
     second.unmount();
     server.use(http.get("/api/notifications", () => mockErrors.rateLimited(20)));
     renderOffice(<NotificationListScreen />, { role: "OWNER" });
@@ -238,6 +242,43 @@ describe("알림 종류 확장", () => {
     expect(link.getAttribute("href")).toBe("/contracts/601");
   });
 
+  it("대표 이전 알림은 이동 대상이 없어도 대표 이전 화면으로 이어진다", async () => {
+    setMockWorkState({
+      notifications: [
+        buildMockNotification({
+          notificationId: 9103,
+          type: "OWNER_TRANSFER",
+          message: "대표 이전 요청이 도착했습니다.",
+          targetType: "NONE",
+          targetId: null,
+        }),
+      ],
+    });
+    renderOffice(<NotificationListScreen />, { role: "OWNER" });
+    expect(await screen.findByText("대표 이전 요청이 도착했습니다.")).not.toBeNull();
+    expect(screen.getByText("대표 이전")).not.toBeNull();
+    const link = screen.getByRole("link", { name: "관련 화면으로 이동" });
+    expect(link.getAttribute("href")).toBe("/members/owner-transfer");
+  });
+
+  it("구성원 정지·복구·강등 알림은 보안 알림 라벨로 보이고 링크 없이 표시한다", async () => {
+    setMockWorkState({
+      notifications: [
+        buildMockNotification({
+          notificationId: 9104,
+          type: "SECURITY_ALERT",
+          message: "사무소 구성원 접근이 정지되었습니다.",
+          targetType: "NONE",
+          targetId: null,
+        }),
+      ],
+    });
+    renderOffice(<NotificationListScreen />, { role: "OWNER" });
+    expect(await screen.findByText("사무소 구성원 접근이 정지되었습니다.")).not.toBeNull();
+    expect(screen.getByText("로그인·보안")).not.toBeNull();
+    expect(screen.queryByRole("link", { name: "관련 화면으로 이동" })).toBeNull();
+  });
+
   it("알 수 없는 알림 종류와 이동 대상은 일반 알림으로 표시하고 링크를 달지 않는다", async () => {
     setMockWorkState({
       notifications: [
@@ -254,6 +295,44 @@ describe("알림 종류 확장", () => {
     expect(await screen.findByText("새 종류의 알림입니다.")).not.toBeNull();
     expect(screen.getByText("알림")).not.toBeNull();
     expect(screen.queryByRole("link", { name: "관련 화면으로 이동" })).toBeNull();
+  });
+});
+
+describe("알림 종류 20가지", () => {
+  const SERVER_TYPES = [
+    "OFFICE_REVIEW",
+    "MEMBERSHIP_APPROVAL_NEEDED",
+    "INVITATION",
+    "ASSIGNEE_CHANGED",
+    "VISIT_SCHEDULED",
+    "VISIT_CONFIRMED",
+    "VISIT_RESCHEDULE_NEEDED",
+    "VISIT_COMPLETION_PENDING",
+    "VISIT_SUPERVISION_CHECK",
+    "SECURITY_ALERT",
+    "NOTICE",
+    "TRIAL_ENDING",
+    "PLAN_CHANGED",
+    "PAYMENT",
+    "RETURN_SCHEDULED",
+    "DELETION_SCHEDULED",
+    "SUPPORT_REPLY",
+    "TERMS_CHANGED",
+    "CONTRACT_EXPIRY",
+    "OWNER_TRANSFER",
+  ];
+
+  it("서버의 모든 알림 종류에 전용 라벨이 있다", () => {
+    expect(SERVER_TYPES).toHaveLength(20);
+    for (const type of SERVER_TYPES) {
+      expect(notificationTypeLabel(type), type).not.toBe("알림");
+    }
+  });
+
+  it("대표 이전 알림은 대상 종류와 관계없이 대표 이전 화면 주소를 준다", () => {
+    expect(notificationLink("OWNER_TRANSFER", "NONE", null)).toBe("/members/owner-transfer");
+    expect(notificationLink("PAYMENT", "SUBSCRIPTION", null)).toBe("/billing");
+    expect(notificationLink("SECURITY_ALERT", "NONE", null)).toBeNull();
   });
 });
 

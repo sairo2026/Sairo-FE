@@ -388,6 +388,49 @@ describe("구독 흐름 보완", () => {
     );
   });
 
+  it("결제 전 상태는 서버가 준 다음 결제 예상 금액을 보여준다", async () => {
+    billingState.subscription = buildSubscription({
+      status: "PRE_PAYMENT",
+      nextChargeAmount: 71_000,
+      ...READY,
+    });
+    const user = userEvent.setup();
+    show();
+    expect(await screen.findByText("71,000원 (VAT 포함)")).not.toBeNull();
+    await user.click(screen.getByRole("button", { name: "지금 결제" }));
+    expect((await screen.findByRole("dialog")).textContent).toContain(
+      "71,000원(부가가치세 포함)을 지금 결제합니다",
+    );
+  });
+
+  it("결제 응답이 처리 중이면 완료라고 하지 않고 확인 중으로 안내한다", async () => {
+    billingState.subscription = buildSubscription({ status: "PRE_PAYMENT", ...READY });
+    server.use(
+      http.post("/api/subscriptions/first-payment", () =>
+        HttpResponse.json({ status: "ACTIVE", invoiceId: 9, paymentStatus: "PROCESSING" }),
+      ),
+    );
+    const user = userEvent.setup();
+    show();
+    await user.click(await screen.findByRole("button", { name: "지금 결제" }));
+    await user.click(
+      within(await screen.findByRole("dialog")).getByRole("button", { name: "결제하기" }),
+    );
+    expect(await screen.findByText(/결제사에 결제 결과를 확인하고 있습니다/)).not.toBeNull();
+    expect(screen.queryByText("결제가 완료됐습니다.")).toBeNull();
+  });
+
+  it("결제 응답이 PAID이면 완료로 안내한다", async () => {
+    billingState.subscription = buildSubscription({ status: "PRE_PAYMENT", ...READY });
+    const user = userEvent.setup();
+    show();
+    await user.click(await screen.findByRole("button", { name: "지금 결제" }));
+    await user.click(
+      within(await screen.findByRole("dialog")).getByRole("button", { name: "결제하기" }),
+    );
+    expect(await screen.findByText("결제가 완료됐습니다.")).not.toBeNull();
+  });
+
   it("미납 상태의 재결제도 확인 중이면 완료라고 하지 않는다", async () => {
     billingState.subscription = buildSubscription({
       status: "PAST_DUE_GRACE",
@@ -429,6 +472,7 @@ describe("구독 흐름 보완", () => {
     await user.click(await screen.findByRole("button", { name: "구독 해지" }));
     const dialog = await screen.findByRole("dialog");
     expect(dialog.textContent).toContain("구독이 지금 바로 종료됩니다");
+    expect(dialog.textContent).toContain("아직 결제되지 않은 청구서는 취소 처리");
     expect(within(dialog).queryByRole("link", { name: "지금 바로 종료" })).toBeNull();
     await user.click(within(dialog).getByRole("button", { name: "지금 해지" }));
     expect(await screen.findByText(/구독이 종료됐습니다. 종료 후 30일 동안/)).not.toBeNull();

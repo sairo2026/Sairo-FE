@@ -37,12 +37,18 @@ export const REFUND_STATUS: Record<string, Labeled> = {
 export const REFUND_REASONS: ReadonlyArray<{ value: string; label: string }> = [
   { value: "CANCELLATION", label: "해지" },
   { value: "AUTH_SUSPENSION", label: "인증 중단" },
-  { value: "DUPLICATE_CHARGE", label: "중복 결제" },
+  { value: "DUPLICATE_CHARGE", label: "중복 청구" },
   { value: "INCORRECT_CHARGE", label: "잘못된 청구" },
   { value: "SERVICE_FAILURE", label: "서비스 장애" },
   { value: "LATE_APPROVAL", label: "승인 지연" },
   { value: "POLICY_COMPENSATION", label: "정책 보상" },
 ];
+
+/** 사용자가 환불을 신청할 때 고를 수 있는 사유. 나머지 사유는 시스템이 정한다. */
+export const REFUND_REQUEST_REASONS: ReadonlyArray<{ value: string; label: string }> =
+  REFUND_REASONS.filter(
+    (item) => item.value === "DUPLICATE_CHARGE" || item.value === "INCORRECT_CHARGE",
+  );
 
 export const ATTEMPT_RESULT: Record<string, string> = {
   PROCESSING: "처리 중",

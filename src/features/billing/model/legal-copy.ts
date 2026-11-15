@@ -139,7 +139,8 @@ export const COMMERCE_NOTICE_COPY = {
 export const TAX_COPY = {
   intro:
     "세금계산서를 받으시려면 사업자등록번호와 수신 이메일을 입력해 주세요. 청구가 시작되기 전에는 세금계산서가 발급되지 않습니다.",
-  businessNumberError: "사업자등록번호 형식이 올바르지 않습니다. 숫자 10자리를 입력해 주세요.",
+  businessNumberError:
+    "사업자등록번호 형식이 올바르지 않습니다. 숫자 10자리를 입력해 주세요. 하이픈(-)은 넣어도 됩니다.",
   emailError: "이메일 주소 형식이 올바르지 않습니다.",
   saved: "세금계산서 수신 정보를 저장했습니다.",
   states: {

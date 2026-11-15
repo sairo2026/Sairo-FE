@@ -211,6 +211,17 @@ describe("청구서 상세와 환불 신청", () => {
     expect(sent).toEqual({ invoiceId: 501, reasonCode: "DUPLICATE_CHARGE" });
   });
 
+  it("환불 신청에서는 중복 청구와 잘못된 청구 두 가지 사유만 고를 수 있다", async () => {
+    const user = userEvent.setup();
+    renderOffice(<InvoiceDetailScreen invoiceId={501} />, { role: "OWNER" });
+    await user.click(await screen.findByRole("button", { name: "환불 신청" }));
+    const dialog = await screen.findByRole("dialog");
+    const options = within(dialog)
+      .getAllByRole("option")
+      .map((option) => option.textContent);
+    expect(options).toEqual(["선택해 주세요", "중복 청구", "잘못된 청구"]);
+  });
+
   it("이미 처리 중인 같은 신청이 있으면 기존 신청 안내를 보여준다", async () => {
     server.use(
       http.post("/api/refund-requests", () =>
@@ -238,7 +249,7 @@ describe("청구서 상세와 환불 신청", () => {
     renderOffice(<InvoiceDetailScreen invoiceId={501} />, { role: "OWNER" });
     await user.click(await screen.findByRole("button", { name: "환불 신청" }));
     const dialog = await screen.findByRole("dialog");
-    await user.selectOptions(within(dialog).getByRole("combobox"), "CANCELLATION");
+    await user.selectOptions(within(dialog).getByRole("combobox"), "INCORRECT_CHARGE");
     await user.click(within(dialog).getByRole("button", { name: "환불 신청" }));
     expect((await within(dialog).findByRole("alert")).textContent).toContain("진행할 수 없습니다");
   });
@@ -249,7 +260,7 @@ describe("청구서 상세와 환불 신청", () => {
     renderOffice(<InvoiceDetailScreen invoiceId={501} />, { role: "OWNER" });
     await user.click(await screen.findByRole("button", { name: "환불 신청" }));
     const dialog = await screen.findByRole("dialog");
-    await user.selectOptions(within(dialog).getByRole("combobox"), "CANCELLATION");
+    await user.selectOptions(within(dialog).getByRole("combobox"), "INCORRECT_CHARGE");
     await user.click(within(dialog).getByRole("button", { name: "환불 신청" }));
     expect((await within(dialog).findByRole("alert")).textContent).toContain(
       "45초 뒤에 다시 시도해 주세요",
@@ -272,7 +283,7 @@ describe("환불 신청 내역", () => {
     renderOffice(<RefundsScreen />, { role: "OWNER" });
     const link = await screen.findByRole("link", { name: "환불 901" });
     const row = link.closest("tr") as HTMLElement;
-    expect(within(row).getByText("중복 결제")).not.toBeNull();
+    expect(within(row).getByText("중복 청구")).not.toBeNull();
     expect(within(row).getByText("접수")).not.toBeNull();
     expect(within(row).getByText("산정 전")).not.toBeNull();
   });

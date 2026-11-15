@@ -47,7 +47,29 @@ export const NOTIFICATION_TYPE_LABEL: Record<string, string> = {
   SUPPORT_REPLY: "지원 답변",
   TERMS_CHANGED: "약관·방침 변경",
   CONTRACT_EXPIRY: "임대 만기",
+  OWNER_TRANSFER: "대표 이전",
 };
+
+/** 대표 이전 알림은 이동 대상 종류가 NONE이라 알림 종류로 이동 화면을 정한다. */
+export const OWNER_TRANSFER_HREF = "/members/owner-transfer";
+
+/** 계약에서 생긴 업무(잔금·만기)의 원천 번호는 계약 ID라서 그 계약으로 보낸다. 그 외는 null이다. */
+export function taskContractHref(
+  sourceType: string,
+  sourceId: number | null | undefined,
+): string | null {
+  const isContractSource = sourceType === "CONTRACT_BALANCE" || sourceType === "CONTRACT_MATURITY";
+  return isContractSource && sourceId ? `/contracts/${sourceId}` : null;
+}
+
+export function notificationLink(
+  type: string,
+  targetType: string,
+  targetId: number | null | undefined,
+): string | null {
+  if (type === "OWNER_TRANSFER") return OWNER_TRANSFER_HREF;
+  return notificationHref(targetType, targetId);
+}
 
 export function notificationHref(targetType: string, targetId: number | null | undefined) {
   switch (targetType) {

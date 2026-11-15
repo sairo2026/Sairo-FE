@@ -29,7 +29,7 @@ import {
   ROLE_LABEL,
   labelOf,
 } from "../model/labels";
-import { describeOfficeError } from "../model/messages";
+import { describeOfficeError, describeRoleChangeError } from "../model/messages";
 import { validateReason } from "../model/validation";
 import {
   DetailList,
@@ -80,7 +80,10 @@ function MemberDetailBody({ detail }: { detail: MembershipDetailResponse }) {
       setNotice("역할을 변경했습니다.");
       await refreshAll();
     },
-    onError: (caught) => handleError(caught, "역할을 변경하지 못했습니다. 다시 시도해 주세요."),
+    onError: (caught) => {
+      setDialog(null);
+      setError(describeRoleChangeError(caught, "역할을 변경하지 못했습니다. 다시 시도해 주세요."));
+    },
   });
 
   const suspendMutation = useMutation({

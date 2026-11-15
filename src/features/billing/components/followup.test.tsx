@@ -193,8 +193,8 @@ describe("가격 변경 안내", () => {
 });
 
 describe("세금계산서 수신 정보", () => {
-  async function fill(user: ReturnType<typeof userEvent.setup>) {
-    await user.type(await screen.findByRole("textbox", { name: "사업자등록번호" }), "1234567890");
+  async function fill(user: ReturnType<typeof userEvent.setup>, businessNumber = "1234567890") {
+    await user.type(await screen.findByRole("textbox", { name: "사업자등록번호" }), businessNumber);
     await user.type(screen.getByRole("textbox", { name: "상호" }), "예시 공인중개사사무소");
     await user.type(screen.getByRole("textbox", { name: "대표자 이름" }), "김예시");
     await user.type(screen.getByRole("textbox", { name: "수신 이메일" }), "tax@example.com");
@@ -217,7 +217,7 @@ describe("세금계산서 수신 정보", () => {
     await user.click(await screen.findByRole("button", { name: "저장" }));
     expect(
       await screen.findByText(
-        "사업자등록번호 형식이 올바르지 않습니다. 숫자 10자리를 입력해 주세요.",
+        "사업자등록번호 형식이 올바르지 않습니다. 숫자 10자리를 입력해 주세요. 하이픈(-)은 넣어도 됩니다.",
       ),
     ).not.toBeNull();
     expect(screen.getByText("상호를 입력해 주세요.")).not.toBeNull();
@@ -262,9 +262,55 @@ describe("세금계산서 수신 정보", () => {
       ),
     ).toBe(true);
     expect(
-      screen.getByText("형식이 올바르지 않습니다. 입력한 내용을 확인해 주세요."),
+      screen.getByText(
+        "사업자등록번호 형식이 올바르지 않습니다. 숫자 10자리를 입력해 주세요. 하이픈(-)은 넣어도 됩니다.",
+      ),
     ).not.toBeNull();
     expect(screen.queryByText(/서버 문장/)).toBeNull();
+  });
+
+  it("사업자등록번호에 하이픈을 넣어도 입력되고 서버에는 숫자만 보낸다", async () => {
+    let sent: Record<string, unknown> = {};
+    server.use(
+      http.put("/api/billing/tax-recipient", async ({ request }) => {
+        sent = (await request.json()) as Record<string, unknown>;
+        return HttpResponse.json({ ...billingState.taxRecipient, registered: true });
+      }),
+    );
+    const user = userEvent.setup();
+    renderOffice(<TaxRecipientScreen />, { role: "OWNER" });
+    await fill(user, "123-45-67890");
+    expect(
+      (screen.getByRole("textbox", { name: "사업자등록번호" }) as HTMLInputElement).value,
+    ).toBe("123-45-67890");
+    await user.click(screen.getByRole("button", { name: "저장" }));
+    expect(await screen.findByText("세금계산서 수신 정보를 저장했습니다.")).not.toBeNull();
+    expect(sent.businessNumber).toBe("1234567890");
+  });
+
+  it("서버가 사업자등록번호와 이메일을 각각 거절하면 항목별 안내를 보여준다", async () => {
+    server.use(
+      http.put("/api/billing/tax-recipient", () =>
+        errorResponse(422, "TAX_RECIPIENT_INVALID", "수신자", {
+          fieldErrors: [
+            { field: "businessNumber", code: "INVALID_VALUE", message: "체크섬" },
+            { field: "receiverEmail", code: "INVALID_FORMAT", message: "이메일" },
+          ],
+        }),
+      ),
+    );
+    const user = userEvent.setup();
+    renderOffice(<TaxRecipientScreen />, { role: "OWNER" });
+    await fill(user);
+    await user.click(screen.getByRole("button", { name: "저장" }));
+    expect(
+      await screen.findByText(
+        "존재하지 않는 사업자등록번호로 보입니다. 번호를 다시 확인해 주세요.",
+      ),
+    ).not.toBeNull();
+    expect(
+      screen.getByText("이메일 주소 형식이 올바르지 않습니다. 다시 확인해 주세요."),
+    ).not.toBeNull();
   });
 
   it("저장된 값은 불러와 보여주고 조회 실패 시 오류를 보여준다", async () => {
@@ -283,7 +329,7 @@ describe("세금계산서 수신 정보", () => {
     expect(await screen.findByDisplayValue("저장된 상호")).not.toBeNull();
     expect(
       (screen.getByRole("textbox", { name: "사업자등록번호" }) as HTMLInputElement).value,
-    ).toBe("1234567890");
+    ).toBe("123-45-67890");
     cleanup();
     server.use(http.get("/api/billing/tax-recipient", () => mockErrors.server()));
     renderOffice(<TaxRecipientScreen />, { role: "OWNER" });

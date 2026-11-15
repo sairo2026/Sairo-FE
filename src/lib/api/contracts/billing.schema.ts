@@ -302,6 +302,8 @@ export const FirstPaymentResponseSchema = z.object({
   updatedAt: z.string(),
   version: z.number(),
   subscriptionId: z.number(),
+  invoiceId: z.number().nullable().optional(),
+  paymentStatus: z.enum(["PAID", "PROCESSING", "VERIFYING"]).nullable().optional(),
 });
 export type FirstPaymentResponse = z.infer<typeof FirstPaymentResponseSchema>;
 
@@ -351,6 +353,8 @@ export const RetryPaymentResponseSchema = z.object({
   updatedAt: z.string(),
   version: z.number(),
   subscriptionId: z.number(),
+  invoiceId: z.number().nullable().optional(),
+  paymentStatus: z.enum(["PAID", "PROCESSING", "VERIFYING"]).nullable().optional(),
 });
 export type RetryPaymentResponse = z.infer<typeof RetryPaymentResponseSchema>;
 

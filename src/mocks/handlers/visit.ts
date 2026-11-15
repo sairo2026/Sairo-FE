@@ -82,6 +82,9 @@ export function buildMockCandidate(
     grantId: null,
     grantState: null,
     propertyAddressDetail: null,
+    visitDurationMinutes: 30,
+    travelDurationMinutes: 15,
+    approvalId: null,
     ...partial,
   };
 }
