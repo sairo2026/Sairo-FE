@@ -66,8 +66,45 @@ describe("약관 동의 영역의 필수·선택 표시", () => {
 
   it("개인정보처리방침은 체크 없는 열람 고지이고 전문 보기만 둔다", () => {
     render(<Harness />);
-    expect(screen.getAllByRole("checkbox")).toHaveLength(2);
+    expect(screen.getAllByRole("checkbox")).toHaveLength(3);
     expect(screen.getByRole("button", { name: /개인정보처리방침 전문 보기/ })).toBeTruthy();
+  });
+
+  it("필수 약관 전체 동의는 필수 항목만 체크하고 선택 항목은 건드리지 않는다", async () => {
+    render(<Harness />);
+    const all = screen.getByRole("checkbox", { name: "필수 약관 전체 동의" });
+    await userEvent.click(all);
+    expect(
+      (screen.getByRole("checkbox", { name: /이용약관에 동의합니다/ }) as HTMLInputElement).checked,
+    ).toBe(true);
+    expect(
+      (screen.getByRole("checkbox", { name: /공지·혜택 안내를 받고/ }) as HTMLInputElement).checked,
+    ).toBe(false);
+    expect((all as HTMLInputElement).checked).toBe(true);
+    expect(screen.getByTestId("ready").textContent).toBe("true");
+  });
+
+  it("필수 약관 전체 동의를 풀어도 사용자가 직접 체크한 선택 항목은 유지된다", async () => {
+    render(<Harness />);
+    await userEvent.click(screen.getByRole("checkbox", { name: /공지·혜택 안내를 받고/ }));
+    const all = screen.getByRole("checkbox", { name: "필수 약관 전체 동의" });
+    await userEvent.click(all);
+    await userEvent.click(all);
+    expect(
+      (screen.getByRole("checkbox", { name: /이용약관에 동의합니다/ }) as HTMLInputElement).checked,
+    ).toBe(false);
+    expect(
+      (screen.getByRole("checkbox", { name: /공지·혜택 안내를 받고/ }) as HTMLInputElement).checked,
+    ).toBe(true);
+    expect(screen.getByTestId("ready").textContent).toBe("false");
+  });
+
+  it("필수 항목을 하나씩 모두 체크하면 전체 동의도 체크 상태가 된다", async () => {
+    render(<Harness />);
+    const all = screen.getByRole("checkbox", { name: "필수 약관 전체 동의" });
+    expect((all as HTMLInputElement).checked).toBe(false);
+    await userEvent.click(screen.getByRole("checkbox", { name: /이용약관에 동의합니다/ }));
+    expect((all as HTMLInputElement).checked).toBe(true);
   });
 
   it("필수 약관에 체크해야 진행할 수 있고 선택 항목은 진행 조건이 아니다", async () => {
@@ -131,6 +168,6 @@ describe("체크박스와 입력 라벨의 필수·선택 표시", () => {
     );
     const labels = Array.from(document.querySelectorAll("label")).map((node) => node.textContent);
     expect(labels).toEqual(["메모(선택)", "요청 내용 (선택)", "이름*"]);
-    expect(document.querySelectorAll("label span.text-ink-2")).toHaveLength(2);
+    expect(document.querySelectorAll("label span.text-ink-3")).toHaveLength(2);
   });
 });

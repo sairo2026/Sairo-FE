@@ -36,6 +36,7 @@
   --color-ink-3: var(--text-disabled);
   --color-danger: var(--danger);
   --color-required: var(--required);
+  --color-brand-border: #8586ee;
 
   /* 상태 태그 채움색과 글자색 */
   --color-tag-blue: #cee3ff;
@@ -389,6 +390,23 @@ a:focus-visible > .clickable-tile {
 }
 a:active > .clickable-tile {
   background-color: var(--tile-active);
+}
+
+/* 약관 대화상자 본문: 가는 4px 막대로 약관 전문 영역을 방해하지 않게 한다. */
+.scroll-area-slim {
+  scrollbar-width: thin;
+  scrollbar-color: #9ca3af transparent;
+}
+.scroll-area-slim::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+.scroll-area-slim::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scroll-area-slim::-webkit-scrollbar-thumb {
+  background: #9ca3af;
+  border-radius: 4px;
 }
 
 /* 안쪽 스크롤 영역: 스크롤바를 항상 보이게 하고(막대 색 대비 3:1 이상) 항목 단위로 멈춘다. */

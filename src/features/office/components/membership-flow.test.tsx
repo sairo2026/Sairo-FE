@@ -163,6 +163,12 @@ describe("참여 요청", () => {
     expect(screen.getByText("땡땡사무소에 참여를 요청하시겠습니까?")).not.toBeNull();
     expect(screen.getByRole("radio", { name: "소속공인중개사" })).not.toBeNull();
     expect(screen.getByRole("radio", { name: "중개보조원" })).not.toBeNull();
+    const name = screen.getByLabelText("사무소명") as HTMLInputElement;
+    const address = screen.getByLabelText("중개사무소 주소") as HTMLInputElement;
+    expect(name.value).toBe("땡땡사무소");
+    expect(name.readOnly).toBe(true);
+    expect(address.value).toBe("서울특별시 성북구 정릉로 77");
+    expect(address.readOnly).toBe(true);
   });
 
   it("소속공인중개사는 자격번호와 확인 항목을 모두 요구한다", async () => {
@@ -206,7 +212,27 @@ describe("참여 요청", () => {
     });
     server.resetHandlers();
     await user.click(screen.getByRole("button", { name: "참여 요청" }));
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText(/사무소 참여 요청이 완료되었습니다/)).not.toBeNull();
+    expect(within(dialog).getByLabelText("참여 요청한 사무소")).not.toBeNull();
+    await waitFor(() =>
+      expect((within(dialog).getByLabelText("요청자 이름") as HTMLInputElement).value).not.toBe(""),
+    );
+    expect(navigation.replace).not.toHaveBeenCalled();
+    await user.click(within(dialog).getByRole("button", { name: "확인" }));
     await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/office/membership"));
+  });
+
+  it("완료 창에서 요청 취소를 누르면 참여 요청을 철회하고 시작 화면으로 돌아간다", async () => {
+    const user = userEvent.setup();
+    renderOffice(<MembershipRequestForm officeId={5} />);
+    await user.type(screen.getByLabelText(/^자격증 번호/), "A-1234");
+    await user.click(screen.getByLabelText(/^고용신고를 확인했습니다/));
+    await user.click(screen.getByLabelText(/^필요한 교육을 이수했습니다/));
+    await user.click(screen.getByRole("button", { name: "참여 요청" }));
+    const dialog = await screen.findByRole("dialog");
+    await user.click(within(dialog).getByRole("button", { name: "요청 취소" }));
+    await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/office/start"));
   });
 
   it("인증되지 않은 사무소는 찾을 수 없다고 안내한다", async () => {

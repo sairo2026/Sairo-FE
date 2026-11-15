@@ -73,7 +73,7 @@ export function LegalDocumentModal({
       isOpen={isOpen}
       title={document.title}
       onClose={onClose}
-      size="wide"
+      size="terms"
       footer={<Button onClick={onClose}>닫기</Button>}
     >
       <LegalMarkdown blocks={blocks} isCompact />

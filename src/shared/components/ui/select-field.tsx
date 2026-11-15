@@ -19,7 +19,30 @@ export type SelectFieldProps = Omit<
   placeholder?: string;
   error?: string;
   required?: boolean;
+  /** inline은 필터 막대용으로 라벨을 선택 상자 왼쪽에 둔다. */
+  layout?: "stacked" | "inline";
 };
+
+function SelectChevron() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 20 20"
+      width="20"
+      height="20"
+      fill="none"
+      className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-ink"
+    >
+      <path
+        d="M5 7.5l5 5 5-5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 export function SelectField({
   label,
@@ -31,40 +54,57 @@ export function SelectField({
   required,
   id,
   className,
+  layout = "stacked",
   ...rest
 }: SelectFieldProps) {
   const generatedId = useId();
   const selectId = id ?? generatedId;
   const errorId = `${selectId}-error`;
+  const isInline = layout === "inline";
   return (
-    <div className={cn("flex flex-col", FIELD_GAP_CLASS, className)}>
-      <FieldLabel htmlFor={selectId} required={required}>
-        {label}
-      </FieldLabel>
-      <select
-        {...rest}
-        id={selectId}
-        value={value}
-        required={required}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? errorId : undefined}
-        onChange={(event) => onValueChange(event.target.value)}
-        className={cn(
-          "h-14 min-w-0 max-w-full rounded-control border bg-surface px-4 text-body font-medium text-ink focus:border-primary focus:bg-white disabled:cursor-not-allowed disabled:text-ink-3",
-          error ? "border-danger" : "border-line",
-        )}
-      >
-        {placeholder ? (
-          <option value="" disabled>
-            {placeholder}
-          </option>
-        ) : null}
-        {options.map((option) => (
-          <option key={option.value} value={option.value} disabled={option.isDisabled}>
-            {option.label}
-          </option>
-        ))}
-      </select>
+    <div
+      className={cn(
+        "flex",
+        isInline ? "flex-row items-center gap-5" : cn("flex-col", FIELD_GAP_CLASS),
+        className,
+      )}
+    >
+      {isInline ? (
+        <label htmlFor={selectId} className="shrink-0 text-body font-semibold text-ink-2">
+          {label}
+        </label>
+      ) : (
+        <FieldLabel htmlFor={selectId} required={required}>
+          {label}
+        </FieldLabel>
+      )}
+      <div className="relative min-w-[115px] max-w-full self-start">
+        <select
+          {...rest}
+          id={selectId}
+          value={value}
+          required={required}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? errorId : undefined}
+          onChange={(event) => onValueChange(event.target.value)}
+          className={cn(
+            "h-[42px] w-full min-w-0 max-w-full appearance-none rounded-small border bg-white pl-[10px] pr-10 text-body font-medium text-ink focus:border-primary disabled:cursor-not-allowed disabled:text-ink-3",
+            error ? "border-danger" : "border-[#9ca3af]",
+          )}
+        >
+          {placeholder ? (
+            <option value="" disabled>
+              {placeholder}
+            </option>
+          ) : null}
+          {options.map((option) => (
+            <option key={option.value} value={option.value} disabled={option.isDisabled}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <SelectChevron />
+      </div>
       {error ? (
         <p id={errorId} role="alert" className="text-caption text-danger">
           {error}
@@ -156,6 +196,9 @@ export type RadioGroupProps = {
   options: SelectOption[];
   onValueChange: (value: string) => void;
   error?: string;
+  /** segmented는 선택지를 58px 높이의 칸 버튼으로 보여 준다. 선택된 칸은 브랜드 테두리와 글자색을 쓴다. */
+  variant?: "default" | "segmented";
+  required?: boolean;
 };
 
 export function RadioGroup({
@@ -165,23 +208,50 @@ export function RadioGroup({
   options,
   onValueChange,
   error,
+  variant = "default",
+  required,
 }: RadioGroupProps) {
+  const isSegmented = variant === "segmented";
   return (
     <fieldset className="flex min-w-0 flex-col gap-2" aria-invalid={error ? true : undefined}>
-      <FieldLabel as="legend">{legend}</FieldLabel>
-      <div className="flex flex-wrap gap-x-6 gap-y-1">
-        {options.map((option) => (
-          <Radio
-            key={option.value}
-            name={name}
-            value={option.value}
-            label={option.label}
-            checked={value === option.value}
-            disabled={option.isDisabled}
-            isInvalid={Boolean(error)}
-            onSelect={() => onValueChange(option.value)}
-          />
-        ))}
+      <FieldLabel as="legend" required={required}>
+        {legend}
+      </FieldLabel>
+      <div className={cn("flex flex-wrap", isSegmented ? "gap-4" : "gap-x-6 gap-y-1")}>
+        {options.map((option) =>
+          isSegmented ? (
+            <label
+              key={option.value}
+              className={cn(
+                "relative inline-flex h-[58px] items-center justify-center rounded-control border bg-surface px-6 text-body font-medium focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary",
+                option.isDisabled ? "cursor-not-allowed" : "cursor-pointer",
+                value === option.value ? "border-primary text-primary" : "border-line text-ink",
+              )}
+            >
+              <input
+                type="radio"
+                name={name}
+                value={option.value}
+                checked={value === option.value}
+                disabled={option.isDisabled}
+                onChange={() => onValueChange(option.value)}
+                className={HIDDEN_INPUT_CLASS}
+              />
+              {option.label}
+            </label>
+          ) : (
+            <Radio
+              key={option.value}
+              name={name}
+              value={option.value}
+              label={option.label}
+              checked={value === option.value}
+              disabled={option.isDisabled}
+              isInvalid={Boolean(error)}
+              onSelect={() => onValueChange(option.value)}
+            />
+          ),
+        )}
       </div>
       {error ? (
         <p role="alert" className="text-caption text-danger">
@@ -204,6 +274,8 @@ export type CheckboxProps = {
   className?: string;
   /** 동의·확인 항목이면 라벨 뒤에 필수·선택 표시를 붙인다. */
   requirement?: "required" | "optional";
+  /** form은 가입 약관 목록용 규격이다. 높이 36, 선택 전 테두리 1px과 연한 채움을 쓴다. */
+  variant?: "default" | "form";
 };
 
 /** 선택 전·호버·선택·포커스·비활성·오류 상태를 표시하는 체크박스. 라벨 전체가 클릭 영역이다. */
@@ -218,14 +290,17 @@ export function Checkbox({
   id,
   className,
   requirement,
+  variant = "default",
 }: CheckboxProps) {
   const generatedId = useId();
   const inputId = id ?? generatedId;
+  const isForm = variant === "form";
   return (
     <label
       htmlFor={inputId}
       className={cn(
-        "group relative inline-flex min-h-11 items-center gap-3 text-body text-ink",
+        "group relative inline-flex items-center gap-3 text-body text-ink",
+        isForm ? "min-h-9" : "min-h-11",
         disabled ? "cursor-not-allowed text-ink-3" : "cursor-pointer",
         className,
       )}
@@ -244,7 +319,8 @@ export function Checkbox({
       <span
         aria-hidden="true"
         className={cn(
-          "flex h-7 w-7 shrink-0 items-center justify-center rounded-small border-[1.5px] text-white peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary",
+          "flex h-7 w-7 shrink-0 items-center justify-center rounded-small text-white peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary",
+          isForm ? "border" : "border-[1.5px]",
           disabled
             ? checked
               ? "border-ink-3 bg-ink-3"
@@ -252,8 +328,9 @@ export function Checkbox({
             : checked
               ? "border-primary bg-primary group-hover:border-primary-hover group-hover:bg-primary-hover"
               : cn(
-                  "bg-white group-hover:border-primary group-hover:bg-primary-soft",
-                  isInvalid ? "border-danger" : "border-control",
+                  "group-hover:border-primary group-hover:bg-primary-soft",
+                  isForm ? "bg-surface" : "bg-white",
+                  isInvalid ? "border-danger" : isForm ? "border-line" : "border-control",
                 ),
         )}
       >
@@ -348,6 +425,7 @@ export function TermsItem({
         checked={checked}
         onCheckedChange={onCheckedChange}
         className="font-medium"
+        variant="form"
         requirement={isRequired ? "required" : "optional"}
         label={label}
       />

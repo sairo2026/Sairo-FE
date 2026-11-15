@@ -293,6 +293,7 @@ function ArchiveDialog({
   });
   return (
     <Modal
+      size="notice"
       isOpen
       title="매물 보관"
       onClose={onClose}
@@ -387,22 +388,8 @@ function DetailBody({ property }: { property: PropertyDetailResponse }) {
             {isArchived ? <Badge tone="red">보관됨</Badge> : null}
           </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Link
-            href="/properties"
-            className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 clickable-control"
-          >
-            목록
-          </Link>
-          {isArchived ? (
-            <Button
-              isLoading={restoreMutation.isPending}
-              disabled={isReadOnly}
-              onClick={() => restoreMutation.mutate()}
-            >
-              복원
-            </Button>
-          ) : (
+        <div className="flex flex-wrap gap-4">
+          {isArchived ? null : (
             <>
               <Link
                 href={`/properties/${property.propertyId}/access-approvals`}
@@ -428,15 +415,37 @@ function DetailBody({ property }: { property: PropertyDetailResponse }) {
               >
                 계약 등록
               </Link>
+            </>
+          )}
+          <Link
+            href="/properties"
+            className="inline-flex h-12 min-w-[120px] items-center justify-center rounded-control bg-primary-soft px-10 text-body font-medium text-ink-2 hover:bg-primary-line"
+          >
+            목록
+          </Link>
+          {isArchived ? (
+            <Button
+              isLoading={restoreMutation.isPending}
+              disabled={isReadOnly}
+              onClick={() => restoreMutation.mutate()}
+            >
+              복원
+            </Button>
+          ) : (
+            <>
+              <Button
+                variant="outlined"
+                disabled={isReadOnly}
+                onClick={() => setIsArchiveOpen(true)}
+              >
+                보관
+              </Button>
               <Link
                 href={`/properties/${property.propertyId}/edit`}
-                className="inline-flex h-12 items-center rounded-control bg-primary px-6 text-body font-bold text-white hover:bg-primary-hover"
+                className="inline-flex h-12 min-w-[120px] items-center justify-center rounded-control bg-primary px-10 text-body font-bold text-white hover:bg-primary-hover"
               >
                 수정
               </Link>
-              <Button variant="ghost" disabled={isReadOnly} onClick={() => setIsArchiveOpen(true)}>
-                보관
-              </Button>
             </>
           )}
         </div>

@@ -54,15 +54,16 @@ export function PasswordResetRequestForm({
   }
 
   return (
-    <AuthFrame title={title} description={description} width="sm">
+    <AuthFrame title={title} variant="form">
       <form
         noValidate
-        className="flex flex-col gap-5"
+        className="flex flex-col gap-7"
         onSubmit={(event) => {
           event.preventDefault();
           void submit();
         }}
       >
+        <p className="text-body text-ink-2">{description}</p>
         <TextField
           label="이메일"
           value={email}
@@ -81,19 +82,21 @@ export function PasswordResetRequestForm({
             사용할 수 있고, 다시 요청하면 이전 링크는 사라집니다.
           </FormNotice>
         ) : null}
-        <Button type="submit" fullWidth isLoading={isBusy} disabled={cooldown.remaining > 0}>
-          {cooldown.remaining > 0
-            ? `${cooldown.remaining}초 뒤 다시 보내기`
-            : isSent
-              ? "다시 보내기"
-              : "재설정 링크 받기"}
-        </Button>
-        <Link
-          href="/login"
-          className="text-center text-caption font-semibold text-primary hover:underline"
-        >
-          로그인으로 돌아가기
-        </Link>
+        <div className="mt-4 flex justify-center gap-4">
+          <Link
+            href="/login"
+            className="inline-flex h-12 min-w-[120px] items-center justify-center rounded-control bg-primary-soft px-10 font-medium text-ink-2 hover:bg-primary-line"
+          >
+            뒤로
+          </Link>
+          <Button type="submit" isLoading={isBusy} disabled={cooldown.remaining > 0}>
+            {cooldown.remaining > 0
+              ? `${cooldown.remaining}초 뒤 다시 보내기`
+              : isSent
+                ? "다시 보내기"
+                : "재설정 링크 받기"}
+          </Button>
+        </div>
       </form>
     </AuthFrame>
   );
@@ -125,7 +128,7 @@ export function PasswordResetForm({ token }: { token: string | null }) {
 
   if (isDone) {
     return (
-      <AuthFrame title="비밀번호를 바꿨습니다" width="sm">
+      <AuthFrame title="비밀번호를 바꿨습니다" variant="form">
         <div className="flex flex-col gap-4">
           <FormNotice>
             보안을 위해 이전에 로그인한 모든 기기에서 로그아웃되었습니다. 새 비밀번호로 다시
@@ -178,19 +181,18 @@ export function PasswordResetForm({ token }: { token: string | null }) {
   const strength = passwordStrength(password);
 
   return (
-    <AuthFrame
-      title="새 비밀번호 설정"
-      description="링크는 30분 동안 한 번만 사용할 수 있습니다. 8자 이상 12자 이하로 만들어 주세요."
-      width="sm"
-    >
+    <AuthFrame title="새 비밀번호 설정" variant="form">
       <form
         noValidate
-        className="flex flex-col gap-5"
+        className="flex flex-col gap-7"
         onSubmit={(event) => {
           event.preventDefault();
           void submit();
         }}
       >
+        <p className="text-body text-ink-2">
+          링크는 30분 동안 한 번만 사용할 수 있습니다. 8자 이상 12자 이하로 만들어 주세요.
+        </p>
         <TextField
           label="새 비밀번호"
           kind="password"
@@ -200,6 +202,7 @@ export function PasswordResetForm({ token }: { token: string | null }) {
             setPasswordError(undefined);
           }}
           autoComplete="new-password"
+          placeholder="8~12자 이내의 비밀번호를 입력해 주세요."
           error={passwordError}
           statusText={password ? `강도 ${PASSWORD_STRENGTH_LABEL[strength]}` : undefined}
         />
@@ -212,12 +215,21 @@ export function PasswordResetForm({ token }: { token: string | null }) {
             setConfirmError(undefined);
           }}
           autoComplete="new-password"
+          placeholder="설정한 비밀번호를 다시 입력해 주세요."
           error={confirmError}
         />
         {formError ? <FormAlert>{formError}</FormAlert> : null}
-        <Button type="submit" fullWidth isLoading={isBusy}>
-          비밀번호 바꾸기
-        </Button>
+        <div className="mt-4 flex justify-center gap-4">
+          <Link
+            href="/login"
+            className="inline-flex h-12 min-w-[120px] items-center justify-center rounded-control bg-primary-soft px-10 font-medium text-ink-2 hover:bg-primary-line"
+          >
+            뒤로
+          </Link>
+          <Button type="submit" isLoading={isBusy}>
+            비밀번호 바꾸기
+          </Button>
+        </div>
       </form>
     </AuthFrame>
   );

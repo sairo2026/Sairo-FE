@@ -11,7 +11,8 @@ import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
 import { Button } from "@/shared/components/ui/button";
-import { ConfirmDialog } from "@/shared/components/ui/modal";
+import { FIELD_LABEL_CLASS } from "@/shared/components/ui/field-label";
+import { ConfirmDialog, Modal } from "@/shared/components/ui/modal";
 import { SelectableCard } from "@/shared/components/ui/selectable-card";
 import { TextField } from "@/shared/components/ui/text-field";
 import { formatSeoulDateTime } from "@/shared/lib/format";
@@ -23,7 +24,12 @@ import {
   startMembershipReapplication,
 } from "../api/office.api";
 import type { MembershipStatusWire } from "../api/office.api";
-import { officeKeys, useMyMembership, useRefreshOfficeState } from "../hooks/office-queries";
+import {
+  officeKeys,
+  useMyMembership,
+  useRefreshOfficeState,
+  useRequesterName,
+} from "../hooks/office-queries";
 import { ENTITY_TYPE_LABEL, ROLE_LABEL, labelOf } from "../model/labels";
 import { describeOfficeError, describeRemaining, fieldErrorMap } from "../model/messages";
 import {
@@ -137,35 +143,11 @@ export function OfficeSearchScreen() {
   const searchError = resultQuery.error ? fieldErrorMap(resultQuery.error) : {};
 
   return (
-    <FlowFrame
-      title="참여할 사무소를 찾아 주세요."
-      description="인증이 끝난 사무소만 검색됩니다. 사업자등록번호는 검색 조건으로만 쓰이고 결과에는 표시되지 않습니다. 대표의 개인 연락처와 직원 목록은 공개하지 않습니다."
-    >
-      <div className="flex flex-col gap-5">
-        <div role="radiogroup" aria-label="검색 방법" className="grid grid-cols-2 gap-2">
-          {(
-            [
-              ["business", "사업자등록번호"],
-              ["name", "사무소명과 지역"],
-            ] as const
-          ).map(([key, label]) => (
-            <SelectableCard
-              key={key}
-              selectionRole="radio"
-              isSelected={mode === key}
-              onClick={() => setMode(key)}
-              className={cn(
-                "h-12 rounded-control text-body",
-                mode === key ? "font-semibold text-primary" : "text-ink",
-              )}
-            >
-              {label}
-            </SelectableCard>
-          ))}
-        </div>
+    <FlowFrame title="참여할 사무소를 찾아 주세요.">
+      <div className="flex flex-col gap-6">
         <form
           noValidate
-          className="flex flex-col gap-4"
+          className="flex flex-col gap-11"
           onSubmit={(event) => {
             event.preventDefault();
             search();
@@ -184,7 +166,7 @@ export function OfficeSearchScreen() {
               error={errors.businessNumber ?? searchError.businessRegistrationNumber}
             />
           ) : (
-            <>
+            <div className="flex flex-col gap-7">
               <TextField
                 label="사무소명"
                 value={name}
@@ -206,7 +188,7 @@ export function OfficeSearchScreen() {
                 error={errors.region ?? searchError.region}
                 maxLength={50}
               />
-            </>
+            </div>
           )}
           <ButtonRow>
             <Button variant="cancel" onClick={() => router.push("/office/start")}>
@@ -217,6 +199,37 @@ export function OfficeSearchScreen() {
             </Button>
           </ButtonRow>
         </form>
+
+        <div
+          role="radiogroup"
+          aria-label="검색 방법"
+          className="flex flex-wrap items-center justify-center gap-2"
+        >
+          {(
+            [
+              ["business", "사업자등록번호"],
+              ["name", "사무소명과 지역"],
+            ] as const
+          ).map(([key, label]) => (
+            <SelectableCard
+              key={key}
+              selectionRole="radio"
+              isSelected={mode === key}
+              onClick={() => setMode(key)}
+              className={cn(
+                "h-9 rounded-control px-3.5 text-caption",
+                mode === key ? "font-semibold text-primary" : "text-ink-2",
+              )}
+            >
+              {label}
+            </SelectableCard>
+          ))}
+        </div>
+
+        <MutedNote>
+          인증이 끝난 사무소만 검색됩니다. 사업자등록번호는 검색 조건으로만 쓰이고 결과에는 표시되지
+          않습니다. 대표의 개인 연락처와 직원 목록은 공개하지 않습니다.
+        </MutedNote>
 
         {isBlocked ? (
           <FormNotice>
@@ -360,6 +373,38 @@ const ROLE_CHOICES: Array<{ role: MembershipRole; label: string }> = [
   { role: "DEPUTY", label: "중개보조원" },
 ];
 
+function RoleSelect({
+  labelId,
+  role,
+  onSelect,
+}: {
+  labelId: string;
+  role: MembershipRole;
+  onSelect: (role: MembershipRole) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-5">
+      <p id={labelId} className={FIELD_LABEL_CLASS}>
+        역할 선택
+      </p>
+      <div role="radiogroup" aria-labelledby={labelId} className="flex gap-3">
+        {ROLE_CHOICES.map((choice) => (
+          <SelectableCard
+            key={choice.role}
+            selectionRole="radio"
+            variant="option"
+            isSelected={role === choice.role}
+            onClick={() => onSelect(choice.role)}
+            className="h-[58px] flex-1 rounded-control px-6 text-body"
+          >
+            {choice.label}
+          </SelectableCard>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function QualificationFields({
   role,
   qualificationNumber,
@@ -429,6 +474,8 @@ export function MembershipRequestForm({ officeId }: { officeId: number }) {
   const [trainingConfirmed, setTrainingConfirmed] = useState(false);
   const [errors, setErrors] = useState<FieldErrors<QualificationField>>({});
   const [formError, setFormError] = useState<string>();
+  const [completedId, setCompletedId] = useState<number | null>(null);
+  const [completeError, setCompleteError] = useState<string>();
 
   const mutation = useMutation({
     mutationFn: () =>
@@ -441,10 +488,7 @@ export function MembershipRequestForm({ officeId }: { officeId: number }) {
           trainingConfirmed,
         }),
       }),
-    onSuccess: async () => {
-      await refresh();
-      router.replace("/office/membership");
-    },
+    onSuccess: (result) => setCompletedId(result.membershipId),
     onError: (caught) => {
       const mapped = fieldErrorMap(caught);
       setErrors({
@@ -455,6 +499,23 @@ export function MembershipRequestForm({ officeId }: { officeId: number }) {
       setFormError(describeOfficeError(caught, "참여를 요청하지 못했습니다. 다시 시도해 주세요."));
     },
   });
+
+  const requesterName = useRequesterName(completedId !== null);
+
+  const cancelMutation = useMutation({
+    mutationFn: () => cancelMembership(completedId ?? 0),
+    onSuccess: async () => {
+      await refresh();
+      router.replace("/office/start");
+    },
+    onError: (caught) =>
+      setCompleteError(describeOfficeError(caught, "철회하지 못했습니다. 다시 시도해 주세요.")),
+  });
+
+  async function finish() {
+    await refresh();
+    router.replace("/office/membership");
+  }
 
   function submit() {
     setFormError(undefined);
@@ -472,51 +533,39 @@ export function MembershipRequestForm({ officeId }: { officeId: number }) {
           ? `${office.name}에 참여를 요청하시겠습니까?`
           : "선택한 사무소에 참여를 요청하시겠습니까?"
       }
-      description="대표자 이름과 연락처는 보여드리지 않습니다. 역할과 자격 정보를 입력하면 대표가 확인한 뒤 승인합니다."
     >
-      <MutedNote>{MEMBERSHIP_NOTICE_COPY.join}</MutedNote>
       <form
         noValidate
-        className="flex flex-col gap-5"
+        className="flex flex-col gap-8"
         onSubmit={(event) => {
           event.preventDefault();
           submit();
         }}
       >
         {office ? (
-          <div className="rounded-control bg-surface px-4 py-3">
-            <p className="text-body font-semibold text-ink">{office.name}</p>
-            <p className="text-caption text-ink-2">{office.address}</p>
-          </div>
+          <>
+            <TextField
+              label="사무소명"
+              value={office.name}
+              onValueChange={() => undefined}
+              readOnly
+            />
+            <TextField
+              label="중개사무소 주소"
+              value={office.address}
+              onValueChange={() => undefined}
+              readOnly
+            />
+          </>
         ) : null}
-        <div className="flex flex-col gap-2">
-          <p id="membership-role-label" className="text-caption font-semibold text-ink">
-            역할 선택
-          </p>
-          <div
-            role="radiogroup"
-            aria-labelledby="membership-role-label"
-            className="grid grid-cols-2 gap-2"
-          >
-            {ROLE_CHOICES.map((choice) => (
-              <SelectableCard
-                key={choice.role}
-                selectionRole="radio"
-                isSelected={role === choice.role}
-                onClick={() => {
-                  setRole(choice.role);
-                  setErrors({});
-                }}
-                className={cn(
-                  "h-12 rounded-control text-body",
-                  role === choice.role ? "font-semibold text-primary" : "text-ink",
-                )}
-              >
-                {choice.label}
-              </SelectableCard>
-            ))}
-          </div>
-        </div>
+        <RoleSelect
+          labelId="membership-role-label"
+          role={role}
+          onSelect={(next) => {
+            setRole(next);
+            setErrors({});
+          }}
+        />
         <QualificationFields
           role={role}
           qualificationNumber={qualificationNumber}
@@ -534,6 +583,11 @@ export function MembershipRequestForm({ officeId }: { officeId: number }) {
             setErrors({});
           }}
         />
+        <MutedNote>{MEMBERSHIP_NOTICE_COPY.join}</MutedNote>
+        <MutedNote>
+          대표자 이름과 연락처는 보여드리지 않습니다. 역할과 자격 정보를 입력하면 대표가 확인한 뒤
+          승인합니다.
+        </MutedNote>
         {formError ? (
           <div className="flex flex-col gap-2">
             <FormAlert>{formError}</FormAlert>
@@ -544,11 +598,44 @@ export function MembershipRequestForm({ officeId }: { officeId: number }) {
           <Button variant="cancel" onClick={() => router.push("/office/join")}>
             이전
           </Button>
-          <Button type="submit" isLoading={mutation.isPending}>
+          <Button type="submit" isLoading={mutation.isPending} disabled={completedId !== null}>
             참여 요청
           </Button>
         </ButtonRow>
       </form>
+      <Modal
+        isOpen={completedId !== null}
+        title="사무소 참여 요청이 완료되었습니다. 사무소에서 수락 시 참여가 가능합니다."
+        onClose={() => void finish()}
+        footer={
+          <>
+            <Button
+              variant="cancel"
+              isLoading={cancelMutation.isPending}
+              onClick={() => cancelMutation.mutate()}
+            >
+              요청 취소
+            </Button>
+            <Button onClick={() => void finish()}>확인</Button>
+          </>
+        }
+      >
+        <div className="flex flex-col gap-8">
+          <TextField
+            label="참여 요청한 사무소"
+            value={office?.name ?? ""}
+            onValueChange={() => undefined}
+            readOnly
+          />
+          <TextField
+            label="요청자 이름"
+            value={requesterName.data ?? ""}
+            onValueChange={() => undefined}
+            readOnly
+          />
+          {completeError ? <FormAlert>{completeError}</FormAlert> : null}
+        </div>
+      </Modal>
     </FlowFrame>
   );
 }
@@ -817,34 +904,14 @@ function ReapplicationForm({
     >
       <p className="text-body font-semibold text-ink">재신청</p>
       <MutedNote>재신청하려면 역할과 자격, 교육, 고용신고 확인을 다시 입력해야 합니다.</MutedNote>
-      <div className="flex flex-col gap-2">
-        <p id="reapply-role-label" className="text-caption font-semibold text-ink">
-          역할 선택
-        </p>
-        <div
-          role="radiogroup"
-          aria-labelledby="reapply-role-label"
-          className="grid grid-cols-2 gap-2"
-        >
-          {ROLE_CHOICES.map((choice) => (
-            <SelectableCard
-              key={choice.role}
-              selectionRole="radio"
-              isSelected={role === choice.role}
-              onClick={() => {
-                setRole(choice.role);
-                setErrors({});
-              }}
-              className={cn(
-                "h-12 rounded-control text-body",
-                role === choice.role ? "font-semibold text-primary" : "text-ink",
-              )}
-            >
-              {choice.label}
-            </SelectableCard>
-          ))}
-        </div>
-      </div>
+      <RoleSelect
+        labelId="reapply-role-label"
+        role={role}
+        onSelect={(next) => {
+          setRole(next);
+          setErrors({});
+        }}
+      />
       <QualificationFields
         role={role}
         qualificationNumber={qualificationNumber}

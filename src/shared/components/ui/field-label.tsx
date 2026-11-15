@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 import { cn } from "@/shared/lib/cn";
 
-export const FIELD_GAP_CLASS = "gap-3";
-export const FIELD_LABEL_CLASS = "text-body font-semibold text-ink";
+export const FIELD_GAP_CLASS = "gap-5";
+export const FIELD_LABEL_CLASS = "text-h2 font-semibold text-ink";
 
 const OPTIONAL_SUFFIX = /^(.*?)(\s*)\(선택\)$/;
 
@@ -16,7 +16,7 @@ function withOptionalMark(children: ReactNode): ReactNode {
     <>
       {base}
       {gap}
-      <span className={cn("font-normal text-ink-2", gap === "" && "ml-1")}>(선택)</span>
+      <span className={cn("font-semibold text-ink-3", gap === "" && "ml-1")}>(선택)</span>
     </>
   );
 }
@@ -29,7 +29,7 @@ export type FieldLabelProps = {
   children: ReactNode;
 };
 
-/** 폼 항목 라벨. 글자 16 SemiBold이고 필수 별표는 장식이라 스크린리더가 읽지 않는다. */
+/** 폼 항목 라벨. 글자 20 SemiBold이고 필수 별표는 장식이라 스크린리더가 읽지 않는다. */
 export function FieldLabel({
   htmlFor,
   required,
@@ -38,7 +38,7 @@ export function FieldLabel({
   children,
 }: FieldLabelProps) {
   const star = required ? (
-    <span aria-hidden="true" className="ml-0.5 text-required">
+    <span aria-hidden="true" className="ml-1 text-required">
       *
     </span>
   ) : null;

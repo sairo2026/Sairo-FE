@@ -49,7 +49,7 @@ export function DateTimeField({
         aria-describedby={error ? errorId : undefined}
         onChange={(event) => onValueChange(event.target.value)}
         className={cn(
-          "h-14 rounded-control border bg-surface px-4 text-body font-medium text-ink focus:border-primary focus:bg-white disabled:cursor-not-allowed disabled:text-ink-3",
+          "h-[58px] rounded-control border bg-surface px-5 text-body font-medium text-ink focus:border-primary focus:bg-white disabled:cursor-not-allowed disabled:text-ink-3",
           error ? "border-danger" : "border-line",
         )}
       />

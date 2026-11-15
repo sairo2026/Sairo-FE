@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: "요금 안내",
   description: "사이로의 구독 요금과 이용 조건을 안내합니다.",
   robots: INDEXABLE_ROBOTS,
-  ...publicPageSocialMetadata("요금 안내", "사이로의 구독 요금과 이용 조건을 안내합니다."),
+  ...publicPageSocialMetadata("요금 안내", "사이로의 구독 요금과 이용 조건을 안내합니다.", "/pricing"),
 };
 
 export default function Page() {

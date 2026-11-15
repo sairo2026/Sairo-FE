@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { TermsCatalogResponse } from "@/lib/api/contracts/auth.schema";
-import { TermsItem } from "@/shared/components/ui/select-field";
+import { Checkbox, TermsItem } from "@/shared/components/ui/select-field";
 import { LegalDocumentModal } from "@/shared/legal/legal-document-view";
 import { findLegalDocumentByTermsCode } from "@/shared/legal/registry";
 import type { LegalDocument } from "@/shared/legal/registry";
@@ -81,45 +81,66 @@ export function TermsAgreementSection({
     if (document) setOpenDocument(document);
   }
 
+  const requiredItems = items.filter((item) => isAgreementItem(item) && item.required);
+  const isAllRequiredChecked =
+    requiredItems.length > 0 && requiredItems.every((item) => selection[item.termsCode] === true);
+
+  function toggleRequired(checked: boolean) {
+    const next = { ...selection };
+    for (const item of requiredItems) next[item.termsCode] = checked;
+    onChange(next);
+  }
+
   return (
     <fieldset className="min-w-0 flex flex-col gap-3">
-      <legend className="mb-3 text-body font-semibold text-ink">
+      <legend className="mb-5 text-h2 font-semibold text-black">
         {SIGNUP_TERMS_COPY.sectionTitle}
       </legend>
-      {items.map((item) => {
-        const hasBody = findLegalDocumentByTermsCode(item.termsCode) !== undefined;
-        const isChanged = changedCodes.includes(item.termsCode) && !selection[item.termsCode];
-        if (!isAgreementItem(item)) {
+      <div className="flex flex-col">
+        {requiredItems.length > 0 ? (
+          <Checkbox
+            variant="form"
+            checked={isAllRequiredChecked}
+            onCheckedChange={toggleRequired}
+            className="font-medium"
+            label={<span className="text-primary">{SIGNUP_TERMS_COPY.selectAllRequiredLabel}</span>}
+          />
+        ) : null}
+        {items.map((item) => {
+          const hasBody = findLegalDocumentByTermsCode(item.termsCode) !== undefined;
+          const isChanged = changedCodes.includes(item.termsCode) && !selection[item.termsCode];
+          if (!isAgreementItem(item)) {
+            return (
+              <div key={item.termsCode} className="flex items-center justify-between gap-3">
+                <p className="text-body text-ink">{labelFor(item)}</p>
+                <FullTextLink item={item} hasBody={hasBody} onOpen={openFullText} />
+              </div>
+            );
+          }
           return (
-            <div key={item.termsCode} className="flex items-center justify-between gap-3">
-              <p className="text-body text-ink">{labelFor(item)}</p>
-              <FullTextLink item={item} hasBody={hasBody} onOpen={openFullText} />
+            <div key={item.termsCode} className="flex flex-col gap-1">
+              <TermsItem
+                label={labelFor(item)}
+                isRequired={item.required}
+                checked={selection[item.termsCode] === true}
+                onCheckedChange={(checked) => onChange({ ...selection, [item.termsCode]: checked })}
+                href={hasBody ? undefined : item.documentUrl}
+                onViewFull={hasBody ? () => openFullText(item) : undefined}
+                viewFullLabel={`${fullTextName(item)} 전문 보기`}
+              />
+              <p className="flex items-center gap-2 pl-10 text-caption text-ink-2">
+                {SIGNUP_TERMS_COPY.versionCaption(item.version)}
+                {isChanged ? <ChangedBadge /> : null}
+              </p>
+              {item.termsCode === MARKETING_TERMS_CODE ? (
+                <p className="whitespace-pre-line pl-10 text-caption text-ink-2">
+                  {breakSentences(SIGNUP_TERMS_COPY.marketingSummary)}
+                </p>
+              ) : null}
             </div>
           );
-        }
-        return (
-          <div key={item.termsCode} className="flex flex-col gap-1">
-            <TermsItem
-              label={labelFor(item)}
-              isRequired={item.required}
-              checked={selection[item.termsCode] === true}
-              onCheckedChange={(checked) => onChange({ ...selection, [item.termsCode]: checked })}
-              href={hasBody ? undefined : item.documentUrl}
-              onViewFull={hasBody ? () => openFullText(item) : undefined}
-              viewFullLabel={`${fullTextName(item)} 전문 보기`}
-            />
-            <p className="flex items-center gap-2 pl-8 text-caption text-ink-2">
-              {SIGNUP_TERMS_COPY.versionCaption(item.version)}
-              {isChanged ? <ChangedBadge /> : null}
-            </p>
-            {item.termsCode === MARKETING_TERMS_CODE ? (
-              <p className="whitespace-pre-line pl-8 text-caption text-ink-2">
-                {breakSentences(SIGNUP_TERMS_COPY.marketingSummary)}
-              </p>
-            ) : null}
-          </div>
-        );
-      })}
+        })}
+      </div>
       {!hasLoginEmail ? (
         <p className="text-caption text-ink-2">{SIGNUP_TERMS_COPY.noEmailMarketingNotice}</p>
       ) : null}

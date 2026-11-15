@@ -21,10 +21,25 @@ export const NOINDEX_ROBOTS: NonNullable<Metadata["robots"]> = { index: false, f
 export function publicPageSocialMetadata(
   title: string,
   description: string,
-): Pick<Metadata, "openGraph" | "twitter"> {
+  path: string,
+): Pick<Metadata, "openGraph" | "twitter" | "alternates"> {
   const socialTitle = `${title} | 사이로`;
   return {
-    openGraph: { title: socialTitle, description },
-    twitter: { title: socialTitle, description },
+    alternates: { canonical: path },
+    openGraph: {
+      type: "website",
+      url: path,
+      siteName: "사이로(SAIRO)",
+      locale: "ko_KR",
+      title: socialTitle,
+      description,
+      images: [SITE_OG_IMAGE],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: socialTitle,
+      description,
+      images: [SITE_OG_IMAGE.url],
+    },
   };
 }

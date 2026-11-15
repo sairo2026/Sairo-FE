@@ -11,8 +11,8 @@ import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
-import { Card } from "@/shared/components/ui/card";
 import { DateTimeField } from "@/shared/components/ui/date-time-field";
+import { FieldLabel } from "@/shared/components/ui/field-label";
 import { Modal } from "@/shared/components/ui/modal";
 import { PageHeader } from "@/shared/components/ui/page-header";
 import { RadioGroup, SelectField } from "@/shared/components/ui/select-field";
@@ -47,38 +47,45 @@ type DuplicateItem = {
   deletedAt: string | null;
 };
 
+const FORM_GRID_CLASS =
+  "grid grid-cols-1 gap-x-[45px] gap-y-[22px] lg:grid-cols-[repeat(2,minmax(0,510px))]";
+
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <Card tone="flat" title={title}>
-      <div className="flex flex-col gap-5">{children}</div>
-    </Card>
+    <section className="flex max-w-[1075px] flex-col gap-5 pt-4">
+      <h2 className="text-h2 font-semibold text-ink">{title}</h2>
+      {children}
+    </section>
   );
 }
 
 function TextAreaField({
   label,
+  hint,
   value,
   onValueChange,
   error,
 }: {
   label: string;
+  hint?: string;
   value: string;
   onValueChange: (value: string) => void;
   error?: string;
 }) {
   const id = useId();
   return (
-    <div className="flex flex-col gap-2">
-      <label htmlFor={id} className="text-caption font-semibold text-ink">
-        {label}
-      </label>
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-1">
+        <FieldLabel htmlFor={id}>{label}</FieldLabel>
+        {hint ? <p className="text-caption text-ink-2">{hint}</p> : null}
+      </div>
       <textarea
         id={id}
         rows={4}
         value={value}
         aria-invalid={error ? true : undefined}
         onChange={(event) => onValueChange(event.target.value)}
-        className="rounded-control border border-line bg-surface p-4 text-body text-ink focus:border-primary focus:bg-white"
+        className="rounded-control border border-line bg-surface px-5 py-4 text-body font-medium text-ink focus:border-primary focus:bg-white"
       />
       {error ? (
         <p role="alert" className="text-caption text-danger">
@@ -104,6 +111,7 @@ function DuplicateDialog({
 }) {
   return (
     <Modal
+      size="notice"
       isOpen
       title="같은 이름과 연락처의 고객이 있습니다"
       onClose={onClose}
@@ -249,7 +257,7 @@ export function CustomerForm(props: FormProps) {
   return (
     <form
       noValidate
-      className="flex max-w-3xl flex-col gap-6"
+      className="flex max-w-[1075px] flex-col gap-6"
       onSubmit={(event) => {
         event.preventDefault();
         void submit();
@@ -269,12 +277,16 @@ export function CustomerForm(props: FormProps) {
           </Button>
         </div>
       ) : null}
-      <FormNotice>
-        주민등록번호와 전체 금융계좌번호는 입력할 수 없습니다. 입력하면 저장되지 않습니다.
-      </FormNotice>
+      <div className="flex max-w-[1075px] flex-col gap-2 rounded-card-flat bg-surface px-6 py-5">
+        <p className="text-body font-semibold text-ink">고객 정보 입력 안내</p>
+        <p className="text-caption text-ink-2">
+          주민등록번호와 전체 금융계좌번호는 입력할 수 없습니다. 입력하면 저장되지 않습니다.
+        </p>
+      </div>
 
-      <Section title="기본 정보">
+      <div className={FORM_GRID_CLASS}>
         <RadioGroup
+          variant="segmented"
           legend="고객 구분"
           name="customer-kind"
           value={values.isCorporation ? "corporation" : "individual"}
@@ -283,37 +295,6 @@ export function CustomerForm(props: FormProps) {
             { value: "corporation", label: "법인" },
           ]}
           onValueChange={(value) => setField("isCorporation", value === "corporation")}
-        />
-        <TextField
-          label={nameLabel}
-          required
-          value={values.name}
-          maxLength={100}
-          onValueChange={(value) => setField("name", value)}
-          error={errors.name}
-        />
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <TextField
-            label="연락처"
-            kind="tel"
-            value={values.phone}
-            onValueChange={(value) => setField("phone", value)}
-            error={errors.phone}
-          />
-          <TextField
-            label="보조 연락처"
-            kind="tel"
-            value={values.secondaryPhone}
-            hint="대리 연락자를 쓰는 경우 번호를 넣고 업무 메모에 대리인 정보를 적어 주세요."
-            onValueChange={(value) => setField("secondaryPhone", value)}
-            error={errors.secondaryPhone}
-          />
-        </div>
-        <TextField
-          label="이메일"
-          value={values.email}
-          onValueChange={(value) => setField("email", value)}
-          error={errors.email}
         />
         <SelectField
           label="담당 공인중개사"
@@ -327,59 +308,96 @@ export function CustomerForm(props: FormProps) {
           onValueChange={(value) => setField("managingMembershipId", value)}
           error={errors.managingMembershipId}
         />
-        <TextAreaField
-          label="업무 메모"
-          value={values.memo}
-          onValueChange={(value) => setField("memo", value)}
-          error={errors.memo}
+        <TextField
+          label={nameLabel}
+          required
+          value={values.name}
+          maxLength={100}
+          onValueChange={(value) => setField("name", value)}
+          error={errors.name}
         />
-        <p className="-mt-3 text-caption text-ink-2">{CUSTOMER_COLLECTION_COPY.memoGuide}</p>
-      </Section>
+        <TextField
+          label="연락처"
+          kind="tel"
+          value={values.phone}
+          onValueChange={(value) => setField("phone", value)}
+          error={errors.phone}
+        />
+        <TextField
+          label="이메일"
+          value={values.email}
+          onValueChange={(value) => setField("email", value)}
+          error={errors.email}
+        />
+        <TextField
+          label="보조 연락처"
+          kind="tel"
+          value={values.secondaryPhone}
+          hint="대리 연락자를 쓰는 경우 번호를 넣고 업무 메모에 대리인 정보를 적어 주세요."
+          onValueChange={(value) => setField("secondaryPhone", value)}
+          error={errors.secondaryPhone}
+        />
+        <div className="lg:col-span-2">
+          <TextAreaField
+            label="업무 메모"
+            hint={CUSTOMER_COLLECTION_COPY.memoGuide}
+            value={values.memo}
+            onValueChange={(value) => setField("memo", value)}
+            error={errors.memo}
+          />
+        </div>
+      </div>
 
       <Section title="개인정보 수집 안내">
         <p className="text-caption text-ink-2">
           고객 정보를 왜 모으는지, 어떤 근거로 처리하는지, 언제까지 보관하는지 기록합니다.
         </p>
-        <TextField
-          label="수집 경로"
-          required
-          value={values.dataSource}
-          hint={CUSTOMER_COLLECTION_COPY.sourceHint}
-          onValueChange={(value) => setField("dataSource", value)}
-          error={errors.dataSource}
-        />
-        <SelectField
-          label="처리 근거"
-          required={!isEdit}
-          value={values.processingBasis}
-          placeholder="처리 근거를 선택해 주세요."
-          options={PROCESSING_BASES.map((value) => ({
-            value,
-            label: PROCESSING_BASIS_LABEL[value] ?? value,
-          }))}
-          onValueChange={(value) => setField("processingBasis", value)}
-          error={errors.processingBasis}
-        />
-        <p className="-mt-3 text-caption text-ink-2">{CUSTOMER_COLLECTION_COPY.basisHint}</p>
-        <TextField
-          label="수집 목적"
-          required
-          value={values.dataPurpose}
-          onValueChange={(value) => setField("dataPurpose", value)}
-          error={errors.dataPurpose}
-        />
-        <DateTimeField
-          label="보유 기한"
-          kind="date"
-          required
-          value={values.retentionUntil}
-          onValueChange={(value) => setField("retentionUntil", value)}
-          error={errors.retentionUntil}
-        />
-        <p className="-mt-3 text-caption text-ink-2">{CUSTOMER_COLLECTION_COPY.retentionHint}</p>
+        <div className={FORM_GRID_CLASS}>
+          <TextField
+            label="수집 경로"
+            required
+            value={values.dataSource}
+            hint={CUSTOMER_COLLECTION_COPY.sourceHint}
+            onValueChange={(value) => setField("dataSource", value)}
+            error={errors.dataSource}
+          />
+          <TextField
+            label="수집 목적"
+            required
+            value={values.dataPurpose}
+            onValueChange={(value) => setField("dataPurpose", value)}
+            error={errors.dataPurpose}
+          />
+          <div className="flex flex-col gap-3">
+            <SelectField
+              label="처리 근거"
+              required={!isEdit}
+              value={values.processingBasis}
+              placeholder="처리 근거를 선택해 주세요."
+              options={PROCESSING_BASES.map((value) => ({
+                value,
+                label: PROCESSING_BASIS_LABEL[value] ?? value,
+              }))}
+              onValueChange={(value) => setField("processingBasis", value)}
+              error={errors.processingBasis}
+            />
+            <p className="text-caption text-ink-2">{CUSTOMER_COLLECTION_COPY.basisHint}</p>
+          </div>
+          <div className="flex flex-col gap-3">
+            <DateTimeField
+              label="보유 기한"
+              kind="date"
+              required
+              value={values.retentionUntil}
+              onValueChange={(value) => setField("retentionUntil", value)}
+              error={errors.retentionUntil}
+            />
+            <p className="text-caption text-ink-2">{CUSTOMER_COLLECTION_COPY.retentionHint}</p>
+          </div>
+        </div>
       </Section>
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-4">
         <Link
           href={detail ? `/customers/${detail.customerId}` : "/customers"}
           className="inline-flex h-12 min-w-[120px] items-center justify-center rounded-control bg-primary-soft px-10 text-body font-medium text-ink-2 hover:bg-primary-line"

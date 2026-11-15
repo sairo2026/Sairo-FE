@@ -72,8 +72,7 @@ export function TextField({
       </FieldLabel>
       <div
         className={cn(
-          "flex h-14 items-center gap-2 rounded-control border bg-surface px-4 focus-within:border-primary focus-within:bg-white",
-          error ? "border-danger" : "border-line",
+          "flex h-[58px] items-center gap-4 rounded-control border border-line bg-surface px-5 focus-within:border-primary focus-within:bg-white",
         )}
       >
         <input
@@ -102,7 +101,7 @@ export function TextField({
             type="button"
             onClick={onAction}
             disabled={isActionDisabled}
-            className="h-9 shrink-0 rounded-small bg-primary px-4 text-caption font-semibold text-white hover:bg-primary-hover disabled:cursor-not-allowed disabled:bg-white disabled:text-ink-3 disabled:ring-1 disabled:ring-line"
+            className="h-9 min-w-14 shrink-0 rounded-small bg-primary px-3 text-caption font-semibold text-white hover:bg-primary-hover disabled:cursor-not-allowed disabled:bg-white disabled:text-ink-3 disabled:ring-1 disabled:ring-line"
           >
             {actionLabel}
           </button>
@@ -112,7 +111,11 @@ export function TextField({
         <p
           id={messageId}
           role={error ? "alert" : undefined}
-          className={cn("text-caption", error ? "text-danger" : "text-ink-2")}
+          className={cn(
+            "-mt-2 text-caption",
+            error || statusText ? "text-center" : "",
+            error ? "text-danger" : statusText ? "text-primary" : "text-ink-2",
+          )}
         >
           {error ?? statusText ?? hint}
         </p>

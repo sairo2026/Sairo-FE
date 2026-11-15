@@ -108,17 +108,14 @@ export function ScheduleTag({ tone, label, count, isInteractive, className }: Sc
     <span
       data-tone={tone}
       className={cn(
-        "flex min-h-[92px] min-w-[132px] flex-col justify-between rounded-control px-4 py-3",
+        "flex h-[92px] w-[132px] flex-col items-center justify-center gap-2 rounded-control px-5 py-2",
         tone === "gray" ? "border border-line bg-white text-ink-2" : toneClass[tone],
         isInteractive && "clickable-tile",
         className,
       )}
     >
       <span className="text-body font-medium">{label}</span>
-      <span className="text-h2 font-bold">
-        {count}
-        <span className="text-caption font-medium">건</span>
-      </span>
+      <span className="text-h2 font-semibold">{count}건</span>
     </span>
   );
 }
