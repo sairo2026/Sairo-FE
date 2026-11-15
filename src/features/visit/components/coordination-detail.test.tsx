@@ -314,6 +314,32 @@ describe("방문 조율 상세", () => {
     expect(detail()?.status).toBe("FINAL_CONFIRMATION_REQUIRED");
   });
 
+  it("후보에 저장된 방문·이동 시간을 일정 입력의 처음 값으로 쓴다", async () => {
+    setMockVisitState({
+      coordinations: [
+        buildMockCoordination({
+          coordinationId: 801,
+          status: "COORDINATABLE",
+          candidateProperties: [
+            buildMockCandidate({
+              candidatePropertyId: 1,
+              propertyId: 501,
+              visitDurationMinutes: 45,
+              travelDurationMinutes: 20,
+              approvalId: 7001,
+            }),
+          ],
+        }),
+      ],
+    });
+    renderOffice(<CoordinationDetailScreen coordinationId={801} />, { role: "OWNER" });
+    expect(await screen.findByText(/방문 45분 · 이동 20분/)).not.toBeNull();
+    const visit = (await screen.findAllByLabelText("방문 소요시간 (분)"))[0] as HTMLInputElement;
+    expect(visit.value).toBe("45");
+    const travel = screen.getAllByLabelText("다음 매물까지 이동시간 (분)")[0] as HTMLInputElement;
+    expect(travel.value).toBe("20");
+  });
+
   it("방문 소요시간이 범위를 벗어나면 저장하지 않고 안내한다", async () => {
     const user = userEvent.setup();
     renderOffice(<CoordinationDetailScreen coordinationId={801} />, { role: "OWNER" });

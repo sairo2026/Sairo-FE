@@ -19,6 +19,12 @@ import { TAX_COPY } from "../model/legal-copy";
 import { describeBillingError } from "../model/messages";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const BUSINESS_NUMBER_PATTERN = /^\d{3}-?\d{2}-?\d{5}$/;
+
+/** 사업자등록번호는 하이픈을 넣어도 되고, 서버에는 숫자만 보낸다. */
+export function businessNumberDigits(value: string): string {
+  return value.replace(/\D/g, "");
+}
 
 export type TaxForm = {
   businessNumber: string;
@@ -31,7 +37,7 @@ export type TaxForm = {
 
 export function validateTaxForm(form: TaxForm): Record<string, string> {
   const errors: Record<string, string> = {};
-  if (!/^\d{10}$/.test(form.businessNumber)) {
+  if (!BUSINESS_NUMBER_PATTERN.test(form.businessNumber.trim())) {
     errors.businessNumber = TAX_COPY.businessNumberError;
   }
   if (form.companyName.trim() === "") errors.companyName = "상호를 입력해 주세요.";
@@ -47,7 +53,7 @@ export function validateTaxForm(form: TaxForm): Record<string, string> {
 function TaxForm({ initial }: { initial: TaxRecipient }) {
   const queryClient = useQueryClient();
   const [form, setForm] = useState<TaxForm>({
-    businessNumber: (initial.businessNumber ?? "").replace(/\D/g, ""),
+    businessNumber: initial.businessNumber ?? "",
     companyName: initial.companyName ?? "",
     representativeName: initial.representativeName ?? "",
     receiverEmail: initial.receiverEmail ?? "",
@@ -61,7 +67,7 @@ function TaxForm({ initial }: { initial: TaxRecipient }) {
   const mutation = useMutation({
     mutationFn: () =>
       saveTaxRecipient({
-        businessNumber: form.businessNumber,
+        businessNumber: businessNumberDigits(form.businessNumber),
         companyName: form.companyName.trim(),
         representativeName: form.representativeName.trim(),
         receiverEmail: form.receiverEmail.trim(),
@@ -107,12 +113,11 @@ function TaxForm({ initial }: { initial: TaxRecipient }) {
         )}
         <TextField
           label="사업자등록번호"
-          kind="number"
-          inputMode="numeric"
-          maxLength={10}
+          inputMode="text"
+          maxLength={12}
           value={form.businessNumber}
-          onValueChange={(next) => update("businessNumber", next.replace(/\D/g, ""))}
-          hint="숫자 10자리"
+          onValueChange={(next) => update("businessNumber", next.replace(/[^\d-]/g, ""))}
+          hint="숫자 10자리, 하이픈(-)을 넣어도 됩니다"
           error={errors.businessNumber}
         />
         <TextField

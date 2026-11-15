@@ -37,6 +37,48 @@ export function describeOfficeError(error: unknown, fallback: string): string {
   return describeAuthError(error, fallback);
 }
 
+const CHANGE_REQUEST_ERROR_BY_CODE: Record<string, string> = {
+  PENDING_REGISTRATION_EXISTS:
+    "심사 중인 변경 신청이 있습니다. 심사 결과가 나온 뒤 다시 신청해 주세요.",
+};
+
+/** 사무소 정보 변경 신청의 오류 문구. 같은 코드라도 사무소 등록 신청과 안내가 다르다. */
+export function describeChangeRequestError(error: unknown, fallback: string): string {
+  if (error instanceof ApiError && error.status < 500) {
+    const known = CHANGE_REQUEST_ERROR_BY_CODE[error.code];
+    if (known) return known;
+  }
+  return describeOfficeError(error, fallback);
+}
+
+const ROLE_CHANGE_ERROR_BY_CODE: Record<string, string> = {
+  DEPUTY_QUOTA_EXCEEDED:
+    "중개보조원으로 바꾸면 중개보조원 수가 허용 한도를 넘습니다. 중개보조원은 개업공인중개사와 소속공인중개사를 합한 수의 5배까지만 둘 수 있으니 인원 구성을 확인해 주세요.",
+};
+
+/** 구성원 역할 변경의 오류 문구. 승인 때와 달리 변경 때의 한도 초과를 알린다. */
+export function describeRoleChangeError(error: unknown, fallback: string): string {
+  if (error instanceof ApiError && error.status < 500) {
+    const known = ROLE_CHANGE_ERROR_BY_CODE[error.code];
+    if (known) return known;
+  }
+  return describeOfficeError(error, fallback);
+}
+
+const CHANGE_REQUEST_FIELD_PREFIX = "requestedValues.";
+
+/** 변경 신청의 필드 오류는 `requestedValues.항목`으로 오므로 입력 칸 이름으로 바꾼다. */
+export function changeRequestFieldErrors(error: unknown): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const [field, copy] of Object.entries(fieldErrorMap(error))) {
+    const key = field.startsWith(CHANGE_REQUEST_FIELD_PREFIX)
+      ? field.slice(CHANGE_REQUEST_FIELD_PREFIX.length)
+      : field;
+    result[key] = copy;
+  }
+  return result;
+}
+
 export function describeRemaining(expiresAt: string | null | undefined, now: Date): string | null {
   if (!expiresAt) return null;
   const diff = new Date(expiresAt).getTime() - now.getTime();

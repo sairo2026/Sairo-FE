@@ -22,7 +22,6 @@ const RequestListSchema = z.object({
   items: z.array(
     VisitRequestListResponseSchema.shape.items.element.extend({
       version: z.number().optional(),
-      requestKind: z.string().optional(),
     }),
   ),
 });
@@ -95,8 +94,17 @@ export function createChangeRequest(itemId: number, request: VisitChangeRequestC
   });
 }
 
+/** API 명세서 표에는 없지만 서버는 조율 ID(coordinationId)를 내려 주므로 알림에서 조율로 이동하는 데 쓴다. */
+const RequestNoticeWireSchema = VisitRequestNoticeListResponseSchema.extend({
+  items: z.array(
+    VisitRequestNoticeListResponseSchema.shape.items.element.extend({
+      coordinationId: z.number().optional(),
+    }),
+  ),
+});
+
 export function listRequestNotices() {
-  return apiFetch("/api/visit-request-notices", { schema: VisitRequestNoticeListResponseSchema });
+  return apiFetch("/api/visit-request-notices", { schema: RequestNoticeWireSchema });
 }
 
 /** 백엔드는 204 본문 없음으로 답한다. */

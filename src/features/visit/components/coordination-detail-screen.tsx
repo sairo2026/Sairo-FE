@@ -151,7 +151,8 @@ function CandidateRow({
           {candidate.propertyAddressDetail ? ` ${candidate.propertyAddressDetail}` : ""}
         </span>
         <span className="text-caption text-ink-2">
-          신청 가능 구간 {candidate.applicableSlots.length}개
+          방문 {candidate.visitDurationMinutes}분 · 이동 {candidate.travelDurationMinutes}분 · 신청
+          가능 구간 {candidate.applicableSlots.length}개
           {state && state !== "ACTIVE" ? " · 허용이 끝나 신청할 수 없습니다" : ""}
         </span>
       </div>
@@ -424,8 +425,8 @@ function SchedulePanel({ detail, isReadOnly }: { detail: Detail; isReadOnly: boo
     detail.candidateProperties.map((item, index) => ({
       candidatePropertyId: item.candidatePropertyId,
       order: String(index + 1),
-      visit: "30",
-      travel: "15",
+      visit: String(item.visitDurationMinutes),
+      travel: String(item.travelDurationMinutes),
     })),
   );
   const [errors, setErrors] = useState<Record<number, string>>({});

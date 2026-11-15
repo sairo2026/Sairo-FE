@@ -144,6 +144,7 @@ export const ContractDetailResponseSchema = z.object({
       supersedesDocumentId: z.number().nullable().optional(),
     }),
   ),
+  openFollowupTaskCount: z.number(),
   officeId: z.number(),
   createdAt: z.iso.datetime({ offset: true }),
   updatedAt: z.iso.datetime({ offset: true }),

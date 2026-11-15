@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
@@ -11,7 +12,12 @@ import { formatSeoulDate } from "@/shared/lib/format";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { FormNotice } from "@/shared/components/feedback/form-frame";
 import { useTasks } from "../hooks/home-queries";
-import { TASK_SOURCE_LABEL, TASK_STATUS_LABEL, TASK_STATUS_TONE } from "../model/labels";
+import {
+  TASK_SOURCE_LABEL,
+  TASK_STATUS_LABEL,
+  TASK_STATUS_TONE,
+  taskContractHref,
+} from "../model/labels";
 import { describeWorkError } from "../model/messages";
 import { TaskDialog } from "./task-dialog";
 import type { TaskItem } from "./task-dialog";
@@ -104,7 +110,21 @@ export function TaskListScreen() {
           {
             key: "source",
             header: "구분",
-            render: (row) => TASK_SOURCE_LABEL[row.sourceType] ?? row.sourceType,
+            render: (row) => {
+              const label = TASK_SOURCE_LABEL[row.sourceType] ?? row.sourceType;
+              const href = taskContractHref(row.sourceType, row.sourceId);
+              return href ? (
+                <Link
+                  href={href}
+                  aria-label={`업무 ${row.title}의 계약 보기`}
+                  className="font-semibold text-primary underline-offset-4 clickable-link"
+                >
+                  {label}
+                </Link>
+              ) : (
+                label
+              );
+            },
           },
           {
             key: "status",
