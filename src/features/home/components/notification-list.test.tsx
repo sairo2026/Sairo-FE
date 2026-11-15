@@ -16,6 +16,7 @@ import {
   notificationHref,
   notificationLink,
   notificationTypeLabel,
+  notificationTypeTone,
   parseNotificationTab,
   visitRequestNoticeHref,
 } from "../model/labels";
@@ -168,6 +169,32 @@ describe("알림함", () => {
     expect(await within(panel).findByText("시간 마감")).not.toBeNull();
     await user.click(within(panel).getByRole("button", { name: /읽음 처리/ }));
     await waitFor(() => expect(read).toBe(true));
+  });
+
+  it("방문 신청 알림의 선택됨·재검증 실패·확정 라벨은 서로 다른 색으로 보인다", async () => {
+    const notice = (noticeId: number, noticeType: string) => ({
+      noticeId,
+      requestId: 5,
+      noticeType,
+      channel: "IN_APP",
+      createdAt: "2026-11-10T09:00:00+09:00",
+      readAt: null,
+    });
+    server.use(
+      http.get("/api/visit-request-notices", () =>
+        HttpResponse.json({
+          items: [notice(1, "REVALIDATION_FAILED"), notice(2, "SELECTED"), notice(3, "CONFIRMED")],
+        }),
+      ),
+    );
+    const user = userEvent.setup();
+    renderOffice(<NotificationListScreen />, { role: "OWNER" });
+    await user.click(await screen.findByRole("tab", { name: "방문 신청 알림" }));
+    const panel = await screen.findByRole("tabpanel");
+    const toneOf = async (label: string) =>
+      (await within(panel).findByText(label)).closest("[data-tone]")?.getAttribute("data-tone");
+    const tones = [await toneOf("재검증 실패"), await toneOf("선택됨"), await toneOf("확정")];
+    expect(tones).toEqual(["red", "teal", "green"]);
   });
 
   it("방문 신청 알림이 없으면 빈 안내를 보여준다", async () => {
@@ -327,6 +354,14 @@ describe("알림 종류 20가지", () => {
     for (const type of SERVER_TYPES) {
       expect(notificationTypeLabel(type), type).not.toBe("알림");
     }
+  });
+
+  it("경고·확정·안내 알림은 서로 다른 색을 쓰고 알 수 없는 종류는 파랑이다", () => {
+    expect(notificationTypeTone("SECURITY_ALERT")).toBe("red");
+    expect(notificationTypeTone("PAYMENT")).toBe("amber");
+    expect(notificationTypeTone("VISIT_CONFIRMED")).toBe("green");
+    expect(notificationTypeTone("NOTICE")).toBe("yellow");
+    expect(notificationTypeTone("UNKNOWN_TYPE")).toBe("blue");
   });
 
   it("대표 이전 알림은 대상 종류와 관계없이 대표 이전 화면 주소를 준다", () => {

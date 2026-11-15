@@ -36,6 +36,7 @@
   --color-ink-3: var(--text-disabled);
   --color-danger: var(--danger);
   --color-required: var(--required);
+  --color-brand-border: #8586ee;
 
   /* 상태 태그 채움색과 글자색 */
   --color-tag-blue: #cee3ff;
@@ -50,6 +51,22 @@
   --color-tag-amber-ink: #4e3f00;
   --color-tag-teal: #cefff4;
   --color-tag-teal-ink: #00382c;
+
+  /* 방문 조율 상태 타일 색. 디자인 시스템 ScheduleTag 값이다. */
+  --color-tag-rose: #ffd8d8;
+  --color-tag-rose-ink: #a20000;
+  --color-tag-orange: #ffcc93;
+  --color-tag-orange-ink: #5b3000;
+  --color-tag-lime: #f8ffac;
+  --color-tag-lime-ink: #434900;
+  --color-tag-mint: #82ff76;
+  --color-tag-mint-ink: #00382c;
+  --color-tag-violet: #d7ceff;
+  --color-tag-violet-ink: #3319a5;
+  --color-tag-silver: #c9c9c9;
+  --color-tag-silver-ink: #3d4959;
+  --color-tag-crimson: #b65353;
+  --color-tag-crimson-ink: #ffffff;
 
   --font-sans:
     var(--font-pretendard), "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
@@ -338,6 +355,34 @@ a:focus-visible > .clickable-tile {
   --tile-hover: #dfe2ea;
   --tile-active: #cdd1dc;
 }
+.clickable-tile[data-tone="rose"] {
+  --tile-hover: #dbbaba;
+  --tile-active: #ccadad;
+}
+.clickable-tile[data-tone="orange"] {
+  --tile-hover: #dbaf7e;
+  --tile-active: #cca376;
+}
+.clickable-tile[data-tone="lime"] {
+  --tile-hover: #d5db94;
+  --tile-active: #c6cc8a;
+}
+.clickable-tile[data-tone="mint"] {
+  --tile-hover: #70db65;
+  --tile-active: #68cc5e;
+}
+.clickable-tile[data-tone="violet"] {
+  --tile-hover: #b9b1db;
+  --tile-active: #aca5cc;
+}
+.clickable-tile[data-tone="silver"] {
+  --tile-hover: #acacac;
+  --tile-active: #a1a1a1;
+}
+.clickable-tile[data-tone="crimson"] {
+  --tile-hover: #9d4747;
+  --tile-active: #924242;
+}
 a:hover > .clickable-tile,
 a:focus-visible > .clickable-tile {
   background-color: var(--tile-hover);
@@ -345,6 +390,23 @@ a:focus-visible > .clickable-tile {
 }
 a:active > .clickable-tile {
   background-color: var(--tile-active);
+}
+
+/* 약관 대화상자 본문: 가는 4px 막대로 약관 전문 영역을 방해하지 않게 한다. */
+.scroll-area-slim {
+  scrollbar-width: thin;
+  scrollbar-color: #9ca3af transparent;
+}
+.scroll-area-slim::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+.scroll-area-slim::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scroll-area-slim::-webkit-scrollbar-thumb {
+  background: #9ca3af;
+  border-radius: 4px;
 }
 
 /* 안쪽 스크롤 영역: 스크롤바를 항상 보이게 하고(막대 색 대비 3:1 이상) 항목 단위로 멈춘다. */

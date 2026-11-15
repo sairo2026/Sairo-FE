@@ -177,6 +177,7 @@ function RemoveDialog({ customer, onClose }: { customer: CustomerDetail; onClose
   });
   return (
     <Modal
+      size="notice"
       isOpen
       title={customer.deletable ? "오입력 고객 삭제" : "고객 보관"}
       onClose={onClose}

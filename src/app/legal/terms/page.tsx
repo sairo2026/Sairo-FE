@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: "이용약관",
   description: "사이로의 이용약관 안내입니다.",
   robots: INDEXABLE_ROBOTS,
-  ...publicPageSocialMetadata("이용약관", "사이로의 이용약관 안내입니다."),
+  ...publicPageSocialMetadata("이용약관", "사이로의 이용약관 안내입니다.", "/legal/terms"),
 };
 
 export default function Page() {

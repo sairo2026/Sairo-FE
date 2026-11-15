@@ -11,6 +11,7 @@ import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
 import { Button } from "@/shared/components/ui/button";
 import { ConfirmDialog } from "@/shared/components/ui/modal";
+import { FieldLabel, OfficeFieldScope } from "@/shared/components/ui/field-label";
 import { PageHeader } from "@/shared/components/ui/page-header";
 import { SelectField } from "@/shared/components/ui/select-field";
 import { fieldErrorMap } from "@/shared/lib/api-messages";
@@ -136,83 +137,85 @@ function FormBody({
   }));
 
   return (
-    <div className="flex flex-col gap-6">
-      <PageHeader
-        title={contract ? "계약 초안 수정" : "계약 등록"}
-        description="초안으로 임시 저장하거나 필수값을 모두 채워 체결 등록합니다."
-      />
-      <FormNotice>{CONTRACT_ENTRY_COPY.parties}</FormNotice>
-      {formError ? <FormAlert>{formError}</FormAlert> : null}
-      <section className="flex flex-col gap-3 rounded-card-flat border border-line px-5 py-4">
-        <h2 className="text-body font-semibold text-ink">매물</h2>
-        {propertyId !== null || contract ? (
-          <p className="text-body text-ink">
-            {property.data ? (
-              <Link
-                href={`/properties/${property.data.propertyId}`}
-                className="font-semibold text-primary hover:underline"
-              >
-                {property.data.name}
-                {property.data.address ? ` · ${property.data.address}` : ""}
-              </Link>
-            ) : (
-              "매물 정보를 불러오는 중입니다."
-            )}
-          </p>
-        ) : (
-          <SelectField
-            label="매물 선택"
-            required
-            value={pickedProperty}
-            options={propertyOptions}
-            placeholder="계약할 매물 선택"
-            onValueChange={setPickedProperty}
-            error={errors.propertyId}
-          />
-        )}
-      </section>
-      <ContractFields
-        values={values}
-        onChange={setValues}
-        errors={errors}
-        managerOptional={contract !== null}
-      />
-      <div className="flex flex-wrap justify-end gap-2">
-        {contract ? (
+    <OfficeFieldScope>
+      <div className="flex max-w-[1075px] flex-col gap-6">
+        <PageHeader
+          title={contract ? "계약 초안 수정" : "계약 등록"}
+          description="초안으로 임시 저장하거나 필수값을 모두 채워 체결 등록합니다."
+        />
+        <FormNotice>{CONTRACT_ENTRY_COPY.parties}</FormNotice>
+        {formError ? <FormAlert>{formError}</FormAlert> : null}
+        <fieldset className="flex min-w-0 flex-col gap-3">
+          <FieldLabel as="legend">매물</FieldLabel>
+          {propertyId !== null || contract ? (
+            <p className="text-body text-ink">
+              {property.data ? (
+                <Link
+                  href={`/properties/${property.data.propertyId}`}
+                  className="font-semibold text-primary hover:underline"
+                >
+                  {property.data.name}
+                  {property.data.address ? ` · ${property.data.address}` : ""}
+                </Link>
+              ) : (
+                "매물 정보를 불러오는 중입니다."
+              )}
+            </p>
+          ) : (
+            <SelectField
+              label="매물 선택"
+              required
+              value={pickedProperty}
+              options={propertyOptions}
+              placeholder="계약할 매물 선택"
+              onValueChange={setPickedProperty}
+              error={errors.propertyId}
+            />
+          )}
+        </fieldset>
+        <ContractFields
+          values={values}
+          onChange={setValues}
+          errors={errors}
+          managerOptional={contract !== null}
+        />
+        <div className="flex flex-wrap justify-start gap-2">
+          {contract ? (
+            <Button
+              variant="ghost"
+              disabled={busy || isReadOnly}
+              onClick={() => setConfirmDelete(true)}
+            >
+              초안 삭제
+            </Button>
+          ) : null}
           <Button
-            variant="ghost"
+            variant="outlined"
+            isLoading={saveDraft.isPending}
             disabled={busy || isReadOnly}
-            onClick={() => setConfirmDelete(true)}
+            onClick={() => submit("draft")}
           >
-            초안 삭제
+            초안 저장
           </Button>
-        ) : null}
-        <Button
-          variant="outlined"
-          isLoading={saveDraft.isPending}
-          disabled={busy || isReadOnly}
-          onClick={() => submit("draft")}
-        >
-          초안 저장
-        </Button>
-        <Button
-          isLoading={sign.isPending}
-          disabled={busy || isReadOnly}
-          onClick={() => submit("sign")}
-        >
-          체결 등록
-        </Button>
+          <Button
+            isLoading={sign.isPending}
+            disabled={busy || isReadOnly}
+            onClick={() => submit("sign")}
+          >
+            체결 등록
+          </Button>
+        </div>
+        <ConfirmDialog
+          isOpen={confirmDelete}
+          title="초안 삭제"
+          message="이 계약 초안을 삭제할까요? 당사자 입력값과 함께 완전히 삭제되며 되돌릴 수 없습니다."
+          confirmLabel="삭제"
+          isPending={remove.isPending}
+          onConfirm={() => remove.mutate()}
+          onCancel={() => setConfirmDelete(false)}
+        />
       </div>
-      <ConfirmDialog
-        isOpen={confirmDelete}
-        title="초안 삭제"
-        message="이 계약 초안을 삭제할까요? 당사자 입력값과 함께 완전히 삭제되며 되돌릴 수 없습니다."
-        confirmLabel="삭제"
-        isPending={remove.isPending}
-        onConfirm={() => remove.mutate()}
-        onCancel={() => setConfirmDelete(false)}
-      />
-    </div>
+    </OfficeFieldScope>
   );
 }
 

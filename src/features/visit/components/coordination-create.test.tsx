@@ -81,7 +81,9 @@ describe("방문 조율 생성", () => {
     expect((screen.getByLabelText("방문 가능 시작일") as HTMLInputElement).max).toBe(max);
     expect(
       screen.getByText(
-        `방문 가능 기간은 오늘부터 30일 안으로 정해 주세요. 종료일은 ${max}까지 고를 수 있습니다.`,
+        new RegExp(
+          `방문 가능 기간은 오늘부터 30일 안으로 정해 주세요. 종료일은 ${max}까지 고를 수 있습니다.`,
+        ),
       ),
     ).not.toBeNull();
   });

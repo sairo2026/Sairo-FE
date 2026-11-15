@@ -25,6 +25,17 @@ describe("체크박스 상태", () => {
     expect(input.closest("label")?.className).toContain("cursor-pointer");
   });
 
+  it("form 규격은 연한 채움과 1px 연한 테두리, 높이 36의 행을 쓴다", () => {
+    render(<Checkbox variant="form" label="약관" checked={false} onCheckedChange={() => {}} />);
+    const input = screen.getByRole("checkbox", { name: "약관" });
+    const mark = markOf(input);
+    expect(mark.className).toContain("bg-surface");
+    expect(mark.className).toContain("border-line");
+    expect(mark.className).not.toContain("border-control");
+    expect(mark.className.split(" ")).toContain("border");
+    expect(input.closest("label")?.className).toContain("min-h-9");
+  });
+
   it("선택하면 브랜드 색으로 채우고 흰 체크 표시를 보인다", () => {
     render(<Checkbox label="동의" checked onCheckedChange={() => {}} />);
     const mark = markOf(screen.getByRole("checkbox", { name: "동의" }));

@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   ...publicPageSocialMetadata(
     "약관과 정책",
     "사이로의 이용약관, 개인정보처리방침, 환불정책 등 약관과 정책을 모아 안내합니다.",
+    "/legal",
   ),
 };
 

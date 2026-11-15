@@ -168,7 +168,7 @@ function TaskDialogBody({ task, onClose }: TaskDialogProps) {
   return (
     <Modal
       isOpen
-      size="wide"
+      size="form"
       title={isEdit ? "업무 수정" : "업무 만들기"}
       onClose={onClose}
       footer={
@@ -201,7 +201,7 @@ function TaskDialogBody({ task, onClose }: TaskDialogProps) {
         </>
       }
     >
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-8">
         {formError ? <FormAlert>{formError}</FormAlert> : null}
         {task && auto ? (
           <FormNotice>
@@ -224,7 +224,7 @@ function TaskDialogBody({ task, onClose }: TaskDialogProps) {
           disabled={auto}
           maxLength={100}
         />
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2">
           <SelectField
             label="담당자"
             required
@@ -252,11 +252,7 @@ function TaskDialogBody({ task, onClose }: TaskDialogProps) {
             error={errors.dueTime}
             disabled={auto}
           />
-        </div>
-        {isDeputy ? (
-          <FormNotice>중개보조원은 본인 업무만 만들고 고칠 수 있습니다.</FormNotice>
-        ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {isDeputy ? null : (
             <SelectField
               label="관련 고객(선택)"
               value={values.relatedCustomerId}
@@ -265,15 +261,19 @@ function TaskDialogBody({ task, onClose }: TaskDialogProps) {
               onValueChange={(v) => set("relatedCustomerId", v)}
               disabled={auto}
             />
-            <SelectField
-              label="관련 매물(선택)"
-              value={values.relatedPropertyId}
-              options={propertyOptions}
-              placeholder="선택 안 함"
-              onValueChange={(v) => set("relatedPropertyId", v)}
-              disabled={auto}
-            />
-          </div>
+          )}
+        </div>
+        {isDeputy ? (
+          <FormNotice>중개보조원은 본인 업무만 만들고 고칠 수 있습니다.</FormNotice>
+        ) : (
+          <SelectField
+            label="관련 매물(선택)"
+            value={values.relatedPropertyId}
+            options={propertyOptions}
+            placeholder="선택 안 함"
+            onValueChange={(v) => set("relatedPropertyId", v)}
+            disabled={auto}
+          />
         )}
         <TextField
           label="메모(선택)"

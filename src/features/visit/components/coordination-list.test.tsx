@@ -43,7 +43,7 @@ describe("방문 조율 목록", () => {
     expect(screen.getByText("국민대 앞 아파트, 정릉 상가")).not.toBeNull();
     expect(screen.getByText("2개")).not.toBeNull();
     const card = screen.getByRole("button", { name: /^조율 가능/ });
-    expect(within(card).getByText("1")).not.toBeNull();
+    expect(within(card).getByText("1건")).not.toBeNull();
     expect(screen.getAllByRole("listitem").length).toBeGreaterThanOrEqual(9);
   });
 

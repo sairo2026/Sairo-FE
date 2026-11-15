@@ -8,7 +8,6 @@ import { useCustomerDetail } from "@/features/customer/hooks/customer-queries";
 import { usePropertyDetail } from "@/features/property/hooks/property-queries";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { Button } from "@/shared/components/ui/button";
-import { Card } from "@/shared/components/ui/card";
 import { DateTimeField } from "@/shared/components/ui/date-time-field";
 import { PageHeader } from "@/shared/components/ui/page-header";
 import { SelectField } from "@/shared/components/ui/select-field";
@@ -143,72 +142,67 @@ export function CoordinationCreateScreen({
       {prefillNotices.map((message) => (
         <FormNotice key={message}>{message}</FormNotice>
       ))}
-      <Card>
-        <div className="flex flex-col gap-8">
-          <CustomerPicker
-            value={customer}
-            onChange={(next) => {
-              setCustomer(next);
-              setErrors((current) => ({ ...current, customer: undefined }));
-            }}
-            error={errors.customer}
+      <div className="flex max-w-[1075px] flex-col gap-8">
+        <CustomerPicker
+          value={customer}
+          onChange={(next) => {
+            setCustomer(next);
+            setErrors((current) => ({ ...current, customer: undefined }));
+          }}
+          error={errors.customer}
+        />
+        <CandidatePicker
+          selected={candidates}
+          onToggle={toggle}
+          max={MAX_CANDIDATES}
+          error={errors.candidates}
+        />
+        <div className="grid grid-cols-1 gap-x-[45px] gap-y-5 lg:grid-cols-[repeat(2,minmax(0,510px))]">
+          <DateTimeField
+            label="방문 가능 시작일"
+            kind="date"
+            value={start}
+            min={today}
+            max={maxEnd}
+            onValueChange={setStart}
+            error={errors.start}
           />
-          <CandidatePicker
-            selected={candidates}
-            onToggle={toggle}
-            max={MAX_CANDIDATES}
-            error={errors.candidates}
+          <DateTimeField
+            label="방문 가능 종료일"
+            kind="date"
+            value={end}
+            min={start || today}
+            max={maxEnd}
+            onValueChange={setEnd}
+            error={errors.end}
           />
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <DateTimeField
-              label="방문 가능 시작일"
-              kind="date"
-              value={start}
-              min={today}
-              max={maxEnd}
-              onValueChange={setStart}
-              error={errors.start}
-            />
-            <DateTimeField
-              label="방문 가능 종료일"
-              kind="date"
-              value={end}
-              min={start || today}
-              max={maxEnd}
-              onValueChange={setEnd}
-              error={errors.end}
-            />
-          </div>
-          <p className="text-caption text-ink-2">
-            방문 가능 기간은 오늘부터 30일 안으로 정해 주세요. 종료일은 {maxEnd}까지 고를 수
-            있습니다.
-          </p>
-          <p className="text-caption text-ink-2">{CUSTOMER_LINK_EXPIRY_RULE}</p>
-          {startsSoon ? <FormNotice>{CUSTOMER_LINK_SHORT_EXPIRY_NOTICE}</FormNotice> : null}
-          {isDeputy ? (
-            <FormNotice>중개보조원은 담당자를 바꿀 수 없어 본인이 담당자로 지정됩니다.</FormNotice>
-          ) : (
-            <SelectField
-              label="담당자"
-              value={manager}
-              options={memberOptions}
-              onValueChange={setManager}
-            />
-          )}
-          {formError ? <FormAlert>{formError}</FormAlert> : null}
-          <div className="flex gap-3">
-            <Button isLoading={mutation.isPending} disabled={isReadOnly} onClick={submit}>
-              조율 만들기
-            </Button>
-            <Link
-              href="/coordinations"
-              className="inline-flex h-14 items-center rounded-control bg-primary-soft px-6 text-body font-medium text-ink-2 hover:bg-primary-line"
-            >
-              취소
-            </Link>
-          </div>
         </div>
-      </Card>
+        <FormNotice>
+          {`방문 가능 기간은 오늘부터 30일 안으로 정해 주세요. 종료일은 ${maxEnd}까지 고를 수 있습니다. ${CUSTOMER_LINK_EXPIRY_RULE}${startsSoon ? ` ${CUSTOMER_LINK_SHORT_EXPIRY_NOTICE}` : ""}`}
+        </FormNotice>
+        {isDeputy ? (
+          <FormNotice>중개보조원은 담당자를 바꿀 수 없어 본인이 담당자로 지정됩니다.</FormNotice>
+        ) : (
+          <SelectField
+            label="담당자"
+            value={manager}
+            options={memberOptions}
+            onValueChange={setManager}
+          />
+        )}
+        {formError ? <FormAlert>{formError}</FormAlert> : null}
+        <div className="flex gap-3">
+          <Button isLoading={mutation.isPending} disabled={isReadOnly} onClick={submit}>
+            조율 만들기
+          </Button>
+          <Link
+            href="/coordinations"
+            className="inline-flex h-12 min-w-[120px] items-center justify-center rounded-control bg-primary-soft px-10 text-body font-medium text-ink-2 hover:bg-primary-line"
+          >
+            취소
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

@@ -28,7 +28,7 @@ export function SearchField({
     <form
       role="search"
       onSubmit={handleSubmit}
-      className="flex h-14 items-center gap-2 rounded-control border border-line bg-surface px-4 focus-within:border-primary focus-within:bg-white"
+      className="flex h-[58px] items-center gap-4 rounded-control border border-line bg-surface px-5 focus-within:border-primary focus-within:bg-white"
     >
       <label htmlFor={id} className="sr-only">
         {label}
@@ -44,7 +44,7 @@ export function SearchField({
       />
       <button
         type="submit"
-        className="h-9 shrink-0 rounded-small bg-primary px-4 text-caption font-semibold text-white hover:bg-primary-hover"
+        className="h-9 w-14 shrink-0 rounded-small bg-primary text-caption font-semibold text-white hover:bg-primary-hover"
       >
         검색
       </button>

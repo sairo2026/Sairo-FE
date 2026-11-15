@@ -2,7 +2,21 @@ import type { ReactNode } from "react";
 import { cn } from "@/shared/lib/cn";
 import { formatDDay } from "@/shared/lib/format";
 
-export type BadgeTone = "blue" | "red" | "yellow" | "green" | "amber" | "teal" | "gray";
+export type BadgeTone =
+  | "blue"
+  | "red"
+  | "yellow"
+  | "green"
+  | "amber"
+  | "teal"
+  | "rose"
+  | "orange"
+  | "lime"
+  | "mint"
+  | "violet"
+  | "silver"
+  | "crimson"
+  | "gray";
 
 const toneClass: Record<BadgeTone, string> = {
   blue: "bg-tag-blue text-tag-blue-ink",
@@ -11,6 +25,13 @@ const toneClass: Record<BadgeTone, string> = {
   green: "bg-tag-green text-tag-green-ink",
   amber: "bg-tag-amber text-tag-amber-ink",
   teal: "bg-tag-teal text-tag-teal-ink",
+  rose: "bg-tag-rose text-tag-rose-ink",
+  orange: "bg-tag-orange text-tag-orange-ink",
+  lime: "bg-tag-lime text-tag-lime-ink",
+  mint: "bg-tag-mint text-tag-mint-ink",
+  violet: "bg-tag-violet text-tag-violet-ink",
+  silver: "bg-tag-silver text-tag-silver-ink",
+  crimson: "bg-tag-crimson text-tag-crimson-ink",
   gray: "border border-line bg-white text-ink-3",
 };
 
@@ -87,17 +108,14 @@ export function ScheduleTag({ tone, label, count, isInteractive, className }: Sc
     <span
       data-tone={tone}
       className={cn(
-        "flex min-h-[92px] min-w-[132px] flex-col justify-between rounded-control px-4 py-3",
+        "flex h-[92px] w-[132px] flex-col items-center justify-center gap-2 rounded-control px-5 py-2",
         tone === "gray" ? "border border-line bg-white text-ink-2" : toneClass[tone],
         isInteractive && "clickable-tile",
         className,
       )}
     >
       <span className="text-body font-medium">{label}</span>
-      <span className="text-h2 font-bold">
-        {count}
-        <span className="text-caption font-medium">건</span>
-      </span>
+      <span className="text-h2 font-semibold">{count}건</span>
     </span>
   );
 }

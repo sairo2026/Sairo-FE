@@ -70,6 +70,7 @@ export const PRICING_COPY = {
     "기업 구간: 별도 견적이며 견적을 수락하기 전에는 자동으로 결제되지 않습니다",
     "모든 구간의 기능은 같습니다. 구간은 과금 인원만 다릅니다.",
   ],
+  planTerms: "매월 자동결제 · 사무소 1곳 기준",
   planFooter: (baseAmount: string) =>
     `월 ${baseAmount}(부가가치세 포함) · 매월 자동결제 · 사무소 1곳 기준`,
   provisional:

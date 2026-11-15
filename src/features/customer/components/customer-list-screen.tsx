@@ -7,6 +7,7 @@ import { ApiError } from "@/shared/api/client";
 import { toErrorScreenKind } from "@/shared/api/error-kind";
 import { ErrorScreen } from "@/shared/components/feedback/error-screen";
 import { Badge } from "@/shared/components/ui/badge";
+import { CreateLink } from "@/shared/components/ui/create-link";
 import { DataTable } from "@/shared/components/ui/data-table";
 import type { PageSize } from "@/shared/components/ui/data-table";
 import { PageHeader } from "@/shared/components/ui/page-header";
@@ -59,6 +60,7 @@ export function CustomerListScreen() {
       ? [
           {
             key: "select",
+            widthClass: "w-16",
             header: "선택",
             render: (row: Row) => (
               <Checkbox
@@ -76,12 +78,13 @@ export function CustomerListScreen() {
       : []),
     {
       key: "name",
+      widthClass: "w-[156px]",
       header: "이름",
       render: (row: Row) => (
         <span className="flex flex-wrap items-center gap-2">
           <Link
             href={`/customers/${row.customerId}`}
-            className="font-semibold text-ink hover:text-primary hover:underline"
+            className="font-bold text-ink hover:text-primary hover:underline"
           >
             {row.name}
           </Link>
@@ -133,14 +136,9 @@ export function CustomerListScreen() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title="고객 관리" description="고객을 관리할 수 있습니다." />
-      <div className="flex flex-wrap items-stretch gap-3">
-        <Link
-          href="/customers/new"
-          className="inline-flex h-14 items-center justify-center rounded-control bg-primary px-6 text-body font-bold text-white hover:bg-primary-hover"
-        >
-          + 고객 등록
-        </Link>
-        <div className="min-w-[260px] flex-1">
+      <div className="flex flex-wrap items-center gap-4">
+        <CreateLink href="/customers/new">고객 등록</CreateLink>
+        <div className="min-w-[260px] max-w-[856px] flex-1">
           <SearchField
             label="고객 검색"
             placeholder="고객 이름이나 연락처로 검색하세요."
@@ -153,8 +151,9 @@ export function CustomerListScreen() {
           />
         </div>
       </div>
-      <div className="flex flex-wrap items-end gap-6">
+      <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
         <SelectField
+          layout="inline"
           label="역할"
           value={roleFilter}
           options={[
@@ -166,7 +165,8 @@ export function CustomerListScreen() {
             setPage(1);
           }}
         />
-        <div className="flex h-14 items-center gap-3 text-body text-ink">
+        <div className="flex items-center gap-5 text-body font-semibold text-ink-2">
+          <span aria-hidden="true">보관 고객 보기</span>
           <Toggle
             label="보관 고객 보기"
             checked={archived}
@@ -176,10 +176,9 @@ export function CustomerListScreen() {
               setPage(1);
             }}
           />
-          <span aria-hidden="true">보관 고객 보기</span>
         </div>
         {isOwner ? (
-          <div className="flex h-14 items-center gap-3">
+          <div className="flex items-center gap-3">
             {selected.length === MAX_MERGE_SELECTION ? (
               <Link
                 href={`/customers/merge?primary=${selected[0]}&merged=${selected[1]}`}

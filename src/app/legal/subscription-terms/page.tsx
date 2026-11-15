@@ -8,7 +8,11 @@ export const metadata: Metadata = {
   title: "구독·결제 약관",
   description: "사이로의 구독·결제 약관 안내입니다.",
   robots: INDEXABLE_ROBOTS,
-  ...publicPageSocialMetadata("구독·결제 약관", "사이로의 구독·결제 약관 안내입니다."),
+  ...publicPageSocialMetadata(
+    "구독·결제 약관",
+    "사이로의 구독·결제 약관 안내입니다.",
+    "/legal/subscription-terms",
+  ),
 };
 
 export default function Page() {

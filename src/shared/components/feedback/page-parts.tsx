@@ -24,7 +24,7 @@ export function FlowFrame({
   children: ReactNode;
 }) {
   return (
-    <AuthFrame title={title} description={description} width={width}>
+    <AuthFrame title={title} description={description} width={width} variant="form">
       {children}
     </AuthFrame>
   );
@@ -57,7 +57,7 @@ export function ButtonRow({
   return (
     <div
       className={cn(
-        "flex flex-wrap gap-3",
+        "flex flex-wrap gap-4",
         align === "center" ? "justify-center" : "justify-start",
       )}
     >

@@ -119,7 +119,7 @@ describe("계약 목록", () => {
     renderOffice(<ContractListScreen />, { role: "OWNER" });
     await screen.findAllByRole("link", { name: "서울특별시 성북구 정릉로 77" });
     expect(screen.getAllByRole("link", { name: "서울특별시 성북구 정릉로 77" })).toHaveLength(1);
-    await user.click(screen.getByRole("checkbox", { name: "중복 제외 포함" }));
+    await user.click(screen.getByRole("switch", { name: "중복 제외 포함" }));
     await waitFor(() => expect(screen.getByText("중복 제외됨")).not.toBeNull());
   });
 
@@ -184,7 +184,7 @@ describe("계약 목록", () => {
     );
     renderOffice(<ContractListScreen />, { role: "DEPUTY" });
     expect(await screen.findByText("접근 권한이 없습니다")).not.toBeNull();
-    expect(screen.queryByRole("link", { name: "+ 계약 등록" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "계약 등록" })).toBeNull();
     expect(called).toBe(false);
   });
 
@@ -193,7 +193,7 @@ describe("계약 목록", () => {
     const row = await screen.findByRole("link", { name: "서울특별시 성북구 정릉로 77" });
     expect(row.getAttribute("href")).toBe("/contracts/9101");
     expect(
-      within(document.body).getByRole("link", { name: "+ 계약 등록" }).getAttribute("href"),
+      within(document.body).getByRole("link", { name: "계약 등록" }).getAttribute("href"),
     ).toBe("/contracts/new");
   });
 });

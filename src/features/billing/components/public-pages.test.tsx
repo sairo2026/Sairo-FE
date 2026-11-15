@@ -76,9 +76,7 @@ describe("공개 요금 페이지", () => {
     expect(screen.getByRole("link", { name: "환불정책" }).getAttribute("href")).toBe(
       "/legal/refund-policy",
     );
-    expect(screen.getByTestId("pricing-image").textContent).toContain(
-      "화면 예시를 불러오지 못했습니다.",
-    );
+    expect(screen.queryByTestId("pricing-image")).toBeNull();
   });
 
   it("환불 요약은 환불정책의 기준을 그대로 담고 전문 링크로 연결한다", async () => {

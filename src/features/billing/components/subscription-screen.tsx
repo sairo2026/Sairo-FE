@@ -3,6 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { PaymentAttempt, SubscriptionCurrent } from "../api/wire";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import {
@@ -15,6 +16,7 @@ import { QueryGate } from "@/shared/components/feedback/query-gate";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import { ConfirmDialog, Modal } from "@/shared/components/ui/modal";
+import { SecondaryLink } from "@/shared/components/ui/secondary-link";
 import { PageHeader } from "@/shared/components/ui/page-header";
 import { formatKrw, formatSeoulDate, formatSeoulDateTime } from "@/shared/lib/format";
 import {
@@ -75,10 +77,28 @@ function ReadinessList({ subscription }: { subscription: SubscriptionCurrent }) 
               {item.ok ? "완료" : "필요"}
             </span>
           </span>
-          {item.ok ? null : <TextLink href={item.href}>{item.label}하기</TextLink>}
+          {item.ok ? null : (
+            <SecondaryLink href={item.href} size="sm">
+              {item.label}하기
+            </SecondaryLink>
+          )}
         </li>
       ))}
     </ul>
+  );
+}
+
+function RowLink({ href, children }: { href: string; children: ReactNode }) {
+  return (
+    <Link
+      href={href}
+      className="group flex items-center justify-between gap-3 border-b border-line py-3 text-body font-medium text-ink clickable-row"
+    >
+      {children}
+      <span aria-hidden="true" className="clickable-arrow">
+        ›
+      </span>
+    </Link>
   );
 }
 
@@ -438,7 +458,7 @@ function SubscriptionView({ subscription }: { subscription: SubscriptionCurrent 
   const preview = useConsentPreview(undefined, undefined, subscription.status === "PRE_PAYMENT");
   const chargeAmount = subscription.nextChargeAmount ?? preview.data?.totalAmountInclVat ?? null;
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       <Card title="구독 현황">
         <div className="mb-4 flex flex-wrap items-center gap-3">
           <StatusBadge tone={status?.tone ?? "gray"} label={status?.label ?? subscription.status} />
@@ -464,33 +484,30 @@ function SubscriptionView({ subscription }: { subscription: SubscriptionCurrent 
           </p>
         )}
         <div className="mt-3">
-          <Link
-            href="/billing/card"
-            className="text-caption font-semibold text-primary hover:underline"
-          >
+          <SecondaryLink href="/billing/card" size="sm">
             {subscription.paymentMethod ? "카드 관리" : "카드 등록"}
-          </Link>
+          </SecondaryLink>
         </div>
       </Card>
       <Card title="요금과 내역">
-        <ul className="flex flex-col gap-2 text-body">
+        <ul className="flex flex-col">
           <li>
-            <TextLink href="/billing/plans">요금제 안내와 예상 금액</TextLink>
+            <RowLink href="/billing/plans">요금제 안내와 예상 금액</RowLink>
           </li>
           <li>
-            <TextLink href="/billing/consent">구독 구매 동의</TextLink>
+            <RowLink href="/billing/consent">구독 구매 동의</RowLink>
           </li>
           <li>
-            <TextLink href="/billing/invoices">결제 내역</TextLink>
+            <RowLink href="/billing/invoices">결제 내역</RowLink>
           </li>
           <li>
-            <TextLink href="/billing/refunds">환불 신청 내역</TextLink>
+            <RowLink href="/billing/refunds">환불 신청 내역</RowLink>
           </li>
           <li>
-            <TextLink href="/billing/tax-recipient">세금계산서 수신 정보</TextLink>
+            <RowLink href="/billing/tax-recipient">세금계산서 수신 정보</RowLink>
           </li>
           <li>
-            <TextLink href="/billing/return-guide">자료 반환과 보관 안내</TextLink>
+            <RowLink href="/billing/return-guide">자료 반환과 보관 안내</RowLink>
           </li>
         </ul>
       </Card>
@@ -503,7 +520,9 @@ function SubscriptionView({ subscription }: { subscription: SubscriptionCurrent 
               : ""}
           </p>
           <div className="mt-3">
-            <TextLink href="/billing/start-agreement">합의 내용 확인</TextLink>
+            <SecondaryLink href="/billing/start-agreement" size="sm">
+              합의 내용 확인
+            </SecondaryLink>
           </div>
         </Card>
       ) : null}
@@ -514,11 +533,11 @@ function SubscriptionView({ subscription }: { subscription: SubscriptionCurrent 
             : "처리할 가격 변경 안내가 없습니다."}
         </p>
         <div className="mt-3">
-          <TextLink href="/billing/price-changes">
+          <SecondaryLink href="/billing/price-changes" size="sm">
             {subscription.pendingPriceChangeNoticeCount > 0
               ? "안내 확인하고 응답"
               : "지난 안내 내역 보기"}
-          </TextLink>
+          </SecondaryLink>
         </div>
       </Card>
     </div>

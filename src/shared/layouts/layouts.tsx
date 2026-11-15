@@ -35,7 +35,7 @@ export function PublicSiteLayout({ children, footer }: LayoutProps & { footer?: 
           <Link href="/" aria-label="사이로 홈">
             <BrandLogo className="w-28" />
           </Link>
-          <nav aria-label="공개 메뉴" className="flex gap-5 text-caption font-semibold text-ink-2">
+          <nav aria-label="공개 메뉴" className="flex gap-5 text-body font-medium text-ink-2">
             <Link href="/pricing" className="clickable-link px-1">
               요금 안내
             </Link>
@@ -102,11 +102,14 @@ export function OfficeLayout({
           tone === "board" ? "bg-surface" : "bg-white",
         )}
       >
-        <aside className="border-b border-line bg-surface px-6 py-6 lg:min-h-dvh lg:border-r lg:border-b-0 lg:px-5 lg:pt-8">
-          <Link href="/home" aria-label="사이로 홈" className="mb-6 block lg:mb-16">
-            <BrandLogo className="w-32" />
+        <aside className="border-b border-line bg-white px-6 py-6 lg:min-h-dvh lg:border lg:px-8 lg:pt-[31px]">
+          <Link href="/home" aria-label="사이로 홈" className="mb-6 block lg:mb-[60px]">
+            <BrandLogo className="w-[127px]" />
           </Link>
-          <nav aria-label="주요 메뉴" className="flex gap-5 overflow-x-auto lg:flex-col lg:gap-5">
+          <nav
+            aria-label="주요 메뉴"
+            className="flex gap-5 overflow-x-auto lg:flex-col lg:gap-[18px]"
+          >
             {items.map((item) => (
               <SideNavItem
                 key={item.key}
@@ -118,11 +121,18 @@ export function OfficeLayout({
           </nav>
         </aside>
         <div className="min-w-0">
-          <header className="flex min-h-[88px] flex-wrap items-center justify-between gap-x-6 gap-y-3 border-b border-line px-8 py-4 text-caption font-semibold text-ink-2 lg:px-16">
+          <header className="flex min-h-[88px] flex-wrap items-center justify-between gap-x-6 gap-y-3 border-b border-line bg-white px-8 py-4 text-caption font-semibold text-ink-2">
             <span>{officeName ?? "사무소"}</span>
             {headerActions}
           </header>
-          <main className="px-5 pt-10 pb-28 sm:px-8 lg:px-16 lg:pt-14">{children}</main>
+          <main
+            className={cn(
+              "px-5 pt-10 pb-28 sm:px-8",
+              tone === "board" ? "lg:pt-7 lg:pr-8 lg:pl-7" : "lg:pt-10 lg:pr-8 lg:pl-11",
+            )}
+          >
+            {children}
+          </main>
         </div>
         <WindowScrollHint
           tone={tone === "board" ? "surface" : "white"}

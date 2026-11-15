@@ -4,7 +4,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
 import { listRequestNotices, readRequestNotice } from "@/features/visit/api/request.api";
-import { NOTICE_TYPE_DESCRIPTION, NOTICE_TYPE_LABEL } from "@/features/visit/model/request-labels";
+import {
+  NOTICE_TYPE_DESCRIPTION,
+  NOTICE_TYPE_LABEL,
+  NOTICE_TYPE_TONE,
+} from "@/features/visit/model/request-labels";
 import { ApiError } from "@/shared/api/client";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
 import { EmptyState } from "@/shared/components/feedback/empty-state";
@@ -19,7 +23,12 @@ import { PAGE_SIZE_OPTIONS } from "@/shared/components/ui/data-table";
 import type { PageSize } from "@/shared/components/ui/data-table";
 import { markNotificationRead } from "../api/home.api";
 import { homeKeys, useNotifications } from "../hooks/home-queries";
-import { notificationLink, notificationTypeLabel, visitRequestNoticeHref } from "../model/labels";
+import {
+  notificationLink,
+  notificationTypeLabel,
+  notificationTypeTone,
+  visitRequestNoticeHref,
+} from "../model/labels";
 import type { NotificationTab } from "../model/labels";
 import { describeWorkError } from "../model/messages";
 
@@ -96,28 +105,28 @@ function GeneralNotifications() {
                   return (
                     <li
                       key={item.notificationId}
-                      className="flex flex-wrap items-center justify-between gap-3 rounded-card-flat border border-line px-5 py-4"
+                      className={`flex flex-wrap items-center justify-between gap-3 rounded-control border bg-surface p-5 ${item.read ? "border-primary-line" : "border-primary"}`}
                     >
-                      <div className="flex min-w-0 flex-col gap-1">
-                        <span className="flex items-center gap-2">
-                          <Badge
-                            tone={item.read ? "gray" : "blue"}
-                            className="h-7 min-w-0 px-3 text-caption"
-                          >
-                            {notificationTypeLabel(item.type)}
-                          </Badge>
-                          {item.read ? null : (
-                            <span className="text-caption font-semibold text-primary">
-                              읽지 않음
-                            </span>
-                          )}
+                      <div className="flex min-w-0 flex-col gap-2">
+                        <span className="flex flex-col gap-1">
+                          <span className="flex items-center gap-2">
+                            <Badge
+                              tone={item.read ? "gray" : notificationTypeTone(item.type)}
+                              className="h-7 min-w-0 px-3 text-caption"
+                            >
+                              {notificationTypeLabel(item.type)}
+                            </Badge>
+                            {item.read ? null : (
+                              <span className="text-caption font-semibold text-primary">
+                                읽지 않음
+                              </span>
+                            )}
+                          </span>
+                          <span className="text-caption text-ink-3">
+                            {formatSeoulDateTime(item.createdAt)}
+                          </span>
                         </span>
-                        <span className={item.read ? "text-ink-2" : "font-semibold text-ink"}>
-                          {item.message}
-                        </span>
-                        <span className="text-caption text-ink-3">
-                          {formatSeoulDateTime(item.createdAt)}
-                        </span>
+                        <span className="text-body text-ink-2">{item.message}</span>
                       </div>
                       <div className="flex gap-2">
                         {href ? (
@@ -192,20 +201,22 @@ function VisitRequestNotices() {
             {data.items.map((item) => (
               <li
                 key={item.noticeId}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-card-flat border border-line px-5 py-4"
+                className={`flex flex-wrap items-center justify-between gap-3 rounded-control border bg-surface p-5 ${item.readAt ? "border-primary-line" : "border-primary"}`}
               >
-                <div className="flex flex-col gap-1">
-                  <Badge
-                    tone={item.readAt ? "gray" : "teal"}
-                    className="h-7 min-w-0 w-fit px-3 text-caption"
-                  >
-                    {NOTICE_TYPE_LABEL[item.noticeType] ?? "방문 신청"}
-                  </Badge>
-                  <span className="text-ink">
-                    {NOTICE_TYPE_DESCRIPTION[item.noticeType] ?? "방문 신청 알림입니다."}
+                <div className="flex flex-col gap-2">
+                  <span className="flex flex-col gap-1">
+                    <Badge
+                      tone={item.readAt ? "gray" : (NOTICE_TYPE_TONE[item.noticeType] ?? "blue")}
+                      className="h-7 w-fit min-w-0 px-3 text-caption"
+                    >
+                      {NOTICE_TYPE_LABEL[item.noticeType] ?? "방문 신청"}
+                    </Badge>
+                    <span className="text-caption text-ink-3">
+                      {formatSeoulDateTime(item.createdAt)}
+                    </span>
                   </span>
-                  <span className="text-caption text-ink-3">
-                    {formatSeoulDateTime(item.createdAt)}
+                  <span className="text-body text-ink-2">
+                    {NOTICE_TYPE_DESCRIPTION[item.noticeType] ?? "방문 신청 알림입니다."}
                   </span>
                 </div>
                 <div className="flex gap-2">

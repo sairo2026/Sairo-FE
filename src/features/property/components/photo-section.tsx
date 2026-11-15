@@ -52,7 +52,7 @@ function PhotoPicker({
 }) {
   return (
     <div className="flex flex-col gap-2">
-      <label className="relative inline-flex w-fit cursor-pointer items-center rounded-control border border-primary bg-primary-soft px-4 py-2 text-caption font-semibold text-primary hover:bg-primary-line">
+      <label className="relative flex h-[207px] w-[276px] max-w-full cursor-pointer items-center justify-center rounded-[6.5px] bg-primary-soft text-body font-medium text-primary hover:bg-primary-line">
         사진 추가
         <input
           type="file"
@@ -96,28 +96,33 @@ function Thumb({ url, alt }: { url: string | null; alt: string }) {
   );
 }
 
+/** picker는 업로드 상자와 오류만, list는 올린 사진 목록만 그린다. 기본값 all은 둘 다 그린다. */
+export type PhotoPart = "all" | "picker" | "list";
+
 export function QueuedPhotoList({
   photos,
   error,
   onAdd,
   onChange,
   onRemove,
+  part = "all",
 }: {
   photos: QueuedPhoto[];
   error?: string;
   onAdd: (files: File[]) => void;
   onChange: (key: string, description: string) => void;
   onRemove: (key: string) => void;
+  part?: PhotoPart;
 }) {
   return (
     <div className="flex flex-col gap-4">
-      <PhotoPicker count={photos.length} onPick={onAdd} />
-      {error ? (
+      {part !== "list" ? <PhotoPicker count={photos.length} onPick={onAdd} /> : null}
+      {error && part !== "list" ? (
         <p role="alert" className="text-caption text-danger">
           {error}
         </p>
       ) : null}
-      {photos.length > 0 ? (
+      {photos.length > 0 && part !== "picker" ? (
         <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {photos.map((photo, index) => (
             <li
@@ -159,6 +164,7 @@ export function SavedPhotoList({
   onAdd,
   onSave,
   onDelete,
+  part = "all",
 }: {
   photos: SavedPhoto[];
   error?: string;
@@ -166,16 +172,19 @@ export function SavedPhotoList({
   onAdd: (files: File[]) => void;
   onSave: (photoId: number, description: string, sortOrder: number) => void;
   onDelete: (photoId: number) => void;
+  part?: PhotoPart;
 }) {
   return (
     <div className="flex flex-col gap-4">
-      <PhotoPicker count={photos.length} isBusy={isBusy} onPick={onAdd} />
-      {error ? (
+      {part !== "list" ? (
+        <PhotoPicker count={photos.length} isBusy={isBusy} onPick={onAdd} />
+      ) : null}
+      {error && part !== "list" ? (
         <p role="alert" className="text-caption text-danger">
           {error}
         </p>
       ) : null}
-      {photos.length === 0 ? (
+      {part === "picker" ? null : photos.length === 0 ? (
         <p className="text-caption text-ink-2">등록된 사진이 없습니다.</p>
       ) : (
         <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

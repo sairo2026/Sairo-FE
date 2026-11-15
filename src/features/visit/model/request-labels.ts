@@ -55,6 +55,17 @@ export const NOTICE_TYPE_LABEL: Record<string, string> = {
   GRANT_REVOKED: "허용 회수로 신청 종결",
 };
 
+export const NOTICE_TYPE_TONE: Record<string, BadgeTone> = {
+  TIME_CLOSED: "amber",
+  SELECTED: "teal",
+  REVALIDATION_FAILED: "red",
+  CONFIRMED: "green",
+  CONDITION_CHANGE_IMPACT: "amber",
+  REAPPROVAL_REQUESTED: "yellow",
+  SLOT_REOPENED: "blue",
+  GRANT_REVOKED: "red",
+};
+
 export const NOTICE_TYPE_DESCRIPTION: Record<string, string> = {
   TIME_CLOSED:
     "같은 매물에서 방문 구간이 겹치거나 방문 간 최소 간격을 지키지 못하는 다른 신청이 확정되어 마감되었습니다. 자동으로 승격되지 않습니다.",

@@ -8,7 +8,7 @@ test.describe("시나리오 3 고객 등록부터 후보 매물 조회까지", (
 
     await test.step("/customers/new에서 담당자·수집근거·목적·보유기한을 넣어 고객을 등록한다", async () => {
       await page.goto("/customers");
-      await page.getByRole("link", { name: "+ 고객 등록" }).click();
+      await page.getByRole("link", { name: "고객 등록" }).click();
       await expect(page.getByRole("heading", { name: "고객 등록" })).toBeVisible();
       await page.getByLabel(/^이름/).fill("신규고객");
       await page.getByLabel("연락처", { exact: true }).fill("01099998888");

@@ -14,10 +14,10 @@ import { TextField } from "./text-field";
 afterEach(cleanup);
 
 describe("폼 라벨 규격", () => {
-  it("라벨은 16 SemiBold이고 필수 별표는 Red2 색이며 스크린리더가 읽지 않는다", () => {
+  it("라벨은 20 SemiBold이고 필수 별표는 Red2 색이며 스크린리더가 읽지 않는다", () => {
     render(<TextField label="이름" value="" onValueChange={() => {}} required />);
     const label = screen.getByText("이름").closest("label");
-    expect(label?.className).toContain("text-body");
+    expect(label?.className).toContain("text-h2");
     expect(label?.className).toContain("font-semibold");
     const star = label?.querySelector("span");
     expect(star?.className).toContain("text-required");
@@ -25,7 +25,33 @@ describe("폼 라벨 규격", () => {
     expect(screen.getByLabelText(/이름/).hasAttribute("required")).toBe(true);
   });
 
-  it("라벨과 입력창 간격은 12px이고 모든 입력 컨트롤이 같은 규격을 쓴다", () => {
+  it("텍스트 입력창은 높이 58에 좌우 여백 20이고 상태 문구는 가운데 정렬이다", () => {
+    const { container } = render(
+      <>
+        <TextField label="a" value="" onValueChange={() => {}} error="오류입니다." />
+        <TextField
+          label="b"
+          value=""
+          onValueChange={() => {}}
+          statusText="인증이 완료되었습니다."
+        />
+        <TextField label="c" value="" onValueChange={() => {}} hint="안내입니다." />
+      </>,
+    );
+    const boxes = container.querySelectorAll("input");
+    for (const input of boxes) {
+      expect(input.parentElement?.className).toContain("h-[58px]");
+      expect(input.parentElement?.className).toContain("px-5");
+    }
+    expect(screen.getByText("오류입니다.").className).toContain("text-danger");
+    expect(screen.getByText("오류입니다.").className).toContain("text-center");
+    expect(screen.getByText("인증이 완료되었습니다.").className).toContain("text-primary");
+    expect(screen.getByText("인증이 완료되었습니다.").className).toContain("text-center");
+    expect(screen.getByText("안내입니다.").className).toContain("text-ink-2");
+    expect(screen.getByText("안내입니다.").className).not.toContain("text-center");
+  });
+
+  it("라벨과 입력창 간격은 20px이고 모든 입력 컨트롤이 같은 규격을 쓴다", () => {
     const { container } = render(
       <>
         <TextField label="a" value="" onValueChange={() => {}} />
@@ -35,8 +61,8 @@ describe("폼 라벨 규격", () => {
       </>,
     );
     for (const label of container.querySelectorAll("label")) {
-      expect(label.className).toContain("text-body");
-      expect(label.parentElement?.className).toContain("gap-3");
+      expect(label.className).toContain("text-h2");
+      expect(label.parentElement?.className).toContain("gap-5");
     }
     expect(container.querySelectorAll(".text-required").length).toBe(3);
   });
@@ -75,8 +101,8 @@ describe("선택 버튼과 태그 규격", () => {
     render(<ScheduleTag tone="blue" label="확정 완료" count={3} />);
     const tag = screen.getByText("확정 완료").parentElement;
     expect(tag?.textContent).toBe("확정 완료3건");
-    expect(tag?.className).toContain("min-h-[92px]");
-    expect(tag?.className).toContain("min-w-[132px]");
+    expect(tag?.className).toContain("h-[92px]");
+    expect(tag?.className).toContain("w-[132px]");
   });
 
   it("상태 태그 색 토큰은 디자인 값의 글자색을 쓴다", () => {
@@ -107,6 +133,18 @@ describe("모달과 사이드 메뉴 규격", () => {
     expect(title.className).toContain("text-h1");
     expect(title.className).toContain("font-bold");
     expect(screen.getByText("본문").parentElement?.className).toContain("mt-8");
+  });
+
+  it("모달 뒷배경은 60% 어둡고 버튼은 가운데에 간격 16으로 둔다", () => {
+    render(
+      <Modal isOpen title="알림" onClose={() => {}} footer={<button type="button">확인</button>}>
+        <p>본문</p>
+      </Modal>,
+    );
+    expect(screen.getByRole("dialog").parentElement?.className).toContain("bg-ink/60");
+    const footer = screen.getByRole("button", { name: "확인" }).parentElement;
+    expect(footer?.className).toContain("justify-center");
+    expect(footer?.className).toContain("gap-4");
   });
 
   it("사이드 메뉴 글자는 H3이고 좁은 메뉴는 md를 쓴다", () => {

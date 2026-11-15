@@ -1,0 +1,47 @@
+name: Visual capture
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "e2e/visual/**"
+      - ".github/workflows/visual-capture.yml"
+
+jobs:
+  capture:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Build with mock API
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_MOCKING: enabled
+
+      - name: Capture screens
+        run: npx playwright test e2e/visual/capture.spec.ts --project=desktop --retries=0
+        env:
+          VISUAL_CAPTURE: "1"
+
+      - name: Upload captures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: visual-captures
+          path: visual-captures
+          retention-days: 7

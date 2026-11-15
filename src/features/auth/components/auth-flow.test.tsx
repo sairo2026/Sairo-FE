@@ -292,13 +292,12 @@ describe("OfficeAccessShell", () => {
       </OfficeAccessShell>,
     );
     await waitFor(() => expect(screen.getByText("본문")).not.toBeNull());
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "알림 열기, 읽지 않은 알림 1건" })).not.toBeNull(),
+    );
+    await userEvent.click(screen.getByRole("button", { name: "내 계정" }));
     expect(screen.getByRole("link", { name: "내 계정" }).getAttribute("href")).toBe("/account");
     expect(screen.getByRole("link", { name: "지원" }).getAttribute("href")).toBe("/support");
-    const notifications = screen.getByRole("link", { name: /^알림/ });
-    expect(notifications.getAttribute("href")).toBe("/notifications");
-    await waitFor(() =>
-      expect(within(notifications).getByLabelText("읽지 않은 알림 1건")).not.toBeNull(),
-    );
     expect(screen.getByRole("button", { name: "로그아웃" })).not.toBeNull();
   });
 
@@ -309,6 +308,7 @@ describe("OfficeAccessShell", () => {
         <p>본문</p>
       </OfficeAccessShell>,
     );
+    await userEvent.click(await screen.findByRole("button", { name: "내 계정" }));
     await userEvent.click(await screen.findByRole("button", { name: "로그아웃" }));
     await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/login"));
   });
