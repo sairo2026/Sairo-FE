@@ -3,7 +3,6 @@ import type { AuthContextResponse } from "@/lib/api/contracts/common.schema";
 import { describeAccess, describeGrace } from "./access-notice";
 import type { AccessCondition, OfficeRole } from "./access-policy";
 import { decideAccess, decideOpsAccess, loginRedirect, routeAreaOf } from "./access-policy";
-import { getOfficeMenu } from "./role-menu";
 
 function context(
   accessCondition: AccessCondition,
@@ -207,41 +206,6 @@ describe("운영 콘솔", () => {
   it("운영자로 확인되면 열고 아니면 운영자 로그인으로 보낸다", () => {
     expect(decideOpsAccess(true).kind).toBe("allow");
     expect(decideOpsAccess(false)).toEqual({ kind: "redirect", to: "/ops/login" });
-  });
-});
-
-describe("역할별 메뉴", () => {
-  const keys = (role: OfficeRole) => getOfficeMenu(role).map((item) => item.key);
-
-  it("대표는 여섯 개 메뉴에 사무소 관리, 데이터 이전, 결제를 더 본다", () => {
-    expect(keys("OWNER")).toEqual([
-      "home",
-      "properties",
-      "customers",
-      "coordinations",
-      "contracts",
-      "settlements",
-      "exports",
-      "office",
-      "import",
-      "billing",
-    ]);
-  });
-
-  it("소속공인중개사는 여섯 개 메뉴와 데이터 내보내기를 본다", () => {
-    expect(keys("AGENT")).toEqual([
-      "home",
-      "properties",
-      "customers",
-      "coordinations",
-      "contracts",
-      "settlements",
-      "exports",
-    ]);
-  });
-
-  it("중개보조원은 홈과 방문 조율만 본다", () => {
-    expect(keys("DEPUTY")).toEqual(["home", "coordinations"]);
   });
 });
 

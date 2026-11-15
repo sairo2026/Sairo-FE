@@ -199,11 +199,71 @@ describe("OfficeAccessShell", () => {
       </OfficeAccessShell>,
     );
     await waitFor(() => expect(screen.getByText("본문")).not.toBeNull());
-    expect(screen.getByRole("link", { name: "사무소 관리" })).not.toBeNull();
-    expect(screen.getByRole("link", { name: "구독·결제" })).not.toBeNull();
+    const menu = screen.getByRole("navigation", { name: "주요 메뉴" });
+    expect(
+      within(menu)
+        .getAllByRole("link")
+        .map((link) => link.textContent),
+    ).toEqual([
+      "홈 (오늘 할 일)",
+      "매물 관리",
+      "고객 관리",
+      "방문 조율",
+      "계약 관리",
+      "데이터 관리",
+      "사무소 관리",
+    ]);
   });
 
-  it("중개보조원은 홈과 방문 조율만 본다", async () => {
+  it("사무소 관리 하위 주소에서는 부모 메뉴와 해당 탭이 선택된다", async () => {
+    navigation.pathname = "/billing/plans";
+    setMockAuthContext(contextOf({ role: "OWNER" }));
+    renderWithQuery(
+      <OfficeAccessShell activeKey="billing">
+        <p>본문</p>
+      </OfficeAccessShell>,
+    );
+    await waitFor(() => expect(screen.getByText("본문")).not.toBeNull());
+    const menu = screen.getByRole("navigation", { name: "주요 메뉴" });
+    expect(
+      within(menu).getByRole("link", { name: "사무소 관리" }).getAttribute("aria-current"),
+    ).toBe("page");
+    const tabs = screen.getByRole("navigation", { name: "사무소 관리 탭" });
+    expect(
+      within(tabs)
+        .getAllByRole("link")
+        .map((link) => link.textContent),
+    ).toEqual(["월말결산", "구성원", "사무소 정보", "인증", "구독·결제"]);
+    expect(within(tabs).getByRole("link", { name: "구독·결제" }).getAttribute("aria-current")).toBe(
+      "page",
+    );
+    expect(
+      within(tabs).getByRole("link", { name: "월말결산" }).getAttribute("aria-current"),
+    ).toBeNull();
+  });
+
+  it("소속공인중개사의 데이터 관리는 내보내기 탭만 보인다", async () => {
+    navigation.pathname = "/exports";
+    setMockAuthContext(contextOf({ role: "AGENT" }));
+    renderWithQuery(
+      <OfficeAccessShell activeKey="exports">
+        <p>본문</p>
+      </OfficeAccessShell>,
+    );
+    await waitFor(() => expect(screen.getByText("본문")).not.toBeNull());
+    const menu = screen.getByRole("navigation", { name: "주요 메뉴" });
+    expect(within(menu).getByRole("link", { name: "데이터 관리" }).getAttribute("href")).toBe(
+      "/exports",
+    );
+    const tabs = screen.getByRole("navigation", { name: "데이터 관리 탭" });
+    expect(
+      within(tabs)
+        .getAllByRole("link")
+        .map((link) => link.textContent),
+    ).toEqual(["데이터 내보내기"]);
+  });
+
+  it("중개보조원은 홈, 방문 조율, 읽기 전용 구성원이 있는 사무소 관리만 본다", async () => {
     navigation.pathname = "/coordinations";
     setMockAuthContext(contextOf({ role: "DEPUTY" }));
     renderWithQuery(
@@ -212,8 +272,16 @@ describe("OfficeAccessShell", () => {
       </OfficeAccessShell>,
     );
     await waitFor(() => expect(screen.getByText("본문")).not.toBeNull());
-    expect(screen.queryByRole("link", { name: "매물 관리" })).toBeNull();
-    expect(screen.getByRole("link", { name: "방문 조율" })).not.toBeNull();
+    const menu = screen.getByRole("navigation", { name: "주요 메뉴" });
+    expect(
+      within(menu)
+        .getAllByRole("link")
+        .map((link) => link.textContent),
+    ).toEqual(["홈 (오늘 할 일)", "방문 조율", "사무소 관리"]);
+    expect(within(menu).getByRole("link", { name: "사무소 관리" }).getAttribute("href")).toBe(
+      "/members",
+    );
+    expect(screen.queryByRole("link", { name: "데이터 관리" })).toBeNull();
   });
 
   it("상단에 알림, 내 계정, 지원, 로그아웃을 보여준다", async () => {
