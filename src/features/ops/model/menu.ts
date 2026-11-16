@@ -7,6 +7,8 @@ export type OpsMenuItem = {
   href: string;
   /** 비어 있으면 운영자 누구나 본다. */
   roles: readonly OpsRole[];
+  /** 하위 화면이 메뉴보다 넓은 역할에 열려 있을 때, 하위 경로에 적용할 역할. */
+  subpathRoles?: readonly OpsRole[];
   /** 같은 메뉴로 묶는 하위 경로 접두사. */
   prefixes?: readonly string[];
 };
@@ -96,7 +98,9 @@ export const OPS_MENU: readonly OpsMenuItem[] = [
     key: "integrations",
     label: "연동 설정",
     href: "/ops/integrations",
-    roles: ["OPS", "PRIVACY"],
+    // 목록 조회와 수정은 운영담당 전용이다. 계약 사본 화면만 개인정보담당에게 열려 있다.
+    roles: ["OPS"],
+    subpathRoles: ["OPS", "PRIVACY"],
   },
   {
     key: "retention-rules",
@@ -132,6 +136,13 @@ function matches(item: OpsMenuItem, pathname: string): boolean {
   return bases.some((base) =>
     base === "/ops" ? pathname === "/ops" : pathname === base || pathname.startsWith(`${base}/`),
   );
+}
+
+/** 경로가 속한 메뉴 항목의 필요 역할. 메뉴에 없는 경로는 화면 쪽 가드에 맡긴다. */
+export function requiredRolesFor(pathname: string): readonly OpsRole[] {
+  const item = OPS_MENU.find((entry) => matches(entry, pathname));
+  if (!item) return [];
+  return pathname === item.href ? item.roles : (item.subpathRoles ?? item.roles);
 }
 
 export function visibleMenu(owned: readonly string[]): OpsMenuItem[] {

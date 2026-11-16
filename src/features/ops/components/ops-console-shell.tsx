@@ -10,9 +10,10 @@ import { AUTH_ROUTES } from "@/features/auth/model/routes";
 import { apiFetch } from "@/shared/api/client";
 import { Button } from "@/shared/components/ui/button";
 import { OpsLayout } from "@/shared/layouts/layouts";
-import { activeMenuKey, visibleMenu } from "../model/menu";
+import { activeMenuKey, requiredRolesFor, visibleMenu } from "../model/menu";
 import { useOpsSession } from "../model/ops-session";
-import { OPS_ROLE_LABELS } from "../model/roles";
+import { OPS_ROLE_LABELS, hasAnyRole } from "../model/roles";
+import { OpsForbiddenNotice } from "./common/ops-role-gate";
 
 function logoutOperator() {
   return apiFetch<void>("/api/ops/auth/logout", {
@@ -42,6 +43,8 @@ export function OpsConsoleShell({ children }: { children: ReactNode }) {
     }
   }
 
+  const requiredRoles = requiredRolesFor(pathname);
+
   return (
     <OpsLayout
       navItems={visibleMenu(session.roles)}
@@ -65,7 +68,12 @@ export function OpsConsoleShell({ children }: { children: ReactNode }) {
         </>
       }
     >
-      {children}
+      {/* 화면이 열리기 전에 막아 역할 없는 운영자의 업무 API 호출이 나가지 않게 한다. */}
+      {hasAnyRole(session.roles, requiredRoles) ? (
+        children
+      ) : (
+        <OpsForbiddenNotice roles={requiredRoles} />
+      )}
     </OpsLayout>
   );
 }
