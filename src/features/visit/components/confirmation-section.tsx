@@ -22,6 +22,9 @@ import { toKstIso } from "../model/time";
 
 type Detail = VisitCoordinationDetailResponse;
 
+/** 일부 매물만 확정된 상태에서는 안내문이 아직 만들어지지 않으므로 오류가 아니라 대기로 보인다. */
+const PARTIAL_STATUSES = ["FINAL_CONFIRMATION_REQUIRED", "APPLYING"];
+
 function MessageBox({ title, text }: { title: string; text: string }) {
   const [copied, setCopied] = useState<"idle" | "copied" | "failed">("idle");
   async function copy() {
@@ -164,10 +167,13 @@ export function ConfirmationSection({ detail }: { detail: Detail }) {
       </h2>
       <p className="text-caption text-ink-2">
         확정된 일정의 안내문은 직접 복사해 전달하고, 전달한 채널과 실제 시각을 기록합니다. 일정이
-        바뀌면 새 버전으로 다시 안내합니다.
+        바뀌면 새 버전으로 다시 안내합니다. 고객에게는 발급한 링크를 다시 열면 확정 일정이 먼저
+        보인다고 안내해도 됩니다.
       </p>
       {messages.isPending ? (
         <p className="text-caption text-ink-2">안내문을 불러오는 중입니다.</p>
+      ) : messages.isError && PARTIAL_STATUSES.includes(detail.status) ? (
+        <FormNotice>모든 매물이 확정되면 고객 안내문과 승인자 안내문이 만들어집니다.</FormNotice>
       ) : messages.isError ? (
         <FormAlert>{describeVisitError(messages.error, "안내문을 불러오지 못했습니다.")}</FormAlert>
       ) : (

@@ -266,7 +266,10 @@ describe("고객 공개 링크 화면", () => {
     setMockVisitFollowState({
       customerLink: { ...getMockVisitFollowState().customerLink, coordinationStatus: "CONFIRMED" },
     });
+    const user = userEvent.setup();
     renderLink();
+    expect(await screen.findByText("방문 일정이 확정되었습니다")).not.toBeNull();
+    await user.click(screen.getByRole("tab", { name: "가능한 시간" }));
     const button = await screen.findByRole("button", { name: "가능한 시간 제출" });
     expect((button as HTMLButtonElement).disabled).toBe(true);
     expect(screen.getByText("지금은 가능한 시간을 제출하거나 고칠 수 없습니다.")).not.toBeNull();

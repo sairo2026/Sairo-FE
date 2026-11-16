@@ -303,7 +303,9 @@ describe("승인자 링크 화면 신청 비교와 선택", () => {
     await user.click(within(dialog).getByRole("button", { name: "선택하기" }));
     expect(await screen.findByText(/확정하지 못했습니다/)).not.toBeNull();
     expect(screen.getByText(/방문 간 최소 간격을 지키지 못해 확정하지 못했습니다/)).not.toBeNull();
-    expect(screen.getByText(/다른 신청을 선택해 주세요/)).not.toBeNull();
+    expect(
+      screen.getByText(/남아 있는 다른 신청을 선택할 수 있습니다|지금 비교할 다른 신청은 없으며/),
+    ).not.toBeNull();
   });
 
   it("중개보조원 한도 잠금으로 재검증에 실패해도 승인자에게는 일반 실패 안내만 보인다", async () => {

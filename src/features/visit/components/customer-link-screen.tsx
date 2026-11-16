@@ -16,7 +16,7 @@ import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Tabs } from "@/shared/components/ui/tabs";
 import { cn } from "@/shared/lib/cn";
-import { formatSeoulDateTime, formatTimeSlot } from "@/shared/lib/format";
+import { formatSeoulDateTime } from "@/shared/lib/format";
 import { normalizeLinkToken } from "@/shared/lib/link-token";
 import { fetchCustomerConfirmed, fetchCustomerLink, submitCustomerTimes } from "../api/follow.api";
 import {
@@ -284,6 +284,16 @@ function CandidateSummary({ link }: { link: PublicVisitLinkResponse }) {
   );
 }
 
+function isNextOnAnotherDay(
+  item: PublicConfirmedVisitResponse["items"][number],
+  next: PublicConfirmedVisitResponse["items"][number] | undefined,
+): boolean {
+  return (
+    next !== undefined &&
+    kstParts(item.scheduledEndAt).date !== kstParts(next.scheduledStartAt).date
+  );
+}
+
 function ConfirmedView({ data, contact }: { data: PublicConfirmedVisitResponse; contact: string }) {
   const isValid = data.state === "VALID";
   return (
@@ -296,7 +306,7 @@ function ConfirmedView({ data, contact }: { data: PublicConfirmedVisitResponse; 
       <ManagerLine name={data.managerDisplayName} role={data.managerLegalRole} />
       {isValid ? (
         <ol className="flex flex-col gap-3">
-          {data.items.map((item) => (
+          {data.items.map((item, index) => (
             <li
               key={item.sortOrder}
               className="flex flex-col gap-1 rounded-control border border-line p-3"
@@ -305,9 +315,11 @@ function ConfirmedView({ data, contact }: { data: PublicConfirmedVisitResponse; 
                 {item.sortOrder}. {item.propertyAddress}
               </span>
               <span className="text-caption text-ink-2">
-                {formatSeoulDateTime(item.scheduledStartAt)} ~ {formatTimeSlot(item.scheduledEndAt)}
+                {formatSeoulDateTime(item.scheduledStartAt)} ~{" "}
+                {formatSeoulDateTime(item.scheduledEndAt)}
               </span>
-              {item.travelDurationMinutes !== null ? (
+              {item.travelDurationMinutes !== null &&
+              !isNextOnAnotherDay(item, data.items[index + 1]) ? (
                 <span className="text-caption text-ink-2">
                   다음 방문까지 이동 {item.travelDurationMinutes}분
                 </span>
@@ -359,7 +371,7 @@ function ConfirmedTab({ token, contact }: { token: string; contact: string }) {
 
 export function CustomerLinkScreen({ token }: { token: string | undefined }) {
   const normalized = normalizeLinkToken(token);
-  const [tab, setTab] = useState("times");
+  const [pickedTab, setTab] = useState<string>();
   const query = useQuery({
     queryKey: ["visit-public", normalized],
     queryFn: ({ signal }) => fetchCustomerLink(normalized ?? "", signal),
@@ -381,12 +393,18 @@ export function CustomerLinkScreen({ token }: { token: string | undefined }) {
     );
   }
   const link = query.data;
+  const isConfirmed = link.coordinationStatus === "CONFIRMED";
+  const tab = pickedTab ?? (isConfirmed ? "confirmed" : "times");
   return (
     <div className="flex flex-col gap-4">
       <header className="flex flex-col gap-2">
-        <h1 className="text-h2 font-bold text-ink">방문 가능한 시간을 알려주세요</h1>
+        <h1 className="text-h2 font-bold text-ink">
+          {isConfirmed ? "방문 일정이 확정되었습니다" : "방문 가능한 시간을 알려주세요"}
+        </h1>
         <p className="text-caption text-ink-2">
-          보러 갈 수 있는 시간을 모두 골라 주세요. 담당자가 동선을 짜서 다시 안내해 드립니다.
+          {isConfirmed
+            ? "확정 일정 탭에서 방문 순서와 시각을 확인해 주세요. 제출한 가능한 시간은 가능한 시간 탭에서 볼 수 있으며 더 이상 고칠 수 없습니다."
+            : "보러 갈 수 있는 시간을 모두 골라 주세요. 담당자가 동선을 짜서 다시 안내해 드립니다."}
         </p>
       </header>
       <section aria-label="안내 사무소" className={cn(SURFACE_CARD, "flex flex-col gap-3")}>
