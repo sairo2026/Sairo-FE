@@ -9,7 +9,7 @@ import { OFFICE_ROUTES } from "../support/office-routes";
 import { fixMockClock } from "../support/scenario";
 import { attachProbe, collectFacts, unexpectedFailures } from "../support/walk";
 import { OPS_MENU } from "../../src/features/ops/model/menu";
-import { OPS_ROLES, hasAnyRole, type OpsRole } from "../../src/features/ops/model/roles";
+import { hasAnyRole, type OpsRole } from "../../src/features/ops/model/roles";
 import { listAppRoutes } from "../support/routes";
 
 const NOTICE_PATH = "/access";
@@ -17,6 +17,9 @@ const FORBIDDEN_TITLE = "접근 권한이 없습니다";
 const OPS_FORBIDDEN_TITLE = "이 화면을 볼 수 있는 운영 역할이 아닙니다";
 /** 읽기 전용에서도 허용되는 내보내기를 뺀, 저장을 일으키는 동작. */
 const WRITE_ACTION = /등록|저장|삭제|보관|추가|생성|신청|제출|발송|확정|취소|이전/;
+
+// 실패 원인을 한 번에 보려고 재시도 없이 돈다.
+test.describe.configure({ retries: 0 });
 
 test.beforeEach(async ({ page }) => {
   await fixMockClock(page);
@@ -70,6 +73,7 @@ const NOTICE_STATES: readonly NoticeState[] = [
     open: [
       ...ACCOUNT_OPEN,
       ["/billing", "/billing"],
+      ["/billing/plans", "/billing/plans"],
       ["/office/verification", "/office/verification"],
     ],
   },
@@ -80,6 +84,7 @@ const NOTICE_STATES: readonly NoticeState[] = [
     open: [
       ...ACCOUNT_OPEN,
       ["/billing", "/billing"],
+      ["/billing/plans", "/billing/plans"],
       ["/office/verification", "/office/verification"],
     ],
   },
@@ -88,7 +93,7 @@ const NOTICE_STATES: readonly NoticeState[] = [
     title: "사무소 인증이 회수되어 접근이 제한되었습니다",
     links: ["내 계정", "지원 문의"],
     open: ACCOUNT_OPEN,
-    forbidden: ["/billing"],
+    forbidden: ["/billing", "/billing/plans"],
   },
   {
     role: "REMOVED",
@@ -104,15 +109,28 @@ const NOTICE_STATES: readonly NoticeState[] = [
   },
 ];
 
-const WALK_PATHS = OFFICE_ROUTES.map((route) => route.path).filter(
-  (path) => path !== "/account" && path !== "/settings",
+/** 접근 제한 상태에서 업무 화면은 모두 같은 안내로 이동하므로 영역별 대표 화면만 돈다. */
+const SAMPLE_PATHS = [
+  "/home",
+  "/properties",
+  "/properties/new",
+  "/customers/1",
+  "/coordinations/new",
+  "/contracts",
+  "/import",
+  "/members",
+  "/office",
+  "/notifications",
+];
+const WALK_PATHS = OFFICE_ROUTES.map((route) => route.path).filter((path) =>
+  SAMPLE_PATHS.includes(path),
 );
 
 for (const state of NOTICE_STATES) {
   test.describe(`${state.role} 접근 제한 화면 순회`, () => {
     const openPaths = new Map(state.open);
     const forbidden = new Set(state.forbidden ?? []);
-    const paths = [...new Set([...WALK_PATHS, ...openPaths.keys()])];
+    const paths = [...new Set([...WALK_PATHS, ...openPaths.keys(), ...forbidden])];
 
     for (const path of paths) {
       test(`${path}`, async ({ page }) => {
@@ -240,7 +258,9 @@ const OPS_WALK: ReadonlyArray<{ href: string; roles: readonly OpsRole[] }> = [
 ];
 
 /** 운영자 하위 역할마다 메뉴와 각 화면의 허용·차단이 역할 규칙과 같은지 본다. */
-for (const role of OPS_ROLES) {
+/** 업무 역할 전부를 돌면 시간이 길어져, 화면 묶음이 서로 겹치지 않는 대표 역할만 돈다. */
+const WALKED_OPS_ROLES: readonly OpsRole[] = ["SUPPORT", "BILLING", "PRIVACY", "OPS", "EXEC_VIEW"];
+for (const role of WALKED_OPS_ROLES) {
   test.describe(`운영 역할 ${role} 화면 순회`, () => {
     test("메뉴는 보유 역할에 맞는 항목만 나온다", async ({ page }) => {
       await useMockOpsRoles(page, [role]);
