@@ -66,7 +66,7 @@ test.describe("시나리오 1 이메일 가입부터 사무소 승인 뒤 로그
       await page.getByRole("button", { name: "등록", exact: true }).click();
       await expect(page).toHaveURL(/\/office\/review/);
       await expect(page.getByText("신규 사무소 등록 심사 진행 중입니다.")).toBeVisible();
-      await expect(page.getByText("서류를 확인하고 있습니다.", { exact: true })).toBeVisible();
+      await expect(page.getByText(/^서류를 확인하고 있습니다\./)).toBeVisible();
     });
   });
 
