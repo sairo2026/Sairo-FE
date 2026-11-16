@@ -291,6 +291,8 @@ export const ERROR_CODE_COPY: Record<string, string> = {
   // 500, 503
   INTERNAL_ERROR: SERVER_ERROR_COPY,
   SMS_UNAVAILABLE: "지금은 인증번호를 문자로 보낼 수 없습니다. 잠시 뒤에 다시 시도해 주세요.",
+  PAYMENT_SYSTEM_UNAVAILABLE:
+    "지금 결제 시스템을 점검하고 있습니다. 카드 정보는 저장되지 않았으니 잠시 뒤에 다시 시도해 주세요.",
 };
 
 /** 필드 오류 코드별 문구. 입력 칸 아래에 붙으므로 항목 이름 없이 읽혀도 뜻이 통해야 한다. */
@@ -365,9 +367,10 @@ export function describeApiError(
   if (error instanceof ApiNetworkError) return NETWORK_ERROR_COPY[error.kind];
   if (!(error instanceof ApiError)) return resolved;
   if (error.status >= 500) {
-    return error.code === "SMS_UNAVAILABLE"
-      ? (ERROR_CODE_COPY.SMS_UNAVAILABLE ?? SERVER_ERROR_COPY)
-      : SERVER_ERROR_COPY;
+    if (error.code === "SMS_UNAVAILABLE" || error.code === "PAYMENT_SYSTEM_UNAVAILABLE") {
+      return overrides[error.code] ?? ERROR_CODE_COPY[error.code] ?? SERVER_ERROR_COPY;
+    }
+    return SERVER_ERROR_COPY;
   }
   if (error.code === "RATE_LIMITED") {
     return describeRateLimit(error.retryAfterSeconds, "요청이 너무 많습니다.");

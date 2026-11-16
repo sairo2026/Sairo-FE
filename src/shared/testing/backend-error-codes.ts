@@ -152,6 +152,7 @@ export const BACKEND_ERROR_CODES: ReadonlyArray<readonly [code: string, status: 
   ["VISIT_REQUEST_QUOTA_EXCEEDED", 429],
   ["INTERNAL_ERROR", 500],
   ["SMS_UNAVAILABLE", 503],
+  ["PAYMENT_SYSTEM_UNAVAILABLE", 503],
 ];
 
 export const BACKEND_FIELD_ERROR_CODES: readonly string[] = [
