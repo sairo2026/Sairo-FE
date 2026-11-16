@@ -20,6 +20,7 @@ import {
   useSubscription,
 } from "../hooks/billing-queries";
 import { PLAN_LABEL } from "../model/labels";
+import { cardLabel } from "../model/card-issuer";
 import { CONSENT_COPY, consentSummaryLine } from "../model/legal-copy";
 import { COPY, describeBillingError } from "../model/messages";
 import { CommerceNotice } from "./commerce-notice";
@@ -168,9 +169,7 @@ function ConsentForm({
             { label: "가격 버전", value: preview.priceVersion },
             {
               label: "결제수단",
-              value: card
-                ? `${card.cardIssuer ?? "카드"} 끝자리 ${card.cardLast4 ?? "----"}`
-                : "등록 전",
+              value: card ? cardLabel(card.cardIssuer, card.cardLast4) : "등록 전",
             },
             { label: "약관 버전", value: preview.termsVersion },
           ]}

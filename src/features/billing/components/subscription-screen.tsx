@@ -32,6 +32,7 @@ import {
   useSubscription,
 } from "../hooks/billing-queries";
 import { SUBSCRIPTION_STATUS, labelOf, PLAN_LABEL } from "../model/labels";
+import { cardLabel } from "../model/card-issuer";
 import { COPY, describeBillingError, describePaymentResult } from "../model/messages";
 
 const DAY_MS = 86_400_000;
@@ -55,7 +56,7 @@ const CANCELLABLE_STATUSES = ["TRIAL", "ACTIVE", ...IMMEDIATE_END_STATUSES];
 
 function cardText(subscription: SubscriptionCurrent): string | null {
   const card = subscription.paymentMethod;
-  return card ? `${card.cardIssuer ?? "카드"} 끝자리 ${card.cardLast4 ?? "----"}` : null;
+  return card ? cardLabel(card.cardIssuer, card.cardLast4) : null;
 }
 
 function ReadinessList({ subscription }: { subscription: SubscriptionCurrent }) {
@@ -475,8 +476,7 @@ function SubscriptionView({ subscription }: { subscription: SubscriptionCurrent 
       <Card title="결제수단">
         {subscription.paymentMethod ? (
           <p className="text-body text-ink">
-            {subscription.paymentMethod.cardIssuer ?? "카드"} 끝자리{" "}
-            {subscription.paymentMethod.cardLast4 ?? "----"}
+            {cardLabel(subscription.paymentMethod.cardIssuer, subscription.paymentMethod.cardLast4)}
           </p>
         ) : (
           <p className="text-body text-ink-2">

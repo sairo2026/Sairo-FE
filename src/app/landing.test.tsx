@@ -190,11 +190,7 @@ describe("서비스 첫 화면 요금 요약", () => {
     expect(within(tiers).getByText("월 12,300원")).not.toBeNull();
     expect(within(tiers).queryByText(/39,900원/)).toBeNull();
     expect(screen.queryByText(/확정 요금이며 결제 심사 후 청구를 시작합니다/)).toBeNull();
-    expect(
-      screen.getByText(
-        "현재 가입 조건을 준비하고 있습니다. 이용 조건은 고객지원으로 문의해 주세요.",
-      ),
-    ).not.toBeNull();
+    expect(screen.queryByText(/고객지원으로 문의/)).toBeNull();
     expect(screen.queryByText(/무료로 사용합니다/)).toBeNull();
   });
 
