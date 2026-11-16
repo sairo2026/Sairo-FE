@@ -304,10 +304,7 @@ test.describe("운영 콘솔", () => {
 test.describe("공개 화면의 법적 고지와 필수·선택 표시", () => {
   const publicRoutes = listAppRoutes().filter(
     (route) =>
-      route.area === "public" &&
-      (route.path === "/pricing" ||
-        route.path.startsWith("/legal") ||
-        route.path === "/support/enterprise"),
+      route.area === "public" && (route.path === "/pricing" || route.path.startsWith("/legal")),
   );
   for (const route of publicRoutes) {
     test(`${route.path} 제목, 하단 사업자 정보·법적 링크`, async ({ page }) => {
@@ -330,7 +327,7 @@ test.describe("공개 화면의 법적 고지와 필수·선택 표시", () => {
     });
   }
 
-  for (const path of ["/signup", "/signup/kakao", "/signup/email", "/support/enterprise"]) {
+  for (const path of ["/signup", "/signup/kakao", "/signup/email"]) {
     test(`${path}의 동의·입력 항목은 필수 또는 선택으로 표시된다`, async ({ page }) => {
       await setMockRole(page, null);
       await page.goto(path);

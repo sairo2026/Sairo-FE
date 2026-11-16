@@ -155,9 +155,6 @@ describe("매핑 검토", () => {
     }
     openBatch(302);
     expect(await screen.findByText(/유료 이전 지원 신청에 연결된 파일입니다/)).not.toBeNull();
-    expect(screen.getByRole("link", { name: "신청 보기" }).getAttribute("href")).toBe(
-      "/import/support/41",
-    );
     expect(
       screen.getByRole("button", { name: "매핑 확정하고 미리보기" }).getAttribute("aria-disabled"),
     ).toBe("true");

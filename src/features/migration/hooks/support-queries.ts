@@ -2,14 +2,6 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { fetchAllowedExportTables, fetchExport, listExports } from "../api/export.api";
-import { fetchImportSupportRequest, listImportSupportRequests } from "../api/support-request.api";
-import { SUPPORT_POLLING_STATUSES } from "../model/labels";
-
-export const supportRequestKeys = {
-  all: ["migration", "support-requests"] as const,
-  list: (params: object) => ["migration", "support-requests", "list", params] as const,
-  detail: (requestId: number) => ["migration", "support-requests", "detail", requestId] as const,
-};
 
 export const exportKeys = {
   all: ["migration", "exports"] as const,
@@ -18,24 +10,6 @@ export const exportKeys = {
   detail: (exportId: number) => ["migration", "exports", "detail", exportId] as const,
   allowedTables: ["migration", "exports", "allowed-tables"] as const,
 };
-
-export function useImportSupportRequests(params: { page: number; size: number; status?: string }) {
-  return useQuery({
-    queryKey: supportRequestKeys.list(params),
-    queryFn: () => listImportSupportRequests(params),
-  });
-}
-
-const SUPPORT_POLL_MS = 15000;
-
-export function useImportSupportRequest(requestId: number) {
-  return useQuery({
-    queryKey: supportRequestKeys.detail(requestId),
-    queryFn: () => fetchImportSupportRequest(requestId),
-    refetchInterval: (query) =>
-      SUPPORT_POLLING_STATUSES.includes(query.state.data?.status ?? "") ? SUPPORT_POLL_MS : false,
-  });
-}
 
 export function useExports(params: { page: number; size: number }) {
   return useQuery({ queryKey: exportKeys.list(params), queryFn: () => listExports(params) });

@@ -2,7 +2,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { CookieNotice } from "./cookie-notice";
-import { COOKIE_NOTICE_COPY, ENTERPRISE_PRIVACY_COPY, RAW_ACCESS_PLEDGE_COPY } from "./notice-copy";
+import { COOKIE_NOTICE_COPY, RAW_ACCESS_PLEDGE_COPY } from "./notice-copy";
 
 afterEach(cleanup);
 
@@ -25,14 +25,6 @@ describe("쿠키와 세션 안내", () => {
 });
 
 describe("고정 안내 문구", () => {
-  it("기업 도입 문의 안내는 항목, 목적, 보관, 거부 권리를 모두 담는다", () => {
-    const text = ENTERPRISE_PRIVACY_COPY.items.join(" ");
-    expect(text).toContain("받는 항목");
-    expect(text).toContain("이용 목적");
-    expect(text).toContain("문의가 종료된 날부터 3년");
-    expect(text).toContain("거부 권리");
-  });
-
   it("운영자 보안 서약은 세 항목이다", () => {
     expect(RAW_ACCESS_PLEDGE_COPY.items).toHaveLength(3);
   });

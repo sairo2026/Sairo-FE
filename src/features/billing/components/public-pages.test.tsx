@@ -46,8 +46,8 @@ describe("공개 요금 페이지", () => {
     expect(screen.getByText("1인")).not.toBeNull();
     expect(screen.getByText("2~4인")).not.toBeNull();
     expect(screen.getByText("5인 이상")).not.toBeNull();
-    expect(screen.getByText("기업")).not.toBeNull();
-    expect(screen.getByText("별도 견적")).not.toBeNull();
+    expect(screen.queryByText("기업")).toBeNull();
+    expect(screen.queryByText(/별도 견적|도입 문의/)).toBeNull();
     expect(screen.getByText(/월 39,900원 \(부가세 포함\)/)).not.toBeNull();
     expect(screen.getByText(/월 39,900원\(1명 포함\), 추가 1명당 10,000원/)).not.toBeNull();
     expect(screen.getByText(/월 69,900원\(4명 포함\), 추가 1명당 8,000원/)).not.toBeNull();
@@ -218,7 +218,7 @@ describe("공개 사업자 정보 하단", () => {
     expect(within(info).getByText("사이로(SAIRO)")).not.toBeNull();
     expect(within(info).getByText("김태환")).not.toBeNull();
     expect(within(info).getByText("사업자등록번호")).not.toBeNull();
-    expect(within(info).getByText("전화")).not.toBeNull();
+    expect(within(info).getByText("전화번호")).not.toBeNull();
     expect(within(info).queryByText("통신판매업 신고번호")).toBeNull();
     expect(screen.getByRole("link", { name: "환불정책" }).getAttribute("href")).toBe(
       "/legal/refund-policy",
@@ -241,7 +241,7 @@ describe("공개 사업자 정보 하단", () => {
     renderPublic(<PublicBusinessFooter />);
     const info = await screen.findByTestId("business-info");
     expect(within(info).getByText("704-16-02872")).not.toBeNull();
-    expect(within(info).queryByText("전화")).toBeNull();
+    expect(within(info).queryByText("전화번호")).toBeNull();
     expect(within(info).queryByText("이메일")).toBeNull();
     expect(within(info).queryByText("통신판매업 신고번호")).toBeNull();
     expect(screen.getByRole("link", { name: "이용약관" }).getAttribute("href")).toBe(

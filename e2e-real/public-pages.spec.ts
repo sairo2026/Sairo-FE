@@ -17,7 +17,7 @@ test("공개 요금 API와 /pricing이 게시된 표준 요금표를 보여준�
     page.getByRole("heading", { level: 1, name: "사무소 단위 월 구독 요금" }),
   ).toBeVisible();
   await expect(page.getByText("39,900").first()).toBeVisible();
-  await expect(page.getByText("별도 견적").first()).toBeVisible();
+  await expect(page.getByText(/별도 견적|도입 문의/)).toHaveCount(0);
   await expect(page.locator("section[role='alert']")).toHaveCount(0);
 });
 

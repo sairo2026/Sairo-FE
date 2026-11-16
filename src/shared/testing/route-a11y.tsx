@@ -97,7 +97,6 @@ const PUBLIC_ROOTS = [
   "/grant",
   "/return",
   "/unsubscribe",
-  "/support/enterprise",
 ];
 
 function isPublicPath(path: string): boolean {
