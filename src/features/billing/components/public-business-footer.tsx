@@ -46,12 +46,12 @@ export function PublicBusinessFooter({ initialData }: { initialData?: PublicComp
           className="mb-4 grid grid-cols-1 gap-x-8 gap-y-1 sm:grid-cols-2"
           data-testid="business-info"
         >
-          <Row label="상호" value={info.businessName} />
-          <Row label="대표" value={info.representativeName} />
+          <Row label="상호명" value={info.businessName} />
+          <Row label="대표자명" value={info.representativeName} />
           <Row label="사업자등록번호" value={info.businessNumber} />
           <Row label="통신판매업 신고번호" value={info.ecommerceNotice} />
-          <Row label="주소" value={info.address} />
-          <Row label="전화" value={info.contactPhone} />
+          <Row label="사업장 주소" value={info.address} />
+          <Row label="전화번호" value={info.contactPhone} />
           <Row label="이메일" value={info.supportEmail} />
         </dl>
       ) : null}

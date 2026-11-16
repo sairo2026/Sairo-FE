@@ -84,7 +84,6 @@ export const RELEASE_CHECK_GROUPS: readonly ReleaseCheckGroup[] = [
       "/billing/return-guide",
       "/support",
       "/support/new",
-      "/support/enterprise",
     ],
   },
   {

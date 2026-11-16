@@ -329,7 +329,8 @@ describe("요금제 안내", () => {
     renderOffice(<BillingPlansScreen />, { role: "OWNER" });
     expect(await screen.findByText("표준 가격")).not.toBeNull();
     expect(screen.getByText(/현재 과금 인원 3명 기준 59,900원\(부가세 포함\)/)).not.toBeNull();
-    expect(screen.getByText("별도 견적으로 안내합니다.")).not.toBeNull();
+    expect(screen.queryByText(/별도 견적|도입 문의/)).toBeNull();
+    expect(screen.queryByText("기업 요금제")).toBeNull();
     const input = screen.getByRole("textbox", { name: "인원 수로 계산해 보기" });
     await user.clear(input);
     await user.type(input, "6");

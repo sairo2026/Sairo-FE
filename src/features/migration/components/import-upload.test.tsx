@@ -90,7 +90,7 @@ describe("데이터 이전 업로드 화면", () => {
     migrationState.remainingThisMonth = 0;
     const user = userEvent.setup();
     renderOffice(<ImportUploadScreen />, { role: "OWNER" });
-    expect(await screen.findByText(/직접 실행만 막힙니다/)).not.toBeNull();
+    expect(await screen.findByText(/다음 달에 다시 실행할 수 있습니다/)).not.toBeNull();
     await choose(user, new File(["a"], "list.csv", { type: "text/csv" }));
     await user.click(screen.getByRole("button", { name: "올리고 매핑하러 가기" }));
     await waitFor(() => expect(push).toHaveBeenCalledWith("/import/400"));
@@ -169,17 +169,6 @@ describe("데이터 이전 업로드 화면", () => {
     await choose(user, new File(["a"], "x.xlsx"));
     await user.click(screen.getByRole("button", { name: "올리고 매핑하러 가기" }));
     expect(await screen.findByText(/일시적인 오류가 발생했습니다/)).not.toBeNull();
-  });
-
-  it("유료 지원에 연결된 파일은 직접 작업 불가를 표시한다", async () => {
-    const batch = migrationState.batches[1];
-    if (batch) {
-      batch.supportRequestId = 41;
-      batch.supportRequestStatus = "QUOTED";
-    }
-    renderOffice(<ImportUploadScreen />, { role: "OWNER" });
-    expect(await screen.findByRole("link", { name: /견적 도착/ })).not.toBeNull();
-    expect(screen.getByText(/직접 작업 불가/)).not.toBeNull();
   });
 
   it("읽기 전용 상태에서는 올리기를 막는다", async () => {

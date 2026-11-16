@@ -157,13 +157,10 @@ describe("서비스 이용 화면", () => {
     expect(await screen.findByText("문제가 발생했습니다")).not.toBeNull();
   });
 
-  it("권리 요청, 기업 도입 문의, 탈퇴 안내로 가는 링크가 있다", () => {
+  it("권리 요청, 탈퇴 안내로 가는 링크가 있다", () => {
     renderOffice(<SupportHubScreen />, { role: "AGENT" });
     expect(screen.getByRole("link", { name: "권리 요청하기" }).getAttribute("href")).toBe(
       "/privacy-requests",
-    );
-    expect(screen.getByRole("link", { name: "기업 도입 문의로 가기" }).getAttribute("href")).toBe(
-      "/support/enterprise",
     );
     expect(screen.getByRole("link", { name: "회원 탈퇴 안내" }).getAttribute("href")).toBe(
       "/account/withdrawal",

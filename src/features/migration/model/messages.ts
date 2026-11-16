@@ -6,8 +6,7 @@ export const IMPORT_COPY = {
     "예전에 쓰던 엑셀 파일을 올려 고객, 매물, 계약 자료를 옮깁니다. 대표만 할 수 있습니다.",
   quota: (remaining: number, limit: number) =>
     `이번 달 직접 실행 ${remaining}회 남음 (월 ${limit}회)`,
-  quotaExhausted:
-    "이번 달 직접 실행 횟수를 모두 사용했습니다. 유료 이전 지원을 위한 파일은 올릴 수 있고 직접 실행만 막힙니다.",
+  quotaExhausted: "이번 달 직접 실행 횟수를 모두 사용했습니다. 다음 달에 다시 실행할 수 있습니다.",
   ownerOnly: "데이터 이전은 사무소 대표만 할 수 있습니다.",
   fileRequired: "올릴 파일을 선택해 주세요.",
   targetRequired: "이전할 자료의 종류를 선택해 주세요.",
@@ -52,7 +51,7 @@ export const MIGRATION_ERROR_BY_CODE: Record<string, string> = {
   FILE_TOO_LARGE: "파일 크기는 20MB를 넘을 수 없습니다.",
   IMPORT_LIMIT_EXCEEDED: "시트당 1만 행, 100열을 넘는 파일은 올릴 수 없습니다. 나누어 올려 주세요.",
   IMPORT_QUOTA_EXCEEDED:
-    "이번 달 직접 실행 횟수를 모두 사용했습니다. 유료 이전 지원을 이용해 주세요.",
+    "이번 달 직접 실행 횟수를 모두 사용했습니다. 다음 달에 다시 실행할 수 있습니다.",
   IMPORT_MANAGED_BY_SUPPORT: "유료 이전 지원에 연결된 파일이라 직접 매핑과 실행을 할 수 없습니다.",
   IMPORT_NOT_CANCELLABLE: "취소할 수 있는 기간이 지났거나 취소할 수 있는 데이터가 없습니다.",
   IMPORT_BATCH_ALREADY_LINKED: "이미 다른 이전 지원 신청에 연결된 파일입니다.",

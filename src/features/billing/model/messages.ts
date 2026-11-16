@@ -12,7 +12,6 @@ export const COPY = {
   pricingLoadError:
     "현재 적용 중인 요금표를 불러오지 못했습니다. 결제는 진행되지 않았습니다. 잠시 후 다시 시도해 주세요.",
   pricingReviewBadge: "확정 요금, 결제 심사 후 청구 시작",
-  enterpriseNote: "기업 구간은 별도 견적이며 견적을 수락하기 전에는 자동으로 결제되지 않습니다.",
   regTop:
     "결제수단을 등록해도 지금 결제되지 않습니다. 결제가 시작되기 전에 금액과 결제일을 안내하고 동의를 받습니다.",
   regTopWithDate: (date: string) =>

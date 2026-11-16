@@ -67,10 +67,6 @@ export function PublicPricingScreen({ initialData }: { initialData?: PublicPrici
               </span>
             </li>
           ))}
-          <li className="flex flex-col gap-1 py-4 sm:flex-row sm:items-center sm:justify-between">
-            <span className="text-body font-semibold text-ink">기업</span>
-            <span className="text-body text-ink-2">별도 견적</span>
-          </li>
         </ul>
       </Card>
 
@@ -123,15 +119,6 @@ export function PublicPricingScreen({ initialData }: { initialData?: PublicPrici
             className="font-semibold text-primary underline clickable-link"
           >
             {COPY.pricingRefundLink}
-          </Link>
-        </p>
-        <p className="mt-3 text-caption text-ink-2">
-          {COPY.enterpriseNote}{" "}
-          <Link
-            href="/support/enterprise"
-            className="font-semibold text-primary underline clickable-link"
-          >
-            도입 문의
           </Link>
         </p>
         <p className="mt-3 flex flex-wrap gap-x-2 text-caption text-ink-2">

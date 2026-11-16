@@ -4,7 +4,6 @@ import { afterEach, describe, expect, it } from "vitest";
 import { PRIVACY_RIGHTS_COPY, processingOutsourcingDisclosure } from "./data-rights-copy";
 import {
   DataExportNotice,
-  DataMigrationSupportNotice,
   DataMigrationUploadNotice,
   PrivacyRightsNotice,
   SupportInquiryNotice,
@@ -20,12 +19,6 @@ describe("데이터 이전과 내보내기 안내", () => {
       screen.getByText(/원본 파일은 이전이 끝나면 정해진 기간 안에 삭제됩니다/),
     ).not.toBeNull();
     expect(screen.getByText(/직접 실행은 매월 5회까지 할 수 있습니다/)).not.toBeNull();
-  });
-
-  it("유료 이전 지원 안내는 취소 조건과 열람 범위를 알린다", () => {
-    render(<DataMigrationSupportNotice />);
-    expect(screen.getByText(/결제 후에는 대표가 취소할 수 없습니다/)).not.toBeNull();
-    expect(screen.getByText(/처리 목적 외로 이용하지 않습니다/)).not.toBeNull();
   });
 
   it("내보내기 안내는 만료 시간과 탈퇴한 구성원 표시를 알린다", () => {

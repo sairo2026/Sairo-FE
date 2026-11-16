@@ -155,7 +155,6 @@ describe("선택된 메뉴 판정", () => {
     ["/contracts/7/fees", "contracts", null],
     ["/import", "data", "import"],
     ["/import/301", "data", "import"],
-    ["/import/support/9/payment-result", "data", "import"],
     ["/exports", "data", "exports"],
     ["/settlements", "office", "settlements"],
     ["/settlements/2026-10/details", "office", "settlements"],

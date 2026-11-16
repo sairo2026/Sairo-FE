@@ -166,12 +166,6 @@ export function SupportHubScreen() {
       <Inquiries />
       <PrivacyHistory isCompact />
       <TextLink href="/privacy-requests">{COPY.privacyLink}</TextLink>
-      <Card title={COPY.enterpriseTitle}>
-        <div className="flex flex-col gap-2">
-          <p className="text-caption text-ink-2">{COPY.enterpriseDescription}</p>
-          <TextLink href="/support/enterprise">{COPY.enterpriseLink}</TextLink>
-        </div>
-      </Card>
       <Card title={COPY.withdrawalTitle}>
         <div className="flex flex-col gap-2">
           <p className="text-caption text-ink-2">{COPY.withdrawalDescription}</p>
