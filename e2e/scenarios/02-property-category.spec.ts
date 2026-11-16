@@ -50,3 +50,21 @@ test("시나리오 2 매물을 활성 등록하고 커스텀 카테고리와 입
     await expect(page.getByLabel(/^층고/)).toBeVisible();
   });
 });
+
+test("매물 등록에서 목록에 없는 담당자는 초대로 추가하고 승인 전에는 고를 수 없다", async ({
+  page,
+}) => {
+  await useMockOfficeRole(page, "OWNER");
+  await page.goto("/properties/new");
+  await expect(page.getByRole("heading", { name: "매물 등록" })).toBeVisible();
+  const group = page.getByRole("group", { name: "담당 공인중개사 직접 추가" });
+  await group.getByRole("button", { name: "직접 입력해서 추가하기" }).click();
+  await group.getByLabel("초대할 공인중개사 이메일").fill("new.agent@example.com");
+  await group.getByRole("button", { name: "초대 보내기" }).click();
+  await expect(group.getByText(/수락하고 대표가 승인하면 담당 공인중개사로 지정/)).toBeVisible();
+  await expect(
+    page
+      .getByLabel("담당 공인중개사", { exact: true })
+      .locator("option", { hasText: "초대받은분" }),
+  ).toHaveCount(0);
+});

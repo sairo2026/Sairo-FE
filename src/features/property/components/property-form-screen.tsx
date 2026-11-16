@@ -11,6 +11,7 @@ import { useIdempotencyKeyHolder } from "@/shared/api/idempotency-key";
 import { cn } from "@/shared/lib/cn";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
+import { ManagerInviteAdd } from "@/shared/components/manager-invite-add";
 import { Button } from "@/shared/components/ui/button";
 import { DateTimeField } from "@/shared/components/ui/date-time-field";
 import { Checkbox, SelectField } from "@/shared/components/ui/select-field";
@@ -689,19 +690,22 @@ export function PropertyForm(props: FormProps) {
             disabled={isReadOnly}
             onSelect={setOccupant}
           />
-          <SelectField
-            label="담당 공인중개사"
-            value={values.managingMembershipId}
-            options={[
-              { value: "", label: "선택 안 함" },
-              ...(members.data ?? []).map((item) => ({
-                value: String(item.membershipId),
-                label: item.displayName,
-              })),
-            ]}
-            onValueChange={(value) => setField("managingMembershipId", value)}
-            error={errors.managingMembershipId}
-          />
+          <div className="flex min-w-0 flex-col gap-3">
+            <SelectField
+              label="담당 공인중개사"
+              value={values.managingMembershipId}
+              options={[
+                { value: "", label: "선택 안 함" },
+                ...(members.data ?? []).map((item) => ({
+                  value: String(item.membershipId),
+                  label: item.displayName,
+                })),
+              ]}
+              onValueChange={(value) => setField("managingMembershipId", value)}
+              error={errors.managingMembershipId}
+            />
+            <ManagerInviteAdd />
+          </div>
           {isEdit ? (
             <div className={cn("flex flex-col", OFFICE_FIELD_GAP_CLASS)}>
               <p className={OFFICE_FIELD_LABEL_CLASS}>건물 카테고리</p>
