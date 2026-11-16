@@ -57,7 +57,7 @@ test("매물 등록에서 목록에 없는 담당자는 초대로 추가하고 �
   await useMockOfficeRole(page, "OWNER");
   await page.goto("/properties/new");
   await expect(page.getByRole("heading", { name: "매물 등록" })).toBeVisible();
-  const group = page.getByRole("group", { name: "담당 공인중개사 직접 추가" });
+  const group = page.getByRole("group", { name: "공인중개사 초대로 추가" });
   await group.getByRole("button", { name: "직접 입력해서 추가하기" }).click();
   await group.getByLabel("초대할 공인중개사 이메일").fill("new.agent@example.com");
   await group.getByRole("button", { name: "초대 보내기" }).click();

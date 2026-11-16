@@ -74,7 +74,7 @@ export function ManagerInviteAdd() {
   return (
     <div
       role="group"
-      aria-label="담당 공인중개사 직접 추가"
+      aria-label="공인중개사 초대로 추가"
       className={cn("flex min-w-0 flex-col", OFFICE_FIELD_GAP_CLASS)}
     >
       {notice ? (

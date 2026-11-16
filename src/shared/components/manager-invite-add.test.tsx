@@ -30,12 +30,12 @@ afterAll(() => stopServer());
 const OPEN_LABEL = "직접 입력해서 추가하기";
 
 function openButton() {
-  const group = screen.queryByRole("group", { name: "담당 공인중개사 직접 추가" });
+  const group = screen.queryByRole("group", { name: "공인중개사 초대로 추가" });
   return group ? within(group).queryByRole("button", { name: OPEN_LABEL }) : null;
 }
 const EMAIL_LABEL = "초대할 공인중개사 이메일";
 
-describe("담당 공인중개사 직접 추가", () => {
+describe("공인중개사 초대로 추가", () => {
   it("대표가 이메일만 입력하면 소속공인중개사 초대를 보내고 승인 전까지 지정할 수 없다고 안내한다", async () => {
     const user = userEvent.setup();
     let sent: { email?: string; role?: string } | undefined;
