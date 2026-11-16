@@ -246,7 +246,7 @@ function showcaseProperties(): PropertyDetailResponse[] {
     buildMockProperty({
       propertyId: 9001,
       name: "방문 조율 중인 매물",
-      activeCoordinations: [{ coordinationId: 801, status: "PROPOSED", customerName: "김손님" }],
+      activeCoordinations: [{ coordinationId: 801, status: "APPLYING", customerName: "김손님" }],
     }),
     buildMockProperty({
       propertyId: 9002,

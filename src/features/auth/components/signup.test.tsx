@@ -204,7 +204,7 @@ describe("이메일 가입 기본 정보", () => {
     renderWithQuery(<SignupEmailFlow />);
     await screen.findByText("기본 가입 정보 입력");
     await user.click(screen.getByRole("button", { name: "이용약관 전문 보기" }));
-    const dialog = await screen.findByRole("dialog", { name: "이용약관" });
+    const dialog = await screen.findByRole("dialog", { name: "서비스 이용 약관 동의" });
     expect(within(dialog).getByRole("heading", { name: "제1조 (목적)" })).not.toBeNull();
     await user.click(within(dialog).getByRole("button", { name: "닫기" }));
     expect(screen.queryByRole("dialog")).toBeNull();
@@ -257,7 +257,7 @@ describe("휴대폰 본인확인", () => {
     expect((screen.getByLabelText(/^휴대폰 번호/) as HTMLInputElement).value).toBe("010-1234-5678");
     await user.click(screen.getByRole("button", { name: "인증번호 받기" }));
     expect(await screen.findByLabelText(/^인증번호/)).not.toBeNull();
-    expect(screen.getByRole("timer").textContent).toBe("05:00");
+    expect(screen.getByRole("timer").textContent).toBe("5:00");
     expect(screen.getByText(/60초 뒤 재발송/)).not.toBeNull();
     expect(screen.getByRole("button", { name: "재발송" }).hasAttribute("disabled")).toBe(true);
   });
@@ -370,7 +370,7 @@ describe("이메일 가입 완료", () => {
   it("인증과 약관을 마치면 비밀번호를 정해 가입하고 접근 상태에 맞는 화면으로 간다", async () => {
     const user = userEvent.setup();
     await toPasswordStep(user);
-    await user.type(screen.getByLabelText(/^비밀번호\*?$/), "abcd1234!");
+    await user.type(screen.getByLabelText(/^비밀번호 설정\*?$/), "abcd1234!");
     await user.type(screen.getByLabelText(/^비밀번호 확인/), "abcd1234!");
     await user.click(screen.getByRole("button", { name: "가입하기" }));
     await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/office/start"));
@@ -379,19 +379,19 @@ describe("이메일 가입 완료", () => {
   it("비밀번호가 8자보다 짧거나 12자보다 길면 안내한다", async () => {
     const user = userEvent.setup();
     await toPasswordStep(user);
-    await user.type(screen.getByLabelText(/^비밀번호\*?$/), "abc");
+    await user.type(screen.getByLabelText(/^비밀번호 설정\*?$/), "abc");
     await user.click(screen.getByRole("button", { name: "가입하기" }));
-    expect(await screen.findByText("비밀번호는 8자 이상이어야 합니다.")).not.toBeNull();
-    await user.clear(screen.getByLabelText(/^비밀번호\*?$/));
-    await user.type(screen.getByLabelText(/^비밀번호\*?$/), "abcd1234abcd1");
+    expect(await screen.findByText("8~12자 이내로 설정해 주십시오.")).not.toBeNull();
+    await user.clear(screen.getByLabelText(/^비밀번호 설정\*?$/));
+    await user.type(screen.getByLabelText(/^비밀번호 설정\*?$/), "abcd1234abcd1");
     await user.click(screen.getByRole("button", { name: "가입하기" }));
-    expect(await screen.findByText("비밀번호는 12자 이하여야 합니다.")).not.toBeNull();
+    expect(await screen.findByText("8~12자 이내로 설정해 주십시오.")).not.toBeNull();
   });
 
   it("너무 흔한 비밀번호는 막고 두 칸이 다르면 안내한다", async () => {
     const user = userEvent.setup();
     await toPasswordStep(user);
-    await user.type(screen.getByLabelText(/^비밀번호\*?$/), "12345678");
+    await user.type(screen.getByLabelText(/^비밀번호 설정\*?$/), "12345678");
     await user.type(screen.getByLabelText(/^비밀번호 확인/), "1234567");
     await user.click(screen.getByRole("button", { name: "가입하기" }));
     expect(await screen.findByText(/너무 흔한 비밀번호/)).not.toBeNull();
@@ -401,17 +401,17 @@ describe("이메일 가입 완료", () => {
   it("입력한 비밀번호의 강도를 표시한다", async () => {
     const user = userEvent.setup();
     await toPasswordStep(user);
-    await user.type(screen.getByLabelText(/^비밀번호\*?$/), "abcdefgh");
+    await user.type(screen.getByLabelText(/^비밀번호 설정\*?$/), "abcdefgh");
     expect(screen.getByText("강도 약함")).not.toBeNull();
-    await user.clear(screen.getByLabelText(/^비밀번호\*?$/));
-    await user.type(screen.getByLabelText(/^비밀번호\*?$/), "Abcd1234!x");
+    await user.clear(screen.getByLabelText(/^비밀번호 설정\*?$/));
+    await user.type(screen.getByLabelText(/^비밀번호 설정\*?$/), "Abcd1234!x");
     expect(screen.getByText("강도 강함")).not.toBeNull();
   });
 
   it("서버가 비밀번호를 거부하면 그 칸에 사유를 보여준다", async () => {
     const user = userEvent.setup();
     await toPasswordStep(user);
-    await user.type(screen.getByLabelText(/^비밀번호\*?$/), "weakpass1");
+    await user.type(screen.getByLabelText(/^비밀번호 설정\*?$/), "weakpass1");
     await user.type(screen.getByLabelText(/^비밀번호 확인/), "weakpass1");
     await user.click(screen.getByRole("button", { name: "가입하기" }));
     expect(
@@ -425,7 +425,7 @@ describe("이메일 가입 완료", () => {
     const user = userEvent.setup();
     await toPasswordStep(user);
     setMockTermsVersion("2026-12-01");
-    await user.type(screen.getByLabelText(/^비밀번호\*?$/), "abcd1234!");
+    await user.type(screen.getByLabelText(/^비밀번호 설정\*?$/), "abcd1234!");
     await user.type(screen.getByLabelText(/^비밀번호 확인/), "abcd1234!");
     await user.click(screen.getByRole("button", { name: "가입하기" }));
     const dialog = await screen.findByRole("dialog");
@@ -459,7 +459,7 @@ describe("이메일 가입 완료", () => {
     await screen.findAllByText("인증이 완료되었습니다.");
     await user.click(screen.getByLabelText(/이용약관에 동의합니다/));
     await user.click(screen.getByRole("button", { name: "다음" }));
-    await user.type(await screen.findByLabelText(/^비밀번호\*?$/), "abcd1234!");
+    await user.type(await screen.findByLabelText(/^비밀번호 설정\*?$/), "abcd1234!");
     await user.type(screen.getByLabelText(/^비밀번호 확인/), "abcd1234!");
     await user.click(screen.getByRole("button", { name: "가입하기" }));
     expect(await screen.findByText("이미 가입된 계정이 있습니다")).not.toBeNull();
@@ -482,7 +482,7 @@ describe("이메일 가입 완료", () => {
     await screen.findAllByText("인증이 완료되었습니다.");
     await user.click(screen.getByLabelText(/이용약관에 동의합니다/));
     await user.click(screen.getByRole("button", { name: "다음" }));
-    await user.type(await screen.findByLabelText(/^비밀번호\*?$/), "abcd1234!");
+    await user.type(await screen.findByLabelText(/^비밀번호 설정\*?$/), "abcd1234!");
     await user.type(screen.getByLabelText(/^비밀번호 확인/), "abcd1234!");
     await user.click(screen.getByRole("button", { name: "가입하기" }));
     expect(await screen.findByRole("button", { name: /다시 시도/ })).not.toBeNull();
@@ -496,7 +496,7 @@ describe("이메일 가입 완료", () => {
     );
     const user = userEvent.setup();
     await toPasswordStep(user);
-    await user.type(screen.getByLabelText(/^비밀번호\*?$/), "abcd1234!");
+    await user.type(screen.getByLabelText(/^비밀번호 설정\*?$/), "abcd1234!");
     await user.type(screen.getByLabelText(/^비밀번호 확인/), "abcd1234!");
     await user.click(screen.getByRole("button", { name: "가입하기" }));
     expect(await screen.findByText(/인증 시간이 지났거나/)).not.toBeNull();
@@ -514,7 +514,7 @@ describe("이메일 가입 완료", () => {
     server.use(http.post("/api/auth/signup/email", () => mockErrors.server()));
     const user = userEvent.setup();
     await toPasswordStep(user);
-    await user.type(screen.getByLabelText(/^비밀번호\*?$/), "abcd1234!");
+    await user.type(screen.getByLabelText(/^비밀번호 설정\*?$/), "abcd1234!");
     await user.type(screen.getByLabelText(/^비밀번호 확인/), "abcd1234!");
     await user.click(screen.getByRole("button", { name: "가입하기" }));
     expect((await screen.findByRole("alert")).textContent).toContain("일시적인 오류");

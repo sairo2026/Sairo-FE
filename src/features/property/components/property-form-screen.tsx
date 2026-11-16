@@ -108,7 +108,7 @@ function DuplicateDialog({
     <Modal
       size="notice"
       isOpen
-      title="같은 주소의 매물이 있습니다"
+      title="중복된 주소와 유형의 매물이 이미 등록되어 있습니다."
       onClose={onClose}
       footer={
         <>

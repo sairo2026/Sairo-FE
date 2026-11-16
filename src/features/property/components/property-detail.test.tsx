@@ -204,6 +204,35 @@ describe("매물 보관과 복원", () => {
     );
   });
 
+  it("방문 조율과 계약 상태를 영문 코드 없이 한글로 보여준다", async () => {
+    withProperty({
+      propertyId: 502,
+      name: "상태 확인 매물",
+      activeCoordinations: [
+        { coordinationId: 11, status: "APPLYING", customerName: "김신청" },
+        { coordinationId: 12, status: "PROPOSED", customerName: "박제안" },
+      ],
+      contracts: [
+        {
+          contractId: 8,
+          dealType: "MONTHLY",
+          contractStatus: "SIGNED",
+          signedDate: "2026-09-15",
+          leaseStartDate: null,
+          leaseEndDate: null,
+        },
+      ],
+    });
+    const user = userEvent.setup();
+    renderOffice(<PropertyDetailScreen propertyId={502} />, { role: "OWNER" });
+    await user.click(await screen.findByRole("button", { name: "보관" }));
+    const dialog = screen.getByRole("dialog");
+    expect(within(dialog).getByText(/김신청 · 신청 진행/)).not.toBeNull();
+    expect(within(dialog).getByText(/박제안 · 진행 중/)).not.toBeNull();
+    expect(within(dialog).getByText(/계약 월세 · 체결/)).not.toBeNull();
+    expect(within(dialog).queryByText(/PROPOSED|APPLYING|SIGNED/)).toBeNull();
+  });
+
   it("보관하면 목록으로 이동한다", async () => {
     const user = userEvent.setup();
     renderOffice(<PropertyDetailScreen propertyId={501} />, { role: "OWNER" });

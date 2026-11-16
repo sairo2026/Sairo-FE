@@ -194,7 +194,7 @@ describe("비밀번호 찾기와 재설정", () => {
     await user.type(screen.getByLabelText("이메일 인증"), "someone@example.com");
     await user.click(screen.getByRole("button", { name: "재설정 링크 받기" }));
     expect((await screen.findByRole("status")).textContent).toContain("가입한 계정이 있다면");
-    expect(screen.getByRole("timer").textContent).toMatch(/^\d{2}:\d{2}$/);
+    expect(screen.getByRole("timer").textContent).toMatch(/^\d:\d{2}$/);
     const resend = screen.getByRole("button", { name: "재발송" }) as HTMLButtonElement;
     expect(resend.disabled).toBe(true);
   });
@@ -214,7 +214,7 @@ describe("비밀번호 찾기와 재설정", () => {
     await user.type(screen.getByLabelText("새 비밀번호"), "short");
     await user.type(screen.getByLabelText("새 비밀번호 확인"), "short");
     await user.click(screen.getByRole("button", { name: "비밀번호 바꾸기" }));
-    expect(await screen.findByText("비밀번호는 8자 이상이어야 합니다.")).not.toBeNull();
+    expect(await screen.findByText("8~12자 이내로 설정해 주십시오.")).not.toBeNull();
   });
 
   it("두 비밀번호가 다르면 안내한다", async () => {

@@ -3,6 +3,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ApiError } from "@/shared/api/client";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { useRefreshOfficeState } from "../hooks/office-queries";
 import { createRegistration, lookupOffice } from "../api/office.api";
@@ -23,6 +24,12 @@ const ENTITY_OPTIONS = (Object.keys(ENTITY_TYPE_LABEL) as EntityType[]).map((val
 
 type Step = "lookup" | "details";
 
+/** 조회 서버가 응답하지 못한 경우만 직접 입력으로 이어 갈 수 있다. 입력값 오류와 권한 오류는 제외한다. */
+function isLookupUnavailable(caught: unknown): boolean {
+  if (!(caught instanceof ApiError)) return true;
+  return caught.status === 404 || caught.status >= 500;
+}
+
 export function OfficeRegistrationForm() {
   const router = useRouter();
   const refresh = useRefreshOfficeState();
@@ -40,6 +47,7 @@ export function OfficeRegistrationForm() {
   const [formError, setFormError] = useState<string>();
   const [existingOffice, setExistingOffice] = useState(false);
   const [conflictLink, setConflictLink] = useState<string>();
+  const [lookupFailed, setLookupFailed] = useState(false);
 
   const lookupMutation = useMutation({
     mutationFn: lookupOffice,
@@ -52,6 +60,7 @@ export function OfficeRegistrationForm() {
     },
     onError: (caught) => {
       setErrors(fieldErrorMap(caught));
+      setLookupFailed(isLookupUnavailable(caught));
       setFormError(
         describeOfficeError(caught, "사무소를 확인하지 못했습니다. 다시 시도해 주세요."),
       );
@@ -80,6 +89,7 @@ export function OfficeRegistrationForm() {
 
   function lookup() {
     setFormError(undefined);
+    setLookupFailed(false);
     setExistingOffice(false);
     const problems: FieldErrors<RegistrationField | LookupField> = validateLookup({
       registrationAuthority: authority,
@@ -192,6 +202,26 @@ export function OfficeRegistrationForm() {
               </div>
             ) : null}
             {formError ? <FormAlert>{formError}</FormAlert> : null}
+            {lookupFailed ? (
+              <div className="flex flex-col gap-2">
+                <MutedNote>
+                  조회에 실패해도 사무소 정보를 직접 입력해 신청할 수 있습니다. 이미 등록된 사무소는
+                  신청 단계에서 다시 확인합니다.
+                </MutedNote>
+                <div>
+                  <Button
+                    variant="cancel"
+                    onClick={() => {
+                      setFormError(undefined);
+                      setErrors({});
+                      setStep("details");
+                    }}
+                  >
+                    정보 직접 입력
+                  </Button>
+                </div>
+              </div>
+            ) : null}
           </div>
           <ButtonRow>
             <Button variant="cancel" onClick={() => router.push("/office/start")}>
@@ -216,7 +246,13 @@ export function OfficeRegistrationForm() {
   }
 
   return (
-    <FlowFrame title="신규 사무소 등록을 위한 기본 정보를 입력해 주십시오.">
+    <FlowFrame
+      title={
+        lookupFailed
+          ? "신규 사무소 정보 조회에 실패했습니다.\n정보를 직접 입력해 주십시오."
+          : "신규 사무소 등록을 위한 기본 정보를 입력해 주십시오."
+      }
+    >
       <form
         noValidate
         className="flex flex-col gap-11"
@@ -302,6 +338,7 @@ export function OfficeRegistrationForm() {
             variant="cancel"
             onClick={() => {
               setStep("lookup");
+              setLookupFailed(false);
               setErrors({});
               setFormError(undefined);
             }}

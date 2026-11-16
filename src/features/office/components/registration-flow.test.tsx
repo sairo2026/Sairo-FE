@@ -161,6 +161,19 @@ describe("사무소 등록 신청", () => {
     expect((await screen.findByRole("alert")).textContent).toContain("일시적인 오류");
   });
 
+  it("조회 서버가 응답하지 못하면 정보를 직접 입력해 이어 갈 수 있다", async () => {
+    server.use(http.get("/api/offices/lookup", () => mockErrors.server()));
+    const user = userEvent.setup();
+    renderOffice(<OfficeRegistrationForm />);
+    await fillLookup(user);
+    await screen.findByRole("alert");
+    await user.click(screen.getByRole("button", { name: "정보 직접 입력" }));
+    expect(await screen.findByLabelText("사무소명")).not.toBeNull();
+    expect(
+      screen.getByRole("heading", { name: /신규 사무소 정보 조회에 실패했습니다/ }),
+    ).not.toBeNull();
+  });
+
   it("기본 정보가 비어 있으면 필드별 오류를 보여준다", async () => {
     const user = userEvent.setup();
     renderOffice(<OfficeRegistrationForm />);
@@ -414,7 +427,7 @@ describe("심사 상태", () => {
       },
     });
     await user.click(screen.getByRole("button", { name: /다시 시도/ }));
-    expect(await screen.findByText("서류를 확인하고 있습니다.")).not.toBeNull();
+    expect(await screen.findByText(/^서류를 확인하고 있습니다\./)).not.toBeNull();
   });
 
   it("작성 중이면 증빙 이어가기와 철회를 보여준다", async () => {

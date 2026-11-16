@@ -232,7 +232,7 @@ describe("이메일 연결 링크", () => {
     await user.type(await screen.findByLabelText("비밀번호"), "abc");
     await user.type(screen.getByLabelText("비밀번호 확인"), "abd");
     await user.click(screen.getByRole("button", { name: "연결하기" }));
-    expect(await screen.findByText("비밀번호는 8자 이상이어야 합니다.")).not.toBeNull();
+    expect(await screen.findByText("8~12자 이내로 설정해 주십시오.")).not.toBeNull();
     expect(screen.getByText("비밀번호가 일치하지 않습니다.")).not.toBeNull();
   });
 

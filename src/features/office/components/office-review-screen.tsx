@@ -119,7 +119,6 @@ function StatusBody({ registration }: { registration: OfficeRegistrationStatusRe
           <Button onClick={() => router.push("/access")}>확인</Button>
         </ButtonRow>
         <div className="flex flex-col items-center gap-3 text-center">
-          <MutedNote>{headline[status]}</MutedNote>
           <MutedNote>{REVIEW_TARGET_NOTE}</MutedNote>
           <MutedNote>{REREVIEW_NOTE}</MutedNote>
           {notice ? <FormNotice>{notice}</FormNotice> : null}

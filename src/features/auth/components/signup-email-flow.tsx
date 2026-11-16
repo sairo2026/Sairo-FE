@@ -19,7 +19,7 @@ import {
   verifySignupEmail,
 } from "../api/account.api";
 import { authContextQueryKey } from "../hooks/use-auth-context";
-import { useCountdown } from "../hooks/use-countdown";
+import { formatClock, useCountdown } from "../hooks/use-countdown";
 import { describeAuthError, fieldErrorMap } from "@/shared/lib/api-messages";
 import { landingPathFor } from "../model/landing";
 import {
@@ -349,6 +349,11 @@ export function SignupEmailFlow({ token }: { token?: string }) {
                 actionLabel={emailTicket ? undefined : emailLinkSent ? "재발송" : "인증 링크 받기"}
                 onAction={() => void sendEmailLink()}
                 isActionDisabled={isBusy || resend.remaining > 0}
+                timerText={
+                  emailLinkSent && !emailTicket && resend.remaining > 0
+                    ? formatClock(resend.remaining)
+                    : undefined
+                }
                 error={emailError}
                 statusText={
                   emailTicket
@@ -428,7 +433,7 @@ export function SignupEmailFlow({ token }: { token?: string }) {
               autoComplete="email"
             />
             <TextField
-              label="비밀번호"
+              label="비밀번호 설정"
               kind="password"
               value={password}
               onValueChange={(next) => {
