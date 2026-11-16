@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { ImportBatchListResponse } from "@/lib/api/contracts/migration.schema";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
-import { StatusBadge, TextLink } from "@/shared/components/feedback/page-parts";
+import { StatusBadge } from "@/shared/components/feedback/page-parts";
 import { ErrorScreen } from "@/shared/components/feedback/error-screen";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
 import { Button } from "@/shared/components/ui/button";
@@ -14,7 +14,6 @@ import { DataTable } from "@/shared/components/ui/data-table";
 import type { PageSize } from "@/shared/components/ui/data-table";
 import { FileField } from "@/shared/components/ui/file-field";
 import { PageHeader } from "@/shared/components/ui/page-header";
-import { SecondaryLink } from "@/shared/components/ui/secondary-link";
 import { SelectField } from "@/shared/components/ui/select-field";
 import { formatSeoulDateTime } from "@/shared/lib/format";
 import { DataMigrationUploadNotice } from "@/shared/legal/data-rights-notices";
@@ -26,9 +25,7 @@ import {
   IMPORT_ACCEPTED_EXTENSIONS,
   IMPORT_MAX_FILE_BYTES,
   IMPORT_MONTHLY_LIMIT,
-  SUPPORT_STATUS,
   TARGET_TYPES,
-  isActiveSupportLink,
   targetTypeLabel,
 } from "../model/labels";
 import { IMPORT_COPY, describeMigrationError } from "../model/messages";
@@ -126,27 +123,6 @@ function BatchStatusBadge({ status }: { status: string }) {
   return <StatusBadge tone={label?.tone ?? "gray"} label={label?.label ?? status} />;
 }
 
-function SupportLink({ item }: { item: Item }) {
-  if (item.supportRequestId === null || item.supportRequestId === undefined) {
-    return item.eligibleForSupport ? (
-      <TextLink href={`/import/support?batchId=${item.batchId}`}>지원 신청</TextLink>
-    ) : (
-      <>-</>
-    );
-  }
-  const status = item.supportRequestStatus ?? "";
-  const label = SUPPORT_STATUS[status]?.label ?? status;
-  return (
-    <Link
-      href={`/import/support/${item.supportRequestId}`}
-      className="font-semibold text-primary hover:underline"
-    >
-      {label}
-      {isActiveSupportLink(status) ? " (직접 작업 불가)" : ""}
-    </Link>
-  );
-}
-
 function History({ items }: { items: Item[] }) {
   const [page, setPage] = useState(1);
   const [size, setSize] = useState<PageSize>(25);
@@ -191,7 +167,6 @@ function History({ items }: { items: Item[] }) {
           header: "올린 시각",
           render: (row) => formatSeoulDateTime(row.createdAt),
         },
-        { key: "support", header: "유료 지원", render: (row) => <SupportLink item={row} /> },
       ]}
     />
   );
@@ -204,11 +179,7 @@ export function ImportUploadScreen() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader
-        title={IMPORT_COPY.uploadTitle}
-        description={IMPORT_COPY.uploadDescription}
-        actions={<SecondaryLink href="/import/support">유료 이전 지원</SecondaryLink>}
-      />
+      <PageHeader title={IMPORT_COPY.uploadTitle} description={IMPORT_COPY.uploadDescription} />
       <DataMigrationUploadNotice />
       <QueryGate query={query} loadingLabel="이전 이력을 불러오는 중입니다.">
         {(data) => (

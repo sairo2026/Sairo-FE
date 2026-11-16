@@ -25,16 +25,6 @@ export function DataMigrationUploadNotice() {
   );
 }
 
-export function DataMigrationSupportNotice() {
-  return (
-    <NoticeBlock title={DATA_MIGRATION_COPY.supportTitle}>
-      <p>{DATA_MIGRATION_COPY.support}</p>
-      <p>{DATA_MIGRATION_COPY.supportCancel}</p>
-      <p>{DATA_MIGRATION_COPY.supportPrivacy}</p>
-    </NoticeBlock>
-  );
-}
-
 export function DataExportNotice() {
   return (
     <NoticeBlock>

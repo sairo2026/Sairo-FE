@@ -144,9 +144,6 @@ export function LandingPage({ pricing, footer }: LandingPageProps) {
                 <EntryLink href={ENTRY_LINKS.pricing.href} tone="outlined">
                   {ENTRY_LINKS.pricing.label}
                 </EntryLink>
-                <EntryLink href={ENTRY_LINKS.enterprise.href} tone="ghost">
-                  {ENTRY_LINKS.enterprise.label}
-                </EntryLink>
               </div>
             </div>
             <div className="rounded-card border border-primary-line bg-white px-6 py-7 shadow-popup sm:px-8">
@@ -317,12 +314,6 @@ export function LandingPage({ pricing, footer }: LandingPageProps) {
                 className="inline-flex min-h-12 items-center justify-center rounded-control bg-white px-6 text-body font-bold text-primary hover:bg-primary-soft"
               >
                 {ENTRY_LINKS.signup.label}
-              </Link>
-              <Link
-                href={ENTRY_LINKS.enterprise.href}
-                className="inline-flex min-h-12 items-center justify-center rounded-control border border-white px-6 text-body font-semibold text-white hover:bg-primary-hover"
-              >
-                {ENTRY_LINKS.enterprise.label}
               </Link>
             </div>
           </div>

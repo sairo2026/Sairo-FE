@@ -122,6 +122,9 @@ describe("describeApiError", () => {
       "일시적인 오류가 발생했습니다. 잠시 뒤에 다시 시도해 주세요.",
     );
     expect(describeApiError(apiError(429, "MFA_LOCKED"))).toBe(ERROR_CODE_COPY.MFA_LOCKED);
+    expect(describeApiError(apiError(503, "PAYMENT_SYSTEM_UNAVAILABLE"))).toBe(
+      ERROR_CODE_COPY.PAYMENT_SYSTEM_UNAVAILABLE,
+    );
   });
 
   it("계정 존재 여부를 더 드러내지 않는다", () => {

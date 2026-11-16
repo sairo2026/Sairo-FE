@@ -20,9 +20,8 @@ export function PricingSummary({ initialData }: { initialData?: PublicPricing })
 
   if (query.isPending) {
     return (
-      <div role="status" aria-busy="true" className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div role="status" aria-busy="true" className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <span className="sr-only">요금표를 불러오는 중입니다.</span>
-        <Skeleton className="h-32 w-full" />
         <Skeleton className="h-32 w-full" />
         <Skeleton className="h-32 w-full" />
         <Skeleton className="h-32 w-full" />
@@ -68,7 +67,7 @@ export function PricingSummary({ initialData }: { initialData?: PublicPricing })
           {PRICING_COPY.provisional}
         </p>
       ) : null}
-      <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-4" data-testid="pricing-summary-tiers">
+      <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-testid="pricing-summary-tiers">
         {pricing.plans.map((tier) => (
           <li
             key={`${tier.planCode}-${tier.minMembers}`}
@@ -81,11 +80,6 @@ export function PricingSummary({ initialData }: { initialData?: PublicPricing })
             </p>
           </li>
         ))}
-        <li className="flex flex-col gap-2 rounded-card-flat border border-line bg-white px-6 py-5">
-          <h3 className="text-h2 font-semibold text-ink">기업</h3>
-          <p className="text-body text-ink-2">별도 견적</p>
-          <p className="text-caption text-ink-2">{COPY.enterpriseNote}</p>
-        </li>
       </ul>
       <p className="text-caption text-ink-2">{COPY.pricingVatNotice}</p>
       <p className={trialText ? "text-body font-semibold text-primary" : "text-body text-ink"}>

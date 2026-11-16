@@ -95,10 +95,7 @@ function Body({ batch }: { batch: ImportBatchDetail }) {
       />
       <DataMigrationUploadNotice />
       {isManaged && linked?.supportRequestId ? (
-        <FormNotice>
-          {IMPORT_COPY.managedBySupport}{" "}
-          <TextLink href={`/import/support/${linked.supportRequestId}`}>신청 보기</TextLink>
-        </FormNotice>
+        <FormNotice>{IMPORT_COPY.managedBySupport}</FormNotice>
       ) : null}
       {isReadOnly ? (
         <FormNotice>

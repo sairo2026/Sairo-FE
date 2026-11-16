@@ -57,7 +57,7 @@ describe("서비스 첫 화면", () => {
     ]);
   });
 
-  it("로그인, 가입, 도입 문의, 요금 구역으로 가는 진입 버튼을 둔다", async () => {
+  it("로그인, 가입, 요금 구역으로 가는 진입 버튼을 둔다", async () => {
     renderLanding();
     await screen.findByTestId("pricing-summary-tiers");
     const header = screen.getByRole("banner");
@@ -66,7 +66,6 @@ describe("서비스 첫 화면", () => {
     const main = screen.getByRole("main");
     expect(hrefOf("가입하고 시작하기", main)).toBe("/signup");
     expect(hrefOf("요금 보기", main)).toBe("#pricing");
-    expect(hrefOf("도입 문의", main)).toBe("/support/enterprise");
     expect(hrefOf("요금 자세히 보기", main)).toBe("/pricing");
     expect(hrefOf("본문으로 건너뛰기")).toBe("#main");
     expect(main.getAttribute("id")).toBe("main");
@@ -154,11 +153,11 @@ describe("서비스 첫 화면 요금 요약", () => {
       within(tiers)
         .getAllByRole("heading", { level: 3 })
         .map((node) => node.textContent),
-    ).toEqual(["1인", "2~4인", "5인 이상", "기업"]);
+    ).toEqual(["1인", "2~4인", "5인 이상"]);
     expect(within(tiers).getByText("월 39,900원")).not.toBeNull();
     expect(within(tiers).getByText(/월 39,900원\(1명 포함\), 추가 1명당 10,000원/)).not.toBeNull();
     expect(within(tiers).getByText(/월 69,900원\(4명 포함\), 추가 1명당 8,000원/)).not.toBeNull();
-    expect(within(tiers).getByText("별도 견적")).not.toBeNull();
+    expect(within(tiers).queryByText("별도 견적")).toBeNull();
     expect(screen.getByText(/부가가치세를 포함한 월 이용료입니다/)).not.toBeNull();
     expect(
       screen.getByText(/사무소 인증을 마친 날부터 60일 동안 무료로 사용합니다/),
@@ -235,12 +234,12 @@ describe("서비스 첫 화면 하단", () => {
     );
     renderLanding();
     const info = await screen.findByTestId("business-info");
-    expect(within(info).getByText("상호")).not.toBeNull();
+    expect(within(info).getByText("상호명")).not.toBeNull();
     expect(within(info).getByText("사이로(SAIRO)")).not.toBeNull();
     expect(within(info).getByText("사업자등록번호")).not.toBeNull();
-    expect(within(info).getByText("주소")).not.toBeNull();
+    expect(within(info).getByText("사업장 주소")).not.toBeNull();
     expect(within(info).getByText("이메일")).not.toBeNull();
-    expect(within(info).queryByText("전화")).toBeNull();
+    expect(within(info).queryByText("전화번호")).toBeNull();
     expect(within(info).queryByText("통신판매업 신고번호")).toBeNull();
     const footer = screen.getByRole("contentinfo");
     expect(hrefOf("이용약관", footer)).toBe("/legal/terms");

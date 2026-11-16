@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import type { BillingPlanListResponse } from "@/lib/api/contracts/billing.schema";
 import { MutedNote, StatusBadge, TextLink } from "@/shared/components/feedback/page-parts";
@@ -35,20 +34,10 @@ function PlansView({ data }: { data: BillingPlanListResponse }) {
         <span className="text-caption text-ink-2">적용 가격 버전 {data.priceVersion}</span>
       </div>
       <p className="text-body text-ink-2">{COPY.pricingVatNotice}</p>
-      {data.plans.map((plan) => (
-        <Card key={plan.planCode} title={`${PLAN_LABEL[plan.planCode] ?? plan.planCode} 요금제`}>
-          {plan.tiers.length === 0 ? (
-            <div className="flex flex-col gap-2">
-              <p className="text-body text-ink">별도 견적으로 안내합니다.</p>
-              <MutedNote>{COPY.enterpriseNote}</MutedNote>
-              <Link
-                href="/support/enterprise"
-                className="text-caption font-semibold text-primary underline clickable-link"
-              >
-                도입 문의
-              </Link>
-            </div>
-          ) : (
+      {data.plans
+        .filter((plan) => plan.tiers.length > 0)
+        .map((plan) => (
+          <Card key={plan.planCode} title={`${PLAN_LABEL[plan.planCode] ?? plan.planCode} 요금제`}>
             <ul className="flex flex-col divide-y divide-line">
               {plan.tiers.map((tier) => (
                 <li
@@ -67,9 +56,8 @@ function PlansView({ data }: { data: BillingPlanListResponse }) {
                 </li>
               ))}
             </ul>
-          )}
-        </Card>
-      ))}
+          </Card>
+        ))}
       <Card title="예상 금액">
         <p className="mb-3 text-body text-ink">
           현재 과금 인원 {data.memberCount}명 기준{" "}

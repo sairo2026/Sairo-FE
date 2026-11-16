@@ -171,6 +171,5 @@ export const CLOSING_COPY = {
 export const ENTRY_LINKS = {
   login: { label: "로그인", href: "/login" },
   signup: { label: "가입하기", href: "/signup" },
-  enterprise: { label: "도입 문의", href: "/support/enterprise" },
   pricing: { label: "요금 보기", href: "#pricing" },
 } as const;
