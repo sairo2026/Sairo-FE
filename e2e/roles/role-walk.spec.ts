@@ -515,7 +515,8 @@ const DETAIL_WALKS: ReadonlyArray<{
     roles: ["OWNER", "AGENT"],
   },
   { list: "/coordinations", subs: ["", "/requests"], roles: ROLES },
-  { list: "/members", subs: [""], roles: ROLES },
+  // 구성원 목록은 대표에게만 상세 링크를 준다.
+  { list: "/members", subs: [""], roles: ["OWNER"] },
 ];
 
 async function firstDetailHref(page: Page, base: string, scope: string): Promise<string | null> {
