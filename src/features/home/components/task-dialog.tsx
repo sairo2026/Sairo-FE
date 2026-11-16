@@ -196,7 +196,7 @@ function TaskDialogBody({ task, onClose }: TaskDialogProps) {
             취소
           </Button>
           <Button onClick={submit} isLoading={save.isPending} disabled={busy || isReadOnly}>
-            저장
+            {isEdit ? "저장" : "업무 생성"}
           </Button>
         </>
       }
