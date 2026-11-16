@@ -36,6 +36,7 @@ const TABS = [
 ] as const;
 
 function ContractTable({ tab }: { tab: string }) {
+  const { isReadOnly } = useOfficeAccess();
   const [partyName, setPartyName] = useState("");
   const [propertyAddress, setPropertyAddress] = useState("");
   const [applied, setApplied] = useState({ partyName: "", propertyAddress: "" });
@@ -71,7 +72,9 @@ function ContractTable({ tab }: { tab: string }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center gap-6">
-        <CreateLink href="/contracts/new">계약 등록</CreateLink>
+        <CreateLink href="/contracts/new" isDisabled={isReadOnly}>
+          계약 등록
+        </CreateLink>
         <form
           role="search"
           onSubmit={(event) => {

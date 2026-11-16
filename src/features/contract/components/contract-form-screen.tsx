@@ -234,6 +234,7 @@ export function ContractDraftEditScreen({ contractId }: { contractId: number }) 
       {(detail) =>
         detail.contractStatus !== "DRAFT" ? (
           <div className="flex flex-col gap-4">
+            <PageHeader title="계약 초안 수정" />
             <FormNotice>
               체결된 계약은 초안으로 수정할 수 없습니다. 핵심정보 오기록은 정정으로 처리합니다.
             </FormNotice>
