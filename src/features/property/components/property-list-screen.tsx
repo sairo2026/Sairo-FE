@@ -283,7 +283,9 @@ export function PropertyListScreen() {
     <div className="flex flex-col gap-6">
       <PageHeader title="매물 관리" description="등록된 매물을 관리할 수 있습니다." />
       <div className="flex flex-wrap items-center gap-6">
-        <CreateLink href="/properties/new">매물 등록</CreateLink>
+        <CreateLink href="/properties/new" isDisabled={isReadOnly}>
+          매물 등록
+        </CreateLink>
         <div className="min-w-[260px] max-w-[856px] flex-1">
           <SearchField
             label="매물 검색"

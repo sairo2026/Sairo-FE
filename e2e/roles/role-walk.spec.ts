@@ -260,8 +260,7 @@ test.describe("역할 간 동작 버튼 일관성", () => {
 });
 
 test.describe("대표 결제 지연 읽기 전용", () => {
-  // /properties는 매물 화면 담당 작업이 끝난 뒤 포함한다.
-  for (const path of ["/customers", "/contracts", "/coordinations", "/members"]) {
+  for (const path of ["/properties", "/customers", "/contracts", "/coordinations", "/members"]) {
     test(`${path}은 안내 배너를 보이고 저장 동작을 막는다`, async ({ page }) => {
       await setMockRole(page, "OWNER_OVERDUE" as MockOfficeRole);
       const probe = attachProbe(page);
