@@ -1,5 +1,6 @@
 import { setupWorker } from "msw/browser";
 import { handlers } from "./handlers";
+import { setMockPhoneVerificationRequired } from "./handlers/account";
 import { MOCK_ACTIVE_CONTEXT, setMockAuthContext } from "./handlers/auth";
 import { legalReviewHandlers } from "./handlers/legal-review";
 
@@ -24,6 +25,18 @@ function applyStoredRole(): void {
   }
 }
 
+/** 화면 대조용 캡처에서만 쓴다. 휴대폰 인증을 요구하는 가입 화면을 열 때 저장소 값으로 켠다. */
+function applyStoredPhoneVerification(): void {
+  try {
+    if (window.localStorage.getItem("sairo-mock-phone-verification") === "required") {
+      setMockPhoneVerificationRequired(true);
+    }
+  } catch {
+    return;
+  }
+}
+
 applyStoredRole();
+applyStoredPhoneVerification();
 
 export const worker = setupWorker(...legalReviewHandlers, ...handlers);
