@@ -85,6 +85,8 @@ export function describePaymentResult(
 export const ERROR_BY_CODE: Record<string, string> = {
   BILLING_KEY_ISSUE_FAILED:
     "카드사에서 결제수단 등록을 승인하지 않았습니다. 결제된 금액은 없습니다. 다른 카드로 다시 시도하거나 카드사에 문의해 주세요.",
+  PAYMENT_SYSTEM_UNAVAILABLE:
+    "지금 결제 시스템을 점검하고 있습니다. 카드 정보는 저장되지 않았으니 잠시 뒤에 다시 시도해 주세요.",
   PAYMENT_FAILED:
     "카드사에서 결제를 승인하지 않았습니다. 결제된 금액은 없습니다. 카드 한도·유효기간을 확인하거나 다른 카드를 등록해 주세요.",
   PAYMENT_METHOD_REQUIRED: "결제하려면 결제수단 등록과 결제 조건 동의가 먼저 필요합니다.",

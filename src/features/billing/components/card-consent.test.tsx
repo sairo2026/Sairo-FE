@@ -272,6 +272,22 @@ describe("카드 등록 결과", () => {
     );
   });
 
+  it("결제 시스템 점검 중이면 카드 정보가 저장되지 않았다고 안내하고 다시 시도할 수 있다", async () => {
+    server.use(
+      http.post("/api/subscriptions/billing-key", () =>
+        errorResponse(503, "PAYMENT_SYSTEM_UNAVAILABLE", "점검"),
+      ),
+    );
+    renderOffice(
+      <CardResultScreen authKey="auth-ok" customerKey="customer-key-0001" version="1.0" />,
+      { role: "OWNER" },
+    );
+    expect((await screen.findByRole("alert")).textContent).toContain(
+      "결제 시스템을 점검하고 있습니다",
+    );
+    expect(screen.getByRole("link", { name: "카드 등록으로 돌아가기" })).not.toBeNull();
+  });
+
   it("고객 키가 맞지 않으면 처음부터 다시 시도하라고 안내한다", async () => {
     renderOffice(<CardResultScreen authKey="auth-ok" customerKey="other-key" version="1.0" />, {
       role: "OWNER",
