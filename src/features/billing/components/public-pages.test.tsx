@@ -122,18 +122,16 @@ describe("공개 요금 페이지", () => {
     expect(screen.queryByText(/확정 요금이며 결제 심사 후 청구를 시작합니다/)).toBeNull();
   });
 
-  it("활성 체험 이벤트가 없으면 무료 기간을 약속하지 않고 문의를 안내한다", async () => {
+  it("활성 체험 이벤트가 없으면 무료 이용 기간 카드를 숨긴다", async () => {
     server.use(
       http.get("/api/public/pricing", () =>
         HttpResponse.json({ ...MOCK_PUBLIC_PRICING, generalTrial: null }),
       ),
     );
     renderPublic(<PublicPricingScreen />);
-    expect(
-      await screen.findByText(
-        "현재 가입 조건을 준비하고 있습니다. 이용 조건은 고객지원으로 문의해 주세요.",
-      ),
-    ).not.toBeNull();
+    expect(await screen.findByText("요금 구간 안내")).not.toBeNull();
+    expect(screen.queryByText("무료 이용 기간")).toBeNull();
+    expect(screen.queryByText(/고객지원으로 문의/)).toBeNull();
     expect(screen.queryByText(/무료로 사용합니다/)).toBeNull();
   });
 

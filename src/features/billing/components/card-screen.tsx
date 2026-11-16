@@ -20,6 +20,7 @@ import { deleteBillingKey, openBillingKeySession, registerBillingKey } from "../
 import { billingKeys, useCardNotice, useSubscription } from "../hooks/billing-queries";
 import { PaymentWidgetUnavailableError, tossBillingAuthLauncher } from "../lib/payment-widget";
 import type { BillingAuthLauncher } from "../lib/payment-widget";
+import { cardLabel } from "../model/card-issuer";
 import { CARD_NOTICE_COPY } from "../model/legal-copy";
 import { COPY, describeBillingError } from "../model/messages";
 import { CommerceNotice, SellerNotice } from "./commerce-notice";
@@ -114,9 +115,7 @@ function CardView({
       <Card title="등록된 카드">
         {card ? (
           <div className="flex flex-col gap-3">
-            <p className="text-body text-ink">
-              {card.cardIssuer ?? "카드"} 끝자리 {card.cardLast4 ?? "----"}
-            </p>
+            <p className="text-body text-ink">{cardLabel(card.cardIssuer, card.cardLast4)}</p>
             {isBusyInvoice ? (
               <MutedNote>처리 중인 청구가 있어 새 카드 교체는 결과 확인 뒤 완료됩니다.</MutedNote>
             ) : null}
