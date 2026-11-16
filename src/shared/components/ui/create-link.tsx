@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 const CREATE_CLASS =
-  "inline-flex h-14 shrink-0 items-center justify-center gap-1 rounded-control bg-primary px-6 text-body font-bold text-white hover:bg-primary-hover disabled:cursor-not-allowed disabled:bg-ink-3";
+  "inline-flex h-14 shrink-0 items-center justify-center gap-1 rounded-control bg-primary px-6 text-body font-bold text-white hover:bg-primary-hover disabled:cursor-not-allowed disabled:bg-ink-3 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:bg-ink-3";
 
 function PlusIcon() {
   return (
