@@ -14,10 +14,12 @@ import type { PageSize } from "@/shared/components/ui/data-table";
 import { SecondaryLink } from "@/shared/components/ui/secondary-link";
 import { PageHeader } from "@/shared/components/ui/page-header";
 import { SearchField } from "@/shared/components/ui/search-field";
-import { SelectField } from "@/shared/components/ui/select-field";
+import { Button } from "@/shared/components/ui/button";
+import { Checkbox, SelectField } from "@/shared/components/ui/select-field";
 import { TextField } from "@/shared/components/ui/text-field";
 import { Toggle } from "@/shared/components/ui/select-field";
 import { useAssignableMembers } from "@/shared/session/assignable-members";
+import { useOfficeAccess } from "@/shared/session/office-access-context";
 import type { PropertyListResponse } from "@/lib/api/contracts/property.schema";
 import type { PropertyListParams } from "../api/property.api";
 import { usePropertyCategories, usePropertyList } from "../hooks/property-queries";
@@ -34,6 +36,7 @@ import {
   toneOf,
 } from "../model/labels";
 import { describePropertyError } from "../model/messages";
+import { BulkArchiveDialog } from "./archive-notices";
 
 const TRADE_TYPE_BY_DEAL: Record<string, TradeType> = {
   MONTHLY: "monthly",
@@ -116,6 +119,9 @@ export function PropertyListScreen() {
   const [page, setPage] = useState(1);
   const [size, setSize] = useState<PageSize>(25);
   const [filterError, setFilterError] = useState<string>();
+  const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(new Set());
+  const [isArchiveOpen, setIsArchiveOpen] = useState(false);
+  const { isReadOnly } = useOfficeAccess();
   const categories = usePropertyCategories();
   const members = useAssignableMembers();
   const query = usePropertyList(toParams(applied, page, size));
@@ -126,6 +132,7 @@ export function PropertyListScreen() {
 
   function applyNow(next: Filters) {
     setFilterError(undefined);
+    setSelectedIds(new Set());
     setApplied(next);
     setPage(1);
   }
@@ -152,6 +159,25 @@ export function PropertyListScreen() {
   function reset() {
     setDraft(EMPTY_FILTERS);
     applyNow(EMPTY_FILTERS);
+  }
+
+  const rows = query.data?.items ?? [];
+  const canSelect = !applied.archived;
+  const allSelected =
+    rows.length > 0 && rows.every((row) => selectedIds.has(String(row.propertyId)));
+  const selectedRows = rows.filter((row) => selectedIds.has(String(row.propertyId)));
+
+  function toggleRow(id: string) {
+    setSelectedIds((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleAll(checked: boolean) {
+    setSelectedIds(checked ? new Set(rows.map((row) => String(row.propertyId))) : new Set());
   }
 
   const now = new Date();
@@ -257,7 +283,9 @@ export function PropertyListScreen() {
     <div className="flex flex-col gap-6">
       <PageHeader title="매물 관리" description="등록된 매물을 관리할 수 있습니다." />
       <div className="flex flex-wrap items-center gap-6">
-        <CreateLink href="/properties/new">매물 등록</CreateLink>
+        <CreateLink href="/properties/new" isDisabled={isReadOnly}>
+          매물 등록
+        </CreateLink>
         <div className="min-w-[260px] max-w-[856px] flex-1">
           <SearchField
             label="매물 검색"
@@ -270,6 +298,33 @@ export function PropertyListScreen() {
         <SecondaryLink href="/properties/categories">카테고리 관리</SecondaryLink>
       </div>
       <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
+        {canSelect ? (
+          <div className="flex items-center gap-4">
+            <Checkbox
+              label="전체 선택"
+              checked={allSelected}
+              disabled={isReadOnly || rows.length === 0}
+              onCheckedChange={toggleAll}
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={isReadOnly || selectedRows.length === 0}
+              onClick={() => setIsArchiveOpen(true)}
+            >
+              <svg aria-hidden="true" viewBox="0 0 20 20" width="16" height="16" fill="none">
+                <path
+                  d="M4 6h12M8 6V4h4v2M6 6l.7 10h6.6L14 6M8.5 9v4M11.5 9v4"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              보관
+            </Button>
+          </div>
+        ) : null}
         <SelectField
           layout="inline"
           label="담당자"
@@ -392,14 +447,28 @@ export function PropertyListScreen() {
       <DataTable
         caption="매물 목록"
         columns={columns}
-        rows={query.data?.items ?? []}
+        rows={rows}
         getRowId={(row) => String(row.propertyId)}
         getRowHref={(row) => `/properties/${row.propertyId}`}
         totalCount={query.data?.totalElements ?? 0}
         page={page}
         pageSize={size}
-        onPageChange={setPage}
+        onPageChange={(next) => {
+          setSelectedIds(new Set());
+          setPage(next);
+        }}
+        selection={
+          canSelect
+            ? {
+                selectedIds,
+                onToggleRow: toggleRow,
+                rowLabel: (row) => `${row.name} 선택`,
+                disabled: isReadOnly,
+              }
+            : undefined
+        }
         onPageSizeChange={(next) => {
+          setSelectedIds(new Set());
           setSize(next);
           setPage(1);
         }}
@@ -416,6 +485,24 @@ export function PropertyListScreen() {
             : "조건에 맞는 매물이 없습니다. 매물을 등록해 보세요."
         }
       />
+      {isArchiveOpen ? (
+        <BulkArchiveDialog
+          targets={selectedRows.map((row) => ({
+            propertyId: row.propertyId,
+            name: row.name,
+            registrationStage: row.registrationStage,
+          }))}
+          onClose={() => setIsArchiveOpen(false)}
+          onFinished={(archivedIds) => {
+            setIsArchiveOpen(false);
+            setSelectedIds((current) => {
+              const next = new Set(current);
+              for (const id of archivedIds) next.delete(String(id));
+              return next;
+            });
+          }}
+        />
+      ) : null}
     </div>
   );
 }

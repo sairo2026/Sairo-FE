@@ -57,10 +57,13 @@ export function ReceivedGrantsScreen() {
 
   if (role === "DEPUTY") {
     return (
-      <EmptyState
-        title="이 화면은 중개보조원에게 제공되지 않습니다."
-        description="허용받은 매물은 승인된 대표와 소속공인중개사가 봅니다."
-      />
+      <div className="flex flex-col gap-6">
+        <PageHeader title="허용받은 매물" />
+        <EmptyState
+          title="이 화면은 중개보조원에게 제공되지 않습니다."
+          description="허용받은 매물은 승인된 대표와 소속공인중개사가 봅니다."
+        />
+      </div>
     );
   }
   const openOptions = (coordinations.data?.items ?? [])

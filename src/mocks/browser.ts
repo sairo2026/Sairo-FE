@@ -12,6 +12,13 @@ function applyStoredRole(): void {
     if (role === "OWNER" || role === "AGENT" || role === "DEPUTY") {
       setMockAuthContext({ ...MOCK_ACTIVE_CONTEXT, role });
     }
+    if (role === "OWNER_OVERDUE") {
+      setMockAuthContext({
+        ...MOCK_ACTIVE_CONTEXT,
+        role: "OWNER",
+        accessCondition: "PAYMENT_OVERDUE",
+      });
+    }
     if (role === "NEW") {
       setMockAuthContext({
         ...MOCK_ACTIVE_CONTEXT,

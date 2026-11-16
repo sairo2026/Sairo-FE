@@ -29,7 +29,7 @@ type Row = CustomerListResponse["items"][number];
 const MAX_MERGE_SELECTION = 2;
 
 export function CustomerListScreen() {
-  const { role } = useOfficeAccess();
+  const { role, isReadOnly } = useOfficeAccess();
   const isOwner = role === "OWNER";
   const [draftKeyword, setDraftKeyword] = useState("");
   const [keyword, setKeyword] = useState("");
@@ -137,7 +137,9 @@ export function CustomerListScreen() {
     <div className="flex flex-col gap-6">
       <PageHeader title="고객 관리" description="고객을 관리할 수 있습니다." />
       <div className="flex flex-wrap items-center gap-4">
-        <CreateLink href="/customers/new">고객 등록</CreateLink>
+        <CreateLink href="/customers/new" isDisabled={isReadOnly}>
+          고객 등록
+        </CreateLink>
         <div className="min-w-[260px] max-w-[856px] flex-1">
           <SearchField
             label="고객 검색"

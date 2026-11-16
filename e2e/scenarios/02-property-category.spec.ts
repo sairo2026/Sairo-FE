@@ -13,10 +13,10 @@ test("시나리오 2 매물을 활성 등록하고 커스텀 카테고리와 입
     await page.getByRole("link", { name: "매물 등록" }).click();
     await expect(page.getByRole("heading", { name: "매물 등록" })).toBeVisible();
     await page.getByLabel(/^매물명/).fill("E2E 아파트");
-    await expect(page.getByLabel(/^카테고리/).locator("option", { hasText: "아파트" })).toHaveCount(
-      1,
-    );
-    await page.getByLabel(/^카테고리/).selectOption({ label: "아파트" });
+    await expect(
+      page.getByLabel(/^건물 카테고리/).locator("option", { hasText: "아파트" }),
+    ).toHaveCount(1);
+    await page.getByLabel(/^건물 카테고리/).selectOption({ label: "아파트" });
     await page.getByLabel("매물 주소").fill("서울특별시 종로구 시험로 1");
     await page.getByLabel("담당 공인중개사").selectOption("2");
     await page.getByRole("button", { name: "활성 등록" }).click();
@@ -43,7 +43,7 @@ test("시나리오 2 매물을 활성 등록하고 커스텀 카테고리와 입
   await test.step("새 매물 등록 화면에서 커스텀 카테고리를 고르면 추가한 입력 항목이 나온다", async () => {
     await page.getByRole("link", { name: "매물 목록" }).first().click();
     await page.getByRole("link", { name: "매물 등록" }).click();
-    const category = page.getByLabel(/^카테고리/);
+    const category = page.getByLabel(/^건물 카테고리/);
     await expect(category.locator("option", { hasText: "창고형 상가" })).toHaveCount(1);
     await expect(page.getByText("카테고리를 선택하면 전용 입력 항목이 나타납니다.")).toBeVisible();
     await category.selectOption({ label: "창고형 상가" });

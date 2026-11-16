@@ -168,13 +168,24 @@ export async function submitEvidence(page: Page): Promise<void> {
 export async function duplicatePropertyDialog(page: Page): Promise<void> {
   await page.getByLabel(/^매물 주소/).fill("서울특별시 성북구 정릉로 77");
   await page.getByLabel(/^매물명/).fill("중복 확인 매물");
-  await page.getByLabel(/^카테고리/).selectOption({ label: "아파트" });
+  await page.getByLabel(/^건물 카테고리/).selectOption({ label: "아파트" });
   await page.getByRole("button", { name: "임시저장" }).click();
   await page.getByRole("dialog").waitFor();
 }
 
 export async function openArchiveDialog(page: Page): Promise<void> {
   await page.getByRole("button", { name: "보관", exact: true }).click();
+}
+
+export async function archiveCompleted(page: Page): Promise<void> {
+  await page.getByRole("button", { name: "보관", exact: true }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "보관", exact: true }).click();
+  await page.getByRole("dialog", { name: "매물 보관이 완료되었습니다." }).waitFor();
+}
+
+export async function selectAllProperties(page: Page): Promise<void> {
+  await page.getByRole("link", { name: "국민대 앞 아파트" }).waitFor();
+  await page.getByLabel("전체 선택").check();
 }
 
 export async function phoneCodeSent(page: Page): Promise<void> {
