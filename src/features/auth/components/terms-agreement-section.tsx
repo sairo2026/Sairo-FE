@@ -152,7 +152,12 @@ export function TermsAgreementSection({
         </p>
       ) : null}
       {openDocument ? (
-        <LegalDocumentModal document={openDocument} isOpen onClose={() => setOpenDocument(null)} />
+        <LegalDocumentModal
+          document={openDocument}
+          title={openDocument.slug === "terms" ? "서비스 이용 약관 동의" : undefined}
+          isOpen
+          onClose={() => setOpenDocument(null)}
+        />
       ) : null}
     </fieldset>
   );

@@ -240,8 +240,36 @@ function toListItem(detail: PropertyDetailResponse): PropertyListResponse["items
   };
 }
 
+/** 목록에는 나오지 않고 번호로만 열리는 화면 대조용 매물이다. 보관할 수 없는 상태를 보여 준다. */
+function showcaseProperties(): PropertyDetailResponse[] {
+  return [
+    buildMockProperty({
+      propertyId: 9001,
+      name: "방문 조율 중인 매물",
+      activeCoordinations: [{ coordinationId: 801, status: "APPLYING", customerName: "김손님" }],
+    }),
+    buildMockProperty({
+      propertyId: 9002,
+      name: "계약 중인 매물",
+      contracts: [
+        {
+          contractId: 901,
+          dealType: "MONTHLY",
+          contractStatus: "SIGNED",
+          signedDate: "2026-11-01",
+          leaseStartDate: "2026-12-01",
+          leaseEndDate: "2027-11-30",
+        },
+      ],
+    }),
+  ];
+}
+
 function findProperty(id: string | readonly string[] | undefined) {
-  return state.properties.find((item) => String(item.propertyId) === String(id));
+  return (
+    state.properties.find((item) => String(item.propertyId) === String(id)) ??
+    showcaseProperties().find((item) => String(item.propertyId) === String(id))
+  );
 }
 
 function replaceProperty(next: PropertyDetailResponse) {

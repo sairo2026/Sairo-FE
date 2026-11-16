@@ -169,7 +169,7 @@ function TaskDialogBody({ task, onClose }: TaskDialogProps) {
     <Modal
       isOpen
       size="form"
-      title={isEdit ? "업무 수정" : "업무 만들기"}
+      title={isEdit ? "업무 수정" : "오늘의 업무 생성"}
       onClose={onClose}
       footer={
         <>
@@ -216,7 +216,7 @@ function TaskDialogBody({ task, onClose }: TaskDialogProps) {
           </p>
         ) : null}
         <TextField
-          label="제목"
+          label="할 일 제목"
           required
           value={values.title}
           onValueChange={(v) => set("title", v)}
@@ -231,6 +231,7 @@ function TaskDialogBody({ task, onClose }: TaskDialogProps) {
             value={assignee}
             options={memberOptions}
             placeholder="담당자 선택"
+            layout="block"
             onValueChange={(v) => set("assigneeMembershipId", v)}
             error={errors.assigneeMembershipId}
             disabled={auto || isDeputy}
@@ -258,6 +259,7 @@ function TaskDialogBody({ task, onClose }: TaskDialogProps) {
               value={values.relatedCustomerId}
               options={customerOptions}
               placeholder="선택 안 함"
+              layout="block"
               onValueChange={(v) => set("relatedCustomerId", v)}
               disabled={auto}
             />
@@ -271,6 +273,7 @@ function TaskDialogBody({ task, onClose }: TaskDialogProps) {
             value={values.relatedPropertyId}
             options={propertyOptions}
             placeholder="선택 안 함"
+            layout="block"
             onValueChange={(v) => set("relatedPropertyId", v)}
             disabled={auto}
           />

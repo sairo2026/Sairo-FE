@@ -23,8 +23,8 @@ const COMMON_PASSWORDS = new Set([
 export function validatePasswordInput(value: string): string | null {
   const length = countCodePoints(value);
   if (length === 0 || value.trim() === "") return "비밀번호를 입력해 주세요.";
-  if (length < PASSWORD_MIN) return `비밀번호는 ${PASSWORD_MIN}자 이상이어야 합니다.`;
-  if (length > PASSWORD_MAX) return `비밀번호는 ${PASSWORD_MAX}자 이하여야 합니다.`;
+  if (length < PASSWORD_MIN) return `${PASSWORD_MIN}~${PASSWORD_MAX}자 이내로 설정해 주십시오.`;
+  if (length > PASSWORD_MAX) return `${PASSWORD_MIN}~${PASSWORD_MAX}자 이내로 설정해 주십시오.`;
   if (COMMON_PASSWORDS.has(value.toLowerCase())) {
     return "너무 흔한 비밀번호입니다. 다른 비밀번호를 입력해 주세요.";
   }
