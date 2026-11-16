@@ -82,9 +82,7 @@ export function PricingSummary({ initialData }: { initialData?: PublicPricing })
         ))}
       </ul>
       <p className="text-caption text-ink-2">{COPY.pricingVatNotice}</p>
-      <p className={trialText ? "text-body font-semibold text-primary" : "text-body text-ink"}>
-        {trialText ?? PRICING_COPY.noTrial}
-      </p>
+      {trialText ? <p className="text-body font-semibold text-primary">{trialText}</p> : null}
       <div>
         <Link href="/pricing" className={DETAIL_LINK_CLASS}>
           요금 자세히 보기

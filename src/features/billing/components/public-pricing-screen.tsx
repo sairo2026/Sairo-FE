@@ -104,11 +104,11 @@ export function PublicPricingScreen({ initialData }: { initialData?: PublicPrici
         </table>
       </Card>
 
-      <Card title="무료 이용 기간">
-        <p className={trialText ? "text-body font-semibold text-primary" : "text-body text-ink"}>
-          {trialText ?? PRICING_COPY.noTrial}
-        </p>
-      </Card>
+      {trialText ? (
+        <Card title="무료 이용 기간">
+          <p className="text-body font-semibold text-primary">{trialText}</p>
+        </Card>
+      ) : null}
 
       <Card title={PRICING_COPY.paymentTitle}>
         <p className="text-body text-ink">{PRICING_COPY.payment}</p>

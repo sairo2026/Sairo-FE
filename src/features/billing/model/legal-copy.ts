@@ -1,4 +1,5 @@
 import { formatKrw, formatSeoulDate } from "@/shared/lib/format";
+import { cardIssuerName, cardLabel } from "./card-issuer";
 
 export const CARD_NOTICE_COPY = {
   body: "카드 정보는 결제대행사 결제창에서 직접 입력되며 사이로 서버에 저장되지 않습니다. 사이로는 카드사, 카드 끝 4자리, 결제대행사가 발급한 연결 키만 보관합니다. 지금 등록해도 결제는 시작되지 않습니다. 유료 전환 전에 금액과 결제일을 다시 안내하고 동의를 받은 뒤에만 결제합니다. 등록은 사무소 대표가 사무소를 대표해 하는 것이며 카드는 언제든 해제할 수 있습니다.",
@@ -7,7 +8,7 @@ export const CARD_NOTICE_COPY = {
   changedError: "카드 등록 안내가 바뀌었습니다. 내용을 확인한 뒤 다시 진행해 주세요.",
   done: (issuer: string | null, last4: string | null, firstBillingDate: string | null) =>
     `결제수단이 등록됐습니다.${
-      issuer || last4 ? ` 등록 카드 ${issuer ?? "카드"} 끝자리 ${last4 ?? "----"}.` : ""
+      issuer || last4 ? ` 등록 카드 ${cardLabel(issuer, last4)}.` : ""
     } 이번 등록으로 결제된 금액은 없습니다.${
       firstBillingDate ? ` 첫 결제 예정일은 ${firstBillingDate}입니다.` : ""
     }`,
@@ -56,7 +57,7 @@ export function consentSummaryLine(input: ConsentSummaryInput): string {
     ...(input.firstBillingAt ? [`첫 결제 ${formatSeoulDate(input.firstBillingAt)}`] : []),
     `이후 매월 ${billingDayLabel(input.firstBillingAt ?? input.nextChargeAt)} 자동 결제`,
     input.cardIssuer || input.cardLast4
-      ? `결제수단 ${input.cardIssuer ?? "카드"}(끝자리 ${input.cardLast4 ?? "----"})`
+      ? `결제수단 ${cardIssuerName(input.cardIssuer)}(끝자리 ${input.cardLast4 ?? "----"})`
       : "결제수단 등록 전",
   ];
   return parts.join(" · ");
@@ -74,7 +75,6 @@ export const PRICING_COPY = {
     `월 ${baseAmount}(부가가치세 포함) · 매월 자동결제 · 사무소 1곳 기준`,
   provisional:
     "확정 요금이며 결제 심사 후 청구를 시작합니다. 청구가 시작되기 전에는 결제되지 않습니다.",
-  noTrial: "현재 가입 조건을 준비하고 있습니다. 이용 조건은 고객지원으로 문의해 주세요.",
   paymentTitle: "결제 안내",
   payment:
     "구독은 월 선불 자동결제입니다. 카드 정보는 결제대행사 결제창에서 직접 입력되며 사이로 서버에 저장되지 않습니다. 결제는 사무소 대표가 합니다.",
