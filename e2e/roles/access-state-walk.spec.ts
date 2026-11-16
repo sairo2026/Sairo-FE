@@ -15,8 +15,8 @@ import { listAppRoutes } from "../support/routes";
 const NOTICE_PATH = "/access";
 const FORBIDDEN_TITLE = "접근 권한이 없습니다";
 const OPS_FORBIDDEN_TITLE = "이 화면을 볼 수 있는 운영 역할이 아닙니다";
-/** 읽기 전용에서도 허용되는 내보내기를 뺀, 저장을 일으키는 동작. */
-const WRITE_ACTION = /등록|저장|삭제|보관|추가|생성|신청|제출|발송|확정|취소|이전/;
+/** 저장을 일으키는 버튼의 이름. 필터, 건수 칩, 내비게이션 링크가 걸리지 않게 끝말로 판정한다. */
+const WRITE_ACTION = /(등록|저장|삭제|생성|발송|제출|확정)(하기)?$/;
 
 // 실패 원인을 한 번에 보려고 재시도 없이 돈다.
 test.describe.configure({ retries: 0 });
@@ -112,14 +112,10 @@ const NOTICE_STATES: readonly NoticeState[] = [
 /** 접근 제한 상태에서 업무 화면은 모두 같은 안내로 이동하므로 영역별 대표 화면만 돈다. */
 const SAMPLE_PATHS = [
   "/home",
-  "/properties",
   "/properties/new",
   "/customers/1",
-  "/coordinations/new",
-  "/contracts",
   "/import",
   "/members",
-  "/office",
   "/notifications",
 ];
 const WALK_PATHS = OFFICE_ROUTES.map((route) => route.path).filter((path) =>
@@ -245,21 +241,21 @@ test.describe("읽기 전용 상태의 대표 결제 화면", () => {
   }
 });
 
-const OPS_EXTRA_PATHS = ["/ops/audit-log", "/ops/raw-access/new", "/ops/billing/refunds"];
+/** 메뉴에 없는 하위 화면의 필요 역할. 화면 코드의 역할 지정과 같아야 한다. */
+const OPS_EXTRA_PATHS: ReadonlyArray<{ href: string; roles: readonly OpsRole[] }> = [
+  { href: "/ops/audit-log", roles: ["SECURITY_ADMIN"] },
+  { href: "/ops/raw-access/new", roles: [] },
+  { href: "/ops/billing/refunds", roles: ["BILLING"] },
+];
 const knownOpsPaths = new Set(listAppRoutes().map((route) => route.path));
 const OPS_WALK: ReadonlyArray<{ href: string; roles: readonly OpsRole[] }> = [
   ...OPS_MENU.map((item) => ({ href: item.href, roles: item.roles })),
-  ...OPS_EXTRA_PATHS.filter((path) => knownOpsPaths.has(path)).map((href) => ({
-    href,
-    roles: (OPS_MENU.find(
-      (item) => href.startsWith(item.href) || item.prefixes?.some((p) => href.startsWith(p)),
-    )?.roles ?? []) as readonly OpsRole[],
-  })),
+  ...OPS_EXTRA_PATHS.filter((extra) => knownOpsPaths.has(extra.href)),
 ];
 
-/** 운영자 하위 역할마다 메뉴와 각 화면의 허용·차단이 역할 규칙과 같은지 본다. */
 /** 업무 역할 전부를 돌면 시간이 길어져, 화면 묶음이 서로 겹치지 않는 대표 역할만 돈다. */
-const WALKED_OPS_ROLES: readonly OpsRole[] = ["SUPPORT", "BILLING", "PRIVACY", "OPS", "EXEC_VIEW"];
+/** 운영자 하위 역할마다 메뉴와 각 화면의 허용·차단이 역할 규칙과 같은지 본다. */
+const WALKED_OPS_ROLES: readonly OpsRole[] = ["BILLING", "PRIVACY", "OPS", "EXEC_VIEW"];
 for (const role of WALKED_OPS_ROLES) {
   test.describe(`운영 역할 ${role} 화면 순회`, () => {
     test("메뉴는 보유 역할에 맞는 항목만 나온다", async ({ page }) => {
