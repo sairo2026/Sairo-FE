@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, screen, waitFor, within } from "@testing-library/react";
+import { cleanup, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http } from "msw";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
@@ -233,13 +233,26 @@ describe("매물 보관과 복원", () => {
     expect(within(dialog).queryByText(/PROPOSED|APPLYING|SIGNED/)).toBeNull();
   });
 
-  it("보관하면 목록으로 이동한다", async () => {
+  it("보관하면 완료 안내를 보여주고 확인을 누르면 목록으로 이동한다", async () => {
     const user = userEvent.setup();
     renderOffice(<PropertyDetailScreen propertyId={501} />, { role: "OWNER" });
     await user.click(await screen.findByRole("button", { name: "보관" }));
     await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "보관" }));
-    await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/properties"));
+    const notice = await screen.findByRole("dialog", { name: "매물 보관이 완료되었습니다." });
+    expect(navigation.push).not.toHaveBeenCalled();
     expect(getMockPropertyState().properties[0]?.deletedAt).toBeTruthy();
+    await user.click(within(notice).getByRole("button", { name: "확인" }));
+    expect(navigation.push).toHaveBeenCalledWith("/properties");
+  });
+
+  it("임시저장 매물을 삭제하면 삭제 완료 안내를 보여준다", async () => {
+    const user = userEvent.setup();
+    renderOffice(<PropertyDetailScreen propertyId={502} />, { role: "OWNER" });
+    await user.click(await screen.findByRole("button", { name: "보관" }));
+    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "보관" }));
+    const notice = await screen.findByRole("dialog", { name: "매물 삭제가 완료되었습니다." });
+    await user.click(within(notice).getByRole("button", { name: "확인" }));
+    expect(navigation.push).toHaveBeenCalledWith("/properties");
   });
 
   it("서버가 진행 중인 계약을 알려 오면 오류 문구를 보여준다", async () => {

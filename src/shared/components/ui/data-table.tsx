@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { cn } from "@/shared/lib/cn";
 import { Button } from "./button";
+import { Checkbox } from "./select-field";
 import { formatCount } from "@/shared/lib/format";
 import { Pagination } from "./pagination";
 import { TableScroll } from "./table-scroll";
@@ -30,6 +31,15 @@ export type DataTableColumn<Row> = {
   truncate?: boolean;
 };
 
+export type DataTableSelection<Row> = {
+  /** 선택된 행 번호 모음. */
+  selectedIds: ReadonlySet<string>;
+  onToggleRow: (id: string) => void;
+  /** 스크린리더가 읽는 행 선택 이름. */
+  rowLabel: (row: Row) => string;
+  disabled?: boolean;
+};
+
 export type DataTableProps<Row> = {
   caption: string;
   columns: DataTableColumn<Row>[];
@@ -49,6 +59,8 @@ export type DataTableProps<Row> = {
   emptyMessage?: string;
   /** 주면 행 전체가 그 주소로 들어가는 눌림 영역이 되고 호버 배경과 오른쪽 화살표가 붙는다. */
   getRowHref?: (row: Row) => string | undefined;
+  /** 주면 맨 앞에 행 선택 체크박스 열이 붙는다. */
+  selection?: DataTableSelection<Row>;
 };
 
 const TRUNCATE_WIDTH_CLASS = "max-w-[16rem]";
@@ -82,6 +94,7 @@ export function DataTable<Row>({
   onRetry,
   emptyMessage = "표시할 내용이 없습니다.",
   getRowHref,
+  selection,
 }: DataTableProps<Row>) {
   const pageCount = Math.max(1, Math.ceil(totalCount / pageSize));
   const holderRef = useRef<HTMLDivElement>(null);
@@ -119,6 +132,14 @@ export function DataTable<Row>({
             <caption className="sr-only">{caption}</caption>
             <thead>
               <tr>
+                {selection ? (
+                  <th
+                    scope="col"
+                    className="sticky top-0 z-20 h-[60px] w-12 border-b border-brand-border bg-white py-0 pr-2"
+                  >
+                    <span className="sr-only">선택</span>
+                  </th>
+                ) : null}
                 {columns.map((column) => (
                   <th
                     key={column.key}
@@ -154,6 +175,7 @@ export function DataTable<Row>({
                 : isLoading
                   ? Array.from({ length: 5 }, (_, index) => (
                       <tr key={`loading-${index}`} aria-hidden="true">
+                        {selection ? <td className="w-12 py-4 pr-2" /> : null}
                         {columns.map((column) => (
                           <td key={column.key} className="py-4 pr-5">
                             <span className="block h-4 animate-pulse rounded-small bg-surface" />
@@ -171,6 +193,16 @@ export function DataTable<Row>({
                             href && "clickable-table-row group relative",
                           )}
                         >
+                          {selection ? (
+                            <td className="relative z-10 h-[72px] w-12 py-0 pr-2">
+                              <Checkbox
+                                ariaLabel={selection.rowLabel(row)}
+                                checked={selection.selectedIds.has(getRowId(row))}
+                                disabled={selection.disabled}
+                                onCheckedChange={() => selection.onToggleRow(getRowId(row))}
+                              />
+                            </td>
+                          ) : null}
                           {columns.map((column, columnIndex) => (
                             <td
                               key={column.key}

@@ -46,7 +46,7 @@ export function summarizeOffers(item: ListItem): string[] {
   );
 }
 
-function seoulToday(now: Date): string {
+export function seoulToday(now: Date): string {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Seoul",
     year: "numeric",
