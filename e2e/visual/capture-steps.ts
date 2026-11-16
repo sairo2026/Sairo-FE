@@ -97,6 +97,17 @@ export async function wrongPasswordLogin(page: Page): Promise<void> {
   await page.getByRole("alert").first().waitFor();
 }
 
+export async function lockedLogin(page: Page): Promise<void> {
+  await page.getByPlaceholder("이메일 주소를 입력해 주세요.").fill("agent@example.com");
+  await page.getByPlaceholder("비밀번호를 입력해 주세요.").fill("wrong-password-1");
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    const response = page.waitForResponse("**/api/auth/login");
+    await page.getByRole("button", { name: "로그인", exact: true }).click();
+    await response;
+  }
+  await page.getByRole("timer").waitFor();
+}
+
 export async function forgotPasswordSent(page: Page): Promise<void> {
   await page.getByPlaceholder("email@email.com").fill("email@email.com");
   await page.getByRole("button", { name: "재설정 링크 받기" }).click();

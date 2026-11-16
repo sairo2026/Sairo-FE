@@ -131,7 +131,7 @@ describe("이메일 로그인", () => {
     await user.type(screen.getByLabelText("비밀번호"), "wrong-password");
     await user.click(screen.getByRole("button", { name: "로그인" }));
     expect((await screen.findByRole("alert")).textContent).toBe(
-      "이메일 또는 비밀번호가 맞지 않습니다.",
+      "이메일 또는 비밀번호가 맞지 않습니다. 5회 불일치 시 15분 뒤 다시 시도할 수 있습니다.",
     );
     expect(navigation.replace).not.toHaveBeenCalled();
   });
@@ -145,6 +145,9 @@ describe("이메일 로그인", () => {
     await user.click(screen.getByRole("button", { name: "로그인" }));
     const timer = await screen.findByRole("timer");
     expect(timer.textContent).toBe("15:00");
+    const notice = screen.getByRole("alert");
+    expect(notice.textContent).toContain("로그인에 5회 실패해 잠시 막았습니다.");
+    expect(notice.className).toContain("text-danger");
     expect(screen.getByRole("button", { name: "로그인" }).getAttribute("aria-disabled")).toBe(
       "true",
     );

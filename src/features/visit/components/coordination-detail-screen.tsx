@@ -35,6 +35,7 @@ import {
   RESCHEDULE_TRIGGER_TEXT,
   labelOf,
   linkValidity,
+  statusStage,
 } from "../model/labels";
 import { ApiError } from "@/shared/api/client";
 import { CUSTOMER_LINK_EXPIRY_RULE } from "../model/customer-link-rules";
@@ -419,7 +420,15 @@ function CustomerTimePanel({ detail, isReadOnly }: { detail: Detail; isReadOnly:
 
 type ScheduleRow = { candidatePropertyId: number; order: string; visit: string; travel: string };
 
-function SchedulePanel({ detail, isReadOnly }: { detail: Detail; isReadOnly: boolean }) {
+function SchedulePanel({
+  detail,
+  isReadOnly,
+  onSuggested,
+}: {
+  detail: Detail;
+  isReadOnly: boolean;
+  onSuggested: (starts: Record<number, string>) => void;
+}) {
   const refresh = useRefresh();
   const [rows, setRows] = useState<ScheduleRow[]>(() =>
     detail.candidateProperties.map((item, index) => ({
@@ -456,10 +465,15 @@ function SchedulePanel({ detail, isReadOnly }: { detail: Detail; isReadOnly: boo
         },
         detail.version,
       ),
-    onSuccess: async () => {
+    onSuccess: async (data) => {
       setError(undefined);
       setBlockedIds(null);
       setNotice("일정 구성을 저장했습니다. 신청 가능한 시작 시각 후보가 계산되었습니다.");
+      onSuggested(
+        Object.fromEntries(
+          data.items.map((item) => [item.candidatePropertyId, item.suggestedStartAt]),
+        ),
+      );
       await refresh();
     },
     onError: async (caught) => {
@@ -680,6 +694,8 @@ function DetailBody({ detail }: { detail: Detail }) {
   const { role, isReadOnly } = useOfficeAccess();
   const isDeputy = role === "DEPUTY";
   const alert = detail.rescheduleAlert;
+  const [suggestedStarts, setSuggestedStarts] = useState<Record<number, string>>({});
+  const stage = statusStage(detail.status, (detail.scheduleItems ?? []).length > 0);
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-wrap items-end justify-between gap-4">
@@ -687,8 +703,9 @@ function DetailBody({ detail }: { detail: Detail }) {
           <h1 className="text-h1 font-bold text-ink">방문 조율 상세</h1>
           <div className="flex flex-wrap items-center gap-3 text-body text-ink">
             <CustomerSummary detail={detail} isDeputy={isDeputy} />
-            <CoordinationStatusBadge status={detail.status} />
+            <CoordinationStatusBadge status={detail.status} label={stage.label} />
           </div>
+          {stage.hint ? <p className="text-caption text-ink-2">{stage.hint}</p> : null}
           <p className="text-caption text-ink-2">
             담당 {detail.managerName} · 방문 가능 {formatSeoulDate(detail.periodStartDate)} ~{" "}
             {formatSeoulDate(detail.periodEndDate)}
@@ -715,8 +732,9 @@ function DetailBody({ detail }: { detail: Detail }) {
             key={detail.candidateProperties.map((item) => item.candidatePropertyId).join("-")}
             detail={detail}
             isReadOnly={isReadOnly}
+            onSuggested={setSuggestedStarts}
           />
-          <RequestsSection detail={detail} />
+          <RequestsSection detail={detail} suggestedStarts={suggestedStarts} />
           <ChangeSection detail={detail} />
           <ResultSection detail={detail} />
           <ConfirmationSection detail={detail} />

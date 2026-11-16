@@ -225,8 +225,11 @@ export function ApproverRequestList({
           </FormNotice>
         ) : (
           <FormAlert>
-            최신 조건을 확인한 결과 확정하지 못했습니다. {failureText(result)} 다른 신청을 선택해
-            주세요. 신청한 중개사에게는 사유와 대안 안내가 전달됩니다.
+            최신 조건을 확인한 결과 확정하지 못했습니다. {failureText(result)}{" "}
+            {items.length > 0
+              ? "남아 있는 다른 신청을 선택할 수 있습니다."
+              : "지금 비교할 다른 신청은 없으며 중개사가 다시 신청하면 이곳에 나타납니다."}{" "}
+            신청한 중개사에게는 사유와 대안 안내가 전달됩니다.
           </FormAlert>
         )
       ) : null}

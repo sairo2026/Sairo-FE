@@ -142,7 +142,11 @@ describe("방문 신청 현황", () => {
     expect(
       await screen.findByText(/함께 위반한 항목 승인자가 허용한 시간대가 아닙니다/),
     ).not.toBeNull();
-    expect(screen.getByText(/함께 위반한 항목 고객의 다른 확정 방문과 겹칩니다/)).not.toBeNull();
+    expect(
+      screen.getByText(
+        /함께 위반한 항목 고객이 가능하다고 한 시간이 아니거나 고객의 다른 확정 방문과 겹칩니다/,
+      ),
+    ).not.toBeNull();
     expect(screen.getAllByText(/다음 행동 조율 상세의 일정 구성을 다시 저장/).length).toBe(1);
     expect(screen.queryByText(/CONDITION_CHANGED|WINDOW_MISMATCH|CUSTOMER_CONFLICT/)).toBeNull();
   });

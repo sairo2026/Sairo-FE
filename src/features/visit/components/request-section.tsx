@@ -109,10 +109,12 @@ function CandidateRequests({
   detail,
   candidate,
   requests,
+  suggestedStartAt,
 }: {
   detail: Detail;
   candidate: Candidate;
   requests: RequestListItem[];
+  suggestedStartAt?: string;
 }) {
   const refresh = useRefreshAll();
   const { role, isReadOnly } = useOfficeAccess();
@@ -179,6 +181,8 @@ function CandidateRequests({
       {isOpen ? (
         <RequestForm
           slots={candidate.applicableSlots}
+          defaultDurationMinutes={candidate.visitDurationMinutes}
+          suggestedStartAt={suggestedStartAt}
           submitLabel="방문 신청 제출"
           isPending={mutation.isPending}
           feedback={mutation.isError ? <RequestFailure error={mutation.error} /> : undefined}
@@ -205,7 +209,13 @@ function CandidateRequests({
   );
 }
 
-export function RequestsSection({ detail }: { detail: Detail }) {
+export function RequestsSection({
+  detail,
+  suggestedStarts = {},
+}: {
+  detail: Detail;
+  suggestedStarts?: Record<number, string>;
+}) {
   const query = useVisitRequests(detail.coordinationId);
   return (
     <section id="requests" className="flex flex-col gap-3" aria-labelledby="requests-title">
@@ -222,7 +232,8 @@ export function RequestsSection({ detail }: { detail: Detail }) {
       </div>
       <p className="text-caption text-ink-2">
         신청은 고객 가능 시간과 승인자 조건이 맞는 구간에서만 낼 수 있고 승인자의 시간표 전체는
-        보이지 않습니다. {REQUEST_NOT_RESERVATION_NOTICE}
+        보이지 않습니다. 신청 구간을 누르면 일정 구성의 방문 소요시간만큼만 채워지며, 같은 조율의
+        다른 매물과 겹치면 확정할 때 재검증에 실패합니다. {REQUEST_NOT_RESERVATION_NOTICE}
       </p>
       {query.isError ? (
         <FormAlert>신청 목록을 불러오지 못했습니다. 잠시 뒤 다시 시도해 주세요.</FormAlert>
@@ -234,6 +245,7 @@ export function RequestsSection({ detail }: { detail: Detail }) {
             detail={detail}
             candidate={candidate}
             requests={query.data?.items ?? []}
+            suggestedStartAt={suggestedStarts[candidate.candidatePropertyId]}
           />
         ))}
       </ul>
@@ -325,6 +337,7 @@ function ChangeItem({
         ) : (
           <RequestForm
             slots={changeSlots}
+            defaultDurationMinutes={candidate?.visitDurationMinutes}
             submitLabel="변경 신청 제출"
             isPending={mutation.isPending}
             feedback={mutation.isError ? <RequestFailure error={mutation.error} /> : undefined}

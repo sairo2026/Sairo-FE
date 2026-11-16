@@ -497,7 +497,9 @@ describe("매물 등록 요청 멱등 키", () => {
       const user = userEvent.setup();
       renderOffice(<PropertyCreateScreen />, { role: "OWNER" });
       await screen.findByRole("option", { name: "아파트" });
-      await user.click(screen.getByRole("button", { name: "직접 입력해서 추가하기" }));
+      await user.click(
+        screen.getAllByRole("button", { name: "직접 입력해서 추가하기" }).at(-1) as HTMLElement,
+      );
       await user.type(screen.getByLabelText("새 카테고리 이름"), "창고형 상가");
       await user.click(screen.getByRole("button", { name: "추가" }));
       await waitFor(() =>
@@ -517,7 +519,9 @@ describe("매물 등록 요청 멱등 키", () => {
     it("이름이 비었거나 중복이면 안내한다", async () => {
       const user = userEvent.setup();
       renderOffice(<PropertyCreateScreen />, { role: "OWNER" });
-      await user.click(screen.getByRole("button", { name: "직접 입력해서 추가하기" }));
+      await user.click(
+        screen.getAllByRole("button", { name: "직접 입력해서 추가하기" }).at(-1) as HTMLElement,
+      );
       await user.click(screen.getByRole("button", { name: "추가" }));
       expect(await screen.findByText("카테고리 이름을 입력해 주세요.")).not.toBeNull();
       await user.type(screen.getByLabelText("새 카테고리 이름"), "주차장");
