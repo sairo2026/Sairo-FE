@@ -86,9 +86,12 @@ function OfficeShellFrame({ children, activeKey }: { children: ReactNode; active
   const tabs = activeSection?.tabs ?? [];
   const officeName = context.officeName ?? undefined;
   const grace = describeGrace(context);
-  const banner = isReadOnly
-    ? "결제가 지연되어 읽기만 가능합니다. 대표가 결제를 마치면 다시 저장할 수 있습니다."
-    : grace;
+  // 대표의 결제 화면은 읽기 전용 판정에서 빠지지만 업무 화면이 막힌 이유는 알려야 한다.
+  const isOverdue = context.accessCondition === "PAYMENT_OVERDUE";
+  const banner =
+    isReadOnly || isOverdue
+      ? "결제가 지연되어 읽기만 가능합니다. 대표가 결제를 마치면 다시 저장할 수 있습니다."
+      : grace;
   return (
     <OfficeLayout
       activeKey={active?.sectionKey ?? activeKey}

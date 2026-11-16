@@ -3,45 +3,12 @@ import { join } from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 import { settle, useMockOfficeRole as setMockRole, type MockOfficeRole } from "../support/app";
 import { fixMockClock } from "../support/scenario";
+import { attachProbe, collectFacts, unexpectedFailures } from "../support/walk";
+import { OFFICE_ROUTES, ROLES, type Role } from "../support/office-routes";
 import { listAppRoutes } from "../support/routes";
 
-type Role = "OWNER" | "AGENT" | "DEPUTY";
-const ROLES: readonly Role[] = ["OWNER", "AGENT", "DEPUTY"];
 const FORBIDDEN_TITLE = "접근 권한이 없습니다";
 const REPORT_DIR = join(process.cwd(), "role-walk-report");
-
-/** 접근 규칙(access-policy, role-menu)에서 기대하는 역할별 접근 표. */
-const OFFICE_ROUTES: ReadonlyArray<{
-  path: string;
-  label: string;
-  roles: readonly Role[];
-  finalPath?: string;
-}> = [
-  { path: "/home", label: "홈", roles: ROLES },
-  { path: "/tasks", label: "오늘 할 일", roles: ROLES },
-  { path: "/properties", label: "매물", roles: ["OWNER", "AGENT"] },
-  { path: "/properties/new", label: "매물 등록", roles: ["OWNER", "AGENT"] },
-  { path: "/customers", label: "고객", roles: ["OWNER", "AGENT"] },
-  { path: "/customers/new", label: "고객 등록", roles: ["OWNER", "AGENT"] },
-  { path: "/coordinations", label: "방문 조율", roles: ROLES },
-  { path: "/coordinations/new", label: "방문 조율 생성", roles: ROLES },
-  { path: "/granted-properties", label: "열람 허용 매물", roles: ROLES },
-  { path: "/contracts", label: "계약", roles: ["OWNER", "AGENT"] },
-  { path: "/contracts/new", label: "계약 등록", roles: ["OWNER", "AGENT"] },
-  { path: "/import", label: "데이터 이전", roles: ["OWNER"] },
-  { path: "/exports", label: "데이터 내보내기", roles: ["OWNER", "AGENT"] },
-  { path: "/settlements", label: "월말결산", roles: ["OWNER", "AGENT"] },
-  { path: "/members", label: "구성원", roles: ROLES },
-  { path: "/billing", label: "구독·결제", roles: ["OWNER"] },
-  { path: "/billing/plans", label: "요금제", roles: ["OWNER"] },
-  { path: "/office", label: "사무소 정보", roles: ["OWNER"] },
-  { path: "/notifications", label: "알림", roles: ROLES },
-  { path: "/settings", label: "계정 설정", roles: ROLES, finalPath: "/account" },
-  { path: "/properties/1", label: "매물 상세", roles: ["OWNER", "AGENT"] },
-  { path: "/customers/1", label: "고객 상세", roles: ["OWNER", "AGENT"] },
-  { path: "/contracts/1", label: "계약 상세", roles: ["OWNER", "AGENT"] },
-  { path: "/account", label: "내 계정", roles: ROLES },
-];
 
 const EXPECTED_MENU: Record<Role, string[]> = {
   OWNER: [
@@ -64,118 +31,6 @@ const EXPECTED_MENU: Record<Role, string[]> = {
   ],
   DEPUTY: ["홈 (오늘 할 일)", "방문 조율", "사무소 관리"],
 };
-
-type Probe = {
-  consoleErrors: string[];
-  failedApis: string[];
-  pageErrors: string[];
-  detach: () => void;
-};
-
-function attachProbe(page: Page): Probe {
-  let active = true;
-  const probe: Probe = {
-    consoleErrors: [],
-    failedApis: [],
-    pageErrors: [],
-    detach: () => {
-      active = false;
-    },
-  };
-  page.on("console", (message) => {
-    if (!active || message.type() !== "error") return;
-    const text = message.text();
-    // 응답 상태는 failedApis가 따로 잡는다.
-    if (text.startsWith("Failed to load resource")) return;
-    probe.consoleErrors.push(text.slice(0, 300));
-  });
-  page.on("pageerror", (error) => {
-    if (active) probe.pageErrors.push(String(error).slice(0, 300));
-  });
-  page.on("response", (response) => {
-    if (!active) return;
-    const url = new URL(response.url());
-    if (!url.pathname.startsWith("/api/")) return;
-    if (response.status() >= 400) {
-      probe.failedApis.push(
-        `${response.status()} ${response.request().method()} ${url.pathname}${url.search}`,
-      );
-    }
-  });
-  page.on("requestfailed", (request) => {
-    if (!active) return;
-    const url = new URL(request.url());
-    if (url.pathname.startsWith("/api/")) {
-      probe.failedApis.push(`FAILED ${request.method()} ${url.pathname}`);
-    }
-  });
-  return probe;
-}
-
-/** 모의 자료에 없는 번호(1)나 비어 있는 상태를 뜻하는 404·401은 정상 응답으로 본다. */
-const EXPECTED_EMPTY =
-  /^(404|401) GET .*(\/1(\/|\?|$)|archive-grants\/current|owner-transfer|start-customer-agreement)/;
-
-function unexpectedFailures(probe: Probe): string[] {
-  return probe.failedApis.filter((line) => !EXPECTED_EMPTY.test(line));
-}
-
-type PageFacts = {
-  overflow: number;
-  headings: string[];
-  forbidden: boolean;
-  menu: string[];
-  actions: string[];
-  disabledActions: string[];
-  banner: string | null;
-  url: string;
-};
-
-const MUTATING = /등록|저장|삭제|보관|추가|생성|신청|제출|발송|확정|취소|이전|내보내기/;
-
-async function collectFacts(page: Page): Promise<PageFacts> {
-  return page.evaluate((mutatingSource) => {
-    const mutating = new RegExp(mutatingSource);
-    const root = document.documentElement;
-    const visible = (el: Element) => {
-      const r = el.getBoundingClientRect();
-      const s = getComputedStyle(el);
-      return r.width > 0 && r.height > 0 && s.visibility !== "hidden" && s.display !== "none";
-    };
-    const textOf = (el: Element) => (el.textContent ?? "").trim().replace(/\s+/g, " ");
-    const headings = Array.from(document.querySelectorAll("h1, h2, h3, [role='heading']"))
-      .filter(visible)
-      .map(textOf);
-    const nav = document.querySelector('nav[aria-label="주요 메뉴"]');
-    const menu = nav ? Array.from(nav.querySelectorAll("a")).map(textOf) : [];
-    const controls = Array.from(
-      document.querySelectorAll<HTMLElement>(
-        "main button, main a[href], [role='main'] button, [role='main'] a[href]",
-      ),
-    ).filter(visible);
-    const named = controls
-      .map((el) => ({
-        text: el.getAttribute("aria-label") ?? textOf(el),
-        disabled:
-          (el as HTMLButtonElement).disabled === true ||
-          el.getAttribute("aria-disabled") === "true",
-      }))
-      .filter((item) => mutating.test(item.text));
-    const status = Array.from(document.querySelectorAll("[role='status']"))
-      .map(textOf)
-      .find((text) => text.includes("읽기만"));
-    return {
-      overflow: root.scrollWidth - root.clientWidth,
-      headings,
-      forbidden: headings.some((text) => text.includes("접근 권한이 없습니다")),
-      menu,
-      actions: named.filter((item) => !item.disabled).map((item) => item.text),
-      disabledActions: named.filter((item) => item.disabled).map((item) => item.text),
-      banner: status ?? null,
-      url: location.pathname,
-    };
-  }, MUTATING.source);
-}
 
 const matrix: Record<string, unknown> = {};
 

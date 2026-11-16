@@ -1,6 +1,32 @@
 import type { Page } from "@playwright/test";
 
-export type MockOfficeRole = "OWNER" | "AGENT" | "DEPUTY" | "NEW" | "OWNER_OVERDUE";
+export type MockOfficeRole =
+  | "OWNER"
+  | "AGENT"
+  | "DEPUTY"
+  | "NEW"
+  | "OWNER_OVERDUE"
+  | "AGENT_OVERDUE"
+  | "DEPUTY_OVERDUE"
+  | "OWNER_UNPAID"
+  | "AGENT_UNPAID"
+  | "OWNER_REVIEW"
+  | "AGENT_REVIEW"
+  | "OWNER_REVOKED"
+  | "OWNER_SUSPENDED"
+  | "AGENT_REVOKED"
+  | "REMOVED"
+  | "RETURN_EXPIRED";
+
+export const MOCK_OPS_ROLES_STORAGE_KEY = "sairo-mock-ops-roles";
+
+/** 운영 콘솔에서 보유 역할을 쉼표 목록으로 줄인다. 첫 화면이 열리기 전에 적용한다. */
+export async function useMockOpsRoles(page: Page, roles: readonly string[]): Promise<void> {
+  await page.addInitScript(([key, value]) => window.localStorage.setItem(key, value), [
+    MOCK_OPS_ROLES_STORAGE_KEY,
+    roles.join(","),
+  ] as const);
+}
 
 export const MOCK_ROLE_STORAGE_KEY = "sairo-mock-office-role";
 
