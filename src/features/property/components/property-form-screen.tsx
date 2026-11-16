@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import type { ReactNode } from "react";
+import { createOwnerOccupant } from "@/features/customer/api/customer.api";
 import type { PropertyDetailResponse } from "@/lib/api/contracts/property.schema";
 import { useIdempotencyKeyHolder } from "@/shared/api/idempotency-key";
 import { cn } from "@/shared/lib/cn";
@@ -29,6 +30,7 @@ import { useOfficeAccess } from "@/shared/session/office-access-context";
 import {
   changePropertyCategory,
   checkDuplicateProperty,
+  createOffer,
   createProperty,
   deletePhoto,
   fetchProperty,
@@ -45,9 +47,11 @@ import {
 } from "../hooks/property-queries";
 import {
   EMPTY_PROPERTY_FORM,
+  activeOfferOf,
   fieldRawFromValue,
   formFromDetail,
   toCreateRequest,
+  toOfferRequest,
   toFieldPayload,
   toUpdateRequest,
   validateFieldValue,
@@ -59,9 +63,17 @@ import type {
   PropertyFormField,
   PropertyFormValues,
 } from "../model/form";
-import { OCCUPANCY_LABEL, OCCUPANCY_STATUSES } from "../model/labels";
+import { seoulToday } from "../model/format";
+import { OCCUPANCY_LABEL, OCCUPANCY_STATUSES, OWNER_OCCUPANT_ROLE_LABEL } from "../model/labels";
 import { describePropertyError, fieldErrorMap, isApiCode } from "../model/messages";
 import { CustomFieldsSection } from "./custom-fields-section";
+import {
+  CategoryQuickAdd,
+  CustomerNamePicker,
+  DealPriceFields,
+  DealTypeChips,
+} from "./property-form-parts";
+import type { PartyPick } from "./property-form-parts";
 import type { FieldValueMap } from "./custom-fields-section";
 import { QueuedPhotoList, SavedPhotoList, toQueuedPhoto, validatePhotoFile } from "./photo-section";
 import type { PhotoPart, QueuedPhoto } from "./photo-section";
@@ -209,13 +221,19 @@ function CategoryChangeDialog({
     >
       <div className="flex flex-col gap-3">
         <p>이전 카테고리의 전용 입력값은 지우지 않고 보관되며 매물 상세에서 확인할 수 있습니다.</p>
-        <SelectField
-          label="새 카테고리"
-          value={target}
-          placeholder="카테고리를 선택해 주세요."
-          options={options}
-          onValueChange={setTarget}
-        />
+        <div className="flex flex-wrap items-end gap-3">
+          <SelectField
+            label="새 카테고리"
+            value={target}
+            placeholder="카테고리를 선택해 주세요."
+            options={options}
+            onValueChange={setTarget}
+          />
+          <CategoryQuickAdd
+            disabled={mutation.isPending}
+            onCreated={(id) => setTarget(String(id))}
+          />
+        </div>
         {error ? <FormAlert>{error}</FormAlert> : null}
       </div>
     </Modal>
@@ -254,6 +272,8 @@ export function PropertyForm(props: FormProps) {
   const [duplicates, setDuplicates] = useState<DuplicateMatch[] | null>(null);
   const [duplicateError, setDuplicateError] = useState<string>();
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
+  const [owner, setOwner] = useState<PartyPick | null>(null);
+  const [occupant, setOccupant] = useState<PartyPick | null>(null);
   const pendingActivate = useRef(false);
   const photoSeq = useRef(0);
 
@@ -263,6 +283,8 @@ export function PropertyForm(props: FormProps) {
   const definitions = useFieldDefinitions(categoryId);
   const live = usePropertyDetail(detail?.propertyId ?? 0);
   const current = live.data ?? detail;
+  const activeOffer = current ? activeOfferOf(current) : null;
+  const isOfferLocked = activeOffer !== null;
 
   const savedValueOf = (definition: FieldDefinition): string => {
     const saved = current?.customFields.find(
@@ -283,7 +305,11 @@ export function PropertyForm(props: FormProps) {
   }
 
   function validateAll(activate: boolean) {
-    const nextErrors = validatePropertyForm(values, { requireCategory: !isEdit, activate });
+    const nextErrors = validatePropertyForm(values, {
+      requireCategory: !isEdit,
+      activate,
+      checkOffer: !isOfferLocked,
+    });
     const nextFieldErrors: Record<number, string | undefined> = {};
     for (const definition of definitions.data?.items ?? []) {
       if (!definition.active) continue;
@@ -304,6 +330,19 @@ export function PropertyForm(props: FormProps) {
       if (raw !== baseline) writes.push({ definition, raw });
     }
     return writes;
+  }
+
+  async function saveDealAndParties(propertyId: number) {
+    const offer = isOfferLocked ? null : toOfferRequest(values);
+    if (offer) await createOffer(propertyId, offer);
+    const startDate = seoulToday(new Date());
+    for (const [pick, role] of [
+      [owner, "OWNER"],
+      [occupant, "OCCUPANT"],
+    ] as const) {
+      if (pick)
+        await createOwnerOccupant(propertyId, { customerId: pick.customerId, role, startDate });
+    }
   }
 
   const createKeys = useIdempotencyKeyHolder();
@@ -327,6 +366,14 @@ export function PropertyForm(props: FormProps) {
           );
           version = written.version;
         }
+        try {
+          await saveDealAndParties(detail.propertyId);
+        } catch (caught) {
+          throw Object.assign(new Error("partial"), {
+            propertyId: detail.propertyId,
+            cause: caught,
+          });
+        }
         return { propertyId: detail.propertyId, partial: false };
       }
       const request = toCreateRequest(submitValues);
@@ -349,6 +396,7 @@ export function PropertyForm(props: FormProps) {
           if (photo.description.trim() !== "") form.append("description", photo.description.trim());
           await uploadPhoto(created.propertyId, form);
         }
+        await saveDealAndParties(created.propertyId);
         if (input.activate) {
           const latest = await fetchProperty(created.propertyId);
           await updateProperty(created.propertyId, { registrationStage: "ACTIVE" }, latest.version);
@@ -369,6 +417,12 @@ export function PropertyForm(props: FormProps) {
       const partial = caught as { propertyId?: number; cause?: unknown };
       if (partial.propertyId !== undefined) {
         await queryClient.invalidateQueries({ queryKey: propertyKeys.all });
+        if (isEdit) {
+          setFormError(
+            `${describePropertyError(partial.cause, "일부 내용을 저장하지 못했습니다.")} 매물 정보는 저장되었습니다. 거래 제안과 소유·점유 연결은 매물 상세에서 확인한 뒤 다시 시도해 주세요.`,
+          );
+          return;
+        }
         setFormError(
           `${describePropertyError(partial.cause, "일부 내용을 저장하지 못했습니다.")} 매물은 임시저장되었습니다. 매물 수정 화면에서 이어서 입력해 주세요.`,
         );
@@ -520,6 +574,12 @@ export function PropertyForm(props: FormProps) {
     );
   }
 
+  function linkedNames(role: "OWNER" | "OCCUPANT"): string[] {
+    return (current?.ownerOccupants ?? [])
+      .filter((item) => item.role === role && !item.endDate)
+      .map((item) => item.customerName);
+  }
+
   const isBusy = saveMutation.isPending;
   const title = isEdit ? "매물 수정" : "매물 등록";
   const isDraft = !isEdit || current?.registrationStage === "DRAFT";
@@ -607,9 +667,44 @@ export function PropertyForm(props: FormProps) {
             onValueChange={(value) => setField("name", value)}
             error={errors.name}
           />
+          <DealPriceFields
+            values={values}
+            errors={errors}
+            disabled={isReadOnly || isOfferLocked}
+            onChange={setField}
+          />
+          <CustomerNamePicker
+            label={OWNER_OCCUPANT_ROLE_LABEL.OWNER}
+            placeholder="매물 소유자의 이름을 입력해 주세요."
+            selected={owner}
+            existingNames={linkedNames("OWNER")}
+            disabled={isReadOnly}
+            onSelect={setOwner}
+          />
+          <CustomerNamePicker
+            label={OWNER_OCCUPANT_ROLE_LABEL.OCCUPANT}
+            placeholder="현재 매물 점유자의 이름을 입력해 주세요."
+            selected={occupant}
+            existingNames={linkedNames("OCCUPANT")}
+            disabled={isReadOnly}
+            onSelect={setOccupant}
+          />
+          <SelectField
+            label="담당 공인중개사"
+            value={values.managingMembershipId}
+            options={[
+              { value: "", label: "선택 안 함" },
+              ...(members.data ?? []).map((item) => ({
+                value: String(item.membershipId),
+                label: item.displayName,
+              })),
+            ]}
+            onValueChange={(value) => setField("managingMembershipId", value)}
+            error={errors.managingMembershipId}
+          />
           {isEdit ? (
             <div className={cn("flex flex-col", OFFICE_FIELD_GAP_CLASS)}>
-              <p className={OFFICE_FIELD_LABEL_CLASS}>카테고리</p>
+              <p className={OFFICE_FIELD_LABEL_CLASS}>건물 카테고리</p>
               <div className="flex items-center gap-3">
                 <span className="text-body font-medium text-ink">{current?.categoryName}</span>
                 <Button
@@ -623,34 +718,41 @@ export function PropertyForm(props: FormProps) {
               </div>
             </div>
           ) : (
-            <SelectField
-              label="카테고리"
-              required
-              value={values.categoryId}
-              placeholder="카테고리를 선택해 주세요."
-              options={(categories.data?.items ?? [])
-                .filter((item) => item.active)
-                .map((item) => ({ value: String(item.categoryId), label: item.name }))}
-              onValueChange={(value) => {
-                setField("categoryId", value);
-                setFieldRaw({});
-                setFieldErrors({});
-              }}
-              error={errors.categoryId}
-            />
+            <div className="flex min-w-0 flex-wrap items-end gap-3">
+              <SelectField
+                label="건물 카테고리"
+                required
+                value={values.categoryId}
+                placeholder="선택"
+                options={(categories.data?.items ?? [])
+                  .filter((item) => item.active)
+                  .map((item) => ({ value: String(item.categoryId), label: item.name }))}
+                onValueChange={(value) => {
+                  setField("categoryId", value);
+                  setFieldRaw({});
+                  setFieldErrors({});
+                }}
+                error={errors.categoryId}
+              />
+              <CategoryQuickAdd
+                disabled={isReadOnly}
+                onCreated={(id) => {
+                  setField("categoryId", String(id));
+                  setFieldRaw({});
+                  setFieldErrors({});
+                }}
+              />
+            </div>
           )}
-          <SelectField
-            label="담당 공인중개사"
-            value={values.managingMembershipId}
-            options={[
-              { value: "", label: "선택 안 함" },
-              ...(members.data ?? []).map((item) => ({
-                value: String(item.membershipId),
-                label: item.displayName,
-              })),
-            ]}
-            onValueChange={(value) => setField("managingMembershipId", value)}
-            error={errors.managingMembershipId}
+          <DealTypeChips
+            values={values}
+            disabled={isReadOnly || isOfferLocked}
+            lockedHint={
+              isOfferLocked
+                ? "진행 중인 거래 제안이 있어 거래 유형과 가격은 매물 상세의 거래 제안에서 바꿉니다."
+                : undefined
+            }
+            onChange={setField}
           />
           <SelectField
             label="점유상태"

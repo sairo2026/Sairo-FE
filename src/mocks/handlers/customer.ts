@@ -6,6 +6,7 @@ import type {
 } from "@/lib/api/contracts/customer.schema";
 import { errorResponse, mockErrors } from "../error-responses";
 import { resetMockIdempotency, withIdempotency } from "../idempotency";
+import { getMockPropertyState, setMockPropertyState } from "./property";
 
 const NOW = "2026-11-10T09:00:00+09:00";
 
@@ -678,6 +679,26 @@ export const customerHandlers = [
           note: null,
         },
       ],
+    });
+    setMockPropertyState({
+      properties: getMockPropertyState().properties.map((property) =>
+        String(property.propertyId) === params.propertyId
+          ? {
+              ...property,
+              ownerOccupants: [
+                ...property.ownerOccupants,
+                {
+                  linkId,
+                  customerId: body.customerId,
+                  customerName: customer.name,
+                  role: body.role,
+                  startDate: body.startDate,
+                  endDate: null,
+                },
+              ],
+            }
+          : property,
+      ),
     });
     return HttpResponse.json(
       {

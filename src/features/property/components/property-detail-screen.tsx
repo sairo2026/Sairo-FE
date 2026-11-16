@@ -23,6 +23,7 @@ import {
 } from "@/shared/lib/format";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { archiveProperty, restoreProperty } from "../api/property.api";
+import { ArchiveCompletedModal, archiveCompletionTitle } from "./archive-notices";
 import { CoordinationStatusBadge } from "@/features/visit/components/coordination-status-badge";
 import { isCoordinationStatus, statusLabel } from "@/features/visit/model/labels";
 import { propertyKeys, usePropertyDetail } from "../hooks/property-queries";
@@ -275,6 +276,7 @@ function ArchiveDialog({
   const router = useRouter();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string>();
+  const [isCompleted, setIsCompleted] = useState(false);
   const blockers = {
     coordinations: property.activeCoordinations,
     contracts: property.contracts.filter((contract) => contract.contractStatus === "SIGNED"),
@@ -282,15 +284,25 @@ function ArchiveDialog({
   const isBlocked = blockers.coordinations.length > 0 || blockers.contracts.length > 0;
   const mutation = useMutation({
     mutationFn: () => archiveProperty(property.propertyId),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: propertyKeys.all });
-      router.push("/properties");
-    },
+    onSuccess: () => setIsCompleted(true),
     onError: async (caught) => {
       await queryClient.invalidateQueries({ queryKey: propertyKeys.detail(property.propertyId) });
       setError(describePropertyError(caught, "매물을 보관하지 못했습니다. 다시 시도해 주세요."));
     },
   });
+  if (isCompleted) {
+    // 완전히 삭제된 임시저장 매물의 상세를 다시 불러오면 404 화면이 안내 위에 뜨므로 확인 뒤에 정리한다.
+    return (
+      <ArchiveCompletedModal
+        title={archiveCompletionTitle([property])}
+        onConfirm={() => {
+          queryClient.removeQueries({ queryKey: propertyKeys.detail(property.propertyId) });
+          void queryClient.invalidateQueries({ queryKey: propertyKeys.all });
+          router.push("/properties");
+        }}
+      />
+    );
+  }
   return (
     <Modal
       size="notice"

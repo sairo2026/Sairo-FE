@@ -382,4 +382,147 @@ describe("매물 등록 요청 멱등 키", () => {
       "이미 처리되었을 수 있으니",
     );
   });
+
+  describe("거래 유형, 가격, 소유자, 점유자", () => {
+    it("월세가 기본으로 선택되고 보증금과 월세를 입력받는다", async () => {
+      renderOffice(<PropertyCreateScreen />, { role: "OWNER" });
+      const monthly = screen.getByRole("button", { name: "월세" });
+      expect(monthly.getAttribute("aria-pressed")).toBe("true");
+      expect(screen.getByLabelText("가격 (보증금, 원)")).not.toBeNull();
+      expect(screen.getByLabelText("가격 (월세, 원)")).not.toBeNull();
+    });
+
+    it("전세나 매매를 고르면 금액 입력이 하나로 바뀐다", async () => {
+      const user = userEvent.setup();
+      renderOffice(<PropertyCreateScreen />, { role: "OWNER" });
+      await user.click(screen.getByRole("button", { name: "전세" }));
+      expect(screen.getByLabelText("가격 (전세 보증금, 원)")).not.toBeNull();
+      expect(screen.queryByLabelText("가격 (월세, 원)")).toBeNull();
+      await user.click(screen.getByRole("button", { name: "매매" }));
+      expect(screen.getByLabelText("가격 (매매가, 원)")).not.toBeNull();
+    });
+
+    it("가격을 입력하면 임시저장과 함께 거래 제안을 만든다", async () => {
+      const user = userEvent.setup();
+      renderOffice(<PropertyCreateScreen />, { role: "OWNER" });
+      await fillBasics(user);
+      await user.type(screen.getByLabelText("가격 (보증금, 원)"), "20000000");
+      await user.type(screen.getByLabelText("가격 (월세, 원)"), "900000");
+      await user.click(screen.getByRole("button", { name: "임시저장" }));
+      await waitFor(() => expect(navigation.push).toHaveBeenCalledTimes(1));
+      const created = getMockPropertyState().properties[0];
+      expect(created?.offers).toHaveLength(1);
+      expect(created?.offers[0]).toMatchObject({
+        dealType: "MONTHLY",
+        depositAmount: 20_000_000,
+        monthlyRentAmount: 900_000,
+        salePrice: null,
+      });
+    });
+
+    it("가격을 비워 두면 거래 제안을 만들지 않는다", async () => {
+      const user = userEvent.setup();
+      renderOffice(<PropertyCreateScreen />, { role: "OWNER" });
+      await fillBasics(user);
+      await user.click(screen.getByRole("button", { name: "임시저장" }));
+      await waitFor(() => expect(navigation.push).toHaveBeenCalledTimes(1));
+      expect(getMockPropertyState().properties[0]?.offers).toHaveLength(0);
+    });
+
+    it("월세에서 보증금만 적으면 월세 입력을 요구하고 저장하지 않는다", async () => {
+      const user = userEvent.setup();
+      renderOffice(<PropertyCreateScreen />, { role: "OWNER" });
+      await fillBasics(user);
+      await user.type(screen.getByLabelText("가격 (보증금, 원)"), "20000000");
+      await user.click(screen.getByRole("button", { name: "임시저장" }));
+      expect(await screen.findByText("월세는 0 이상의 정수(원)로 입력해 주세요.")).not.toBeNull();
+      expect(getMockPropertyState().properties).toHaveLength(2);
+    });
+
+    it("소유자와 점유자를 등록된 고객에서 찾아 연결한다", async () => {
+      const user = userEvent.setup();
+      renderOffice(<PropertyCreateScreen />, { role: "OWNER" });
+      await fillBasics(user);
+      await user.type(screen.getByLabelText("소유자 (선택)"), "김수요");
+      await user.click(screen.getAllByRole("button", { name: "검색" })[0] as HTMLElement);
+      await user.click(
+        (await screen.findAllByRole("button", { name: /^김수요/ }))[0] as HTMLElement,
+      );
+      expect((screen.getByLabelText("소유자 (선택)") as HTMLInputElement).value).toBe("김수요");
+      await user.click(screen.getByRole("button", { name: "임시저장" }));
+      await waitFor(() => expect(navigation.push).toHaveBeenCalledTimes(1));
+      const created = getMockPropertyState().properties[0];
+      expect(created?.ownerOccupants).toHaveLength(1);
+      expect(created?.ownerOccupants[0]).toMatchObject({
+        customerId: 301,
+        customerName: "김수요",
+        role: "OWNER",
+      });
+    });
+
+    it("일치하는 고객이 없으면 고객 관리에서 먼저 등록하라고 안내한다", async () => {
+      const user = userEvent.setup();
+      renderOffice(<PropertyCreateScreen />, { role: "OWNER" });
+      await user.type(screen.getByLabelText("점유자 (선택)"), "없는사람");
+      await user.click(screen.getAllByRole("button", { name: "검색" })[1] as HTMLElement);
+      expect(await screen.findByText(/고객 관리에서 먼저 등록한 뒤 연결해 주세요/)).not.toBeNull();
+    });
+
+    it("진행 중인 거래 제안이 있으면 수정 화면에서 거래 유형과 가격을 잠그고 안내한다", async () => {
+      renderOffice(<PropertyEditScreen propertyId={501} />, { role: "OWNER" });
+      expect(await screen.findByText(/매물 상세의 거래 제안에서 바꿉니다/)).not.toBeNull();
+      expect((screen.getByRole("button", { name: "전세" }) as HTMLButtonElement).disabled).toBe(
+        true,
+      );
+      expect((screen.getByLabelText("가격 (보증금, 원)") as HTMLInputElement).value).toBe(
+        "20000000",
+      );
+      expect(screen.getByText("현재 연결된 고객: 김소유")).not.toBeNull();
+    });
+
+    it("제안이 없는 매물은 수정 화면에서 가격을 넣어 거래 제안을 만든다", async () => {
+      const user = userEvent.setup();
+      renderOffice(<PropertyEditScreen propertyId={502} />, { role: "OWNER" });
+      await user.click(await screen.findByRole("button", { name: "매매" }));
+      await user.type(screen.getByLabelText("가격 (매매가, 원)"), "250000000");
+      await user.click(screen.getByRole("button", { name: "저장" }));
+      await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/properties/502"));
+      const saved = getMockPropertyState().properties.find((item) => item.propertyId === 502);
+      expect(saved?.offers[0]).toMatchObject({ dealType: "SALE", salePrice: 250_000_000 });
+    });
+  });
+
+  describe("건물 카테고리 직접 입력", () => {
+    it("새 이름을 입력해 카테고리를 만들고 바로 선택한다", async () => {
+      const user = userEvent.setup();
+      renderOffice(<PropertyCreateScreen />, { role: "OWNER" });
+      await screen.findByRole("option", { name: "아파트" });
+      await user.click(screen.getByRole("button", { name: "직접 입력해서 추가하기" }));
+      await user.type(screen.getByLabelText("새 카테고리 이름"), "창고형 상가");
+      await user.click(screen.getByRole("button", { name: "추가" }));
+      await waitFor(() =>
+        expect(getMockPropertyState().categories.some((item) => item.name === "창고형 상가")).toBe(
+          true,
+        ),
+      );
+      const created = getMockPropertyState().categories.find((item) => item.name === "창고형 상가");
+      await waitFor(() =>
+        expect((screen.getByLabelText(/건물 카테고리/) as HTMLSelectElement).value).toBe(
+          String(created?.categoryId),
+        ),
+      );
+      expect(screen.queryByLabelText("새 카테고리 이름")).toBeNull();
+    });
+
+    it("이름이 비었거나 중복이면 안내한다", async () => {
+      const user = userEvent.setup();
+      renderOffice(<PropertyCreateScreen />, { role: "OWNER" });
+      await user.click(screen.getByRole("button", { name: "직접 입력해서 추가하기" }));
+      await user.click(screen.getByRole("button", { name: "추가" }));
+      expect(await screen.findByText("카테고리 이름을 입력해 주세요.")).not.toBeNull();
+      await user.type(screen.getByLabelText("새 카테고리 이름"), "주차장");
+      await user.click(screen.getByRole("button", { name: "추가" }));
+      expect(await screen.findByText("같은 이름의 카테고리가 이미 있습니다.")).not.toBeNull();
+    });
+  });
 });

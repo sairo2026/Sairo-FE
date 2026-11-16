@@ -2,10 +2,13 @@ import type {
   PropertyCreateRequest,
   PropertyDetailResponse,
   PropertyFieldDefinitionListResponse,
+  PropertyOfferCreateRequest,
   PropertyUpdateRequest,
 } from "@/lib/api/contracts/property.schema";
 import { countCodePoints, TEXT_LIMITS } from "@/shared/lib/format";
 import { objectParticle, topicParticle } from "@/shared/lib/korean";
+import { isDealType } from "./labels";
+import type { DealType } from "./labels";
 
 export type FieldDefinition = PropertyFieldDefinitionListResponse["items"][number];
 
@@ -29,6 +32,10 @@ export type PropertyFormValues = {
   referenceLeaseEndDate: string;
   referenceLeaseEndSource: string;
   duplicateOverrideReason: string;
+  dealType: DealType;
+  salePrice: string;
+  depositAmount: string;
+  monthlyRentAmount: string;
 };
 
 export type PropertyFormField = keyof PropertyFormValues;
@@ -54,6 +61,10 @@ export const EMPTY_PROPERTY_FORM: PropertyFormValues = {
   referenceLeaseEndDate: "",
   referenceLeaseEndSource: "",
   duplicateOverrideReason: "",
+  dealType: "MONTHLY",
+  salePrice: "",
+  depositAmount: "",
+  monthlyRentAmount: "",
 };
 
 const ADDRESS_MAX = 200;
@@ -69,7 +80,15 @@ function numberText(value: number | null | undefined): string {
   return value === null || value === undefined ? "" : String(value);
 }
 
+const ACTIVE_OFFER_STATUSES: readonly string[] = ["AVAILABLE", "NEGOTIATING"];
+
+/** 거래 제안 중 진행 중인 첫 번째 제안. 수정 화면에서 거래유형과 가격을 보여줄 때 쓴다. */
+export function activeOfferOf(detail: PropertyDetailResponse) {
+  return detail.offers.find((offer) => ACTIVE_OFFER_STATUSES.includes(offer.status)) ?? null;
+}
+
 export function formFromDetail(detail: PropertyDetailResponse): PropertyFormValues {
+  const offer = activeOfferOf(detail);
   return {
     name: detail.name,
     categoryId: String(detail.categoryId),
@@ -90,6 +109,10 @@ export function formFromDetail(detail: PropertyDetailResponse): PropertyFormValu
     referenceLeaseEndDate: text(detail.referenceLeaseEndDate),
     referenceLeaseEndSource: text(detail.referenceLeaseEndSource),
     duplicateOverrideReason: "",
+    dealType: offer && isDealType(offer.dealType) ? offer.dealType : "MONTHLY",
+    salePrice: numberText(offer?.salePrice),
+    depositAmount: numberText(offer?.depositAmount),
+    monthlyRentAmount: numberText(offer?.monthlyRentAmount),
   };
 }
 
@@ -103,9 +126,60 @@ function lengthError(label: string, value: string, max: number): string | undefi
     : undefined;
 }
 
+const AMOUNT_PATTERN = /^\d+$/;
+const AMOUNT_MAX_DIGITS = 15;
+
+function amountError(label: string, value: string): string | undefined {
+  const trimmed = value.trim();
+  if (!AMOUNT_PATTERN.test(trimmed) || trimmed.length > AMOUNT_MAX_DIGITS) {
+    return `${topicParticle(label)} 0 이상의 정수(원)로 입력해 주세요.`;
+  }
+  return undefined;
+}
+
+/** 가격은 비워 둘 수 있고, 하나라도 적으면 거래유형에 필요한 금액을 모두 받는다. */
+export function hasOfferPrice(values: PropertyFormValues): boolean {
+  return (
+    values.salePrice.trim() !== "" ||
+    values.depositAmount.trim() !== "" ||
+    values.monthlyRentAmount.trim() !== ""
+  );
+}
+
+function validateOfferFields(values: PropertyFormValues): PropertyFormErrors {
+  const errors: PropertyFormErrors = {};
+  if (!hasOfferPrice(values)) return errors;
+  if (values.dealType === "SALE") {
+    errors.salePrice = amountError("매매가", values.salePrice);
+  } else {
+    errors.depositAmount = amountError(
+      values.dealType === "JEONSE" ? "전세 보증금" : "보증금",
+      values.depositAmount,
+    );
+  }
+  if (values.dealType === "MONTHLY") {
+    errors.monthlyRentAmount = amountError("월세", values.monthlyRentAmount);
+  }
+  return errors;
+}
+
+/** 입력한 가격이 있으면 새 거래 제안 요청을, 없으면 null을 돌려준다. */
+export function toOfferRequest(values: PropertyFormValues): PropertyOfferCreateRequest | null {
+  if (!hasOfferPrice(values)) return null;
+  return {
+    dealType: values.dealType,
+    salePrice: values.dealType === "SALE" ? Number(values.salePrice) : null,
+    depositAmount: values.dealType === "SALE" ? null : Number(values.depositAmount),
+    monthlyRentAmount: values.dealType === "MONTHLY" ? Number(values.monthlyRentAmount) : null,
+    premiumAmount: null,
+  };
+}
+
 export type PropertyValidationOptions = {
   requireCategory: boolean;
   activate: boolean;
+  /** 이미 진행 중인 제안이 있으면 거래유형과 가격은 거래 제안 탭에서 바꾸므로 검증하지 않는다. */
+  checkOffer?: boolean;
 };
 
 export function validatePropertyForm(
@@ -163,6 +237,7 @@ export function validatePropertyForm(
     values.referenceLeaseEndSource,
     SOURCE_MAX,
   );
+  if (options.checkOffer !== false) Object.assign(errors, validateOfferFields(values));
   if (values.moveInNegotiable && values.moveInDate !== "") {
     errors.moveInDate = "입주 가능일을 협의로 정하면 날짜를 비워 주세요.";
   }

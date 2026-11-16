@@ -220,6 +220,18 @@ const SHOTS: readonly Shot[] = [
     role: "OWNER",
     act: step.openArchiveDialog,
   },
+  {
+    name: "63-매물-삭제-완료",
+    path: "/properties/501",
+    role: "OWNER",
+    act: step.archiveCompleted,
+  },
+  {
+    name: "64-매물-목록-선택",
+    path: "/properties",
+    role: "OWNER",
+    act: step.selectAllProperties,
+  },
 ];
 
 test.describe("화면 캡처(디자인 비교용)", () => {
