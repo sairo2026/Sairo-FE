@@ -19,8 +19,8 @@ export type SelectFieldProps = Omit<
   placeholder?: string;
   error?: string;
   required?: boolean;
-  /** inline은 필터 막대용으로 라벨을 선택 상자 왼쪽에 둔다. */
-  layout?: "stacked" | "inline";
+  /** inline은 필터 막대용으로 라벨을 선택 상자 왼쪽에 둔다. block은 입력 칸과 같은 58px 높이로 폭을 가득 채운다. */
+  layout?: "stacked" | "inline" | "block";
 };
 
 function SelectChevron() {
@@ -62,6 +62,7 @@ export function SelectField({
   const selectId = id ?? generatedId;
   const errorId = `${selectId}-error`;
   const isInline = layout === "inline";
+  const isBlock = layout === "block";
   return (
     <div
       className={cn(
@@ -79,7 +80,7 @@ export function SelectField({
           {label}
         </FieldLabel>
       )}
-      <div className="relative min-w-[115px] max-w-full self-start">
+      <div className={cn("relative max-w-full", isBlock ? "w-full" : "min-w-[115px] self-start")}>
         <select
           {...rest}
           id={selectId}
@@ -89,8 +90,11 @@ export function SelectField({
           aria-describedby={error ? errorId : undefined}
           onChange={(event) => onValueChange(event.target.value)}
           className={cn(
-            "h-[42px] w-full min-w-0 max-w-full appearance-none rounded-small border bg-white pl-[10px] pr-10 text-body font-medium text-ink focus:border-primary disabled:cursor-not-allowed disabled:text-ink-3",
-            error ? "border-danger" : "border-[#9ca3af]",
+            "w-full min-w-0 max-w-full appearance-none text-body font-medium text-ink focus:border-primary disabled:cursor-not-allowed disabled:text-ink-3",
+            isBlock
+              ? "h-[58px] rounded-control border bg-surface pl-5 pr-12 focus:bg-white"
+              : "h-[42px] rounded-small border bg-white pl-[10px] pr-10",
+            error ? "border-danger" : isBlock ? "border-line" : "border-[#9ca3af]",
           )}
         >
           {placeholder ? (
