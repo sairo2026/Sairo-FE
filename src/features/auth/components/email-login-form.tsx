@@ -14,6 +14,7 @@ import { login } from "../api/account.api";
 import { authContextQueryKey } from "../hooks/use-auth-context";
 import { formatClock, useCountdown } from "../hooks/use-countdown";
 import { describeAuthError } from "@/shared/lib/api-messages";
+import { LOGIN_LOCKED_LEAD, LOGIN_MISMATCH_COPY } from "../model/login-lock";
 import { landingPathFor, safeNextPath } from "../model/landing";
 import { AuthFrame } from "@/shared/components/feedback/form-frame";
 
@@ -51,6 +52,10 @@ export function EmailLoginForm({ next }: { next?: string }) {
       if (error instanceof ApiError && error.code === "LOGIN_LOCKED") {
         lock.start(error.retryAfterSeconds ?? 900);
         setFormError(undefined);
+        return;
+      }
+      if (error instanceof ApiError && error.code === "INVALID_CREDENTIALS") {
+        setFormError(LOGIN_MISMATCH_COPY);
         return;
       }
       setFormError(
@@ -102,9 +107,9 @@ export function EmailLoginForm({ next }: { next?: string }) {
           />
         </div>
         {isLocked ? (
-          <p role="alert" className="mt-3 text-center text-caption text-primary">
-            로그인에 5회 실패해 잠시 막았습니다.{" "}
-            <span role="timer">{formatClock(lock.remaining)}</span> 뒤에 다시 시도해 주세요.
+          <p role="alert" className="mt-3 text-center text-caption text-danger">
+            {LOGIN_LOCKED_LEAD} <span role="timer">{formatClock(lock.remaining)}</span> 뒤에 다시
+            시도해 주세요.
           </p>
         ) : null}
         <div className="mt-8 flex justify-center gap-8 text-caption underline">

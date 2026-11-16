@@ -154,6 +154,12 @@ const SHOTS: readonly Shot[] = [
     act: step.wrongPasswordLogin,
   },
   {
+    name: "50-1-로그인-잠금",
+    path: "/login/email",
+    role: null,
+    act: step.lockedLogin,
+  },
+  {
     name: "51-비밀번호-찾기-메일발송후",
     path: "/password/forgot",
     role: null,
