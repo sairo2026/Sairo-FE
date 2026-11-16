@@ -35,6 +35,8 @@ export function RequestForm({
   isPending,
   disabledReason,
   feedback,
+  defaultDurationMinutes,
+  suggestedStartAt,
   onSubmit,
   onCancel,
 }: {
@@ -43,11 +45,16 @@ export function RequestForm({
   isPending: boolean;
   disabledReason?: string;
   feedback?: ReactNode;
+  /** 일정 구성의 방문 소요시간. 구간을 누르면 구간 전체가 아니라 이 시간만큼만 채운다. */
+  defaultDurationMinutes?: number;
+  /** 일정 구성을 저장할 때 계산된 시작 시각. 선택한 구간 안에 있으면 시작 시각으로 쓴다. */
+  suggestedStartAt?: string;
   onSubmit: (body: RequestBody) => void;
   onCancel?: () => void;
 }) {
   const [values, setValues] = useState<RequestFormValues>(initialValues);
   const [errors, setErrors] = useState<RequestFormErrors>({});
+  const [autoNote, setAutoNote] = useState<string>();
 
   function set<K extends keyof RequestFormValues>(key: K, value: RequestFormValues[K]) {
     setValues((current) => ({ ...current, [key]: value }));
@@ -57,16 +64,32 @@ export function RequestForm({
   function pickSlot(index: number) {
     const slot = slots[index];
     if (!slot) return;
-    const start = kstParts(slot.startsAt);
-    const end = kstParts(slot.endsAt);
+    const slotMinutes = minutesBetween(slot.startsAt, slot.endsAt);
+    const length =
+      defaultDurationMinutes !== undefined && defaultDurationMinutes <= slotMinutes
+        ? defaultDurationMinutes
+        : slotMinutes;
+    const suggestedFits =
+      suggestedStartAt !== undefined &&
+      Date.parse(suggestedStartAt) >= Date.parse(slot.startsAt) &&
+      Date.parse(suggestedStartAt) + length * 60_000 <= Date.parse(slot.endsAt);
+    const startIso = suggestedFits && suggestedStartAt ? suggestedStartAt : slot.startsAt;
+    const endIso = new Date(Date.parse(startIso) + length * 60_000).toISOString();
+    const start = kstParts(startIso);
+    const end = kstParts(endIso);
     setValues((current) => ({
       ...current,
       slotIndex: index,
       date: start.date,
       startTime: start.time,
       endTime: end.date === start.date ? end.time : "23:59",
-      duration: String(minutesBetween(slot.startsAt, slot.endsAt)),
+      duration: String(length),
     }));
+    setAutoNote(
+      length < slotMinutes
+        ? `${suggestedFits ? "일정 구성에서 계산한 시작 시각" : "구간의 시작 시각"} ${start.time}부터 ${length}분으로 채웠습니다. 같은 조율의 다른 매물과 겹치지 않게 시각을 고칠 수 있습니다.`
+        : undefined,
+    );
     setErrors({});
   }
 
@@ -94,6 +117,10 @@ export function RequestForm({
     >
       <fieldset className="min-w-0 flex flex-col gap-2">
         <legend className="text-caption font-semibold text-ink">신청 가능 구간</legend>
+        <p className="text-caption text-ink-2">
+          아래 구간 중 하나를 먼저 눌러 주세요. 누르면 방문 날짜와 시각이 채워지고, 그 안에서 시각을
+          고칠 수 있습니다.
+        </p>
         <div className="flex flex-wrap gap-2">
           {slots.map((slot, index) => (
             <Chip
@@ -111,6 +138,7 @@ export function RequestForm({
           </p>
         ) : null}
       </fieldset>
+      {autoNote ? <p className="text-caption text-ink-2">{autoNote}</p> : null}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <DateTimeField
           label="방문 날짜"

@@ -171,7 +171,11 @@ function ApprovalFormModal({
           value={values.approverPhone}
           onValueChange={(value) => set("approverPhone", value)}
           error={errors.approverPhone}
-          hint="연락처는 선택입니다. 연락처가 없어도 승인자 링크를 발급해 직접 전달할 수 있습니다."
+          hint={
+            values.source === "DIRECT"
+              ? "입력 방식이 승인자 본인이면 연락처가 필요합니다. 중개사 대리 입력이면 선택입니다."
+              : "중개사 대리 입력은 연락처가 없어도 등록하고 승인자 링크를 발급해 직접 전달할 수 있습니다."
+          }
         />
         <RadioGroup
           legend="승인 역할"
@@ -385,7 +389,7 @@ function ApprovalRow({
       <IssuedLinkDialog
         title="승인자 링크"
         link={issued}
-        notice="활성 링크는 출입승인당 하나이고 이 링크는 지금만 볼 수 있습니다. 복사해 승인자에게 전달해 주세요. 링크를 폐기해도 승인자 계정 접근에는 영향이 없고, 접근을 끊으려면 출입승인을 철회해야 합니다."
+        notice="활성 링크는 출입승인당 하나이고 이 링크는 지금만 볼 수 있습니다. 복사해 승인자에게 전달해 주세요. 링크를 폐기해도 승인자 계정 접근에는 영향이 없고, 접근을 끊으려면 출입승인을 철회해야 하며, 철회는 조율 상세 맨 아래의 출입승인 철회 접수에서 진행합니다."
         guidance={<LinkIssueGuidance />}
         onClose={() => setIssued(null)}
       />

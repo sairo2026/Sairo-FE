@@ -305,7 +305,7 @@ describe("방문 조율 상세", () => {
     expect(await screen.findByText(/지금 상태에서는 처리할 수 없습니다/)).not.toBeNull();
   });
 
-  it("일정 구성을 저장하면 계산된 시작 시각을 보여주고 최종 확정 필요 상태가 된다", async () => {
+  it("일정 구성을 저장하면 계산된 시작 시각을 보여주고 신청 준비 단계가 된다", async () => {
     const user = userEvent.setup();
     renderOffice(<CoordinationDetailScreen coordinationId={801} />, { role: "OWNER" });
     await user.click(await screen.findByRole("button", { name: "일정 저장" }));

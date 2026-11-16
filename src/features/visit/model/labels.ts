@@ -16,7 +16,7 @@ export type CoordinationStatus = (typeof COORDINATION_STATUSES)[number];
 export const COORDINATION_STATUS_LABEL: Record<CoordinationStatus, string> = {
   TIME_COLLECTING: "시간 수집 중",
   COORDINATABLE: "조율 가능",
-  FINAL_CONFIRMATION_REQUIRED: "최종 확정 필요",
+  FINAL_CONFIRMATION_REQUIRED: "신청·확정 대기",
   APPLYING: "신청 진행",
   CONFIRMED: "확정 완료",
   RESCHEDULE_REQUIRED: "재조율 필요",
@@ -47,6 +47,30 @@ export function statusLabel(value: string): string {
 
 export function statusTone(value: string): BadgeTone {
   return isCoordinationStatus(value) ? COORDINATION_STATUS_TONE[value] : "gray";
+}
+
+export type StatusStage = { label: string; hint?: string };
+
+/**
+ * 상세 화면 전용 단계 표시. 서버 상태 값은 그대로 두고 같은 상태 안의 실제 단계만 나눠 보인다.
+ * 최종 확정 대기 상태는 일정 저장 직후(확정 없음)와 일부만 확정된 때를 함께 가리킨다.
+ */
+export function statusStage(status: string, hasConfirmedVisit: boolean): StatusStage {
+  if (status === "FINAL_CONFIRMATION_REQUIRED") {
+    return hasConfirmedVisit
+      ? {
+          label: "일부 확정",
+          hint: "일부 매물만 확정되었습니다. 확정되지 않은 매물은 새로 신청해 주세요.",
+        }
+      : {
+          label: "신청 준비",
+          hint: "일정 구성이 끝났습니다. 방문 신청을 내면 승인자가 비교해 선택하고 모든 매물이 확정되면 확정 완료가 됩니다.",
+        };
+  }
+  if (status === "APPLYING") {
+    return { label: statusLabel(status), hint: "신청을 낸 매물은 승인자가 선택하면 확정됩니다." };
+  }
+  return { label: statusLabel(status) };
 }
 
 export const NEXT_ACTION_HASH: Partial<Record<CoordinationStatus, string>> = {

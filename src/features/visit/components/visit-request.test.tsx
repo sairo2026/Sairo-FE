@@ -104,6 +104,20 @@ describe("방문 신청", () => {
     );
   });
 
+  it("구간을 고르면 구간 전체가 아니라 일정 구성의 방문 소요시간만큼만 채운다", async () => {
+    prepare({ visitDurationMinutes: 30 });
+    const user = userEvent.setup();
+    renderOffice(<CoordinationDetailScreen coordinationId={801} />, { role: "AGENT" });
+    await openForm(user);
+    await pickSlot(user);
+    await user.click(screen.getByRole("button", { name: "방문 신청 제출" }));
+    expect(await screen.findByText(/방문 신청을 제출했습니다/)).not.toBeNull();
+    const created = getMockVisitRequestState().requests[0];
+    expect(created?.requestedStartAt).toBe("2026-11-12T10:00:00+09:00");
+    expect(created?.requestedEndAt).toBe("2026-11-12T10:30:00+09:00");
+    expect(created?.expectedDurationMinutes).toBe(30);
+  });
+
   it("구간을 고르지 않으면 제출하지 않고 안내한다", async () => {
     prepare();
     const user = userEvent.setup();

@@ -66,11 +66,13 @@ export const BROKER_REASON_COPY: Record<RevalidationReasonCode, ReasonCopy> = {
     nextStep: RETRY_WITH_NEW_SLOT,
   },
   CUSTOMER_CONFLICT: {
-    reason: "고객의 다른 확정 방문과 겹칩니다.",
+    reason:
+      "고객이 가능하다고 한 시간이 아니거나 고객의 다른 확정 방문과 겹칩니다. 같은 조율의 다른 매물 확정과 겹친 경우도 포함합니다.",
     nextStep: ADJUST_SCHEDULE,
   },
   BROKER_CONFLICT: {
-    reason: "담당 중개사의 다른 확정 방문과 겹칩니다.",
+    reason:
+      "담당 중개사의 다른 확정 방문과 겹칩니다. 같은 조율의 다른 매물 확정과 겹친 경우도 포함합니다.",
     nextStep: ADJUST_SCHEDULE,
   },
   PROPERTY_CONFLICT: {
