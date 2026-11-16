@@ -95,7 +95,7 @@ describe("업무 목록과 업무 팝업", () => {
     const user = userEvent.setup();
     renderOffice(<TaskListScreen />, { role: "OWNER" });
     const dialog = await openCreate(user);
-    await user.click(within(dialog).getByRole("button", { name: "저장" }));
+    await user.click(within(dialog).getByRole("button", { name: /^(저장|업무 생성)$/ }));
     expect(await within(dialog).findByText("제목을 입력해 주세요.")).not.toBeNull();
     expect(getMockWorkState().tasks).toHaveLength(1);
   });
@@ -108,7 +108,7 @@ describe("업무 목록과 업무 팝업", () => {
     title.removeAttribute("maxlength");
     await user.click(title);
     await user.paste("가".repeat(101));
-    await user.click(within(dialog).getByRole("button", { name: "저장" }));
+    await user.click(within(dialog).getByRole("button", { name: /^(저장|업무 생성)$/ }));
     expect(await within(dialog).findByText("제목은 100자까지 입력할 수 있습니다.")).not.toBeNull();
   });
 
@@ -120,7 +120,7 @@ describe("업무 목록과 업무 팝업", () => {
     await waitFor(() =>
       expect((within(dialog).getByLabelText(/담당자/) as HTMLSelectElement).value).not.toBe(""),
     );
-    await user.click(within(dialog).getByRole("button", { name: "저장" }));
+    await user.click(within(dialog).getByRole("button", { name: /^(저장|업무 생성)$/ }));
     expect(await screen.findByText("새 업무")).not.toBeNull();
     expect(screen.queryByRole("dialog")).toBeNull();
   });
@@ -140,7 +140,7 @@ describe("업무 목록과 업무 팝업", () => {
     await waitFor(() =>
       expect((within(dialog).getByLabelText(/담당자/) as HTMLSelectElement).value).not.toBe(""),
     );
-    await user.click(within(dialog).getByRole("button", { name: "저장" }));
+    await user.click(within(dialog).getByRole("button", { name: /^(저장|업무 생성)$/ }));
     expect(
       await within(dialog).findByText("허용 범위를 벗어났습니다. 값을 확인해 주세요."),
     ).not.toBeNull();
@@ -159,7 +159,7 @@ describe("업무 목록과 업무 팝업", () => {
     expect(within(dialog).queryByRole("button", { name: "삭제" })).toBeNull();
     expect(within(dialog).getByText(/원천이 바뀌면 함께 갱신/)).not.toBeNull();
     await user.type(within(dialog).getByLabelText(/메모/), "확인함");
-    await user.click(within(dialog).getByRole("button", { name: "저장" }));
+    await user.click(within(dialog).getByRole("button", { name: /^(저장|업무 생성)$/ }));
     await waitFor(() => expect(getMockWorkState().tasks[0]?.memo).toBe("확인함"));
   });
 
@@ -234,7 +234,7 @@ describe("업무 목록과 업무 팝업", () => {
     renderOffice(<TaskListScreen />, { role: "OWNER" });
     await user.click(await screen.findByRole("button", { name: "업무 고칠 업무 열기" }));
     const dialog = await screen.findByRole("dialog");
-    await user.click(within(dialog).getByRole("button", { name: "저장" }));
+    await user.click(within(dialog).getByRole("button", { name: /^(저장|업무 생성)$/ }));
     expect(
       await within(dialog).findByText(/자동으로 만들어진 업무는 제목·담당자·예정일/),
     ).not.toBeNull();
@@ -272,7 +272,7 @@ describe("업무 목록과 업무 팝업", () => {
     await waitFor(() =>
       expect((within(dialog).getByLabelText(/담당자/) as HTMLSelectElement).value).not.toBe(""),
     );
-    await user.click(within(dialog).getByRole("button", { name: "저장" }));
+    await user.click(within(dialog).getByRole("button", { name: /^(저장|업무 생성)$/ }));
     expect(await within(dialog).findByText(/요청이 너무 많습니다/)).not.toBeNull();
   });
 
