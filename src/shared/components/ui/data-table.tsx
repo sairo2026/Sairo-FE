@@ -207,7 +207,7 @@ export function DataTable<Row>({
                             <td
                               key={column.key}
                               className={cn(
-                                "h-[72px] py-0 pr-5 text-body leading-none font-medium text-ink",
+                                "h-[72px] py-3 pr-5 text-body leading-none font-medium text-ink",
                                 column.widthClass,
                                 column.align === "right" && "text-right tabular-nums",
                                 column.className,

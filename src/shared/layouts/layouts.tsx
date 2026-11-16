@@ -102,7 +102,7 @@ export function OfficeLayout({
           tone === "board" ? "bg-surface" : "bg-white",
         )}
       >
-        <aside className="border-b border-line bg-white px-6 py-6 lg:min-h-dvh lg:border lg:px-8 lg:pt-[31px]">
+        <aside className="border-b border-line bg-white px-6 py-6 lg:sticky lg:top-0 lg:z-30 lg:h-dvh lg:self-start lg:overflow-y-auto lg:border lg:px-8 lg:pt-[31px]">
           <Link href="/home" aria-label="사이로 홈" className="mb-6 block lg:mb-[60px]">
             <BrandLogo className="w-[127px]" />
           </Link>
@@ -121,7 +121,7 @@ export function OfficeLayout({
           </nav>
         </aside>
         <div className="min-w-0">
-          <header className="flex min-h-[88px] flex-wrap items-center justify-between gap-x-6 gap-y-3 border-b border-line bg-white px-8 py-4 text-caption font-semibold text-ink-2">
+          <header className="sticky top-0 z-20 flex min-h-[88px] flex-wrap items-center justify-between gap-x-6 gap-y-3 border-b border-line bg-white px-8 py-4 text-caption font-semibold text-ink-2">
             <span className="text-h2 font-bold text-ink">{officeName ?? "사무소"}</span>
             {headerActions}
           </header>
@@ -155,7 +155,7 @@ export function OpsLayout({
   return (
     <ToastProvider>
       <div className="min-h-dvh bg-surface text-ink">
-        <header className="flex h-14 items-center justify-between gap-4 bg-primary-pressed px-6 text-body font-bold text-white">
+        <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-4 bg-primary-pressed px-6 text-body font-bold text-white">
           <span className="flex items-center gap-3">
             <BrandLogo variant="horizontal-white" className="w-24" />
             <span>운영 콘솔</span>
@@ -167,7 +167,7 @@ export function OpsLayout({
         <div className="lg:grid lg:grid-cols-[220px_minmax(0,1fr)]">
           <nav
             aria-label="운영 메뉴"
-            className="flex gap-4 overflow-x-auto border-b border-line bg-white px-6 py-4 lg:min-h-[calc(100vh-56px)] lg:flex-col lg:border-r lg:border-b-0"
+            className="flex gap-4 overflow-x-auto border-b border-line bg-white px-6 py-4 lg:sticky lg:top-14 lg:h-[calc(100dvh-56px)] lg:self-start lg:overflow-y-auto lg:flex-col lg:border-r lg:border-b-0"
           >
             {navItems.map((item) => (
               <SideNavItem
