@@ -114,7 +114,7 @@ export function TextField({
             type="button"
             onClick={onAction}
             disabled={isActionDisabled}
-            className="h-9 min-w-14 shrink-0 rounded-small bg-primary px-3 text-caption font-semibold text-white hover:bg-primary-hover disabled:cursor-not-allowed disabled:bg-white disabled:text-ink-3 disabled:ring-1 disabled:ring-line"
+            className="h-9 min-w-14 shrink-0 rounded-small bg-primary px-3 text-caption font-semibold text-white hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
           >
             {actionLabel}
           </button>

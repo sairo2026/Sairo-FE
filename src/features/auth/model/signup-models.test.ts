@@ -77,12 +77,12 @@ describe("비밀번호 규칙", () => {
   it("코드 포인트 기준 8자 이상 12자 이하를 허용하고 공백도 센다", () => {
     expect(validatePasswordInput("")).toBe("비밀번호를 입력해 주세요.");
     expect(validatePasswordInput("        ")).toBe("비밀번호를 입력해 주세요.");
-    expect(validatePasswordInput("a".repeat(7))).toContain("8자 이상");
-    expect(validatePasswordInput("a".repeat(13))).toContain("12자 이하");
+    expect(validatePasswordInput("a".repeat(7))).toBe("8~12자 이내로 설정해 주십시오.");
+    expect(validatePasswordInput("a".repeat(13))).toBe("8~12자 이내로 설정해 주십시오.");
     expect(validatePasswordInput("ab cd ef1")).toBeNull();
     expect(validatePasswordInput("가나다라마바사아")).toBeNull();
     expect(validatePasswordInput("😀".repeat(8))).toBeNull();
-    expect(validatePasswordInput("😀".repeat(13))).toContain("12자 이하");
+    expect(validatePasswordInput("😀".repeat(13))).toBe("8~12자 이내로 설정해 주십시오.");
   });
 
   it("흔한 비밀번호는 거부한다", () => {

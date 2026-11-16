@@ -43,7 +43,7 @@ export function Modal({ isOpen, title, onClose, children, footer, size = "defaul
           size === "form" && "flex max-h-[90vh] max-w-[587px] flex-col",
         )}
       >
-        <h2 id={titleId} className="text-h1 font-bold text-ink">
+        <h2 id={titleId} className="whitespace-pre-line text-h1 font-bold text-ink">
           {title}
         </h2>
         <div

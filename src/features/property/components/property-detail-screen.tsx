@@ -24,7 +24,7 @@ import {
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { archiveProperty, restoreProperty } from "../api/property.api";
 import { CoordinationStatusBadge } from "@/features/visit/components/coordination-status-badge";
-import { statusLabel } from "@/features/visit/model/labels";
+import { isCoordinationStatus, statusLabel } from "@/features/visit/model/labels";
 import { propertyKeys, usePropertyDetail } from "../hooks/property-queries";
 import { dealTypeLabel, daysUntil } from "../model/format";
 import {
@@ -322,7 +322,8 @@ function ArchiveDialog({
             <ul className="flex list-disc flex-col gap-1 pl-5">
               {blockers.coordinations.map((item) => (
                 <li key={`c-${item.coordinationId}`}>
-                  방문 조율 {item.customerName} · {statusLabel(item.status)}
+                  방문 조율 {item.customerName} ·{" "}
+                  {isCoordinationStatus(item.status) ? statusLabel(item.status) : "진행 중"}
                 </li>
               ))}
               {blockers.contracts.map((item) => (

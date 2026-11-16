@@ -61,17 +61,19 @@ export function LegalDocumentModal({
   isOpen,
   onClose,
   effectiveDate,
+  title,
 }: {
   document: LegalDocument;
   isOpen: boolean;
   onClose: () => void;
   effectiveDate?: string;
+  title?: string;
 }) {
   const blocks = useDocumentBlocks(document, effectiveDate);
   return (
     <Modal
       isOpen={isOpen}
-      title={document.title}
+      title={title ?? document.title}
       onClose={onClose}
       size="terms"
       footer={<Button onClick={onClose}>닫기</Button>}

@@ -607,7 +607,7 @@ export function MembershipRequestForm({ officeId }: { officeId: number }) {
       </form>
       <Modal
         isOpen={completedId !== null}
-        title="사무소 참여 요청이 완료되었습니다. 사무소에서 수락 시 참여가 가능합니다."
+        title={"사무소 참여 요청이 완료되었습니다.\n사무소에서 수락 시 참여가 가능합니다."}
         onClose={() => void finish()}
         footer={
           <>
