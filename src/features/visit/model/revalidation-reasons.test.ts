@@ -15,7 +15,7 @@ import { REQUEST_RULE_LABEL } from "./request-labels";
 import { VIOLATED_RULE_LABEL } from "./conditions";
 
 /**
- * 백엔드 ApproverConditionEvaluator, VisitRequestChecker, VisitFeasibility가 내는 규칙 코드 12개와
+ * 백엔드 ApproverConditionEvaluator, VisitRequestChecker, VisitFeasibility가 내는 규칙 코드 13개와
  * ApproverSelectionExecutor가 재검증 실패 대표 코드로 쓰는 CONDITION_CHANGED를 그대로 옮긴 목록이다.
  */
 const BACKEND_RULE_CODES = [
@@ -27,6 +27,7 @@ const BACKEND_RULE_CODES = [
   "MIN_GAP",
   "MIN_LEAD",
   "SINGLE_VISIT_MAX",
+  "CUSTOMER_TIME_MISMATCH",
   "CUSTOMER_CONFLICT",
   "BROKER_CONFLICT",
   "PROPERTY_CONFLICT",
@@ -92,11 +93,22 @@ describe("재검증 사유 매핑", () => {
     ]);
   });
 
+  it("고객 가능 시간 밖과 고객의 다른 확정 방문과 겹침은 서로 다른 문구로 설명한다", () => {
+    const mismatch = BROKER_REASON_COPY.CUSTOMER_TIME_MISMATCH.reason;
+    const conflict = BROKER_REASON_COPY.CUSTOMER_CONFLICT.reason;
+    expect(mismatch).not.toBe(conflict);
+    expect(mismatch).toContain("가능하다고 한 시간 밖");
+    expect(mismatch).not.toContain("겹칩니다");
+    expect(conflict).toContain("다른 확정 방문");
+    expect(conflict).not.toContain("가능하다고 한 시간");
+  });
+
   it("승인자에게는 중개사·고객·다른 방문이 드러나는 사유를 하나의 일반 표현으로 묶는다", () => {
     expect(approverFailureLines("DEPUTY_VISIT_LOCKED", "위반한 규칙: DEPUTY_VISIT_LOCKED")).toEqual(
       [GENERIC_APPROVER_REASON],
     );
     for (const code of [
+      "CUSTOMER_TIME_MISMATCH",
       "CUSTOMER_CONFLICT",
       "BROKER_CONFLICT",
       "PROPERTY_CONFLICT",
