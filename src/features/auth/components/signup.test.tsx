@@ -112,6 +112,29 @@ describe("이메일 가입 기본 정보", () => {
     expect(screen.getByRole("button", { name: "재발송" }).hasAttribute("disabled")).toBe(true);
   });
 
+  it("이메일 앞뒤에 공백이 붙어 있어도 공백을 지우고 링크를 보낸다", async () => {
+    const user = userEvent.setup();
+    renderWithQuery(<SignupEmailFlow />);
+    await screen.findByText("기본 가입 정보 입력");
+    await user.type(screen.getByLabelText(/^이메일 인증/), "  new@example.com  ");
+    await user.click(screen.getByRole("button", { name: "인증 링크 받기" }));
+    expect(await screen.findByText(/인증 링크를 보냈습니다/)).not.toBeNull();
+    expect(screen.queryByText("이메일 주소를 올바르게 입력해 주세요.")).toBeNull();
+  });
+
+  it("이메일 인증과 휴대폰 번호가 모두 비어 있으면 두 가지를 함께 안내한다", async () => {
+    const user = userEvent.setup();
+    renderWithQuery(<SignupEmailFlow />);
+    await screen.findByText("기본 가입 정보 입력");
+    await user.click(screen.getByRole("button", { name: "다음" }));
+    expect(await screen.findByText("이메일 인증을 완료해 주세요.")).not.toBeNull();
+    expect(
+      screen.getByText(
+        /휴대폰 번호(를 010-0000-0000 형식으로 입력|) ?(해 주세요|인증을 완료해 주세요)/,
+      ),
+    ).not.toBeNull();
+  });
+
   it("이미 가입한 이메일이면 로그인과 비밀번호 찾기로 안내한다", async () => {
     const user = userEvent.setup();
     renderWithQuery(<SignupEmailFlow />);
