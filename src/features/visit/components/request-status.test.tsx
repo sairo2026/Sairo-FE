@@ -130,7 +130,7 @@ describe("방문 신청 현황", () => {
               conditionId: 801,
               result: "FAILED",
               failureCode: "CONDITION_CHANGED",
-              failureDetail: "위반한 규칙: WINDOW_MISMATCH, CUSTOMER_CONFLICT",
+              failureDetail: "위반한 규칙: WINDOW_MISMATCH, CUSTOMER_TIME_MISMATCH",
               checkedAt: "2026-11-10T10:00:00+09:00",
             },
           ],
@@ -143,12 +143,12 @@ describe("방문 신청 현황", () => {
       await screen.findByText(/함께 위반한 항목 승인자가 허용한 시간대가 아닙니다/),
     ).not.toBeNull();
     expect(
-      screen.getByText(
-        /함께 위반한 항목 고객이 가능하다고 한 시간이 아니거나 고객의 다른 확정 방문과 겹칩니다/,
-      ),
+      screen.getByText(/함께 위반한 항목 신청한 구간이 고객이 가능하다고 한 시간 밖입니다/),
     ).not.toBeNull();
     expect(screen.getAllByText(/다음 행동 조율 상세의 일정 구성을 다시 저장/).length).toBe(1);
-    expect(screen.queryByText(/CONDITION_CHANGED|WINDOW_MISMATCH|CUSTOMER_CONFLICT/)).toBeNull();
+    expect(
+      screen.queryByText(/CONDITION_CHANGED|WINDOW_MISMATCH|CUSTOMER_TIME_MISMATCH/),
+    ).toBeNull();
   });
 
   it("재검증 상세를 불러오지 못해도 목록의 사유 코드로 한국어 문구를 보여준다", async () => {
