@@ -37,6 +37,10 @@ export class ApiError extends Error {
     return this.details.remainingAttempts;
   }
 
+  get failedAttempts(): number | undefined {
+    return this.details.failedAttempts;
+  }
+
   get currentVersion(): number | undefined {
     return this.details.currentVersion;
   }

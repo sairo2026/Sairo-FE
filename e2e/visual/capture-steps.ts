@@ -94,7 +94,7 @@ export async function wrongPasswordLogin(page: Page): Promise<void> {
   await page.getByPlaceholder("이메일 주소를 입력해 주세요.").fill("agent@example.com");
   await page.getByPlaceholder("비밀번호를 입력해 주세요.").fill("wrong-password-1");
   await page.getByRole("button", { name: "로그인", exact: true }).click();
-  await page.getByRole("alert").first().waitFor();
+  await page.getByText("연속 1회 실패 · 남은 시도 4회").waitFor();
 }
 
 export async function lockedLogin(page: Page): Promise<void> {
