@@ -612,6 +612,7 @@ describe("구성원 상세", () => {
     });
     renderOffice(<MemberDetailScreen membershipId={1} />, { role: "OWNER" });
     expect(await screen.findByText(/대표는 강등하거나 내보낼 수 없습니다/)).not.toBeNull();
+    expect(screen.queryByText("넘어갈 담당 업무")).toBeNull();
     expect(screen.queryByRole("button", { name: "내보내기" })).toBeNull();
     expect(screen.queryByRole("button", { name: "역할 변경" })).toBeNull();
   });

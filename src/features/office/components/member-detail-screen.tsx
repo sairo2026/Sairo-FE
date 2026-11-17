@@ -169,20 +169,22 @@ function MemberDetailBody({ detail }: { detail: MembershipDetailResponse }) {
         />
       </Card>
 
-      <Card title="넘어갈 담당 업무">
-        <div className="flex flex-col gap-3">
-          <DetailList
-            items={[
-              { label: "진행 고객", value: `${counts.customers}건` },
-              { label: "매물", value: `${counts.properties}건` },
-              { label: "업무", value: `${counts.tasks}건` },
-              { label: "계약", value: `${counts.contracts}건` },
-              { label: "확정된 방문", value: `${counts.confirmedVisits}건` },
-            ]}
-          />
-          <MutedNote>{handoverNote}</MutedNote>
-        </div>
-      </Card>
+      {isOwnerTarget ? null : (
+        <Card title="넘어갈 담당 업무">
+          <div className="flex flex-col gap-3">
+            <DetailList
+              items={[
+                { label: "진행 고객", value: `${counts.customers}건` },
+                { label: "매물", value: `${counts.properties}건` },
+                { label: "업무", value: `${counts.tasks}건` },
+                { label: "계약", value: `${counts.contracts}건` },
+                { label: "확정된 방문", value: `${counts.confirmedVisits}건` },
+              ]}
+            />
+            <MutedNote>{handoverNote}</MutedNote>
+          </div>
+        </Card>
+      )}
 
       {isOwnerTarget ? (
         <p

@@ -61,6 +61,14 @@ describe("ErrorScreen", () => {
     expect(screen.getByRole("alert")).not.toBeNull();
   });
 
+  it("없는 화면과 권한 없음과 로그인 필요에서는 다시 시도를 보이지 않는다", () => {
+    for (const kind of ["not-found", "forbidden", "unauthenticated"] as const) {
+      const { unmount } = render(<ErrorScreen kind={kind} onRetry={vi.fn()} />);
+      expect(screen.queryByRole("button", { name: "다시 시도" })).toBeNull();
+      unmount();
+    }
+  });
+
   it("다시 시도를 누르면 호출한다", async () => {
     const onRetry = vi.fn();
     render(<ErrorScreen kind="server" onRetry={onRetry} />);
