@@ -416,12 +416,18 @@ function DetailBody({ property }: { property: PropertyDetailResponse }) {
               >
                 다른 사무소 신청 현황
               </Link>
-              <Link
-                href={`/coordinations/new?propertyId=${property.propertyId}`}
-                className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 clickable-control"
-              >
-                방문 조율 시작
-              </Link>
+              {property.registrationStage === "DRAFT" ? (
+                <span className="inline-flex h-12 items-center text-caption text-ink-2">
+                  활성 등록을 마치면 방문 조율을 시작할 수 있습니다.
+                </span>
+              ) : (
+                <Link
+                  href={`/coordinations/new?propertyId=${property.propertyId}`}
+                  className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 clickable-control"
+                >
+                  방문 조율 시작
+                </Link>
+              )}
               <Link
                 href={`/contracts/new?propertyId=${property.propertyId}`}
                 className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 clickable-control"

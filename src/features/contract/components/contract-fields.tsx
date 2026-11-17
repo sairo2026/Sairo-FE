@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { listCustomers } from "@/features/customer/api/customer.api";
 import { Button } from "@/shared/components/ui/button";
 import { FieldLabel, OfficeFieldScope } from "@/shared/components/ui/field-label";
@@ -24,6 +25,73 @@ export type FieldsProps = {
   managerOptional?: boolean;
   signedDateLabel?: string;
 };
+
+type CustomerOption = { value: string; label: string; phone: string };
+
+/** 고객이 많아도 이름이나 연락처로 찾아 연결할 수 있게 검색어로 서버 조회를 덧붙인다. */
+function CustomerLinkSelect({
+  label,
+  party,
+  customers,
+  onChange,
+}: {
+  label: string;
+  party: PartyInput;
+  customers: CustomerOption[];
+  onChange: (customerId: string, found: CustomerOption | undefined) => void;
+}) {
+  const [keyword, setKeyword] = useState("");
+  const term = keyword.trim();
+  const found = useQuery({
+    queryKey: [...contractKeys.customerOptions, "search", term],
+    queryFn: () => listCustomers({ keyword: term, page: 0, size: 30 }),
+    enabled: term !== "",
+  });
+  const merged = new Map<string, CustomerOption>();
+  const searched = (found.data?.items ?? []).map((item) => ({
+    value: String(item.customerId),
+    label: item.name,
+    phone: item.phone ?? "",
+  }));
+  for (const item of term === "" ? customers : searched) merged.set(item.value, item);
+  if (party.customerId !== "" && !merged.has(party.customerId)) {
+    const known = customers.find((item) => item.value === party.customerId);
+    merged.set(
+      party.customerId,
+      known ?? {
+        value: party.customerId,
+        label: party.name || `고객 ${party.customerId}`,
+        phone: "",
+      },
+    );
+  }
+  const options = [...merged.values()];
+  return (
+    <div className="flex flex-col gap-2">
+      <TextField
+        label={`${label} 검색`}
+        value={keyword}
+        onValueChange={setKeyword}
+        placeholder="이름이나 연락처로 찾기"
+        maxLength={100}
+      />
+      <SelectField
+        label={label}
+        value={party.customerId}
+        options={options}
+        placeholder={
+          term !== "" && !found.isPending && searched.length === 0 ? "검색 결과 없음" : "연결 안 함"
+        }
+        onValueChange={(customerId) =>
+          onChange(
+            customerId,
+            options.find((item) => item.value === customerId),
+          )
+        }
+      />
+    </div>
+  );
+}
 
 function PartyEditor({
   legend,
@@ -61,20 +129,18 @@ function PartyEditor({
             value={party.phone}
             onValueChange={(phone) => update(party.key, { phone })}
           />
-          <SelectField
+          <CustomerLinkSelect
             label={`${legend} ${index + 1} 고객 연결`}
-            value={party.customerId}
-            options={customers}
-            placeholder="연결 안 함"
-            onValueChange={(customerId) => {
-              const found = customers.find((item) => item.value === customerId);
+            party={party}
+            customers={customers}
+            onChange={(customerId, found) =>
               update(party.key, {
                 customerId,
                 ...(found && party.name.trim() === ""
                   ? { name: found.label, phone: found.phone }
                   : {}),
-              });
-            }}
+              })
+            }
           />
           <Button
             variant="ghost"
