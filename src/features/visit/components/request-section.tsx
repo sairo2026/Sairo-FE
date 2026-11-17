@@ -245,7 +245,11 @@ export function RequestsSection({
             detail={detail}
             candidate={candidate}
             requests={query.data?.items ?? []}
-            suggestedStartAt={suggestedStarts[candidate.candidatePropertyId]}
+            suggestedStartAt={
+              suggestedStarts[candidate.candidatePropertyId] ??
+              candidate.suggestedStartAt ??
+              undefined
+            }
           />
         ))}
       </ul>

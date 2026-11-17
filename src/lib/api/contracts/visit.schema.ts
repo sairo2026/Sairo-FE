@@ -194,6 +194,7 @@ export const VisitCoordinationDetailResponseSchema = z.object({
       visitDurationMinutes: z.number(),
       travelDurationMinutes: z.number(),
       approvalId: z.number().nullable().optional(),
+      suggestedStartAt: z.iso.datetime({ offset: true }).nullable().optional(),
       ownerOfficeId: z.number(),
       ownerOfficeName: z.string(),
       crossOffice: z.boolean(),
@@ -657,7 +658,9 @@ export type VisitCoordinationManagerChangeRequest = z.infer<
 
 export const ConfirmationMessagesResponseSchema = z.object({
   scheduleVersion: z.number(),
-  customerMessage: z.string(),
+  available: z.boolean(),
+  unavailableReason: z.string().nullable().optional(),
+  customerMessage: z.string().nullable(),
   approverMessages: z.array(
     z.object({
       candidatePropertyId: z.number(),
