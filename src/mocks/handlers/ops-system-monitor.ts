@@ -866,7 +866,7 @@ const DOCUMENT_KINDS = ["SERVICE_CONTRACT", "PROCESSING_TERMS", "SUBPROCESSOR_NO
 
 const integrationHandlers: RequestHandler[] = [
   http.get("/api/ops/integrations", ({ request }) => {
-    const rejected = requireMockOps(OPS);
+    const rejected = requireMockOps(["OPS", "PRIVACY"]);
     if (rejected) return rejected;
     const url = new URL(request.url);
     const environment = url.searchParams.get("environment");
