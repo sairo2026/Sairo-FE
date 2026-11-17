@@ -10,6 +10,7 @@ import { FormAlert } from "@/shared/components/feedback/form-frame";
 import { Button } from "@/shared/components/ui/button";
 import { useInlineAlertDialog } from "@/shared/hooks/use-inline-alert-dialog";
 import { formatSeoulDateTime, countCodePoints } from "@/shared/lib/format";
+import { htmlMarkupError } from "@/shared/lib/html-markup";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { fetchMemo, saveMemo } from "../api/settlement.api";
 import { settlementKeys, useMonthlyMemo } from "../hooks/settlement-queries";
@@ -65,6 +66,11 @@ function MemoEditor({ yearMonth, memo }: { yearMonth: string; memo: MonthlyMemoR
   function submit() {
     if (countCodePoints(text) > MEMO_LIMIT) {
       setError(`메모는 ${MEMO_LIMIT}자까지 입력할 수 있습니다.`);
+      return;
+    }
+    const markup = htmlMarkupError(text);
+    if (markup) {
+      setError(markup);
       return;
     }
     setError(undefined);

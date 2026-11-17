@@ -1,5 +1,5 @@
 import { ApiError } from "@/shared/api/client";
-import { describeAuthError } from "@/shared/lib/api-messages";
+import { describeAuthError, fieldErrorSummary } from "@/shared/lib/api-messages";
 
 const MESSAGE_BY_CODE: Record<string, string> = {
   AUTO_TASK_IMMUTABLE:
@@ -15,6 +15,8 @@ export function describeWorkError(error: unknown, fallback: string): string {
   if (error instanceof ApiError && error.status !== 429 && error.status < 500) {
     const known = MESSAGE_BY_CODE[error.code];
     if (known) return known;
+    const specific = fieldErrorSummary(error);
+    if (specific) return specific;
   }
   return describeAuthError(error, fallback);
 }
