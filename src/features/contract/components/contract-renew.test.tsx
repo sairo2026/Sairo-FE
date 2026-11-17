@@ -45,7 +45,7 @@ async function fillRenewal(user: ReturnType<typeof userEvent.setup>) {
   const manager = await screen.findByLabelText(/담당 공인중개사/);
   await waitFor(() => expect((manager as HTMLSelectElement).options.length).toBeGreaterThan(1));
   await user.selectOptions(manager, "2");
-  setDate("체결일", "2028-09-01");
+  setDate("체결일", "2026-09-01");
   setDate("임대 시작일", "2028-10-15");
   setDate("임대 만기일", "2030-10-14");
   setDate("잔금 예정일", "2028-10-15");

@@ -41,6 +41,20 @@ describe("고객 입력 검증", () => {
     expect(errors.retentionUntil).toBeDefined();
   });
 
+  it("등록할 때 지난 날짜의 보유 기한과 태그 문자는 거절하고 수정에서는 기존 기한을 둔다", () => {
+    const past = { ...valid, retentionUntil: "2020-01-01" };
+    expect(validateCustomerForm(past, { isCreate: true }).retentionUntil).toBe(
+      "보유 기한은 오늘 이후 날짜로 선택해 주세요.",
+    );
+    expect(validateCustomerForm(past, { isCreate: false })).toEqual({});
+    expect(validateCustomerForm({ ...valid, name: "<b>김</b>" }, { isCreate: true }).name).toBe(
+      "특수한 태그 문자는 쓸 수 없습니다. 일반 글자로 입력해 주세요.",
+    );
+    expect(validateCustomerForm({ ...valid, name: "김 < 이 > 박" }, { isCreate: true })).toEqual(
+      {},
+    );
+  });
+
   it("법인이면 법인명으로 안내한다", () => {
     const errors = validateCustomerForm(
       { ...EMPTY_CUSTOMER_FORM, isCorporation: true },

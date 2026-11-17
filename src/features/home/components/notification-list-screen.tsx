@@ -3,7 +3,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
-import { listRequestNotices, readRequestNotice } from "@/features/visit/api/request.api";
+import {
+  listRequestNotices,
+  readAllRequestNotices,
+  readRequestNotice,
+} from "@/features/visit/api/request.api";
 import {
   NOTICE_TYPE_DESCRIPTION,
   NOTICE_TYPE_LABEL,
@@ -21,7 +25,7 @@ import { Tabs } from "@/shared/components/ui/tabs";
 import { formatSeoulDateTime } from "@/shared/lib/format";
 import { PAGE_SIZE_OPTIONS } from "@/shared/components/ui/data-table";
 import type { PageSize } from "@/shared/components/ui/data-table";
-import { markNotificationRead } from "../api/home.api";
+import { markAllNotificationsRead, markNotificationRead } from "../api/home.api";
 import { homeKeys, useNotifications } from "../hooks/home-queries";
 import {
   notificationLink,
@@ -47,6 +51,12 @@ function GeneralNotifications() {
     mutationFn: (notificationId: number) => markNotificationRead(notificationId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: homeKeys.all }),
     onError: (error) => setActionError(describeWorkError(error, "읽음 처리하지 못했습니다.")),
+  });
+  const readAll = useMutation({
+    mutationFn: markAllNotificationsRead,
+    onMutate: () => setActionError(undefined),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: homeKeys.all }),
+    onError: (error) => setActionError(describeWorkError(error, "모두 읽음 처리하지 못했습니다.")),
   });
 
   if (query.error instanceof ApiError && query.error.status === 403) {
@@ -99,6 +109,18 @@ function GeneralNotifications() {
             />
           ) : (
             <>
+              {data.items.some((item) => !item.read) ? (
+                <div className="flex justify-end">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    isLoading={readAll.isPending}
+                    onClick={() => readAll.mutate()}
+                  >
+                    모두 읽음 처리
+                  </Button>
+                </div>
+              ) : null}
               <ul className="flex flex-col gap-2">
                 {data.items.map((item) => {
                   const href = notificationLink(item.type, item.targetType, item.targetId);
@@ -191,55 +213,77 @@ function VisitRequestNotices() {
     mutationFn: (noticeId: number) => readRequestNotice(noticeId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["visit", "notices"] }),
   });
+  const readAll = useMutation({
+    mutationFn: readAllRequestNotices,
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["visit", "notices"] }),
+        queryClient.invalidateQueries({ queryKey: homeKeys.all }),
+      ]),
+  });
   return (
     <QueryGate query={query} loadingLabel="방문 신청 알림을 불러오는 중입니다.">
       {(data) =>
         data.items.length === 0 ? (
           <EmptyState title="방문 신청 알림이 없습니다." />
         ) : (
-          <ul className="flex flex-col gap-2">
-            {data.items.map((item) => (
-              <li
-                key={item.noticeId}
-                className={`flex flex-wrap items-center justify-between gap-3 rounded-control border bg-surface p-5 ${item.readAt ? "border-primary-line" : "border-primary"}`}
-              >
-                <div className="flex flex-col gap-2">
-                  <span className="flex flex-col gap-1">
-                    <Badge
-                      tone={item.readAt ? "gray" : (NOTICE_TYPE_TONE[item.noticeType] ?? "blue")}
-                      className="h-7 w-fit min-w-0 px-3 text-caption"
-                    >
-                      {NOTICE_TYPE_LABEL[item.noticeType] ?? "방문 신청"}
-                    </Badge>
-                    <span className="text-caption text-ink-3">
-                      {formatSeoulDateTime(item.createdAt)}
+          <div className="flex flex-col gap-4">
+            {data.items.some((item) => !item.readAt) ? (
+              <div className="flex justify-end">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  isLoading={readAll.isPending}
+                  onClick={() => readAll.mutate()}
+                >
+                  모두 읽음 처리
+                </Button>
+              </div>
+            ) : null}
+            <ul className="flex flex-col gap-2">
+              {data.items.map((item) => (
+                <li
+                  key={item.noticeId}
+                  className={`flex flex-wrap items-center justify-between gap-3 rounded-control border bg-surface p-5 ${item.readAt ? "border-primary-line" : "border-primary"}`}
+                >
+                  <div className="flex flex-col gap-2">
+                    <span className="flex flex-col gap-1">
+                      <Badge
+                        tone={item.readAt ? "gray" : (NOTICE_TYPE_TONE[item.noticeType] ?? "blue")}
+                        className="h-7 w-fit min-w-0 px-3 text-caption"
+                      >
+                        {NOTICE_TYPE_LABEL[item.noticeType] ?? "방문 신청"}
+                      </Badge>
+                      <span className="text-caption text-ink-3">
+                        {formatSeoulDateTime(item.createdAt)}
+                      </span>
                     </span>
-                  </span>
-                  <span className="text-body text-ink-2">
-                    {NOTICE_TYPE_DESCRIPTION[item.noticeType] ?? "방문 신청 알림입니다."}
-                  </span>
-                </div>
-                <div className="flex gap-2">
-                  <Link
-                    href={visitRequestNoticeHref(item.coordinationId)}
-                    className="inline-flex h-9 items-center rounded-control border border-line px-3.5 text-caption font-medium text-ink-2 clickable-control"
-                  >
-                    방문 조율로 이동
-                  </Link>
-                  {item.readAt ? null : (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      aria-label={`방문 신청 알림 ${item.noticeId} 읽음 처리`}
-                      onClick={() => read.mutate(item.noticeId)}
+                    <span className="text-body text-ink-2">
+                      {NOTICE_TYPE_DESCRIPTION[item.noticeType] ?? "방문 신청 알림입니다."}
+                    </span>
+                  </div>
+                  <div className="flex gap-2">
+                    <Link
+                      href={visitRequestNoticeHref(item.coordinationId)}
+                      className="inline-flex h-9 items-center rounded-control border border-line px-3.5 text-caption font-medium text-ink-2 clickable-control"
                     >
-                      읽음 처리
-                    </Button>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
+                      방문 조율로 이동
+                    </Link>
+                    {item.readAt ? null : (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        aria-label={`방문 신청 알림 ${item.noticeId} 읽음 처리`}
+                        onClick={() => read.mutate(item.noticeId)}
+                      >
+                        읽음 처리
+                      </Button>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
         )
       }
     </QueryGate>

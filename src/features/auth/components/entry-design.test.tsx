@@ -48,6 +48,18 @@ describe("로그인 처음 화면 안내", () => {
   });
 });
 
+describe("로그인 처음 화면 구조", () => {
+  it("본문 영역과 화면 제목을 스크린리더에 알린다", () => {
+    const { unmount } = render(<AuthEntry mode="login" />);
+    expect(screen.getByRole("main")).not.toBeNull();
+    expect(screen.getByRole("heading", { level: 1, name: "로그인" })).not.toBeNull();
+    unmount();
+    render(<AuthEntry mode="signup" />);
+    expect(screen.getByRole("main")).not.toBeNull();
+    expect(screen.getByRole("heading", { level: 1, name: "회원가입" })).not.toBeNull();
+  });
+});
+
 describe("가입 카드 규격", () => {
   it("가입 정보 카드는 폭 676과 그림자를 쓰고 제목과 폼 사이가 넓다", () => {
     render(

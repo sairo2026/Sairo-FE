@@ -32,8 +32,9 @@ export function AuthEntry({
     ? `/login/email${next ? `?next=${encodeURIComponent(next)}` : ""}`
     : "/signup/email";
   return (
-    <div className="flex flex-1 items-center justify-center bg-surface px-4 py-16">
+    <main className="flex flex-1 items-center justify-center bg-surface px-4 py-16">
       <Card tone="elevated" className="min-h-[451px] w-full max-w-[460px]">
+        <h1 className="sr-only">{isLogin ? "로그인" : "회원가입"}</h1>
         <div className="flex flex-col items-center gap-10">
           <BrandLogo variant="vertical" className="w-48" />
           <div className="mx-auto flex w-full max-w-[360px] flex-col gap-3">
@@ -77,6 +78,6 @@ export function AuthEntry({
           <CookieNotice />
         </div>
       </Card>
-    </div>
+    </main>
   );
 }

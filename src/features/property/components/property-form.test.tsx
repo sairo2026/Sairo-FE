@@ -435,7 +435,11 @@ describe("매물 등록 요청 멱등 키", () => {
       await fillBasics(user);
       await user.type(screen.getByLabelText("가격 (보증금, 원)"), "20000000");
       await user.click(screen.getByRole("button", { name: "임시저장" }));
-      expect(await screen.findByText("월세는 0 이상의 정수(원)로 입력해 주세요.")).not.toBeNull();
+      expect(
+        await screen.findByText(
+          "월세는 0 이상의 정수(원)로 입력해 주세요. 해당 금액이 없으면 0을 입력해 주세요.",
+        ),
+      ).not.toBeNull();
       expect(getMockPropertyState().properties).toHaveLength(2);
     });
 

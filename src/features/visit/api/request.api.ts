@@ -107,6 +107,10 @@ export function listRequestNotices() {
   return apiFetch("/api/visit-request-notices", { schema: RequestNoticeWireSchema });
 }
 
+export async function readAllRequestNotices(): Promise<void> {
+  await apiFetch("/api/visit-request-notices/read-all", { method: "POST" });
+}
+
 /** 백엔드는 204 본문 없음으로 답한다. */
 export async function readRequestNotice(noticeId: number): Promise<void> {
   await apiFetch(`/api/visit-request-notices/${noticeId}/read`, { method: "POST" });

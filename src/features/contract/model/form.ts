@@ -123,6 +123,10 @@ function nullIfEmpty(value: string): string | null {
 
 type Mode = "draft" | "sign";
 
+function todaySeoulIso(): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date());
+}
+
 export function validateContractForm(
   values: ContractFormValues,
   mode: Mode,
@@ -150,6 +154,9 @@ export function validateContractForm(
   }
   if (values.leaseStartDate && values.leaseEndDate && values.leaseEndDate < values.leaseStartDate) {
     errors.leaseEndDate = "임대 만기일이 시작일보다 이릅니다.";
+  }
+  if (values.signedDate !== "" && values.signedDate > todaySeoulIso()) {
+    errors.signedDate = "체결일은 오늘보다 늦을 수 없습니다.";
   }
   if (!strict) return errors;
 

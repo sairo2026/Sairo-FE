@@ -21,6 +21,10 @@ export type MockBatch = {
   supportRequestStatus: string | null;
   mappingSaved: boolean;
   executeTicks: number;
+  /** 실패한 줄의 파일 줄 번호. */
+  failedRows: number[];
+  /** 앱에서 고쳐 저장한 값(줄 번호, 항목, 값). */
+  fixes: Record<number, Record<string, string>>;
 };
 
 export type MockMigrationState = {
@@ -67,7 +71,14 @@ export function buildMockBatch(overrides: Partial<ImportBatchDetail> = {}): Mock
     supportRequestStatus: null,
     mappingSaved: false,
     executeTicks: 0,
+    failedRows: [],
+    fixes: {},
   };
+}
+
+function withFailedRows(batch: MockBatch): MockBatch {
+  batch.failedRows = Array.from({ length: batch.detail.counts?.failed ?? 0 }, (_, i) => 8 + 7 * i);
+  return batch;
 }
 
 function initialState(): MockMigrationState {
@@ -75,15 +86,17 @@ function initialState(): MockMigrationState {
     callerRole: "OWNER",
     remainingThisMonth: 3,
     batches: [
-      buildMockBatch({
-        batchId: 301,
-        status: "COMPLETED",
-        counts: { total: 60, succeeded: 55, failed: 5, skippedDuplicate: 0, unprocessed: 0 },
-        executedAt: "2026-11-09T10:30:00+09:00",
-        cancellableUntil: futureIso(48),
-        failureReason: "5건이 형식 오류로 실패했습니다.",
-        version: 3,
-      }),
+      withFailedRows(
+        buildMockBatch({
+          batchId: 301,
+          status: "COMPLETED",
+          counts: { total: 60, succeeded: 55, failed: 5, skippedDuplicate: 0, unprocessed: 0 },
+          executedAt: "2026-11-09T10:30:00+09:00",
+          cancellableUntil: futureIso(48),
+          failureReason: "5건이 형식 오류로 실패했습니다.",
+          version: 3,
+        }),
+      ),
       buildMockBatch({ batchId: 302, fileName: "매물목록.csv", targetType: "PROPERTY" }),
     ],
     nextBatchId: 400,
@@ -246,6 +259,7 @@ function advanceExecution(batch: MockBatch) {
     unprocessed: total - done,
   };
   if (done >= total) {
+    withFailedRows(batch);
     batch.detail.status = "COMPLETED";
     batch.detail.executedAt = NOW;
     batch.detail.cancellableUntil = futureIso(48);
@@ -509,23 +523,84 @@ export const migrationHandlers = [
     });
   }),
 
+  http.get("/api/import-batches/:batchId/rows", ({ params, request }) => {
+    const blocked = denied();
+    if (blocked) return blocked;
+    const batch = findBatch(params.batchId);
+    if (!batch) return mockErrors.notFound();
+    if (!["COMPLETED", "FAILED", "CANCELLED", "EXECUTING"].includes(batch.detail.status)) {
+      return errorResponse(409, "INVALID_TRANSITION", "아직 실행하지 않았습니다.");
+    }
+    const url = new URL(request.url);
+    const outcome = url.searchParams.get("outcome") ?? "FAILED";
+    const page = Number(url.searchParams.get("page") ?? 0);
+    const size = Number(url.searchParams.get("size") ?? 50);
+    const all = mockRows(batch, outcome);
+    return HttpResponse.json({
+      rows: all.slice(page * size, page * size + size),
+      summary: summarizeRows(batch),
+      page,
+      size,
+      totalElements: all.length,
+    });
+  }),
+
+  http.put(
+    "/api/import-batches/:batchId/rows/:rowNumber/correction",
+    async ({ params, request }) => {
+      const blocked = denied();
+      if (blocked) return blocked;
+      const batch = findBatch(params.batchId);
+      if (!batch) return mockErrors.notFound();
+      const rowNumber = Number(params.rowNumber);
+      if (
+        !batch.failedRows.includes(rowNumber) ||
+        !["COMPLETED", "FAILED"].includes(batch.detail.status)
+      ) {
+        return errorResponse(409, "INVALID_TRANSITION", "고칠 수 없는 줄입니다.");
+      }
+      const body = (await request.json()) as { values?: Record<string, string> };
+      batch.fixes[rowNumber] = { ...batch.fixes[rowNumber], ...(body.values ?? {}) };
+      return HttpResponse.json(failedRow(batch, rowNumber));
+    },
+  ),
+
+  http.get("/api/import-batches/:batchId/failed-rows.csv", ({ params }) => {
+    const blocked = denied();
+    if (blocked) return blocked;
+    const batch = findBatch(params.batchId);
+    if (!batch) return mockErrors.notFound();
+    const lines = ["﻿원본 행 번호,고객번호,성명,실패 원인,고치는 방법"];
+    for (const row of batch.failedRows) {
+      lines.push(
+        `${row},C-${row},고객${row},이메일 형식이 올바르지 않습니다.,name@example.com 형식으로 고쳐 주세요.`,
+      );
+    }
+    return new HttpResponse(lines.join("\r\n"), {
+      headers: { "Content-Type": "text/csv; charset=UTF-8" },
+    });
+  }),
+
   http.post("/api/import-batches/:batchId/retry-failed", ({ params }) => {
     const blocked = denied();
     if (blocked) return blocked;
     const batch = findBatch(params.batchId);
     if (!batch) return mockErrors.notFound();
-    if (batch.detail.status !== "COMPLETED" || (batch.detail.counts?.failed ?? 0) === 0) {
+    if (batch.detail.status !== "COMPLETED" || batch.failedRows.length === 0) {
       return errorResponse(409, "INVALID_TRANSITION", "다시 처리할 실패 건이 없습니다.");
     }
+    const stillFailed = batch.failedRows.filter((row) => !isFixed(batch, row));
     const counts = batch.detail.counts;
     if (counts) {
       batch.detail.counts = {
         ...counts,
-        succeeded: counts.succeeded + counts.failed,
-        failed: 0,
+        succeeded: counts.succeeded + (batch.failedRows.length - stillFailed.length),
+        failed: stillFailed.length,
       };
     }
-    batch.detail.failureReason = null;
+    batch.failedRows = stillFailed;
+    batch.detail.failureReason =
+      stillFailed.length > 0 ? `${stillFailed.length}건이 실패했습니다.` : null;
     batch.detail.version += 1;
     return HttpResponse.json({
       batchId: batch.detail.batchId,
@@ -538,3 +613,110 @@ export const migrationHandlers = [
     });
   }),
 ];
+
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE = /^0\d{1,2}-?\d{3,4}-?\d{4}$/;
+
+function failedKind(row: number): "email" | "phone" | "name" {
+  const kinds = ["email", "phone", "name"] as const;
+  return kinds[Math.floor((row - 8) / 7) % 3] ?? "email";
+}
+
+function fieldFor(kind: "email" | "phone" | "name") {
+  if (kind === "email") return { field: "customerEmail", label: "이메일", bad: "이메일아님" };
+  if (kind === "phone") return { field: "customerPhone", label: "연락처", bad: "12-34" };
+  return { field: "customerName", label: "고객명", bad: "" };
+}
+
+function isFixed(batch: MockBatch, row: number): boolean {
+  const kind = failedKind(row);
+  const value = batch.fixes[row]?.[fieldFor(kind).field];
+  if (value === undefined) return false;
+  if (kind === "email") return EMAIL.test(value);
+  if (kind === "phone") return PHONE.test(value);
+  return value.trim() !== "";
+}
+
+function failedRow(batch: MockBatch, row: number) {
+  const kind = failedKind(row);
+  const target = fieldFor(kind);
+  const draft = batch.fixes[row]?.[target.field];
+  const fixed = isFixed(batch, row);
+  const message =
+    kind === "email"
+      ? "이메일 형식이 올바르지 않습니다."
+      : kind === "phone"
+        ? "전화번호 형식이 올바르지 않습니다."
+        : "필수 값이 비어 있습니다.";
+  const fix =
+    kind === "email"
+      ? "name@example.com 형식으로 고쳐 주세요."
+      : kind === "phone"
+        ? "010-1234-5678 형식의 번호로 고쳐 주세요."
+        : "'고객명' 칸이 비어 있습니다. 값을 입력해 주세요.";
+  return {
+    rowNumber: row,
+    outcome: "FAILED" as const,
+    label: kind === "name" ? null : `고객${row}`,
+    sourceId: `C-${row}`,
+    issues: fixed
+      ? []
+      : [
+          {
+            code: "MOCK",
+            field: target.field,
+            fieldLabel: target.label,
+            message,
+            fix,
+            correctable: true,
+          },
+        ],
+    skipReason: null,
+    targetId: null,
+    fields: [
+      {
+        field: target.field,
+        label: target.label,
+        value: draft ?? target.bad,
+        corrected: draft !== undefined,
+      },
+    ],
+    readyToRetry: fixed,
+  };
+}
+
+function summarizeRows(batch: MockBatch) {
+  const counts = batch.detail.counts;
+  return {
+    succeeded: counts?.succeeded ?? 0,
+    failed: counts?.failed ?? 0,
+    skipped: counts?.skippedDuplicate ?? 0,
+  };
+}
+
+function mockRows(batch: MockBatch, outcome: string) {
+  if (outcome === "FAILED") return batch.failedRows.map((row) => failedRow(batch, row));
+  const counts = batch.detail.counts;
+  const total = counts?.total ?? 0;
+  const failed = new Set(batch.failedRows);
+  const wanted =
+    outcome === "SUCCEEDED" ? (counts?.succeeded ?? 0) : (counts?.skippedDuplicate ?? 0);
+  const rows = [];
+  for (let n = 2; n <= total + 1 && rows.length < wanted; n += 1) {
+    if (failed.has(n)) continue;
+    const skipped = n === 12;
+    if ((outcome === "SKIPPED") !== skipped) continue;
+    rows.push({
+      rowNumber: n,
+      outcome: outcome as "SUCCEEDED" | "SKIPPED",
+      label: `고객${n}`,
+      sourceId: `C-${n}`,
+      issues: [],
+      skipReason: skipped ? "DUPLICATE_EXISTING" : null,
+      targetId: 1000 + n,
+      fields: [],
+      readyToRetry: false,
+    });
+  }
+  return rows;
+}
