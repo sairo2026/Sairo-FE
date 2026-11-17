@@ -65,6 +65,15 @@ async function pickBasics(user: ReturnType<typeof userEvent.setup>) {
 }
 
 describe("방문 조율 생성", () => {
+  it("같은 이름의 고객에게 진행 중인 조율이 있으면 만들기 전에 알려준다", async () => {
+    const user = userEvent.setup();
+    renderOffice(<CoordinationCreateScreen />, { role: "OWNER" });
+    await user.click((await screen.findAllByRole("radio", { name: /김수요/ }))[0] as HTMLElement);
+    expect(
+      await screen.findByText(/이 고객 이름으로 진행 중인 조율이 \d+건 있습니다/),
+    ).not.toBeNull();
+  });
+
   it("고객과 후보 매물을 고르지 않으면 제출하지 않고 안내한다", async () => {
     const user = userEvent.setup();
     renderOffice(<CoordinationCreateScreen />, { role: "OWNER" });
