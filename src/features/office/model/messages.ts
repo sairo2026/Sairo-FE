@@ -29,6 +29,10 @@ const MESSAGE_BY_CODE: Record<string, string> = {
   DEPUTY_VISIT_LOCKED: "중개보조원 한도를 넘어 방문 업무가 잠겨 있습니다.",
 };
 
+/** 초대 대상 이메일이 가입자가 아닐 때 다음 행동을 알려 주는 문구다. */
+export const INVITE_TARGET_NOT_FOUND_COPY =
+  "이 이메일로 가입한 사용자를 찾을 수 없습니다. 초대받을 분이 먼저 사이로에 가입한 뒤, 가입한 이메일 주소로 다시 초대해 주세요.";
+
 export function describeOfficeError(error: unknown, fallback: string): string {
   if (error instanceof ApiError && error.status !== 429 && error.status < 500) {
     const known = MESSAGE_BY_CODE[error.code];

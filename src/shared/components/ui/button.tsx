@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 import type { ButtonHTMLAttributes } from "react";
 import { cn } from "@/shared/lib/cn";
 
@@ -11,6 +14,8 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   fullWidth?: boolean;
   /** 안내 화면의 긴 단일 버튼. 폭 230을 쓴다. */
   isWide?: boolean;
+  /** 서버에 한 번만 보내야 하는 버튼에 쓴다. 더블 클릭의 두 번째 클릭은 처리 중 표시가 그려지기 전이라 무시한다. */
+  guardDoubleClick?: boolean;
 };
 
 const variantClass: Record<ButtonVariant, string> = {
@@ -21,12 +26,15 @@ const variantClass: Record<ButtonVariant, string> = {
   ghost: "bg-white text-ink-2 border border-line font-medium clickable-control",
 };
 
+const DOUBLE_CLICK_GUARD_MS = 300;
+
 export function Button({
   variant = "submit",
   isLoading = false,
   size = "md",
   fullWidth = false,
   isWide = false,
+  guardDoubleClick = false,
   type = "button",
   disabled,
   className,
@@ -35,6 +43,14 @@ export function Button({
   ...rest
 }: ButtonProps) {
   const isBlocked = Boolean(disabled) || isLoading;
+  const lockedUntil = useRef(0);
+  // 처리가 끝나 다시 눌러도 되는 상태가 되면 잠금을 푼다.
+  useEffect(() => {
+    if (!isLoading) return;
+    return () => {
+      lockedUntil.current = 0;
+    };
+  }, [isLoading]);
   return (
     <button
       {...rest}
@@ -46,6 +62,14 @@ export function Button({
         if (isBlocked) {
           event.preventDefault();
           return;
+        }
+        const now = Date.now();
+        if (guardDoubleClick && onClick) {
+          if (now < lockedUntil.current) {
+            event.preventDefault();
+            return;
+          }
+          lockedUntil.current = now + DOUBLE_CLICK_GUARD_MS;
         }
         onClick?.(event);
       }}

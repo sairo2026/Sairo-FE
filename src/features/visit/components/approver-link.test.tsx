@@ -74,6 +74,16 @@ describe("승인자 링크 화면 조건 등록", () => {
     expect(screen.getAllByDisplayValue("10:00").length).toBeGreaterThan(0);
   });
 
+  it("선택을 기다리는 신청이 있으면 신청 비교 탭으로 가는 안내를 먼저 보여준다", async () => {
+    const user = userEvent.setup();
+    renderLink();
+    expect(await screen.findByText(/선택을 기다리는 방문 신청이 \d+건 있습니다/)).not.toBeNull();
+    await user.click(screen.getByRole("button", { name: "신청 비교·선택으로 이동" }));
+    expect(screen.getByRole("tab", { name: "신청 비교·선택" }).getAttribute("aria-selected")).toBe(
+      "true",
+    );
+  });
+
   it("형식이 틀린 링크는 서버에 묻지 않고 열 수 없다고 안내한다", async () => {
     renderLink("short");
     expect(await screen.findByText("링크를 열 수 없습니다")).not.toBeNull();
