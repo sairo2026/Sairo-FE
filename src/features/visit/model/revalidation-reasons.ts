@@ -14,6 +14,7 @@ export const REVALIDATION_REASON_CODES = [
   "MIN_GAP",
   "MIN_LEAD",
   "SINGLE_VISIT_MAX",
+  "CUSTOMER_TIME_MISMATCH",
   "CUSTOMER_CONFLICT",
   "BROKER_CONFLICT",
   "PROPERTY_CONFLICT",
@@ -65,9 +66,14 @@ export const BROKER_REASON_COPY: Record<RevalidationReasonCode, ReasonCopy> = {
     reason: "1회 허용 시간을 넘습니다.",
     nextStep: RETRY_WITH_NEW_SLOT,
   },
+  CUSTOMER_TIME_MISMATCH: {
+    reason: "신청한 구간이 고객이 가능하다고 한 시간 밖입니다.",
+    nextStep:
+      "고객이 가능한 시간을 다시 받거나 신청 가능 구간으로 안내된 시간 안에서 새 신청을 내 주세요.",
+  },
   CUSTOMER_CONFLICT: {
     reason:
-      "고객이 가능하다고 한 시간이 아니거나 고객의 다른 확정 방문과 겹칩니다. 같은 조율의 다른 매물 확정과 겹친 경우도 포함합니다.",
+      "고객의 다른 확정 방문이나 이동 시간과 겹칩니다. 같은 조율의 다른 매물 확정과 겹친 경우도 포함합니다.",
     nextStep: ADJUST_SCHEDULE,
   },
   BROKER_CONFLICT: {
@@ -92,6 +98,7 @@ export const GENERIC_BROKER_REASON: ReasonCopy = {
 
 /** 승인자에게는 중개사·고객·다른 방문 사정이 드러나는 사유를 하나의 일반 표현으로 묶어 보인다. */
 export const APPROVER_UNDISCLOSED_REASON_CODES: readonly string[] = [
+  "CUSTOMER_TIME_MISMATCH",
   "CUSTOMER_CONFLICT",
   "BROKER_CONFLICT",
   "PROPERTY_CONFLICT",
