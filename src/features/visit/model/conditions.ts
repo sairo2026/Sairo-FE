@@ -376,6 +376,7 @@ export const VIOLATED_RULE_LABEL: Record<string, string> = {
   CONDITION_CHANGED: "조건 변경으로 맞지 않음",
   NO_PERMISSION: "신청 권한이 유효하지 않음",
   DEPUTY_VISIT_LOCKED: "다른 일정과 겹치거나 신청 쪽 사정으로 확정할 수 없음",
+  CUSTOMER_TIME_MISMATCH: "다른 일정과 겹치거나 신청 쪽 사정으로 확정할 수 없음",
   CUSTOMER_CONFLICT: "다른 일정과 겹치거나 신청 쪽 사정으로 확정할 수 없음",
   BROKER_CONFLICT: "다른 일정과 겹치거나 신청 쪽 사정으로 확정할 수 없음",
   PROPERTY_CONFLICT: "다른 일정과 겹치거나 신청 쪽 사정으로 확정할 수 없음",
