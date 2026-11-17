@@ -53,7 +53,18 @@ describe("매물 목록", () => {
   it("매물이 없으면 빈 목록 안내를 보여준다", async () => {
     setMockPropertyState({ properties: [] });
     renderOffice(<PropertyListScreen />, { role: "OWNER" });
-    expect(await screen.findByText(/조건에 맞는 매물이 없습니다/)).not.toBeNull();
+    expect(await screen.findByText(/등록된 매물이 없습니다/)).not.toBeNull();
+  });
+
+  it("하한이 상한보다 크면 조회하지 않고 안내한다", async () => {
+    const user = userEvent.setup();
+    renderOffice(<PropertyListScreen />, { role: "OWNER" });
+    await screen.findByText("정릉 상가");
+    await user.selectOptions(screen.getByLabelText("거래유형"), "SALE");
+    await user.type(screen.getByLabelText("매매가 하한(만원)"), "100");
+    await user.type(screen.getByLabelText("매매가 상한(만원)"), "1");
+    await user.click(screen.getByRole("button", { name: "조건 적용" }));
+    expect(await screen.findByText(/하한이 상한보다 클 수 없습니다/)).not.toBeNull();
   });
 
   it("조회가 실패하면 목록 안에 오류와 다시 시도 버튼을 보여준다", async () => {
@@ -88,7 +99,7 @@ describe("매물 목록", () => {
     );
     const user = userEvent.setup();
     renderOffice(<PropertyListScreen />, { role: "OWNER" });
-    await screen.findByText(/조건에 맞는 매물이 없습니다/);
+    await screen.findByText(/등록된 매물이 없습니다/);
     await user.selectOptions(screen.getByLabelText("거래유형"), "SALE");
     await waitFor(() => expect(requests.some((item) => item.includes("dealType=SALE"))).toBe(true));
   });
@@ -146,7 +157,7 @@ describe("매물 목록", () => {
     );
     const user = userEvent.setup();
     renderOffice(<PropertyListScreen />, { role: "OWNER" });
-    await screen.findByText(/조건에 맞는 매물이 없습니다/);
+    await screen.findByText(/등록된 매물이 없습니다/);
     await user.type(screen.getByRole("searchbox"), "정릉");
     await user.click(screen.getByRole("button", { name: "검색" }));
     await waitFor(() => expect(requests.some((item) => item.includes("keyword="))).toBe(true));

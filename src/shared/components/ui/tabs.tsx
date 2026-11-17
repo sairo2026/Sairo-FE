@@ -36,7 +36,11 @@ export function Tabs({ label, items, activeKey, onActiveKeyChange }: TabsProps) 
   const active = items.find((item) => item.key === activeKey);
   return (
     <div>
-      <div role="tablist" aria-label={label} className="flex gap-6 border-b border-line">
+      <div
+        role="tablist"
+        aria-label={label}
+        className="flex gap-6 overflow-x-auto border-b border-line"
+      >
         {items.map((item) => {
           const isActive = item.key === activeKey;
           return (
@@ -55,7 +59,7 @@ export function Tabs({ label, items, activeKey, onActiveKeyChange }: TabsProps) 
               onClick={() => onActiveKeyChange(item.key)}
               onKeyDown={(event) => handleKeyDown(event, item.key)}
               className={cn(
-                "-mb-px border-b-2 pb-3 text-body font-semibold transition-colors disabled:cursor-not-allowed disabled:text-ink-3",
+                "-mb-px shrink-0 whitespace-nowrap border-b-2 pb-3 text-body font-semibold transition-colors disabled:cursor-not-allowed disabled:text-ink-3",
                 isActive
                   ? "border-primary text-primary"
                   : "border-transparent text-ink transition-colors hover:border-primary-line hover:bg-primary-soft hover:text-primary active:bg-primary-line",

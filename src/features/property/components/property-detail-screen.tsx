@@ -243,7 +243,21 @@ function RelationPanel({ property }: { property: PropertyDetailResponse }) {
 }
 
 function PhotosPanel({ property }: { property: PropertyDetailResponse }) {
-  if (property.photos.length === 0) return <MutedNote>등록된 사진이 없습니다.</MutedNote>;
+  if (property.photos.length === 0) {
+    return (
+      <div className="flex flex-col gap-2">
+        <MutedNote>등록된 사진이 없습니다.</MutedNote>
+        {property.deletedAt ? null : (
+          <Link
+            href={`/properties/${property.propertyId}/edit`}
+            className="w-fit text-caption font-semibold text-primary hover:underline"
+          >
+            수정 화면에서 사진 추가하기
+          </Link>
+        )}
+      </div>
+    );
+  }
   const sorted = [...property.photos].sort((a, b) => a.sortOrder - b.sortOrder);
   return (
     <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -416,12 +430,18 @@ function DetailBody({ property }: { property: PropertyDetailResponse }) {
               >
                 다른 사무소 신청 현황
               </Link>
-              <Link
-                href={`/coordinations/new?propertyId=${property.propertyId}`}
-                className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 clickable-control"
-              >
-                방문 조율 시작
-              </Link>
+              {property.registrationStage === "DRAFT" ? (
+                <span className="inline-flex h-12 items-center text-caption text-ink-2">
+                  활성 등록을 마치면 방문 조율을 시작할 수 있습니다.
+                </span>
+              ) : (
+                <Link
+                  href={`/coordinations/new?propertyId=${property.propertyId}`}
+                  className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 clickable-control"
+                >
+                  방문 조율 시작
+                </Link>
+              )}
               <Link
                 href={`/contracts/new?propertyId=${property.propertyId}`}
                 className="inline-flex h-12 items-center rounded-control border border-line bg-white px-6 text-body font-medium text-ink-2 clickable-control"

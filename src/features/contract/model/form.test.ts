@@ -35,6 +35,16 @@ describe("계약 입력 모델", () => {
     expect(parseAmount("")).toBeNaN();
   });
 
+  it("체결일이 오늘보다 늦으면 초안과 체결 모두 거절한다", () => {
+    const future = { ...leaseForm(), signedDate: "2999-01-01" };
+    expect(validateContractForm(future, "draft").signedDate).toBe(
+      "체결일은 오늘보다 늦을 수 없습니다.",
+    );
+    expect(validateContractForm(future, "sign").signedDate).toBe(
+      "체결일은 오늘보다 늦을 수 없습니다.",
+    );
+  });
+
   it("체결 검증은 거래유형별 필수값과 잔금 사유를 확인한다", () => {
     const errors = validateContractForm(
       { ...leaseForm(), depositAmount: "", leaseEndDate: "", balanceDueDatePendingReason: "" },

@@ -14,6 +14,7 @@ import { ConfirmDialog } from "@/shared/components/ui/modal";
 import { FieldLabel, OfficeFieldScope } from "@/shared/components/ui/field-label";
 import { PageHeader } from "@/shared/components/ui/page-header";
 import { SelectField } from "@/shared/components/ui/select-field";
+import { TextField } from "@/shared/components/ui/text-field";
 import { fieldErrorMap } from "@/shared/lib/api-messages";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import {
@@ -51,9 +52,17 @@ function FormBody({
   const targetPropertyId =
     contract?.propertyId ?? (pickedProperty === "" ? null : Number(pickedProperty));
   const property = useContractProperty(targetPropertyId);
+  const [propertyKeyword, setPropertyKeyword] = useState("");
+  const [pickedLabel, setPickedLabel] = useState("");
+  const propertyTerm = propertyKeyword.trim();
   const properties = useQuery({
-    queryKey: contractKeys.propertyOptions,
-    queryFn: () => listProperties({ page: 0, size: 100 }),
+    queryKey: [...contractKeys.propertyOptions, propertyTerm],
+    queryFn: () =>
+      listProperties({
+        keyword: propertyTerm === "" ? undefined : propertyTerm,
+        page: 0,
+        size: 100,
+      }),
     enabled: propertyId === null && contract === null,
   });
   const [values, setValues] = useState<ContractFormValues>(() =>
@@ -133,8 +142,21 @@ function FormBody({
   const busy = saveDraft.isPending || sign.isPending || remove.isPending;
   const propertyOptions = (properties.data?.items ?? []).map((item) => ({
     value: String(item.propertyId),
-    label: item.name,
+    label: item.address ? `${item.name} · ${item.address}` : item.name,
   }));
+  if (pickedProperty !== "" && !propertyOptions.some((item) => item.value === pickedProperty)) {
+    propertyOptions.unshift({
+      value: pickedProperty,
+      label: pickedLabel || `매물 ${pickedProperty}`,
+    });
+  }
+  const propertyTotal = properties.data?.totalElements ?? 0;
+  const propertyHint =
+    propertyTerm !== "" && properties.data && propertyOptions.length === 0
+      ? "검색어에 맞는 매물이 없습니다. 이름이나 주소를 바꿔 찾아 보세요."
+      : propertyTotal > propertyOptions.length
+        ? `매물이 ${propertyTotal}건이라 앞의 ${properties.data?.items.length ?? 0}건만 보입니다. 이름이나 주소로 찾아 보세요.`
+        : undefined;
 
   return (
     <OfficeFieldScope>
@@ -162,15 +184,29 @@ function FormBody({
               )}
             </p>
           ) : (
-            <SelectField
-              label="매물 선택"
-              required
-              value={pickedProperty}
-              options={propertyOptions}
-              placeholder="계약할 매물 선택"
-              onValueChange={setPickedProperty}
-              error={errors.propertyId}
-            />
+            <div className="flex flex-col gap-3">
+              <TextField
+                label="매물 검색"
+                value={propertyKeyword}
+                onValueChange={setPropertyKeyword}
+                placeholder="매물명이나 주소로 찾기"
+                maxLength={100}
+              />
+              <SelectField
+                label="매물 선택"
+                required
+                value={pickedProperty}
+                options={propertyOptions}
+                placeholder="계약할 매물 선택"
+                onValueChange={(value) => {
+                  setPickedProperty(value);
+                  const found = propertyOptions.find((item) => item.value === value);
+                  if (found) setPickedLabel(found.label);
+                }}
+                error={errors.propertyId}
+              />
+              {propertyHint ? <p className="text-caption text-ink-2">{propertyHint}</p> : null}
+            </div>
           )}
         </fieldset>
         <ContractFields
