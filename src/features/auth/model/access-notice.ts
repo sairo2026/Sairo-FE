@@ -27,20 +27,35 @@ function describeRejection(context: AuthContextResponse): string[] {
 function describePreVerification(context: AuthContextResponse): AccessNotice {
   const isWaitingMembership =
     context.pendingMembershipId !== null && context.pendingMembershipId !== undefined;
+  if (isWaitingMembership) {
+    return {
+      title: "사무소 참여 승인을 기다리고 있습니다",
+      description:
+        "사무소 대표가 참여 요청을 승인하면 업무 화면을 사용할 수 있습니다. 대표가 보낸 초대라면 참여 요청 상태 화면에서 직접 수락해야 합니다. 그동안 요청 상태 확인과 철회, 계정 관리만 할 수 있습니다.",
+      details: describeRejection(context),
+      actions: [{ label: "참여 요청 상태 확인", href: "/office/membership" }, ...ACCOUNT_ACTIONS],
+    };
+  }
+  const isDrafting =
+    context.pendingRegistrationId !== null && context.pendingRegistrationId !== undefined;
+  if (isDrafting) {
+    return {
+      title: "사무소 인증이 필요합니다",
+      description:
+        "본인 인증과 사무소 인증 신청을 마치면 업무 화면을 사용할 수 있습니다. 작성 중인 신청은 이어서 작성하고 증빙을 제출할 수 있습니다.",
+      details: describeRejection(context),
+      actions: [
+        { label: "사무소 인증 신청", href: AUTH_ROUTES.officeVerification },
+        ...ACCOUNT_ACTIONS,
+      ],
+    };
+  }
   return {
-    title: isWaitingMembership
-      ? "사무소 참여 승인을 기다리고 있습니다"
-      : "사무소 인증이 필요합니다",
-    description: isWaitingMembership
-      ? "사무소 대표가 참여 요청을 승인하면 업무 화면을 사용할 수 있습니다. 그동안 요청 상태 확인과 철회, 계정 관리만 할 수 있습니다."
-      : "본인 인증과 사무소 인증 신청을 마치면 업무 화면을 사용할 수 있습니다. 작성 중인 신청은 이어서 작성하고 증빙을 제출할 수 있습니다.",
+    title: "사무소를 만들거나 참여해 주세요",
+    description:
+      "새 사무소를 등록하거나 기존 사무소에 참여 요청을 보내면 업무 화면을 사용할 수 있습니다. 사무소 대표에게 초대를 받았다면 초대를 받은 이메일로 가입한 계정에서 수락할 수 있습니다.",
     details: describeRejection(context),
-    actions: [
-      isWaitingMembership
-        ? { label: "참여 요청 상태 확인", href: "/office/membership" }
-        : { label: "사무소 인증 신청", href: AUTH_ROUTES.officeVerification },
-      ...ACCOUNT_ACTIONS,
-    ],
+    actions: [{ label: "사무소 만들기·참여하기", href: "/office/start" }, ...ACCOUNT_ACTIONS],
   };
 }
 
