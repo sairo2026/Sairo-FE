@@ -44,7 +44,7 @@ function CustomerLinkSelect({
   const term = keyword.trim();
   const found = useQuery({
     queryKey: [...contractKeys.customerOptions, "search", term],
-    queryFn: () => listCustomers({ keyword: term, page: 0, size: 30 }),
+    queryFn: () => listCustomers({ keyword: term, page: 0, size: 25 }),
     enabled: term !== "",
   });
   const merged = new Map<string, CustomerOption>();
