@@ -187,6 +187,14 @@ describe("홈 대시보드", () => {
     expect(screen.getByRole("link", { name: "읽지 않은 방문 신청 알림 3건" })).toBeTruthy();
   });
 
+  it("방문 신청 현황의 세 항목은 뜻을 한 줄로 설명한다", async () => {
+    renderOffice(<HomeDashboard />);
+    await screen.findByRole("link", { name: "신청 대기 0건" });
+    expect(screen.getByText("승인자가 아직 선택하지 않은 신청입니다.")).toBeTruthy();
+    expect(screen.getByText("선택된 뒤 최신 조건과 일정 확인에 실패한 신청입니다.")).toBeTruthy();
+    expect(screen.getByText("같은 매물의 다른 신청이 확정되어 마감된 신청입니다.")).toBeTruthy();
+  });
+
   it("방문 조율 현황의 상태 태그는 각 상태로 거른 조율 목록으로 이어진다", async () => {
     renderOffice(<HomeDashboard />, { role: "OWNER" });
     const status = await screen.findByRole("region", { name: "방문 조율 현황" });
