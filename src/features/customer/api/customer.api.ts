@@ -40,6 +40,7 @@ export type CustomerListParams = {
   role?: string;
   keyword?: string;
   archived?: boolean;
+  sort?: string;
   page: number;
   size: number;
 };

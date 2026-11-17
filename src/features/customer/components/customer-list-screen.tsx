@@ -22,6 +22,7 @@ import {
   CUSTOMER_ROLE_TONE,
   isCustomerRole,
 } from "../model/labels";
+import { LIST_SORT_OPTIONS } from "@/shared/lib/list-sort";
 import { describeCustomerError } from "../model/messages";
 
 type Row = CustomerListResponse["items"][number];
@@ -35,6 +36,7 @@ export function CustomerListScreen() {
   const [keyword, setKeyword] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
   const [archived, setArchived] = useState(false);
+  const [sort, setSort] = useState("");
   const [page, setPage] = useState(1);
   const [size, setSize] = useState<PageSize>(25);
   const [selected, setSelected] = useState<number[]>([]);
@@ -43,6 +45,7 @@ export function CustomerListScreen() {
     role: roleFilter || undefined,
     keyword: keyword.trim() === "" ? undefined : keyword.trim(),
     archived: archived ? true : undefined,
+    sort: sort || undefined,
     page: page - 1,
     size,
   });
@@ -84,7 +87,8 @@ export function CustomerListScreen() {
         <span className="flex flex-wrap items-center gap-2">
           <Link
             href={`/customers/${row.customerId}`}
-            className="font-bold text-ink hover:text-primary hover:underline"
+            title={row.name}
+            className="block max-w-[16rem] truncate font-bold text-ink hover:text-primary hover:underline"
           >
             {row.name}
           </Link>
@@ -167,6 +171,16 @@ export function CustomerListScreen() {
             setPage(1);
           }}
         />
+        <SelectField
+          layout="inline"
+          label="정렬"
+          value={sort}
+          options={LIST_SORT_OPTIONS.map((item) => ({ value: item.value, label: item.label }))}
+          onValueChange={(value) => {
+            setSort(value);
+            setPage(1);
+          }}
+        />
         <div className="flex items-center gap-5 text-body font-semibold text-ink-2">
           <span aria-hidden="true">보관 고객 보기</span>
           <Toggle
@@ -220,7 +234,9 @@ export function CustomerListScreen() {
         emptyMessage={
           archived
             ? "보관된 고객이 없습니다."
-            : "조건에 맞는 고객이 없습니다. 고객을 등록해 보세요."
+            : keyword.trim() !== "" || roleFilter !== ""
+              ? "조건에 맞는 고객이 없습니다. 검색어나 조건을 바꿔 보세요."
+              : "등록된 고객이 없습니다. 고객 등록 버튼으로 첫 고객을 등록해 보세요."
         }
       />
     </div>

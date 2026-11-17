@@ -35,6 +35,7 @@ import {
   labelOf,
   toneOf,
 } from "../model/labels";
+import { LIST_SORT_OPTIONS } from "@/shared/lib/list-sort";
 import { describePropertyError } from "../model/messages";
 import { BulkArchiveDialog } from "./archive-notices";
 
@@ -58,6 +59,7 @@ type Filters = {
   priceMin: string;
   priceMax: string;
   archived: boolean;
+  sort: string;
 };
 
 const EMPTY_FILTERS: Filters = {
@@ -72,6 +74,7 @@ const EMPTY_FILTERS: Filters = {
   priceMin: "",
   priceMax: "",
   archived: false,
+  sort: "",
 };
 
 const MAN_WON = 10_000;
@@ -130,6 +133,7 @@ function toParams(filters: Filters, page: number, size: number): PropertyListPar
     priceMin: filters.dealType ? optionalNumber(filters.priceMin, MAN_WON) : undefined,
     priceMax: filters.dealType ? optionalNumber(filters.priceMax, MAN_WON) : undefined,
     archived: filters.archived ? true : undefined,
+    sort: filters.sort || undefined,
     page: page - 1,
     size,
   };
@@ -216,7 +220,8 @@ export function PropertyListScreen() {
       render: (row: Row) => (
         <Link
           href={`/properties/${row.propertyId}`}
-          className="font-bold text-ink hover:text-primary hover:underline"
+          title={row.name}
+          className="block max-w-[16rem] truncate font-bold text-ink hover:text-primary hover:underline"
         >
           {row.name}
         </Link>
@@ -400,6 +405,13 @@ export function PropertyListScreen() {
             })),
           ]}
           onValueChange={(value) => changeImmediate("categoryId", value)}
+        />
+        <SelectField
+          layout="inline"
+          label="정렬"
+          value={draft.sort}
+          options={LIST_SORT_OPTIONS.map((item) => ({ value: item.value, label: item.label }))}
+          onValueChange={(value) => changeImmediate("sort", value)}
         />
         <div className="flex items-center gap-5 text-body font-semibold text-ink-2">
           <span>보관된 매물만 보기</span>
