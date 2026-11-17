@@ -330,7 +330,7 @@ describe("고객 공개 링크 화면", () => {
   });
 
   it("서버 오류가 나면 다시 시도 안내를 보여준다", async () => {
-    server.use(http.get("/api/public/customer-visit-links/:token", () => mockErrors.forbidden()));
+    server.use(http.get("/api/public/customer-visit-links/:token", () => mockErrors.server()));
     renderLink();
     expect(await screen.findByRole("button", { name: /다시 시도/ })).not.toBeNull();
   });
