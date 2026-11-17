@@ -694,11 +694,14 @@ function MembershipStatusBody({ membership }: { membership: MembershipStatus }) 
   const needsAcceptance = isPending && isInvite && !membership.invitationAcceptedAt && !expired;
   const remaining = isPending ? describeRemaining(membership.expiresAt, now) : null;
 
+  // 초대를 아직 수락하지 않았다면 철회가 아니라 거절이다.
+  const isDecliningInvite = isInvite && !membership.invitationAcceptedAt;
+  const cancelLabel = isDecliningInvite ? "초대 거절" : isInvite ? "참여 철회" : "요청 철회";
   const cancelMutation = useMutation({
     mutationFn: () => cancelMembership(membership.membershipId),
     onSuccess: async () => {
       setConfirmingCancel(false);
-      setNotice("참여 요청을 철회했습니다.");
+      setNotice(isDecliningInvite ? "초대를 거절했습니다." : "참여 요청을 철회했습니다.");
       await refresh();
     },
     onError: (caught) => {
@@ -815,9 +818,9 @@ function MembershipStatusBody({ membership }: { membership: MembershipStatus }) 
         {status === "EXPIRED" || status === "CANCELLED" ? (
           <Button onClick={() => router.push("/office/start")}>새로 시작</Button>
         ) : null}
-        {isPending && !expired && !isInvite ? (
+        {isPending && !expired ? (
           <Button variant="cancel" onClick={() => setConfirmingCancel(true)}>
-            요청 철회
+            {cancelLabel}
           </Button>
         ) : null}
       </ButtonRow>
@@ -829,9 +832,13 @@ function MembershipStatusBody({ membership }: { membership: MembershipStatus }) 
 
       <ConfirmDialog
         isOpen={confirmingCancel}
-        title="참여 요청을 철회할까요"
-        message="철회하면 대표에게 전달된 요청이 닫히고 새로 시작해야 합니다."
-        confirmLabel="철회"
+        title={isDecliningInvite ? "초대를 거절할까요" : "참여 요청을 철회할까요"}
+        message={
+          isDecliningInvite
+            ? "거절하면 초대가 닫힙니다. 다시 참여하려면 대표에게 새 초대를 요청해야 합니다."
+            : "철회하면 대표에게 전달된 요청이 닫히고 새로 시작해야 합니다."
+        }
+        confirmLabel={isDecliningInvite ? "거절" : "철회"}
         isPending={cancelMutation.isPending}
         onConfirm={() => cancelMutation.mutate()}
         onCancel={() => setConfirmingCancel(false)}

@@ -353,6 +353,36 @@ describe("승인 대기와 초대 수락", () => {
     expect(screen.queryByRole("form", { name: "초대 수락" })).toBeNull();
   });
 
+  it("수락하지 않은 초대는 거절할 수 있다", async () => {
+    setMockOfficeState({ myMembership: membership({ requestSource: "INVITE" }) });
+    const user = userEvent.setup();
+    renderOffice(<MembershipStatusScreen />);
+    expect(screen.queryByRole("button", { name: "요청 철회" })).toBeNull();
+    await user.click(await screen.findByRole("button", { name: "초대 거절" }));
+    const dialog = screen.getByRole("dialog");
+    expect(within(dialog).getByText("초대를 거절할까요")).not.toBeNull();
+    await user.click(within(dialog).getByRole("button", { name: "거절" }));
+    expect(
+      await screen.findByText("초대를 거절했습니다.", { selector: "p[role=status]" }),
+    ).not.toBeNull();
+  });
+
+  it("이미 수락한 초대는 참여 철회로 취소할 수 있다", async () => {
+    setMockOfficeState({
+      myMembership: membership({
+        requestSource: "INVITE",
+        invitationAcceptedAt: "2026-11-10T09:00:00+09:00",
+      }),
+    });
+    const user = userEvent.setup();
+    renderOffice(<MembershipStatusScreen />);
+    await user.click(await screen.findByRole("button", { name: "참여 철회" }));
+    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "철회" }));
+    expect(
+      await screen.findByText("참여 요청을 철회했습니다.", { selector: "p[role=status]" }),
+    ).not.toBeNull();
+  });
+
   it("기한이 지난 초대를 서버가 거부하면 상태 변경 안내를 보여준다", async () => {
     setMockOfficeState({ myMembership: membership({ requestSource: "INVITE", role: "DEPUTY" }) });
     server.use(
