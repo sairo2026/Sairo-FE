@@ -27,6 +27,9 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/notifications",
 }));
 
+/** 개별 읽음 처리 버튼만 고른다. 모두 읽음 처리 버튼은 제외한다. */
+const SINGLE_READ_BUTTON = /^(?!모두).*읽음 처리$/;
+
 let stopServer: () => void;
 
 beforeAll(() => {
@@ -55,9 +58,65 @@ describe("알림함", () => {
   it("읽음 처리하면 읽지 않음 표시가 사라진다", async () => {
     const user = userEvent.setup();
     renderOffice(<NotificationListScreen />, { role: "OWNER" });
-    await user.click(await screen.findByRole("button", { name: /읽음 처리/ }));
+    await user.click(await screen.findByRole("button", { name: SINGLE_READ_BUTTON }));
     await waitFor(() => expect(screen.queryByText("읽지 않음")).toBeNull());
     expect(getMockWorkState().notifications.every((item) => item.read)).toBe(true);
+  });
+
+  it("모두 읽음 처리를 누르면 읽지 않은 알림이 모두 읽음이 되고 버튼이 사라진다", async () => {
+    const user = userEvent.setup();
+    renderOffice(<NotificationListScreen />, { role: "OWNER" });
+    await user.click(await screen.findByRole("button", { name: "모두 읽음 처리" }));
+    await waitFor(() => expect(screen.queryByText("읽지 않음")).toBeNull());
+    expect(getMockWorkState().notifications.every((item) => item.read)).toBe(true);
+    expect(screen.queryByRole("button", { name: "모두 읽음 처리" })).toBeNull();
+  });
+
+  it("모두 읽음 처리가 실패하면 오류 안내를 보여준다", async () => {
+    server.use(http.post("/api/notifications/read-all", () => mockErrors.server()));
+    const user = userEvent.setup();
+    renderOffice(<NotificationListScreen />, { role: "OWNER" });
+    await user.click(await screen.findByRole("button", { name: "모두 읽음 처리" }));
+    expect(await screen.findByRole("alert")).not.toBeNull();
+  });
+
+  it("읽지 않은 알림이 없으면 모두 읽음 처리 버튼을 보이지 않는다", async () => {
+    setMockWorkState({
+      notifications: [buildMockNotification({ notificationId: 1, read: true })],
+    });
+    renderOffice(<NotificationListScreen />, { role: "OWNER" });
+    await screen.findByRole("list");
+    expect(screen.queryByRole("button", { name: "모두 읽음 처리" })).toBeNull();
+  });
+
+  it("방문 신청 알림 탭에서 모두 읽음 처리한다", async () => {
+    let readAll = false;
+    const items = (read: boolean) => [
+      {
+        noticeId: 31,
+        requestId: 5,
+        noticeType: "TIME_CLOSED",
+        channel: "IN_APP",
+        createdAt: "2026-11-10T09:00:00+09:00",
+        readAt: read ? "2026-11-10T09:05:00+09:00" : null,
+      },
+    ];
+    server.use(
+      http.get("/api/visit-request-notices", () => HttpResponse.json({ items: items(readAll) })),
+      http.post("/api/visit-request-notices/read-all", () => {
+        readAll = true;
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+    const user = userEvent.setup();
+    renderOffice(<NotificationListScreen />, { role: "OWNER" });
+    await user.click(await screen.findByRole("tab", { name: "방문 신청 알림" }));
+    const panel = await screen.findByRole("tabpanel");
+    await user.click(await within(panel).findByRole("button", { name: "모두 읽음 처리" }));
+    await waitFor(() => expect(readAll).toBe(true));
+    await waitFor(() =>
+      expect(within(panel).queryByRole("button", { name: "모두 읽음 처리" })).toBeNull(),
+    );
   });
 
   it("읽지 않은 알림만 보기를 켜면 읽은 알림이 빠진다", async () => {
@@ -136,7 +195,7 @@ describe("알림함", () => {
     server.use(http.post("/api/notifications/:id/read", () => mockErrors.notFound()));
     const user = userEvent.setup();
     renderOffice(<NotificationListScreen />, { role: "OWNER" });
-    await user.click(await screen.findByRole("button", { name: /읽음 처리/ }));
+    await user.click(await screen.findByRole("button", { name: SINGLE_READ_BUTTON }));
     expect(await screen.findByText(/대상을 찾을 수 없습니다/)).not.toBeNull();
   });
 
@@ -167,7 +226,7 @@ describe("알림함", () => {
     await user.click(await screen.findByRole("tab", { name: "방문 신청 알림" }));
     const panel = await screen.findByRole("tabpanel");
     expect(await within(panel).findByText("시간 마감")).not.toBeNull();
-    await user.click(within(panel).getByRole("button", { name: /읽음 처리/ }));
+    await user.click(within(panel).getByRole("button", { name: SINGLE_READ_BUTTON }));
     await waitFor(() => expect(read).toBe(true));
   });
 
