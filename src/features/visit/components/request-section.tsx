@@ -163,7 +163,9 @@ function CandidateRequests({
           </span>
         ) : null}
       </span>
-      {candidate.applicableSlots.length > 0 ? (
+      {hasScheduledItem ? (
+        <span className="text-caption text-ink-2">확정된 방문</span>
+      ) : candidate.applicableSlots.length > 0 ? (
         <span className="text-caption text-ink-2">
           신청 가능 구간 {candidate.applicableSlots.length}개
         </span>
