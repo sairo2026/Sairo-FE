@@ -109,3 +109,42 @@ export const SupportDetailWireSchema = ImportSupportRequestDetailResponseSchema.
     .nullish(),
 });
 export type ImportSupportDetail = z.infer<typeof SupportDetailWireSchema>;
+
+const RowIssueSchema = z.object({
+  code: z.string(),
+  field: z.string().nullish(),
+  fieldLabel: z.string().nullish(),
+  message: z.string(),
+  fix: z.string(),
+  correctable: z.boolean(),
+});
+
+const RowFieldSchema = z.object({
+  field: z.string(),
+  label: z.string(),
+  value: z.string().nullish(),
+  corrected: z.boolean(),
+});
+
+export const ImportRowSchema = z.object({
+  rowNumber: z.number(),
+  outcome: z.enum(["SUCCEEDED", "FAILED", "SKIPPED"]),
+  label: z.string().nullish(),
+  sourceId: z.string().nullish(),
+  issues: z.array(RowIssueSchema),
+  skipReason: z.string().nullish(),
+  targetId: z.number().nullish(),
+  fields: z.array(RowFieldSchema),
+  readyToRetry: z.boolean(),
+});
+export type ImportRow = z.infer<typeof ImportRowSchema>;
+export type ImportRowIssue = z.infer<typeof RowIssueSchema>;
+
+export const ImportRowResultsSchema = z.object({
+  rows: z.array(ImportRowSchema),
+  summary: z.object({ succeeded: z.number(), failed: z.number(), skipped: z.number() }),
+  page: z.number(),
+  size: z.number(),
+  totalElements: z.number(),
+});
+export type ImportRowResults = z.infer<typeof ImportRowResultsSchema>;

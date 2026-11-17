@@ -129,6 +129,12 @@ export const SKIP_REASON_LABEL = {
   duplicateExisting: "기존 고객과 겹침",
 } as const;
 
+export const ROW_SKIP_REASON_LABEL: Record<string, string> = {
+  ALREADY_IMPORTED: "이미 이전된 자료라 건너뜀",
+  DUPLICATE_IN_FILE: "파일 안에서 같은 번호가 먼저 나와 건너뜀",
+  DUPLICATE_EXISTING: "사이로에 이미 있는 자료와 겹쳐 건너뜀",
+};
+
 export const SUPPORT_POLLING_STATUSES: readonly string[] = [
   "REQUESTED",
   "PAID",
