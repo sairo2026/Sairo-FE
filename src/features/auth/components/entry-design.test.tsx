@@ -36,6 +36,18 @@ describe("로그인 처음 화면 규격", () => {
   });
 });
 
+describe("로그인 처음 화면 안내", () => {
+  it("탈퇴를 마친 사람에게 완료 안내를 보여준다", () => {
+    render(<AuthEntry mode="login" noticeCode="withdrawn" />);
+    expect(screen.getByRole("status").textContent).toContain("회원 탈퇴가 완료되었습니다");
+  });
+
+  it("알 수 없는 안내 코드는 아무것도 보이지 않는다", () => {
+    render(<AuthEntry mode="login" noticeCode="unknown" />);
+    expect(screen.queryByRole("status")).toBeNull();
+  });
+});
+
 describe("로그인 처음 화면 구조", () => {
   it("본문 영역과 화면 제목을 스크린리더에 알린다", () => {
     const { unmount } = render(<AuthEntry mode="login" />);
