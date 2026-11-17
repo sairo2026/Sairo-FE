@@ -87,6 +87,7 @@ export function WithdrawButton({ request }: { request: RequestListItem }) {
   return (
     <span className="flex flex-col items-start gap-1">
       <Button
+        guardDoubleClick
         variant="ghost"
         size="sm"
         disabled={isReadOnly}

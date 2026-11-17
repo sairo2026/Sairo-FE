@@ -385,6 +385,7 @@ function CustomerTimePanel({ detail, isReadOnly }: { detail: Detail; isReadOnly:
       ) : (
         <div>
           <Button
+            guardDoubleClick
             variant="outlined"
             size="sm"
             disabled={isReadOnly || isClosed}
@@ -404,7 +405,7 @@ function CustomerTimePanel({ detail, isReadOnly }: { detail: Detail; isReadOnly:
             <Button variant="cancel" onClick={() => setIsConfirmingReissue(false)}>
               취소
             </Button>
-            <Button isLoading={issue.isPending} onClick={() => issue.mutate()}>
+            <Button guardDoubleClick isLoading={issue.isPending} onClick={() => issue.mutate()}>
               재발급
             </Button>
           </>
