@@ -3,11 +3,12 @@
 import { useQuery } from "@tanstack/react-query";
 import {
   fetchImportBatch,
+  fetchImportRows,
   fetchImportPreview,
   fetchMappingSuggestion,
   listImportBatches,
 } from "../api/migration.api";
-import type { PageParams } from "../api/migration.api";
+import type { PageParams, RowOutcome } from "../api/migration.api";
 
 export const migrationKeys = {
   batches: ["migration", "batches"] as const,
@@ -15,6 +16,9 @@ export const migrationKeys = {
   batch: (batchId: number) => ["migration", "batch", batchId] as const,
   suggestion: (batchId: number) => ["migration", "suggestion", batchId] as const,
   previewAll: (batchId: number) => ["migration", "preview", batchId] as const,
+  rowsAll: (batchId: number) => ["migration", "rows", batchId] as const,
+  rows: (batchId: number, outcome: RowOutcome, params: PageParams) =>
+    ["migration", "rows", batchId, outcome, params] as const,
   preview: (batchId: number, params: PageParams) =>
     ["migration", "preview", batchId, params] as const,
 };
@@ -47,5 +51,12 @@ export function useImportPreview(batchId: number, params: PageParams, enabled: b
     queryKey: migrationKeys.preview(batchId, params),
     queryFn: () => fetchImportPreview({ batchId, ...params }),
     enabled,
+  });
+}
+
+export function useImportRows(batchId: number, outcome: RowOutcome, params: PageParams) {
+  return useQuery({
+    queryKey: migrationKeys.rows(batchId, outcome, params),
+    queryFn: () => fetchImportRows({ batchId, outcome, ...params }),
   });
 }
