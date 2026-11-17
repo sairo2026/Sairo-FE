@@ -294,13 +294,21 @@ function isNextOnAnotherDay(
   );
 }
 
-function ConfirmedView({ data, contact }: { data: PublicConfirmedVisitResponse; contact: string }) {
+function ConfirmedView({
+  data,
+  contact,
+  isPartial,
+}: {
+  data: PublicConfirmedVisitResponse;
+  contact: string;
+  isPartial: boolean;
+}) {
   const isValid = data.state === "VALID";
   return (
     <div className="flex flex-col gap-4">
       <p className="flex items-center gap-2">
-        <Badge tone={PUBLIC_VISIT_STATE_TONE[data.state]}>
-          {PUBLIC_VISIT_STATE_LABEL[data.state]}
+        <Badge tone={isValid && isPartial ? "blue" : PUBLIC_VISIT_STATE_TONE[data.state]}>
+          {isValid && isPartial ? "일부 확정" : PUBLIC_VISIT_STATE_LABEL[data.state]}
         </Badge>
       </p>
       <ManagerLine name={data.managerDisplayName} role={data.managerLegalRole} />
@@ -319,6 +327,7 @@ function ConfirmedView({ data, contact }: { data: PublicConfirmedVisitResponse; 
                 {formatSeoulDateTime(item.scheduledEndAt)}
               </span>
               {item.travelDurationMinutes !== null &&
+              data.items[index + 1]?.sortOrder === item.sortOrder + 1 &&
               !isNextOnAnotherDay(item, data.items[index + 1]) ? (
                 <span className="text-caption text-ink-2">
                   다음 방문까지 이동 {item.travelDurationMinutes}분
@@ -346,7 +355,15 @@ function ConfirmedView({ data, contact }: { data: PublicConfirmedVisitResponse; 
   );
 }
 
-function ConfirmedTab({ token, contact }: { token: string; contact: string }) {
+function ConfirmedTab({
+  token,
+  contact,
+  isPartial,
+}: {
+  token: string;
+  contact: string;
+  isPartial: boolean;
+}) {
   const query = useQuery({
     queryKey: ["visit-public", token, "confirmed"],
     queryFn: ({ signal }) => fetchCustomerConfirmed(token, signal),
@@ -366,7 +383,7 @@ function ConfirmedTab({ token, contact }: { token: string; contact: string }) {
       <ErrorScreen kind={toErrorScreenKind(query.error)} onRetry={() => void query.refetch()} />
     );
   }
-  return <ConfirmedView data={query.data} contact={contact} />;
+  return <ConfirmedView data={query.data} contact={contact} isPartial={isPartial} />;
 }
 
 export function CustomerLinkScreen({ token }: { token: string | undefined }) {
@@ -462,7 +479,13 @@ export function CustomerLinkScreen({ token }: { token: string | undefined }) {
           {
             key: "confirmed",
             label: "확정 일정",
-            panel: <ConfirmedTab token={normalized} contact={link.officeContactPhone} />,
+            panel: (
+              <ConfirmedTab
+                token={normalized}
+                contact={link.officeContactPhone}
+                isPartial={!isConfirmed}
+              />
+            ),
           },
         ]}
       />
