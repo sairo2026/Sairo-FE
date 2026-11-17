@@ -118,6 +118,7 @@ export function ApproverWorkspace({
   const linkError = [conditions.error, requests.error, confirmed.error].find(isLinkError);
   if (mode === "link" && linkError) return <LinkProblem error={linkError} />;
 
+  const pendingCount = requests.data?.items.length ?? 0;
   const readOnly = isApiCode(requests.error, "APPROVER_READ_ONLY");
   const noConditionYet = isApiCode(conditions.error, "RESOURCE_NOT_FOUND");
   const noticeVersion =
@@ -203,6 +204,18 @@ export function ApproverWorkspace({
           내 매물 모아보기로 돌아가기
         </Link>
       )}
+      {pendingCount > 0 && tab !== "requests" && !readOnly ? (
+        <FormNotice>
+          {`선택을 기다리는 방문 신청이 ${pendingCount}건 있습니다.`}{" "}
+          <button
+            type="button"
+            className="font-semibold text-primary underline clickable-link"
+            onClick={() => setTab("requests")}
+          >
+            신청 비교·선택으로 이동
+          </button>
+        </FormNotice>
+      ) : null}
       <Card>
         <Tabs
           label="승인자 링크 화면"

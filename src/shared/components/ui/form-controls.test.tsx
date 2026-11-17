@@ -26,6 +26,17 @@ describe("Button", () => {
     expect(onClick).not.toHaveBeenCalled();
   });
 
+  it("한 번만 보내야 하는 버튼은 더블 클릭의 두 번째 클릭을 무시한다", async () => {
+    const onClick = vi.fn();
+    render(
+      <Button guardDoubleClick onClick={onClick}>
+        재발급
+      </Button>,
+    );
+    await userEvent.dblClick(screen.getByRole("button", { name: "재발급" }));
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
   it("비활성 상태에서는 클릭되지 않는다", async () => {
     const onClick = vi.fn();
     render(
