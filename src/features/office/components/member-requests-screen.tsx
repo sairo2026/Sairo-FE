@@ -24,7 +24,12 @@ import {
 import type { OfficeMembershipListWire } from "../api/office.api";
 import { officeKeys, useMemberships } from "../hooks/office-queries";
 import { REQUEST_SOURCE_LABEL, ROLE_LABEL, labelOf } from "../model/labels";
-import { describeOfficeError, fieldErrorMap } from "../model/messages";
+import {
+  INVITE_TARGET_NOT_FOUND_COPY,
+  describeOfficeError,
+  fieldErrorMap,
+  isApiStatus,
+} from "../model/messages";
 import { validateInvite, validateReason } from "../model/validation";
 import { MutedNote, ReasonDialog } from "@/shared/components/feedback/page-parts";
 
@@ -56,7 +61,11 @@ function InviteForm() {
     },
     onError: (caught) => {
       setErrors(fieldErrorMap(caught));
-      setFormError(describeOfficeError(caught, "초대를 보내지 못했습니다. 다시 시도해 주세요."));
+      setFormError(
+        isApiStatus(caught, 404)
+          ? INVITE_TARGET_NOT_FOUND_COPY
+          : describeOfficeError(caught, "초대를 보내지 못했습니다. 다시 시도해 주세요."),
+      );
     },
   });
 
