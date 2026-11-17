@@ -194,6 +194,7 @@ export const VisitCoordinationDetailResponseSchema = z.object({
       visitDurationMinutes: z.number(),
       travelDurationMinutes: z.number(),
       approvalId: z.number().nullable().optional(),
+      suggestedStartAt: z.iso.datetime({ offset: true }).nullable().optional(),
       ownerOfficeId: z.number(),
       ownerOfficeName: z.string(),
       crossOffice: z.boolean(),

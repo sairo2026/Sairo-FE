@@ -512,6 +512,7 @@ export const visitHandlers = [
         ? {
             ...candidate,
             applicableSlots: [{ startsAt: item.suggestedStartAt, endsAt: item.suggestedEndAt }],
+            suggestedStartAt: item.suggestedStartAt,
           }
         : candidate;
     });
