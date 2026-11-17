@@ -350,6 +350,11 @@ export const workHandlers = [
     return HttpResponse.json(paged(rows, url));
   }),
 
+  http.post("/api/notifications/read-all", () => {
+    state.notifications = state.notifications.map((item) => ({ ...item, read: true }));
+    return new HttpResponse(null, { status: 204 });
+  }),
+
   http.post("/api/notifications/:notificationId/read", ({ params }) => {
     const found = state.notifications.find(
       (item) => String(item.notificationId) === params.notificationId,
