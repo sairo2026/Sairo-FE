@@ -22,8 +22,11 @@ import { toKstIso } from "../model/time";
 
 type Detail = VisitCoordinationDetailResponse;
 
-/** 일부 매물만 확정된 상태에서는 안내문이 아직 만들어지지 않으므로 오류가 아니라 대기로 보인다. */
-const PARTIAL_STATUSES = ["FINAL_CONFIRMATION_REQUIRED", "APPLYING"];
+/** 서버가 안내문이 없다고 알리는 이유별 대기 문구. 오류가 아니라 정상 응답이다. */
+const UNAVAILABLE_NOTICE: Record<string, string> = {
+  NOT_ALL_CONFIRMED: "모든 매물이 확정되면 고객 안내문과 승인자 안내문이 만들어집니다.",
+};
+const UNAVAILABLE_FALLBACK = "아직 안내문이 만들어지지 않았습니다.";
 
 function MessageBox({ title, text }: { title: string; text: string }) {
   const [copied, setCopied] = useState<"idle" | "copied" | "failed">("idle");
@@ -172,10 +175,12 @@ export function ConfirmationSection({ detail }: { detail: Detail }) {
       </p>
       {messages.isPending ? (
         <p className="text-caption text-ink-2">안내문을 불러오는 중입니다.</p>
-      ) : messages.isError && PARTIAL_STATUSES.includes(detail.status) ? (
-        <FormNotice>모든 매물이 확정되면 고객 안내문과 승인자 안내문이 만들어집니다.</FormNotice>
       ) : messages.isError ? (
         <FormAlert>{describeVisitError(messages.error, "안내문을 불러오지 못했습니다.")}</FormAlert>
+      ) : !messages.data.available || messages.data.customerMessage === null ? (
+        <FormNotice>
+          {UNAVAILABLE_NOTICE[messages.data.unavailableReason ?? ""] ?? UNAVAILABLE_FALLBACK}
+        </FormNotice>
       ) : (
         <div className="flex flex-col gap-3">
           <MessageBox title="고객 안내문" text={messages.data.customerMessage} />

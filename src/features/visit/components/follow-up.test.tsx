@@ -530,6 +530,17 @@ describe("확정 안내 전달", () => {
     expect(await screen.findByText(/지금 상태에서는 처리할 수 없습니다/)).not.toBeNull();
   });
 
+  it("일부 매물만 확정된 상태에서는 오류 대신 대기 문구를 보이고 전달 기록 입력을 숨긴다", async () => {
+    prepare({ status: "APPLYING" });
+    renderOffice(<CoordinationDetailScreen coordinationId={801} />, { role: "OWNER" });
+    expect(
+      await screen.findByText("모든 매물이 확정되면 고객 안내문과 승인자 안내문이 만들어집니다."),
+    ).not.toBeNull();
+    expect(screen.queryByText("고객 안내문")).toBeNull();
+    expect(screen.queryByRole("button", { name: "전달 기록 저장" })).toBeNull();
+    expect(screen.queryByText("안내문을 불러오지 못했습니다.")).toBeNull();
+  });
+
   it("안내문 조회가 실패하면 오류를 보여준다", async () => {
     prepare();
     server.use(
