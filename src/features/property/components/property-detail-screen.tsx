@@ -243,7 +243,21 @@ function RelationPanel({ property }: { property: PropertyDetailResponse }) {
 }
 
 function PhotosPanel({ property }: { property: PropertyDetailResponse }) {
-  if (property.photos.length === 0) return <MutedNote>등록된 사진이 없습니다.</MutedNote>;
+  if (property.photos.length === 0) {
+    return (
+      <div className="flex flex-col gap-2">
+        <MutedNote>등록된 사진이 없습니다.</MutedNote>
+        {property.deletedAt ? null : (
+          <Link
+            href={`/properties/${property.propertyId}/edit`}
+            className="w-fit text-caption font-semibold text-primary hover:underline"
+          >
+            수정 화면에서 사진 추가하기
+          </Link>
+        )}
+      </div>
+    );
+  }
   const sorted = [...property.photos].sort((a, b) => a.sortOrder - b.sortOrder);
   return (
     <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
