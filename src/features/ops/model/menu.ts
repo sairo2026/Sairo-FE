@@ -98,9 +98,8 @@ export const OPS_MENU: readonly OpsMenuItem[] = [
     key: "integrations",
     label: "연동 설정",
     href: "/ops/integrations",
-    // 목록 조회와 수정은 운영담당 전용이다. 계약 사본 화면만 개인정보담당에게 열려 있다.
-    roles: ["OPS"],
-    subpathRoles: ["OPS", "PRIVACY"],
+    // 목록은 개인정보담당에게 읽기 전용으로 열려 있다(백엔드 GET /api/ops/integrations). 수정과 연결 검사는 운영담당 전용이다.
+    roles: ["OPS", "PRIVACY"],
   },
   {
     key: "retention-rules",

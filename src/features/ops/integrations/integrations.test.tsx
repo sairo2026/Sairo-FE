@@ -56,6 +56,11 @@ async function renderList(roles: Parameters<typeof renderWithMonitor>[1] = ["OPS
   await screen.findByRole("button", { name: "연동 1 설정 변경" });
 }
 
+async function renderReadOnlyList() {
+  renderWithMonitor(<IntegrationsScreen />, ["PRIVACY"]);
+  await screen.findByRole("link", { name: "연동 1 계약서 사본" });
+}
+
 async function openEdit(id: number, roles: Parameters<typeof renderWithMonitor>[1] = ["OPS"]) {
   await renderList(roles);
   const user = userEvent.setup();
@@ -294,6 +299,14 @@ describe("계약서 사본 링크", () => {
   it("개인정보담당 역할이 없으면 링크를 숨긴다", async () => {
     await renderList(["OPS"]);
     expect(screen.queryByRole("link", { name: /계약서 사본/ })).toBeNull();
+  });
+
+  it("개인정보담당만 있으면 목록을 읽기 전용으로 보여주고 수정·연결 검사 버튼을 숨긴다", async () => {
+    await renderReadOnlyList();
+    expect(screen.getByRole("table", { name: "연동 설정 목록" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /설정 변경/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /연결 검사/ })).toBeNull();
+    expect(screen.getByText(/개인정보담당은 목록과 계약서 사본만 볼 수 있고/)).toBeTruthy();
   });
 });
 
