@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { ApiError } from "@/shared/api/client";
+import { describePropertyError } from "./messages";
 import { daysUntil, formatOfferPrice, formatWonCompact, joinNames } from "./format";
 import {
   EMPTY_PROPERTY_FORM,
@@ -180,5 +182,16 @@ describe("카테고리 전용 입력 검증", () => {
     expect(fieldRawFromValue(definition({ fieldType: "BOOLEAN" }), false)).toBe("false");
     expect(fieldRawFromValue(definition({}), null)).toBe("");
     expect(fieldRawFromValue(definition({}), 7)).toBe("7");
+  });
+});
+
+describe("매물 오류 문구", () => {
+  it("읽을 수 없는 사진 파일은 파일 확인을 안내한다", () => {
+    const error = new ApiError(400, {
+      code: "INVALID_REQUEST",
+      message: "서버 문구",
+      fieldErrors: [{ field: "file", code: "INVALID_FORMAT", message: "서버 문구" }],
+    });
+    expect(describePropertyError(error, "대체 문구")).toContain("사진 파일을 읽을 수 없습니다");
   });
 });
