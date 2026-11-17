@@ -130,10 +130,41 @@ describe("이메일 로그인", () => {
     await user.type(screen.getByLabelText("이메일 주소"), "nobody@example.com");
     await user.type(screen.getByLabelText("비밀번호"), "wrong-password");
     await user.click(screen.getByRole("button", { name: "로그인" }));
+    const alert = await screen.findByRole("alert");
+    const lines = Array.from(alert.querySelectorAll("p")).map((line) => line.textContent);
+    expect(lines).toEqual([
+      "이메일 또는 비밀번호가 맞지 않습니다.",
+      "연속 1회 실패 · 남은 시도 4회",
+      "5회 불일치 시 15분 뒤 다시 시도할 수 있습니다.",
+    ]);
+    expect(alert.className).toContain("text-danger");
+    expect(navigation.replace).not.toHaveBeenCalled();
+  });
+
+  it("실패가 쌓이면 연속 횟수와 남은 횟수가 갱신되고 남은 횟수가 적으면 더 강조한다", async () => {
+    const user = userEvent.setup();
+    renderWithQuery(<EmailLoginForm />);
+    await user.type(screen.getByLabelText("이메일 주소"), "nobody@example.com");
+    await user.type(screen.getByLabelText("비밀번호"), "wrong-password");
+    await user.click(screen.getByRole("button", { name: "로그인" }));
+    expect((await screen.findByRole("alert")).className).toContain("border-danger/30");
+    await user.click(screen.getByRole("button", { name: "로그인" }));
+    await screen.findByText("연속 2회 실패 · 남은 시도 3회");
+    await user.click(screen.getByRole("button", { name: "로그인" }));
+    await screen.findByText("연속 3회 실패 · 남은 시도 2회");
+    expect(screen.getByRole("alert").className).toContain("bg-danger/10");
+  });
+
+  it("서버가 횟수를 내려주지 않으면 기존 한 줄 문구로 안내한다", async () => {
+    server.use(http.post("/api/auth/login", () => mockErrors.invalidCredentials()));
+    const user = userEvent.setup();
+    renderWithQuery(<EmailLoginForm />);
+    await user.type(screen.getByLabelText("이메일 주소"), "nobody@example.com");
+    await user.type(screen.getByLabelText("비밀번호"), "wrong-password");
+    await user.click(screen.getByRole("button", { name: "로그인" }));
     expect((await screen.findByRole("alert")).textContent).toBe(
       "이메일 또는 비밀번호가 맞지 않습니다. 5회 불일치 시 15분 뒤 다시 시도할 수 있습니다.",
     );
-    expect(navigation.replace).not.toHaveBeenCalled();
   });
 
   it("5회 실패로 잠기면 남은 시간을 보여주고 제출을 막는다", async () => {
@@ -147,6 +178,7 @@ describe("이메일 로그인", () => {
     expect(timer.textContent).toBe("15:00");
     const notice = screen.getByRole("alert");
     expect(notice.textContent).toContain("로그인에 5회 실패해 잠시 막았습니다.");
+    expect(notice.textContent).toContain("5회 불일치 시 15분 뒤 다시 시도할 수 있습니다.");
     expect(notice.className).toContain("text-danger");
     expect(screen.getByRole("button", { name: "로그인" }).getAttribute("aria-disabled")).toBe(
       "true",

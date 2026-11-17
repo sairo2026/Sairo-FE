@@ -14,9 +14,16 @@ import { login } from "../api/account.api";
 import { authContextQueryKey } from "../hooks/use-auth-context";
 import { formatClock, useCountdown } from "../hooks/use-countdown";
 import { describeAuthError } from "@/shared/lib/api-messages";
-import { LOGIN_LOCKED_LEAD, LOGIN_MISMATCH_COPY } from "../model/login-lock";
+import {
+  LOGIN_LOCK_NOTICE,
+  LOGIN_LOCKED_LEAD,
+  LOGIN_MISMATCH_COPY,
+  describeLoginMismatch,
+} from "../model/login-lock";
+import type { LoginMismatchView } from "../model/login-lock";
 import { landingPathFor, safeNextPath } from "../model/landing";
 import { AuthFrame } from "@/shared/components/feedback/form-frame";
+import { cn } from "@/shared/lib/cn";
 
 const loginSchema = z.object({
   email: z
@@ -33,6 +40,7 @@ export function EmailLoginForm({ next }: { next?: string }) {
   const queryClient = useQueryClient();
   const lock = useCountdown();
   const [formError, setFormError] = useState<string>();
+  const [mismatch, setMismatch] = useState<LoginMismatchView>();
   const {
     control,
     handleSubmit,
@@ -44,6 +52,7 @@ export function EmailLoginForm({ next }: { next?: string }) {
 
   const submit = handleSubmit(async (values) => {
     setFormError(undefined);
+    setMismatch(undefined);
     try {
       const result = await login({ email: values.email.trim(), password: values.password });
       await queryClient.invalidateQueries({ queryKey: authContextQueryKey });
@@ -55,7 +64,9 @@ export function EmailLoginForm({ next }: { next?: string }) {
         return;
       }
       if (error instanceof ApiError && error.code === "INVALID_CREDENTIALS") {
-        setFormError(LOGIN_MISMATCH_COPY);
+        const view = describeLoginMismatch(error.details);
+        if (view) setMismatch(view);
+        else setFormError(LOGIN_MISMATCH_COPY);
         return;
       }
       setFormError(
@@ -106,11 +117,39 @@ export function EmailLoginForm({ next }: { next?: string }) {
             )}
           />
         </div>
+        {mismatch && !isLocked ? (
+          <div
+            role="alert"
+            className={cn(
+              "mt-5 flex flex-col gap-2 rounded-control border px-5 py-4 text-left text-danger",
+              mismatch.tone === "critical"
+                ? "border-danger bg-danger/10"
+                : "border-danger/30 bg-danger/5",
+            )}
+          >
+            <p className="text-caption font-bold">{mismatch.lead}</p>
+            <p
+              className={cn(
+                "font-semibold",
+                mismatch.tone === "critical" ? "text-body" : "text-caption",
+              )}
+            >
+              {mismatch.count}
+            </p>
+            <p className="text-caption font-normal text-ink-3">{mismatch.notice}</p>
+          </div>
+        ) : null}
         {isLocked ? (
-          <p role="alert" className="mt-3 text-center text-caption text-danger">
-            {LOGIN_LOCKED_LEAD} <span role="timer">{formatClock(lock.remaining)}</span> 뒤에 다시
-            시도해 주세요.
-          </p>
+          <div
+            role="alert"
+            className="mt-5 flex flex-col gap-2 rounded-control border border-danger bg-danger/10 px-5 py-4 text-left text-danger"
+          >
+            <p className="text-caption font-bold">{LOGIN_LOCKED_LEAD}</p>
+            <p className="text-body font-semibold">
+              <span role="timer">{formatClock(lock.remaining)}</span> 뒤에 다시 시도해 주세요.
+            </p>
+            <p className="text-caption font-normal text-ink-3">{LOGIN_LOCK_NOTICE}</p>
+          </div>
         ) : null}
         <div className="mt-8 flex justify-center gap-8 text-caption underline">
           <Link href="/password/forgot" className="text-ink-2 hover:text-primary">

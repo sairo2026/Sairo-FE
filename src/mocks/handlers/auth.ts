@@ -74,7 +74,7 @@ export const authHandlers = [
       return HttpResponse.json(toLoginResponse(MOCK_ACTIVE_CONTEXT));
     }
     state.failedLogins += 1;
-    return mockErrors.invalidCredentials();
+    return mockErrors.invalidCredentials(state.failedLogins);
   }),
 
   http.post("/api/auth/logout", () => {

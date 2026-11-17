@@ -46,6 +46,8 @@ describe("모의 인증 핸들러", () => {
     for (let attempt = 0; attempt < 5; attempt += 1) {
       const error = await failure(login("wrong"));
       expect(error.code).toBe("INVALID_CREDENTIALS");
+      expect(error.failedAttempts).toBe(attempt + 1);
+      expect(error.remainingAttempts).toBe(4 - attempt);
     }
     const locked = await failure(login("mock-password-1"));
     expect(locked.status).toBe(429);
