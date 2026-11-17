@@ -261,6 +261,42 @@ describe("방문 신청", () => {
     expect(screen.queryByRole("button", { name: "방문 신청" })).toBeNull();
   });
 
+  it("신청 가능 구간이 0개이면 이유를 한 줄로 알려준다", async () => {
+    prepare({ applicableSlots: [] });
+    renderOffice(<CoordinationDetailScreen coordinationId={801} />, { role: "AGENT" });
+    expect(
+      await screen.findByText(/신청 가능 구간 0개: 고객이 가능한 시간을 아직 제출하지 않았습니다/),
+    ).not.toBeNull();
+  });
+
+  it("이미 확정된 후보 매물에는 새 신청 대신 변경 신청을 안내한다", async () => {
+    setMockVisitState({
+      coordinations: [
+        buildMockCoordination({
+          coordinationId: 801,
+          status: "APPLYING",
+          candidateProperties: [buildMockCandidate({ candidatePropertyId: 8011, propertyId: 501 })],
+          scheduleItems: [
+            {
+              itemId: 9001,
+              candidatePropertyId: 8011,
+              scheduledStartAt: "2026-11-12T10:00:00+09:00",
+              scheduledEndAt: "2026-11-12T10:30:00+09:00",
+              result: "SCHEDULED",
+              resultRecordedAt: null,
+              correctionCount: 0,
+              state: "VALID",
+              travelFeasibleToNext: null,
+            },
+          ],
+        }),
+      ],
+    });
+    renderOffice(<CoordinationDetailScreen coordinationId={801} />, { role: "AGENT" });
+    expect(await screen.findByText(/이미 확정된 방문입니다/)).not.toBeNull();
+    expect(screen.queryByRole("button", { name: "방문 신청" })).toBeNull();
+  });
+
   it("중개보조원은 방문 신청을 낼 수 없다", async () => {
     prepare();
     setMockVisitState({ callerRole: "DEPUTY", deputyAssignedIds: [801] });

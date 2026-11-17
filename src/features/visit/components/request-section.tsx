@@ -135,7 +135,14 @@ function CandidateRequests({
   const own = requests.filter((item) => item.candidatePropertyId === candidate.candidatePropertyId);
   const state = candidate.grantState;
   let blocked: string | undefined;
-  if (role === "DEPUTY") blocked = "중개보조원은 방문 신청을 낼 수 없습니다.";
+  const hasScheduledItem = (detail.scheduleItems ?? []).some(
+    (item) =>
+      item.candidatePropertyId === candidate.candidatePropertyId && item.result === "SCHEDULED",
+  );
+  if (hasScheduledItem) {
+    blocked =
+      "이미 확정된 방문입니다. 시각을 바꾸려면 아래 확정 방문 변경과 재승인에서 변경 신청을 내 주세요.";
+  } else if (role === "DEPUTY") blocked = "중개보조원은 방문 신청을 낼 수 없습니다.";
   else if (candidate.crossOffice && state !== "ACTIVE") {
     blocked = "허용이 회수되었거나 만료되어 신청할 수 없습니다. 허용한 사무소에 문의해 주세요.";
   } else if (!SUBMITTABLE.includes(detail.status)) {
@@ -158,6 +165,16 @@ function CandidateRequests({
       {candidate.applicableSlots.length > 0 ? (
         <span className="text-caption text-ink-2">
           신청 가능 구간 {candidate.applicableSlots.length}개
+        </span>
+      ) : null}
+      {candidate.applicableSlots.length === 0 && !blocked && !hasActive ? (
+        <span className="text-caption text-ink-2">
+          신청 가능 구간 0개:{" "}
+          {!detail.customerRespondedAt
+            ? "고객이 가능한 시간을 아직 제출하지 않았습니다."
+            : candidate.approvalId === null || candidate.approvalId === undefined
+              ? "이 매물의 승인자 출입승인이 없습니다."
+              : "고객 가능 시간과 승인자 조건이 겹치는 구간이 없습니다. 승인자 조건이나 고객 가능 시간을 확인해 주세요."}
         </span>
       ) : null}
       {own.length > 0 ? (

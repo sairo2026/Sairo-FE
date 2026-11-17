@@ -260,6 +260,9 @@ export function validateCondition(values: ConditionFormValues): ConditionErrors 
   if (values.appliesUntil === "") errors.appliesUntil = "적용 종료일을 입력해 주세요.";
   else if (values.appliesFrom !== "" && values.appliesUntil < values.appliesFrom) {
     errors.appliesUntil = "적용 종료일은 시작일보다 앞설 수 없습니다.";
+  } else if (values.appliesUntil < todayKst()) {
+    errors.appliesUntil =
+      "적용 종료일은 오늘 이후로 정해 주세요. 지난 날짜로 저장하면 신청을 받을 수 없습니다.";
   }
   for (const key of RULE_KEYS) {
     const problem = checkNumber(key, values[key]);
