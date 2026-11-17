@@ -657,7 +657,9 @@ export type VisitCoordinationManagerChangeRequest = z.infer<
 
 export const ConfirmationMessagesResponseSchema = z.object({
   scheduleVersion: z.number(),
-  customerMessage: z.string(),
+  available: z.boolean(),
+  unavailableReason: z.string().nullable().optional(),
+  customerMessage: z.string().nullable(),
   approverMessages: z.array(
     z.object({
       candidatePropertyId: z.number(),

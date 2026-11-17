@@ -462,8 +462,22 @@ export const visitFollowHandlers = [
     if (coordination.confirmedScheduleVersion === null) {
       return errorResponse(409, "INVALID_TRANSITION", "확정된 일정이 없습니다.");
     }
+    if (
+      coordination.status === "FINAL_CONFIRMATION_REQUIRED" ||
+      coordination.status === "APPLYING"
+    ) {
+      return HttpResponse.json({
+        scheduleVersion: coordination.confirmedScheduleVersion,
+        available: false,
+        unavailableReason: "NOT_ALL_CONFIRMED",
+        customerMessage: null,
+        approverMessages: [],
+      });
+    }
     return HttpResponse.json({
       scheduleVersion: coordination.confirmedScheduleVersion,
+      available: true,
+      unavailableReason: null,
       customerMessage: "11월 12일 오전 10시에 국민대 앞 아파트를 방문합니다.",
       approverMessages: coordination.candidateProperties
         .filter((entry) => !entry.crossOffice)
