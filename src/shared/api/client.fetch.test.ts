@@ -302,6 +302,20 @@ describe("전역 인증 이벤트", () => {
     expect(events.map((event) => event.type)).toEqual(["reconsent-required"]);
   });
 
+  it("403 OFFICE_WRITE_RESTRICTED는 읽기 전용 이벤트를 알리고 이유를 안내한다", async () => {
+    const events: ApiAuthEvent[] = [];
+    const unsubscribe = subscribeApiAuthEvents((event) => events.push(event));
+    server.use(
+      http.post("/api/tasks", () =>
+        errorResponse(403, "OFFICE_WRITE_RESTRICTED", "읽기만 가능한 사무소입니다."),
+      ),
+    );
+    const error = await catchError(apiFetch("/api/tasks", { method: "POST", body: {} }));
+    unsubscribe();
+    expect(events.map((event) => event.type)).toEqual(["office-restricted"]);
+    expect((error as ApiError).isOfficeWriteRestricted).toBe(true);
+  });
+
   it("skipAuthEvents를 주면 이벤트를 알리지 않는다", async () => {
     const listener = vi.fn();
     const unsubscribe = subscribeApiAuthEvents(listener);

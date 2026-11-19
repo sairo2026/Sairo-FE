@@ -50,6 +50,11 @@ export function AuthEventsProvider({ children }: { children: ReactNode }) {
         return;
       }
       if (isOps) return;
+      if (event.type === "office-restricted") {
+        // 서버가 읽기 전용 상태를 알려 주면 접근 상태를 다시 읽어 화면을 읽기 전용으로 바꾼다.
+        void queryClient.invalidateQueries({ queryKey: authContextQueryKey });
+        return;
+      }
       void queryClient.invalidateQueries({ queryKey: authContextQueryKey });
       if (pathnameRef.current !== AUTH_ROUTES.reconsent) router.replace(AUTH_ROUTES.reconsent);
     });

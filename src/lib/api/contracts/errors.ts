@@ -7,6 +7,7 @@ export const API_ERROR_CODES = {
   stepUpRequired: "STEP_UP_REQUIRED",
   forbidden: "FORBIDDEN",
   reconsentRequired: "RECONSENT_REQUIRED",
+  officeWriteRestricted: "OFFICE_WRITE_RESTRICTED",
   resourceNotFound: "RESOURCE_NOT_FOUND",
   versionConflict: "VERSION_CONFLICT",
   termsVersionChanged: "TERMS_VERSION_CHANGED",
