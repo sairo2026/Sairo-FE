@@ -16,16 +16,16 @@ export const metadata: Metadata = {
 };
 
 type LoginPageProps = {
-  searchParams: Promise<{ error?: string; next?: string }>;
+  searchParams: Promise<{ error?: string; next?: string; notice?: string }>;
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const { error, next } = await searchParams;
+  const { error, next, notice } = await searchParams;
   const safeNext = safeNextPath(next) ?? undefined;
   return (
     <>
       <SignedInRedirect next={safeNext} />
-      <AuthEntry mode="login" errorCode={error} next={safeNext} />
+      <AuthEntry mode="login" errorCode={error} noticeCode={notice} next={safeNext} />
     </>
   );
 }

@@ -1,15 +1,19 @@
 // @vitest-environment jsdom
 import { cleanup, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { http } from "msw";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
+import { mockErrors } from "@/mocks/error-responses";
 import { resetMockWorkState, setMockWorkState } from "@/mocks/handlers/work";
 import { server, startMockServer } from "@/mocks/server";
 import { renderOffice } from "@/shared/testing/office-render";
 import { AUTH_ROUTES } from "../model/routes";
 import { OfficeHeaderActions } from "./office-header-actions";
 
+const { replace } = vi.hoisted(() => ({ replace: vi.fn() }));
+
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+  useRouter: () => ({ push: vi.fn(), replace }),
   usePathname: () => "/home",
 }));
 
@@ -23,6 +27,7 @@ afterEach(() => {
   cleanup();
   server.resetHandlers();
   resetMockWorkState();
+  replace.mockClear();
 });
 
 afterAll(() => stopServer());
@@ -62,6 +67,26 @@ describe("사무소 상단 동작", () => {
     await screen.findByRole("dialog", { name: "알림" });
     await user.keyboard("{Escape}");
     expect(screen.queryByRole("dialog", { name: "알림" })).toBeNull();
+  });
+
+  it("이미 세션이 끝났을 때 로그아웃하면 오류 없이 로그인 화면으로 보낸다", async () => {
+    server.use(http.post("/api/auth/logout", () => mockErrors.unauthenticated()));
+    const user = userEvent.setup();
+    renderOffice(<OfficeHeaderActions />, { role: "OWNER" });
+    await user.click(await screen.findByRole("button", { name: /내 계정/ }));
+    await user.click(screen.getByRole("button", { name: "로그아웃" }));
+    await vi.waitFor(() => expect(replace).toHaveBeenCalledWith(AUTH_ROUTES.login));
+    expect(screen.queryByText("로그아웃하지 못했습니다. 다시 시도해 주세요.")).toBeNull();
+  });
+
+  it("로그아웃이 서버 오류로 실패하면 안내하고 화면에 머문다", async () => {
+    server.use(http.post("/api/auth/logout", () => mockErrors.server()));
+    const user = userEvent.setup();
+    renderOffice(<OfficeHeaderActions />, { role: "OWNER" });
+    await user.click(await screen.findByRole("button", { name: /내 계정/ }));
+    await user.click(screen.getByRole("button", { name: "로그아웃" }));
+    expect(await screen.findByText("로그아웃하지 못했습니다. 다시 시도해 주세요.")).toBeTruthy();
+    expect(replace).not.toHaveBeenCalled();
   });
 
   it("내 계정 메뉴에서 내 계정, 지원, 로그아웃에 닿고 ESC로 닫힌다", async () => {

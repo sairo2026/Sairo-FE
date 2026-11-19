@@ -55,6 +55,10 @@ export function listNotifications(params: NotificationListParams) {
   });
 }
 
+export function markAllNotificationsRead() {
+  return apiFetch("/api/notifications/read-all", { method: "POST" });
+}
+
 export function markNotificationRead(notificationId: number) {
   return apiFetch(`/api/notifications/${notificationId}/read`, { method: "POST" });
 }

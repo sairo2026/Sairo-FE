@@ -147,6 +147,11 @@ function RetryAction({ seconds, onRetry }: { seconds: number; onRetry: () => voi
   );
 }
 
+/** 없는 화면, 권한 없음, 로그인 필요는 같은 요청을 다시 보내도 결과가 같아 다시 시도를 보이지 않는다. */
+function isRetryable(kind: ErrorScreenKind): boolean {
+  return kind !== "not-found" && kind !== "forbidden" && kind !== "unauthenticated";
+}
+
 export function ErrorScreen({
   kind,
   title,
@@ -174,7 +179,9 @@ export function ErrorScreen({
       <p className="text-body text-ink-2">{description ?? copy.description}</p>
       {traceId ? <p className="text-caption text-ink-3">문의 번호: {traceId}</p> : null}
       <div className="mt-2 flex flex-wrap justify-center gap-2">
-        {onRetry ? <RetryAction key={waitSeconds} seconds={waitSeconds} onRetry={onRetry} /> : null}
+        {onRetry && isRetryable(kind) ? (
+          <RetryAction key={waitSeconds} seconds={waitSeconds} onRetry={onRetry} />
+        ) : null}
         {kind === "unauthenticated" && links.login ? (
           <Link
             href={links.login.href}
