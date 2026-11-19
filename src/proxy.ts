@@ -9,10 +9,27 @@ import {
   shouldSendToWorkHome,
 } from "@/shared/lib/coming-soon-gate";
 
+export const EDGE_TOKEN_HEADER = "x-sairo-edge-token";
+
+// The API origin trusts the client address header from this edge only when this token matches.
+function nextWithEdgeToken(request: NextRequest): NextResponse {
+  const { pathname } = request.nextUrl;
+  if (pathname !== "/api" && !pathname.startsWith("/api/")) {
+    return NextResponse.next();
+  }
+  const headers = new Headers(request.headers);
+  headers.delete(EDGE_TOKEN_HEADER);
+  const token = process.env.SAIRO_EDGE_TOKEN;
+  if (token) {
+    headers.set(EDGE_TOKEN_HEADER, token);
+  }
+  return NextResponse.next({ request: { headers } });
+}
+
 function passOrSendToWorkHome(request: NextRequest): NextResponse {
   const hasMemberSession = request.cookies.has(MEMBER_SESSION_COOKIE);
   if (!shouldSendToWorkHome(request.nextUrl.pathname, hasMemberSession)) {
-    return NextResponse.next();
+    return nextWithEdgeToken(request);
   }
   const response = NextResponse.redirect(new URL(WORK_HOME_PATH, request.url));
   response.headers.set("Cache-Control", "no-store");
