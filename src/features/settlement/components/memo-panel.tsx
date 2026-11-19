@@ -10,6 +10,7 @@ import { FormAlert } from "@/shared/components/feedback/form-frame";
 import { Button } from "@/shared/components/ui/button";
 import { useInlineAlertDialog } from "@/shared/hooks/use-inline-alert-dialog";
 import { formatSeoulDateTime, countCodePoints } from "@/shared/lib/format";
+import { fieldErrorSummary } from "@/shared/lib/api-messages";
 import { htmlMarkupError } from "@/shared/lib/html-markup";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { fetchMemo, saveMemo } from "../api/settlement.api";
@@ -59,7 +60,9 @@ function MemoEditor({ yearMonth, memo }: { yearMonth: string; memo: MonthlyMemoR
           return;
         }
       }
-      setError(describeWorkError(failure, "메모를 저장하지 못했습니다."));
+      setError(
+        fieldErrorSummary(failure) ?? describeWorkError(failure, "메모를 저장하지 못했습니다."),
+      );
     },
   });
 
