@@ -106,6 +106,17 @@ describe("이메일 로그인", () => {
     await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/home"));
   });
 
+  it("로그인하면 이전 계정이 보던 조회 결과를 모두 지운다", async () => {
+    const user = userEvent.setup();
+    const { queryClient } = renderWithQuery(<EmailLoginForm />);
+    queryClient.setQueryData(["customers", "list"], { items: [{ name: "이전 계정의 고객" }] });
+    await user.type(screen.getByLabelText("이메일 주소"), "agent@example.com");
+    await user.type(screen.getByLabelText("비밀번호"), "mock-password-1");
+    await user.click(screen.getByRole("button", { name: "로그인" }));
+    await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/home"));
+    expect(queryClient.getQueryData(["customers", "list"])).toBeUndefined();
+  });
+
   it("돌아갈 주소가 안전하면 그곳으로 이동한다", async () => {
     const user = userEvent.setup();
     renderWithQuery(<EmailLoginForm next="/properties" />);

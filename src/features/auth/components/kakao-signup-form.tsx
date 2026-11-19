@@ -13,7 +13,6 @@ import { Button } from "@/shared/components/ui/button";
 import { TextField } from "@/shared/components/ui/text-field";
 import { countCodePoints } from "@/shared/lib/format";
 import { fetchMe, fetchSignupTerms, signupWithKakao } from "../api/account.api";
-import { authContextQueryKey } from "../hooks/use-auth-context";
 import { describeAuthError } from "@/shared/lib/api-messages";
 import { landingPathFor } from "../model/landing";
 import { AuthFrame, FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
@@ -157,7 +156,7 @@ export function KakaoSignupForm() {
           .filter((item) => selection[item.termsCode])
           .map((item) => ({ termsCode: item.termsCode, version: item.version })),
       });
-      await queryClient.invalidateQueries({ queryKey: authContextQueryKey });
+      queryClient.clear();
       router.replace(landingPathFor(result));
     } catch (error) {
       await handleError(error);

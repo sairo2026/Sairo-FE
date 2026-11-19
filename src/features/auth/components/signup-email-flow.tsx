@@ -18,7 +18,6 @@ import {
   signupWithEmail,
   verifySignupEmail,
 } from "../api/account.api";
-import { authContextQueryKey } from "../hooks/use-auth-context";
 import { formatClock, useCountdown } from "../hooks/use-countdown";
 import { describeAuthError, fieldErrorMap } from "@/shared/lib/api-messages";
 import { landingPathFor } from "../model/landing";
@@ -252,7 +251,7 @@ export function SignupEmailFlow({ token }: { token?: string }) {
         agreedTerms,
       });
       clearSignupDraft();
-      await queryClient.invalidateQueries({ queryKey: authContextQueryKey });
+      queryClient.clear();
       router.replace(landingPathFor(result));
     } catch (error) {
       await handleSubmitError(error);
