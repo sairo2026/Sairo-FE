@@ -1,4 +1,5 @@
 import { Fragment } from "react";
+import { TableScroll } from "@/shared/components/ui/table-scroll";
 import { cn } from "@/shared/lib/cn";
 import { parseMarkdown, pruneEmptyBlocks } from "./markdown";
 import type { MarkdownBlock } from "./markdown";
@@ -83,13 +84,7 @@ export function LegalMarkdown({ blocks, isCompact = false }: LegalMarkdownProps)
         if (block.type === "table") {
           const caption = tableCaption(blocks, index);
           return (
-            <div
-              key={index}
-              role="region"
-              aria-label={caption}
-              tabIndex={0}
-              className="overflow-x-auto rounded-control border border-line focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
-            >
+            <TableScroll key={index} label={caption} className="rounded-control border border-line">
               <table className="w-full min-w-[32rem] border-collapse text-left text-caption">
                 <caption className="sr-only">{caption}</caption>
                 <thead className="bg-surface">
@@ -113,7 +108,7 @@ export function LegalMarkdown({ blocks, isCompact = false }: LegalMarkdownProps)
                   ))}
                 </tbody>
               </table>
-            </div>
+            </TableScroll>
           );
         }
         return (

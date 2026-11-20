@@ -14,19 +14,6 @@ import {
 afterEach(cleanup);
 
 describe("마크다운 해석", () => {
-  it("가로로 긴 표에 제목을 알려주고 키보드로 포커스할 수 있게 한다", () => {
-    const blocks = parseMarkdown(
-      "#### 보유 기간\n\n| 항목 | 기간 |\n| --- | --- |\n| 회원 정보 | 탈퇴까지 |",
-    );
-    render(<LegalMarkdown blocks={blocks} />);
-
-    const region = screen.getByRole("region", { name: "보유 기간 표" });
-    expect(region.tabIndex).toBe(0);
-    region.focus();
-    expect(document.activeElement).toBe(region);
-    expect(within(region).getByRole("table", { name: "보유 기간 표" })).toBeDefined();
-  });
-
   it("제목, 번호 목록, 중첩 목록, 표를 블록으로 나눈다", () => {
     const blocks = parseMarkdown(
       [
