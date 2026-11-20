@@ -81,10 +81,17 @@ export function LegalMarkdown({ blocks, isCompact = false }: LegalMarkdownProps)
           return <hr key={index} className="border-line" />;
         }
         if (block.type === "table") {
+          const caption = tableCaption(blocks, index);
           return (
-            <div key={index} className="overflow-x-auto rounded-control border border-line">
+            <div
+              key={index}
+              role="region"
+              aria-label={caption}
+              tabIndex={0}
+              className="overflow-x-auto rounded-control border border-line focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
+            >
               <table className="w-full min-w-[32rem] border-collapse text-left text-caption">
-                <caption className="sr-only">{tableCaption(blocks, index)}</caption>
+                <caption className="sr-only">{caption}</caption>
                 <thead className="bg-surface">
                   <tr>
                     {block.header.map((cell) => (
