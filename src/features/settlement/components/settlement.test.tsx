@@ -201,6 +201,18 @@ describe("월간 메모", () => {
     expect(getMockWorkState().memos[THIS_MONTH]).toBeUndefined();
   });
 
+  it("태그 문자가 들어 있으면 저장하지 않고 이유를 알려 준다", async () => {
+    const user = userEvent.setup();
+    const { box } = await renderMemo();
+    await user.click(box);
+    await user.paste("<b>메모</b>");
+    await user.click(screen.getByRole("button", { name: "메모 저장" }));
+    expect(
+      await screen.findByText("특수한 태그 문자는 쓸 수 없습니다. 일반 글자로 입력해 주세요."),
+    ).not.toBeNull();
+    expect(getMockWorkState().memos[THIS_MONTH]).toBeUndefined();
+  });
+
   it("주민번호 패턴은 서버가 거절하고 안내를 보여준다", async () => {
     const user = userEvent.setup();
     const { box } = await renderMemo();

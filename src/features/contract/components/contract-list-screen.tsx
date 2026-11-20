@@ -149,11 +149,13 @@ function ContractTable({ tab }: { tab: string }) {
         }
         onRetry={() => void query.refetch()}
         emptyMessage={
-          tab === "maturity"
-            ? "임대 만기가 90일 안에 오는 계약이 없습니다."
-            : tab === "draft"
-              ? "작성 중인 초안 계약이 없습니다."
-              : "표시할 계약이 없습니다."
+          applied.partyName !== "" || applied.propertyAddress !== ""
+            ? "검색어에 맞는 계약이 없습니다. 당사자 이름이나 주소를 바꿔 보세요."
+            : tab === "maturity"
+              ? "임대 만기가 90일 안에 오는 계약이 없습니다."
+              : tab === "draft"
+                ? "작성 중인 초안 계약이 없습니다."
+                : "표시할 계약이 없습니다. 계약 등록 버튼으로 첫 계약을 등록해 보세요."
         }
         columns={[
           {

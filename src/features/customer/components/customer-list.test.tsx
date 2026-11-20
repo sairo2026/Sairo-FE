@@ -41,10 +41,27 @@ describe("고객 목록", () => {
     expect(within(corporate).getByText("법인")).not.toBeNull();
   });
 
+  it("정렬을 고르면 정렬 기준을 서버에 보낸다", async () => {
+    const requests: string[] = [];
+    server.use(
+      http.get("/api/customers", ({ request }) => {
+        requests.push(new URL(request.url).search);
+        return HttpResponse.json({ items: [], page: 0, size: 25, totalElements: 0 });
+      }),
+    );
+    const user = userEvent.setup();
+    renderOffice(<CustomerListScreen />, { role: "AGENT" });
+    await screen.findByText(/등록된 고객이 없습니다/);
+    await user.selectOptions(screen.getByLabelText("정렬"), "name,asc");
+    await waitFor(() =>
+      expect(requests.some((item) => item.includes("sort=name%2Casc"))).toBe(true),
+    );
+  });
+
   it("고객이 없으면 빈 목록 안내를 보여준다", async () => {
     setMockCustomerState({ customers: [] });
     renderOffice(<CustomerListScreen />, { role: "AGENT" });
-    expect(await screen.findByText(/조건에 맞는 고객이 없습니다/)).not.toBeNull();
+    expect(await screen.findByText(/등록된 고객이 없습니다/)).not.toBeNull();
   });
 
   it("조회가 실패하면 목록 안에 오류와 다시 시도 버튼을 보여준다", async () => {
@@ -79,7 +96,7 @@ describe("고객 목록", () => {
     );
     const user = userEvent.setup();
     renderOffice(<CustomerListScreen />, { role: "AGENT" });
-    await screen.findByText(/조건에 맞는 고객이 없습니다/);
+    await screen.findByText(/등록된 고객이 없습니다/);
     await user.selectOptions(screen.getByLabelText("역할"), "OWNER");
     await waitFor(() => expect(requests.some((item) => item.includes("role=OWNER"))).toBe(true));
     await user.type(screen.getByRole("searchbox"), "김");

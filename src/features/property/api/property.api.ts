@@ -44,6 +44,7 @@ export type PropertyListParams = {
   managingMembershipId?: number;
   registrationStage?: string;
   archived?: boolean;
+  sort?: string;
   page: number;
   size: number;
 };

@@ -373,6 +373,18 @@ describe("희망조건", () => {
     expect(await screen.findByText(/하한이 상한보다 클 수 없고/)).not.toBeNull();
   });
 
+  it("희망 지역에 태그 문자가 있으면 저장하지 않고 이유를 알려 준다", async () => {
+    const user = userEvent.setup();
+    renderOffice(<CustomerDetailScreen customerId={302} />, { role: "AGENT" });
+    await openTab(user, "희망조건");
+    await user.click(await screen.findByRole("button", { name: "희망조건 추가" }));
+    await user.type(screen.getByLabelText("희망 지역"), "<i>강남</i>");
+    await user.click(screen.getByRole("button", { name: "저장" }));
+    expect(
+      await screen.findByText("특수한 태그 문자는 쓸 수 없습니다. 일반 글자로 입력해 주세요."),
+    ).not.toBeNull();
+  });
+
   it("희망조건을 등록하면 안내를 보여주고 수요 고객 역할이 생긴다", async () => {
     const user = userEvent.setup();
     renderOffice(<CustomerDetailScreen customerId={302} />, { role: "AGENT" });
