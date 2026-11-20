@@ -36,6 +36,30 @@ describe("로그인 처음 화면 규격", () => {
   });
 });
 
+describe("로그인 처음 화면 안내", () => {
+  it("탈퇴를 마친 사람에게 완료 안내를 보여준다", () => {
+    render(<AuthEntry mode="login" noticeCode="withdrawn" />);
+    expect(screen.getByRole("status").textContent).toContain("회원 탈퇴가 완료되었습니다");
+  });
+
+  it("알 수 없는 안내 코드는 아무것도 보이지 않는다", () => {
+    render(<AuthEntry mode="login" noticeCode="unknown" />);
+    expect(screen.queryByRole("status")).toBeNull();
+  });
+});
+
+describe("로그인 처음 화면 구조", () => {
+  it("본문 영역과 화면 제목을 스크린리더에 알린다", () => {
+    const { unmount } = render(<AuthEntry mode="login" />);
+    expect(screen.getByRole("main")).not.toBeNull();
+    expect(screen.getByRole("heading", { level: 1, name: "로그인" })).not.toBeNull();
+    unmount();
+    render(<AuthEntry mode="signup" />);
+    expect(screen.getByRole("main")).not.toBeNull();
+    expect(screen.getByRole("heading", { level: 1, name: "회원가입" })).not.toBeNull();
+  });
+});
+
 describe("가입 카드 규격", () => {
   it("가입 정보 카드는 폭 676과 그림자를 쓰고 제목과 폼 사이가 넓다", () => {
     render(

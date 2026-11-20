@@ -97,7 +97,7 @@ function WithdrawalView({ preview }: { preview: WithdrawalPreviewResponse }) {
     mutationFn: withdrawAccount,
     onSuccess: () => {
       queryClient.clear();
-      router.replace("/login");
+      router.replace("/login?notice=withdrawn");
     },
     onError: (caught) => {
       if (isLastOwnerError(caught)) {

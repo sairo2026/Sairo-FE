@@ -11,7 +11,6 @@ import { ApiError } from "@/shared/api/client";
 import { Button } from "@/shared/components/ui/button";
 import { TextField } from "@/shared/components/ui/text-field";
 import { login } from "../api/account.api";
-import { authContextQueryKey } from "../hooks/use-auth-context";
 import { formatClock, useCountdown } from "../hooks/use-countdown";
 import { describeAuthError } from "@/shared/lib/api-messages";
 import {
@@ -55,7 +54,8 @@ export function EmailLoginForm({ next }: { next?: string }) {
     setMismatch(undefined);
     try {
       const result = await login({ email: values.email.trim(), password: values.password });
-      await queryClient.invalidateQueries({ queryKey: authContextQueryKey });
+      // 다른 계정이 쓰던 목록과 상세가 남아 보이지 않도록 이전 조회 결과를 모두 지운다.
+      queryClient.clear();
       router.replace(safeNextPath(next) ?? landingPathFor(result));
     } catch (error) {
       if (error instanceof ApiError && error.code === "LOGIN_LOCKED") {

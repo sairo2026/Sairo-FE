@@ -5,6 +5,7 @@ import {
   PUBLIC_VISIT_STATE_LABEL,
   PUBLIC_VISIT_STATE_TONE,
   linkValidity,
+  statusStage,
   statusLabel,
   statusTone,
 } from "./labels";
@@ -64,5 +65,13 @@ describe("링크 상태", () => {
         now,
       ),
     ).toBe("REVOKED");
+  });
+});
+
+describe("상태별 다음 할 일 안내", () => {
+  it("시간 수집 중과 확정 완료에도 다음 행동을 안내한다", () => {
+    expect(statusStage("TIME_COLLECTING", false).hint).toContain("고객 링크를 발급해");
+    expect(statusStage("CONFIRMED", true).hint).toContain("안내문을 복사해");
+    expect(statusStage("CANCELLED", false).hint).toBeUndefined();
   });
 });

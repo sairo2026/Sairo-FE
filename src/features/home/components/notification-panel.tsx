@@ -156,8 +156,17 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
                   >
                     {content}
                   </Link>
-                ) : (
+                ) : item.read ? (
                   <div className={className}>{content}</div>
+                ) : (
+                  <button
+                    type="button"
+                    aria-label={`${item.message} 읽음 처리`}
+                    className={cn(className, "clickable-row")}
+                    onClick={() => read.mutate(item.notificationId)}
+                  >
+                    {content}
+                  </button>
                 )}
               </li>
             );

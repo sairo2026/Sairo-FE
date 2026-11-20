@@ -37,6 +37,13 @@ describe("승인자 조건 입력 모델", () => {
     expect(errors.singleVisitMaxMinutes).toBe("1 이상의 정수로 입력해 주세요.");
   });
 
+  it("적용 종료일이 오늘보다 앞서면 오류다", () => {
+    const form = { ...emptyConditionForm(), appliesFrom: "2020-01-01", appliesUntil: "2020-02-01" };
+    expect(validateCondition(form).appliesUntil).toBe(
+      "적용 종료일은 오늘 이후로 정해 주세요. 지난 날짜로 저장하면 신청을 받을 수 없습니다.",
+    );
+  });
+
   it("종료 시각이 시작보다 늦지 않으면 오류다", () => {
     const form = emptyConditionForm();
     const range = { ...emptyRange(), start: "12:00", end: "11:00" };

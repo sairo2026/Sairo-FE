@@ -20,6 +20,7 @@ import {
 import { DEAL_TYPES, DEAL_TYPE_LABEL, isDealType } from "../model/labels";
 import type { DealType } from "../model/labels";
 import { describeCustomerError, isApiCode } from "../model/messages";
+import { htmlMarkupError } from "@/shared/lib/html-markup";
 import { topicParticle } from "@/shared/lib/korean";
 
 type Condition = CustomerDetail["demandConditions"][number];
@@ -111,6 +112,8 @@ function validateDemand(values: DemandValues): DemandErrors {
       }
     }
   }
+  const regionError = htmlMarkupError(values.regions);
+  if (regionError) errors.regions = regionError;
   return errors;
 }
 
@@ -254,6 +257,7 @@ function DemandForm({
           hint="쉼표로 여러 지역을 구분해 입력하세요."
           value={values.regions}
           onValueChange={(value) => set("regions", value)}
+          error={errors.regions}
         />
       </div>
       {formError ? <FormAlert>{formError}</FormAlert> : null}

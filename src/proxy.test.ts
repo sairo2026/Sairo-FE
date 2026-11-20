@@ -158,6 +158,39 @@ describe("서비스 첫 화면 프록시", () => {
   });
 });
 
+describe("엣지 토큰 헤더", () => {
+  const overridden = (response: Response, name: string) =>
+    response.headers.get(`x-middleware-request-${name}`);
+
+  it("토큰이 설정되면 API 요청에 붙인다", () => {
+    vi.stubEnv("COMING_SOON", "false");
+    vi.stubEnv("SAIRO_EDGE_TOKEN", "test-token");
+    const response = proxy(new NextRequest("https://app.sairo.agency/api/terms"));
+    expect(overridden(response, "x-sairo-edge-token")).toBe("test-token");
+  });
+
+  it("클라이언트가 보낸 같은 이름의 헤더는 버린다", () => {
+    vi.stubEnv("COMING_SOON", "false");
+    vi.stubEnv("SAIRO_EDGE_TOKEN", "");
+    const response = proxy(
+      new NextRequest("https://app.sairo.agency/api/terms", {
+        headers: { "x-sairo-edge-token": "forged" },
+      }),
+    );
+    expect(overridden(response, "x-sairo-edge-token")).toBeNull();
+    expect(response.headers.get("x-middleware-override-headers") ?? "").not.toContain(
+      "x-sairo-edge-token",
+    );
+  });
+
+  it("API가 아닌 경로에는 붙이지 않는다", () => {
+    vi.stubEnv("COMING_SOON", "false");
+    vi.stubEnv("SAIRO_EDGE_TOKEN", "test-token");
+    const response = proxy(new NextRequest("https://app.sairo.agency/pricing"));
+    expect(overridden(response, "x-sairo-edge-token")).toBeNull();
+  });
+});
+
 describe("프록시 적용 범위", () => {
   it("메일 로고 같은 공개 정적 파일 경로는 프록시를 거치지 않는다", () => {
     const pattern = new RegExp(`^${config.matcher[0]}$`);

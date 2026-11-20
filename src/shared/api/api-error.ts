@@ -53,6 +53,10 @@ export class ApiError extends Error {
     return this.status === 401 && this.code === API_ERROR_CODES.stepUpRequired;
   }
 
+  get isOfficeWriteRestricted(): boolean {
+    return this.status === 403 && this.code === API_ERROR_CODES.officeWriteRestricted;
+  }
+
   get isReconsentRequired(): boolean {
     return this.status === 403 && this.code === API_ERROR_CODES.reconsentRequired;
   }

@@ -19,6 +19,7 @@ import { formatSeoulDateTime } from "@/shared/lib/format";
 import { DataMigrationUploadNotice } from "@/shared/legal/data-rights-notices";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { uploadImportFile } from "../api/migration.api";
+import { ImportGuide } from "./import-guide";
 import { migrationKeys, useImportBatches } from "../hooks/migration-queries";
 import {
   BATCH_STATUS,
@@ -38,6 +39,7 @@ function validateFile(file: File | null): string | undefined {
   if (!IMPORT_ACCEPTED_EXTENSIONS.some((extension) => lower.endsWith(extension))) {
     return IMPORT_COPY.extension;
   }
+  if (file.size === 0) return IMPORT_COPY.emptyFile;
   if (file.size > IMPORT_MAX_FILE_BYTES) return IMPORT_COPY.tooLarge;
   return undefined;
 }
@@ -90,6 +92,7 @@ function UploadForm({ remaining }: { remaining: number }) {
         error={targetError}
         disabled={isReadOnly}
       />
+      <ImportGuide targetType={targetType} />
       <FileField
         id="import-file"
         label="파일 (XLS, XLSX, CSV · 최대 20MB)"

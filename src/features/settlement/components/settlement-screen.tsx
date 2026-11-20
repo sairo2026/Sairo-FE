@@ -160,7 +160,7 @@ function SettlementBody({ yearMonth }: { yearMonth: string }) {
                       className="flex items-baseline justify-between gap-3 rounded-control px-2 py-1 hover:bg-primary-soft"
                     >
                       <span className="text-body text-ink-2">{def.label}</span>
-                      <span className="text-h2 font-bold text-primary">
+                      <span className="shrink-0 whitespace-nowrap text-h2 font-bold text-primary">
                         {formatValue(def, data[def.key])}
                       </span>
                     </Link>

@@ -22,6 +22,17 @@ describe("레이아웃", () => {
     ).toBeNull();
   });
 
+  it("좁은 화면에서 메뉴 이름이 줄바꿈되지 않고 가로로 스크롤된다", () => {
+    render(
+      <OfficeLayout activeKey="office">
+        <p>본문</p>
+      </OfficeLayout>,
+    );
+    const link = screen.getByRole("link", { name: "홈 (오늘 할 일)" });
+    expect(link.className).toContain("shrink-0");
+    expect(link.className).toContain("whitespace-nowrap");
+  });
+
   it("사무소 레이아웃은 상단에 사무소명과 전달받은 동작을 보여준다", () => {
     render(
       <OfficeLayout officeName="사이로중개사무소" headerActions={<button>로그아웃</button>}>

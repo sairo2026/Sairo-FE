@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { ApiError } from "@/shared/api/client";
 import { NotificationPanel } from "@/features/home/components/notification-panel";
 import { useHomeSummary } from "@/features/home/hooks/home-queries";
 import { Button } from "@/shared/components/ui/button";
@@ -12,6 +13,10 @@ import { AUTH_ROUTES } from "../model/routes";
 
 const HEADER_LINK_CLASS =
   "inline-flex h-9 items-center gap-1.5 rounded-control border border-line bg-white px-3.5 text-caption font-medium text-ink-2 transition-colors clickable-control";
+
+function isSessionGone(error: unknown): boolean {
+  return error instanceof ApiError && error.status === 401;
+}
 
 /** 사무소 화면 상단의 알림 종, 내 계정·지원·로그아웃 메뉴. */
 export function OfficeHeaderActions() {
@@ -24,11 +29,16 @@ export function OfficeHeaderActions() {
   const menuId = useId();
   const menuRef = useRef<HTMLDivElement>(null);
   const closePanel = useCallback(() => setPanelOpen(false), []);
+  function leaveSession() {
+    queryClient.clear();
+    router.replace(AUTH_ROUTES.login);
+  }
   const logoutMutation = useMutation({
     mutationFn: logout,
-    onSuccess: () => {
-      queryClient.clear();
-      router.replace(AUTH_ROUTES.login);
+    onSuccess: leaveSession,
+    // 다른 곳에서 이미 로그아웃되어 세션이 없으면 로그아웃된 것과 같으므로 로그인 화면으로 보낸다.
+    onError: (error) => {
+      if (isSessionGone(error)) leaveSession();
     },
   });
 
@@ -88,7 +98,7 @@ export function OfficeHeaderActions() {
             >
               로그아웃
             </Button>
-            {logoutMutation.isError ? (
+            {logoutMutation.isError && !isSessionGone(logoutMutation.error) ? (
               <p role="alert" className="px-1 text-caption text-danger">
                 로그아웃하지 못했습니다. 다시 시도해 주세요.
               </p>

@@ -421,6 +421,11 @@ export const visitRequestHandlers = [
 
   http.get("/api/visit-request-notices", () => HttpResponse.json({ items: state.notices })),
 
+  http.post("/api/visit-request-notices/read-all", () => {
+    state.notices = state.notices.map((item) => (item.readAt ? item : { ...item, readAt: NOW }));
+    return new HttpResponse(null, { status: 204 });
+  }),
+
   http.post("/api/visit-request-notices/:noticeId/read", ({ params }) => {
     const found = state.notices.find((item) => String(item.noticeId) === params.noticeId);
     if (!found) return mockErrors.notFound();

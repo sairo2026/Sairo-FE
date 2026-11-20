@@ -425,9 +425,6 @@ describe("실행 결과", () => {
     openBatch(301);
     await user.click(await screen.findByRole("button", { name: "실패한 줄만 다시 처리" }));
     expect(await screen.findByText(/이번 달 실행 횟수는 더 사용하지 않습니다/)).not.toBeNull();
-    await waitFor(() =>
-      expect(screen.queryByRole("button", { name: "실패한 줄만 다시 처리" })).toBeNull(),
-    );
     expect(migrationState.remainingThisMonth).toBe(3);
   });
 

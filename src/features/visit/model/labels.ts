@@ -70,8 +70,20 @@ export function statusStage(status: string, hasConfirmedVisit: boolean): StatusS
   if (status === "APPLYING") {
     return { label: statusLabel(status), hint: "신청을 낸 매물은 승인자가 선택하면 확정됩니다." };
   }
-  return { label: statusLabel(status) };
+  const hint = STATUS_HINT[status];
+  return hint ? { label: statusLabel(status), hint } : { label: statusLabel(status) };
 }
+
+const STATUS_HINT: Record<string, string> = {
+  TIME_COLLECTING:
+    "고객 링크를 발급해 직접 전달해 주세요. 고객이 가능한 시간을 제출하면 일정을 구성할 수 있습니다.",
+  COORDINATABLE:
+    "고객이 가능한 시간을 제출했습니다. 매물마다 승인자 조건이 있는지 확인하고 일정 구성을 저장해 주세요.",
+  CONFIRMED:
+    "모든 매물이 확정되었습니다. 아래 확정 안내에서 안내문을 복사해 고객과 승인자에게 전달하고 전달 기록을 남겨 주세요.",
+  RESCHEDULE_REQUIRED:
+    "변경이 필요한 확정 방문이 있습니다. 변경 신청을 내거나 일정을 다시 구성해 주세요.",
+};
 
 export const NEXT_ACTION_HASH: Partial<Record<CoordinationStatus, string>> = {
   COORDINATABLE: "#schedule",

@@ -219,6 +219,13 @@ describe("접근 안내 문구", () => {
     const drafting = describeAccess(context("PRE_VERIFICATION", { pendingRegistrationId: 4 }));
     expect(waiting?.title).toBe("사무소 참여 승인을 기다리고 있습니다");
     expect(drafting?.title).toBe("사무소 인증이 필요합니다");
+    expect(drafting?.actions[0]?.href).toBe("/office/verification");
+  });
+
+  it("사무소도 신청도 없는 새 계정은 사무소 만들기·참여하기로 바로 안내한다", () => {
+    const fresh = describeAccess(context("PRE_VERIFICATION"));
+    expect(fresh?.title).toBe("사무소를 만들거나 참여해 주세요");
+    expect(fresh?.actions[0]).toEqual({ label: "사무소 만들기·참여하기", href: "/office/start" });
   });
 
   it("인증 회수와 재인증 중단, 퇴사·내보냄·접근 정지를 다른 문구로 안내한다", () => {

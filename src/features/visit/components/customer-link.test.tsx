@@ -330,7 +330,7 @@ describe("고객 공개 링크 화면", () => {
   });
 
   it("서버 오류가 나면 다시 시도 안내를 보여준다", async () => {
-    server.use(http.get("/api/public/customer-visit-links/:token", () => mockErrors.forbidden()));
+    server.use(http.get("/api/public/customer-visit-links/:token", () => mockErrors.server()));
     renderLink();
     expect(await screen.findByRole("button", { name: /다시 시도/ })).not.toBeNull();
   });
@@ -403,6 +403,17 @@ describe("고객 공개 링크 화면", () => {
     expect(screen.getByText("일부 확정")).not.toBeNull();
     expect(screen.queryByText("확정 완료")).toBeNull();
     expect(screen.queryByText(/다음 방문까지 이동/)).toBeNull();
+  });
+
+  it("신청이 진행 중인 조율은 조율 중 제목과 확정 일정 탭을 먼저 보여준다", async () => {
+    setMockVisitFollowState({
+      customerLink: { ...getMockVisitFollowState().customerLink, coordinationStatus: "APPLYING" },
+    });
+    renderLink();
+    expect(await screen.findByText("방문 일정을 조율하고 있습니다")).not.toBeNull();
+    expect(screen.getByRole("tab", { name: "확정 일정" }).getAttribute("aria-selected")).toBe(
+      "true",
+    );
   });
 
   it("취소·재조율 필요·대체된 일정은 비우고 사무소 문의를 안내한다", async () => {

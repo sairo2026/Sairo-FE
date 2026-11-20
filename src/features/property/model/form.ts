@@ -6,6 +6,7 @@ import type {
   PropertyUpdateRequest,
 } from "@/lib/api/contracts/property.schema";
 import { countCodePoints, TEXT_LIMITS } from "@/shared/lib/format";
+import { htmlMarkupError } from "@/shared/lib/html-markup";
 import { objectParticle, topicParticle } from "@/shared/lib/korean";
 import { isDealType } from "./labels";
 import type { DealType } from "./labels";
@@ -131,6 +132,9 @@ const AMOUNT_MAX_DIGITS = 15;
 
 function amountError(label: string, value: string): string | undefined {
   const trimmed = value.trim();
+  if (trimmed === "") {
+    return `${topicParticle(label)} 0 이상의 정수(원)로 입력해 주세요. 해당 금액이 없으면 0을 입력해 주세요.`;
+  }
   if (!AMOUNT_PATTERN.test(trimmed) || trimmed.length > AMOUNT_MAX_DIGITS) {
     return `${topicParticle(label)} 0 이상의 정수(원)로 입력해 주세요.`;
   }
@@ -189,7 +193,7 @@ export function validatePropertyForm(
   const errors: PropertyFormErrors = {};
   const name = values.name.trim();
   if (name === "") errors.name = `${objectParticle("매물명")} 입력해 주세요.`;
-  else errors.name = lengthError("매물명", name, TEXT_LIMITS.title);
+  else errors.name = lengthError("매물명", name, TEXT_LIMITS.title) ?? htmlMarkupError(name);
   if (options.requireCategory && values.categoryId === "") {
     errors.categoryId = "카테고리를 선택해 주세요.";
   }
@@ -222,8 +226,11 @@ export function validatePropertyForm(
     values.maintenanceFeeItems,
     ITEMS_MAX,
   );
-  errors.description = lengthError("설명", values.description, TEXT_LIMITS.bodyMemo);
-  errors.memo = lengthError("메모", values.memo, TEXT_LIMITS.bodyMemo);
+  errors.description =
+    lengthError("설명", values.description, TEXT_LIMITS.bodyMemo) ??
+    htmlMarkupError(values.description);
+  errors.memo =
+    lengthError("메모", values.memo, TEXT_LIMITS.bodyMemo) ?? htmlMarkupError(values.memo);
   const hasLeaseDate = values.referenceLeaseEndDate !== "";
   const hasLeaseSource = values.referenceLeaseEndSource.trim() !== "";
   if (hasLeaseDate && !hasLeaseSource) {

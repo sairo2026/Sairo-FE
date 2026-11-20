@@ -114,7 +114,7 @@ function MappingForm({
           setErrors((current) => ({ ...current, sourceSystem: undefined }));
         }}
         error={errors.sourceSystem}
-        hint="예: 사용하던 프로그램 이름과 연도"
+        hint={IMPORT_COPY.sourceSystemHint}
         maxLength={50}
         disabled={isLocked}
         required
@@ -201,7 +201,8 @@ export function MappingPanel({ batchId, version, isLocked }: Props) {
   return (
     <Card title="매핑 검토">
       <p className="mb-4 text-caption text-ink-2">
-        올린 파일의 열이 사이로의 어떤 항목인지 확인합니다. 추천은 참고용이며 바꿀 수 있습니다.
+        올린 파일의 열이 사이로의 어떤 항목인지 확인합니다. 추천은 참고용이며 바꿀 수 있습니다.{" "}
+        {IMPORT_COPY.mappingRequiredHint}
       </p>
       <QueryGate query={query} loadingLabel="매핑 제안을 불러오는 중입니다.">
         {(data) => (

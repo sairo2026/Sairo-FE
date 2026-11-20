@@ -287,6 +287,7 @@ export function ApproverRequestList({
               취소
             </Button>
             <Button
+              guardDoubleClick
               isLoading={mutation.isPending}
               onClick={() => target && mutation.mutate(target)}
             >

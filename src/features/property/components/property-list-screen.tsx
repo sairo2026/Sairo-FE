@@ -35,6 +35,7 @@ import {
   labelOf,
   toneOf,
 } from "../model/labels";
+import { LIST_SORT_OPTIONS } from "@/shared/lib/list-sort";
 import { describePropertyError } from "../model/messages";
 import { BulkArchiveDialog } from "./archive-notices";
 
@@ -58,6 +59,7 @@ type Filters = {
   priceMin: string;
   priceMax: string;
   archived: boolean;
+  sort: string;
 };
 
 const EMPTY_FILTERS: Filters = {
@@ -72,6 +74,7 @@ const EMPTY_FILTERS: Filters = {
   priceMin: "",
   priceMax: "",
   archived: false,
+  sort: "",
 };
 
 const MAN_WON = 10_000;
@@ -94,6 +97,28 @@ function optionalNumber(value: string, multiplier = 1): number | undefined {
   return Number(trimmed) * multiplier;
 }
 
+function validateRanges(filters: Filters): string | undefined {
+  const pairs: Array<[string, string, string]> = [
+    ["면적", filters.areaMin, filters.areaMax],
+    [priceBasisLabel(filters.dealType), filters.priceMin, filters.priceMax],
+  ];
+  for (const [label, min, max] of pairs) {
+    const low = optionalNumber(min);
+    const high = optionalNumber(max);
+    if ((low !== undefined && low < 0) || (high !== undefined && high < 0)) {
+      return `${label} 범위는 0 이상으로 입력해 주세요.`;
+    }
+    if (low !== undefined && high !== undefined && low > high) {
+      return `${label} 하한이 상한보다 클 수 없습니다. 하한을 상한 이하로 입력해 주세요.`;
+    }
+  }
+  return undefined;
+}
+
+function hasActiveFilter(filters: Filters): boolean {
+  return JSON.stringify(filters) !== JSON.stringify(EMPTY_FILTERS);
+}
+
 function toParams(filters: Filters, page: number, size: number): PropertyListParams {
   const hasArea = filters.areaMin.trim() !== "" || filters.areaMax.trim() !== "";
   return {
@@ -108,6 +133,7 @@ function toParams(filters: Filters, page: number, size: number): PropertyListPar
     priceMin: filters.dealType ? optionalNumber(filters.priceMin, MAN_WON) : undefined,
     priceMax: filters.dealType ? optionalNumber(filters.priceMax, MAN_WON) : undefined,
     archived: filters.archived ? true : undefined,
+    sort: filters.sort || undefined,
     page: page - 1,
     size,
   };
@@ -141,6 +167,11 @@ export function PropertyListScreen() {
     const hasArea = draft.areaMin.trim() !== "" || draft.areaMax.trim() !== "";
     if (hasArea && draft.areaType === "") {
       setFilterError("면적 범위를 쓰려면 면적 종류를 먼저 선택해 주세요.");
+      return;
+    }
+    const rangeError = validateRanges(draft);
+    if (rangeError) {
+      setFilterError(rangeError);
       return;
     }
     applyNow(draft);
@@ -189,7 +220,8 @@ export function PropertyListScreen() {
       render: (row: Row) => (
         <Link
           href={`/properties/${row.propertyId}`}
-          className="font-bold text-ink hover:text-primary hover:underline"
+          title={row.name}
+          className="block max-w-[16rem] truncate font-bold text-ink hover:text-primary hover:underline"
         >
           {row.name}
         </Link>
@@ -234,7 +266,7 @@ export function PropertyListScreen() {
                 ) : (
                   <span>{offer.dealType}</span>
                 )}
-                <span>{formatOfferPrice(offer)}</span>
+                <span className="whitespace-nowrap">{formatOfferPrice(offer)}</span>
               </li>
             ))}
           </ul>
@@ -374,6 +406,13 @@ export function PropertyListScreen() {
           ]}
           onValueChange={(value) => changeImmediate("categoryId", value)}
         />
+        <SelectField
+          layout="inline"
+          label="정렬"
+          value={draft.sort}
+          options={LIST_SORT_OPTIONS.map((item) => ({ value: item.value, label: item.label }))}
+          onValueChange={(value) => changeImmediate("sort", value)}
+        />
         <div className="flex items-center gap-5 text-body font-semibold text-ink-2">
           <span>보관된 매물만 보기</span>
           <Toggle
@@ -482,7 +521,9 @@ export function PropertyListScreen() {
         emptyMessage={
           applied.archived
             ? "보관된 매물이 없습니다."
-            : "조건에 맞는 매물이 없습니다. 매물을 등록해 보세요."
+            : hasActiveFilter(applied)
+              ? "조건에 맞는 매물이 없습니다. 검색어나 조건을 바꾸거나 초기화해 보세요."
+              : "등록된 매물이 없습니다. 매물 등록 버튼으로 첫 매물을 등록해 보세요."
         }
       />
       {isArchiveOpen ? (

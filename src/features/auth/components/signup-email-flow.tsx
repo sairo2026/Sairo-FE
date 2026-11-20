@@ -18,7 +18,6 @@ import {
   signupWithEmail,
   verifySignupEmail,
 } from "../api/account.api";
-import { authContextQueryKey } from "../hooks/use-auth-context";
 import { formatClock, useCountdown } from "../hooks/use-countdown";
 import { describeAuthError, fieldErrorMap } from "@/shared/lib/api-messages";
 import { landingPathFor } from "../model/landing";
@@ -175,7 +174,7 @@ export function SignupEmailFlow({ token }: { token?: string }) {
   const titles = Object.fromEntries(terms.map((item) => [item.termsCode, item.title]));
 
   async function sendEmailLink() {
-    if (!EMAIL_PATTERN.test(email)) {
+    if (!EMAIL_PATTERN.test(email.trim())) {
       setEmailError("이메일 주소를 올바르게 입력해 주세요.");
       return;
     }
@@ -218,7 +217,7 @@ export function SignupEmailFlow({ token }: { token?: string }) {
     } else {
       setTermsError(undefined);
     }
-    if (!isPhoneReady && emailTicket) {
+    if (!isPhoneReady) {
       setSubmitError(
         phoneRequired
           ? "휴대폰 번호 인증을 완료해 주세요."
@@ -252,7 +251,7 @@ export function SignupEmailFlow({ token }: { token?: string }) {
         agreedTerms,
       });
       clearSignupDraft();
-      await queryClient.invalidateQueries({ queryKey: authContextQueryKey });
+      queryClient.clear();
       router.replace(landingPathFor(result));
     } catch (error) {
       await handleSubmitError(error);
