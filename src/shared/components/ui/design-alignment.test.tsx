@@ -158,14 +158,14 @@ describe("모달과 사이드 메뉴 규격", () => {
     expect(screen.getByRole("link", { name: "나" }).className).toContain("text-h2");
   });
 
-  it("사무소 레이아웃은 사이드바 폭 220을 쓰고 홈은 board 바탕을 쓴다", () => {
+  it("사무소 레이아웃은 사이드바 폭 200을 쓰고 홈은 board 바탕을 쓴다", () => {
     const { container, rerender } = render(
       <OfficeLayout activeKey="home">
         <p>본문</p>
       </OfficeLayout>,
     );
     const root = container.firstElementChild as HTMLElement;
-    expect(root.className).toContain("lg:grid-cols-[220px_minmax(0,1fr)]");
+    expect(root.className).toContain("lg:grid-cols-[200px_minmax(0,1fr)]");
     expect(root.className).toContain("bg-white");
     rerender(
       <OfficeLayout activeKey="home" tone="board">

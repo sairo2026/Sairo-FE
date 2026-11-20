@@ -76,7 +76,14 @@
   --radius-card: 24px;
   --radius-card-flat: 16px;
 
-  /* 글자 규격: 크기 / 줄 높이 */
+  --shadow-popup: 0 8px 24px rgb(17 24 39 / 0.12);
+  --shadow-modal: 0 0 25.45px rgb(27 28 93 / 0.06);
+  --shadow-auth: 0 0 50.9px 23px rgb(27 28 93 / 0.04);
+  --shadow-panel: -1px 0 19.6px rgb(48 49 80 / 0.17);
+}
+
+/* 글자 규격: 크기 / 줄 높이. inline이 아니어야 업무 화면이 아래 변수를 덮어쓸 수 있다. */
+@theme {
   --text-display: 40px;
   --text-display--line-height: 52px;
   --text-h1: 28px;
@@ -89,11 +96,14 @@
   --text-body--line-height: 24px;
   --text-caption: 14px;
   --text-caption--line-height: 20px;
+}
 
-  --shadow-popup: 0 8px 24px rgb(17 24 39 / 0.12);
-  --shadow-modal: 0 0 25.45px rgb(27 28 93 / 0.06);
-  --shadow-auth: 0 0 50.9px 23px rgb(27 28 93 / 0.04);
-  --shadow-panel: -1px 0 19.6px rgb(48 49 80 / 0.17);
+/* 업무 화면(사무소 레이아웃) 안에서만 큰 제목 두 단계를 줄인다. 공개 화면은 위 기본값을 그대로 쓴다. */
+.work-density {
+  --text-h1: 24px;
+  --text-h1--line-height: 32px;
+  --text-h3: 20px;
+  --text-h3--line-height: 28px;
 }
 
 body {
