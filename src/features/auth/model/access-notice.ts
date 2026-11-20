@@ -125,7 +125,7 @@ export function describeAccess(context: AuthContextResponse): AccessNotice | nul
       return {
         title: isOwner ? "결제를 기다리고 있습니다" : "대표의 결제를 기다리고 있습니다",
         description: isOwner
-          ? "사무소 인증이 끝났습니다. 구독 결제를 마치면 업무 화면을 사용할 수 있습니다."
+          ? "사무소 인증이 끝났습니다. 구독 결제를 마치면 업무 화면을 사용할 수 있습니다. 결제 전에는 요금, 결제, 사무소 설정만 이용할 수 있습니다."
           : "사무소 인증은 끝났고 대표가 결제를 마치면 업무 화면을 사용할 수 있습니다. 결제는 대표만 할 수 있습니다.",
         details: [],
         actions: [

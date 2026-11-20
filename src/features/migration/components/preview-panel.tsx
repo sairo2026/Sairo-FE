@@ -126,8 +126,9 @@ function PreviewBody({
           <ul className="flex flex-col gap-1 text-caption text-ink-2">
             {data.duplicateWarnings.map((item) => (
               <li key={`${item.sourceRowNumber}-${item.sourceId}`}>
-                {item.sourceRowNumber}행 · {item.sourceSystem} {item.sourceId}은 이미 사이로에 있는
-                자료(번호 {item.existingTargetId})와 겹쳐 새로 만들지 않습니다.
+                {item.sourceRowNumber}행
+                {item.sourceId ? ` · ${item.sourceSystem} ${item.sourceId}` : ""}은 이미 사이로에
+                있는 자료(번호 {item.existingTargetId})와 겹쳐 새로 만들지 않습니다.
               </li>
             ))}
           </ul>

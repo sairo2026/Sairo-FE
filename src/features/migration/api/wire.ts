@@ -59,7 +59,7 @@ export const PreviewWireSchema = ImportPreviewResponseSchema.extend({
         sourceRowNumber: z.number(),
         sourceSystem: z.string(),
         sourceType: z.string(),
-        sourceId: z.string(),
+        sourceId: z.string().nullish(),
         existingTargetId: z.number(),
         reason: z.string().optional(),
         existingArchived: z.boolean().optional(),
