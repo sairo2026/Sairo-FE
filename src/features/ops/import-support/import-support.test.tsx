@@ -151,9 +151,10 @@ describe("견적 입력 검증", () => {
   });
 
   it("매핑은 필수 대상 필드와 중복 연결을 검사한다", () => {
-    expect(validateMapping({ 성명: "customerName" }, "CUSTOMER")).toEqual([
-      "원본 고객 ID은 반드시 한 열에 연결해야 합니다.",
+    expect(validateMapping({ 고객번호: "customerSourceId" }, "CUSTOMER")).toEqual([
+      "고객명은 반드시 한 열에 연결해야 합니다.",
     ]);
+    expect(validateMapping({ 성명: "customerName" }, "CUSTOMER")).toEqual([]);
     const problems = validateMapping(
       { 고객번호: "customerSourceId", 성명: "customerName", 이름: "customerName" },
       "CUSTOMER",
@@ -331,9 +332,9 @@ describe("처리 시작과 매핑 편집", () => {
 
   it("필수 필드를 연결하지 않으면 저장하지 않고 안내한다", async () => {
     const { user } = await openDetail(405);
-    await user.selectOptions(screen.getByLabelText("원본 열 고객번호"), "");
+    await user.selectOptions(screen.getByLabelText("원본 열 성명"), "");
     await user.click(screen.getByRole("button", { name: "매핑 저장" }));
-    expect(await screen.findByText(/원본 고객 ID은 반드시 한 열에 연결해야 합니다/)).toBeTruthy();
+    expect(await screen.findByText(/고객명은 반드시 한 열에 연결해야 합니다/)).toBeTruthy();
   });
 
   it("같은 대상 필드에 두 열을 연결하면 안내한다", async () => {

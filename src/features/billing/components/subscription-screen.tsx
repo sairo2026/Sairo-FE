@@ -147,7 +147,10 @@ function StatusBody({
   if (status === "PRE_PAYMENT") {
     return (
       <div className="flex flex-col gap-3">
-        <p className="text-body text-ink">결제 준비 중입니다. 실제 청구가 시작된 것이 아닙니다.</p>
+        <p className="text-body text-ink">
+          결제 준비 중입니다. 실제 청구가 시작된 것이 아닙니다. 결제를 마치기 전에는 업무 화면을
+          사용할 수 없고, 요금·결제·사무소 설정은 대표가 계속 이용할 수 있습니다.
+        </p>
         <DetailList
           items={[
             {
