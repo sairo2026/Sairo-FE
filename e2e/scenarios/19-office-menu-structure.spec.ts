@@ -102,12 +102,9 @@ test.describe("사무소 왼쪽 메뉴 7개 구조", () => {
     expect(await menuLabels(page)).toEqual(["홈 (오늘 할 일)", "방문 조율", "사무소 관리"]);
 
     await page.goto("/members");
-    expect(await tabLabels(page, "사무소 관리 탭")).toEqual(["구성원"]);
-    await expect(
-      page.getByRole("navigation", { name: "사무소 관리 탭" }).getByRole("link", {
-        name: "구성원",
-      }),
-    ).toHaveAttribute("aria-current", "page");
+    const tabs = page.getByRole("navigation", { name: "사무소 관리 탭" }).getByRole("link");
+    await expect(tabs).toHaveText(["구성원"]);
+    await expect(tabs).toHaveAttribute("aria-current", "page");
   });
 
   test("탭을 숨겨도 주소 접근은 막힌다", async ({ page }) => {
