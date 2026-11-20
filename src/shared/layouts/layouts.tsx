@@ -98,18 +98,15 @@ export function OfficeLayout({
     <ToastProvider>
       <div
         className={cn(
-          "min-h-dvh text-ink lg:grid lg:grid-cols-[220px_minmax(0,1fr)]",
+          "work-density min-h-dvh text-ink lg:grid lg:grid-cols-[200px_minmax(0,1fr)]",
           tone === "board" ? "bg-surface" : "bg-white",
         )}
       >
-        <aside className="border-b border-line bg-white px-6 py-6 lg:sticky lg:top-0 lg:z-30 lg:h-dvh lg:self-start lg:overflow-y-auto lg:border lg:px-8 lg:pt-[31px]">
-          <Link href="/home" aria-label="사이로 홈" className="mb-6 block lg:mb-[60px]">
-            <BrandLogo className="w-[127px]" />
+        <aside className="border-b border-line bg-white px-6 py-6 lg:sticky lg:top-0 lg:z-30 lg:h-dvh lg:self-start lg:overflow-y-auto lg:border lg:px-6 lg:pt-6">
+          <Link href="/home" aria-label="사이로 홈" className="mb-6 block lg:mb-10">
+            <BrandLogo className="w-28" />
           </Link>
-          <nav
-            aria-label="주요 메뉴"
-            className="flex gap-5 overflow-x-auto lg:flex-col lg:gap-[18px]"
-          >
+          <nav aria-label="주요 메뉴" className="flex gap-5 overflow-x-auto lg:flex-col lg:gap-3">
             {items.map((item) => (
               <SideNavItem
                 key={item.key}
@@ -121,14 +118,14 @@ export function OfficeLayout({
           </nav>
         </aside>
         <div className="min-w-0">
-          <header className="sticky top-0 z-20 flex min-h-[88px] flex-wrap items-center justify-between gap-x-6 gap-y-3 border-b border-line bg-white px-8 py-4 text-caption font-semibold text-ink-2">
+          <header className="sticky top-0 z-20 flex min-h-[76px] flex-wrap items-center justify-between gap-x-6 gap-y-3 border-b border-line bg-white px-8 py-4 text-caption font-semibold text-ink-2">
             <span className="text-h2 font-bold text-ink">{officeName ?? "사무소"}</span>
             {headerActions}
           </header>
           <main
             className={cn(
               "px-5 pt-10 pb-28 sm:px-8",
-              tone === "board" ? "lg:pt-7 lg:pr-8 lg:pl-7" : "lg:pt-10 lg:pr-8 lg:pl-11",
+              tone === "board" ? "lg:pt-7 lg:pr-8 lg:pl-7" : "lg:pt-8 lg:pr-8 lg:pl-9",
             )}
           >
             {children}
@@ -136,7 +133,7 @@ export function OfficeLayout({
         </div>
         <WindowScrollHint
           tone={tone === "board" ? "surface" : "white"}
-          className="lg:left-[220px]"
+          className="lg:left-[200px]"
         />
       </div>
     </ToastProvider>
