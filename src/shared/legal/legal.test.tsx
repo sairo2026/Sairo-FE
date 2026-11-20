@@ -148,6 +148,14 @@ describe("약관 문서 목록", () => {
     expect(screen.queryByRole("heading", { name: "부칙" })).toBeNull();
   });
 
+  it("이용약관과 개인정보처리방침은 통신판매업 신고번호를 표시한다", () => {
+    for (const slug of ["terms", "privacy"] as const) {
+      const document = findLegalDocument(slug);
+      if (!document) throw new Error("문서가 없습니다");
+      expect(document.body).toContain("제 2026-고양덕양구-2847 호");
+    }
+  });
+
   it("개인정보처리방침의 수탁사 표는 값이 없는 행을 게시하지 않는다", () => {
     const privacy = findLegalDocument("privacy");
     if (!privacy) throw new Error("개인정보처리방침이 없습니다");

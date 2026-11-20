@@ -10,7 +10,12 @@ import {
 } from "@/lib/api/contracts/migration.schema";
 import type { ImportMappingConfirmRequest } from "@/lib/api/contracts/migration.schema";
 import { apiFetch, withQuery } from "@/shared/api/client";
-import { BatchDetailWireSchema, PreviewWireSchema } from "./wire";
+import {
+  BatchDetailWireSchema,
+  ImportRowResultsSchema,
+  ImportRowSchema,
+  PreviewWireSchema,
+} from "./wire";
 
 export type PageParams = { page: number; size: number };
 
@@ -94,4 +99,33 @@ export function retryFailedImport(batchId: number) {
     method: "POST",
     schema: ImportRetryFailedResponseSchema,
   });
+}
+
+export type RowOutcome = "SUCCEEDED" | "FAILED" | "SKIPPED";
+
+export function fetchImportRows(request: { batchId: number; outcome: RowOutcome } & PageParams) {
+  return apiFetch(
+    withQuery(`/api/import-batches/${request.batchId}/rows`, {
+      outcome: request.outcome,
+      page: request.page,
+      size: request.size,
+    }),
+    { schema: ImportRowResultsSchema },
+  );
+}
+
+export function correctImportRow(request: {
+  batchId: number;
+  rowNumber: number;
+  values: Record<string, string>;
+}) {
+  return apiFetch(`/api/import-batches/${request.batchId}/rows/${request.rowNumber}/correction`, {
+    method: "PUT",
+    body: { values: request.values },
+    schema: ImportRowSchema,
+  });
+}
+
+export function failedRowsCsvUrl(batchId: number): string {
+  return `/api/import-batches/${batchId}/failed-rows.csv`;
 }

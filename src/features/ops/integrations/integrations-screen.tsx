@@ -26,6 +26,7 @@ import type { Integration } from "./integrations-model";
 
 function IntegrationTable() {
   const canSeeCopies = useHasOpsRole(["PRIVACY"]);
+  const canManage = useHasOpsRole(["OPS"]);
   const [environment, setEnvironment] = useState("");
   const [applied, setApplied] = useState("");
   const [editing, setEditing] = useState<Integration | null>(null);
@@ -57,6 +58,11 @@ function IntegrationTable() {
 
   return (
     <>
+      {canManage ? null : (
+        <p className="text-caption text-ink-2">
+          개인정보담당은 목록과 계약서 사본만 볼 수 있고 설정 변경과 연결 검사는 운영담당이 합니다.
+        </p>
+      )}
       <OpsFilterBar
         label="연동 조회"
         onApply={() => setApplied(environment)}
@@ -141,15 +147,17 @@ function IntegrationTable() {
                 ) : (
                   "-"
                 )}
-                <Button
-                  variant="outlined"
-                  size="sm"
-                  aria-label={`연동 ${row.integrationId} 연결 검사`}
-                  isLoading={checkingId === row.integrationId}
-                  onClick={() => void runCheck(row)}
-                >
-                  연결 검사
-                </Button>
+                {canManage ? (
+                  <Button
+                    variant="outlined"
+                    size="sm"
+                    aria-label={`연동 ${row.integrationId} 연결 검사`}
+                    isLoading={checkingId === row.integrationId}
+                    onClick={() => void runCheck(row)}
+                  >
+                    연결 검사
+                  </Button>
+                ) : null}
               </div>
             ),
           },
@@ -175,17 +183,19 @@ function IntegrationTable() {
             header: "관리",
             render: (row) => (
               <div className="flex flex-col gap-2">
-                <Button
-                  variant="outlined"
-                  size="sm"
-                  aria-label={`연동 ${row.integrationId} 설정 변경`}
-                  onClick={() => {
-                    setFeedback(null);
-                    setEditing(row);
-                  }}
-                >
-                  설정 변경
-                </Button>
+                {canManage ? (
+                  <Button
+                    variant="outlined"
+                    size="sm"
+                    aria-label={`연동 ${row.integrationId} 설정 변경`}
+                    onClick={() => {
+                      setFeedback(null);
+                      setEditing(row);
+                    }}
+                  >
+                    설정 변경
+                  </Button>
+                ) : null}
                 {canSeeCopies ? (
                   <Link
                     href={`/ops/integrations/${row.integrationId}/contract-copies`}
@@ -220,7 +230,7 @@ export function IntegrationsScreen() {
     <OpsScreen
       title="연동 설정"
       description="결제, 이메일, 본인확인, 저장소, AI 공급자 연동의 상태와 계약·고지 점검을 관리합니다."
-      roles={["OPS"]}
+      roles={["OPS", "PRIVACY"]}
     >
       <p className="text-caption text-ink-2">
         비밀값은 저장소 참조 ID와 마스킹된 연결값만 보입니다. 시험 환경에서는 실제 과금과 운영 고객

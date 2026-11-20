@@ -260,6 +260,9 @@ export function validateCondition(values: ConditionFormValues): ConditionErrors 
   if (values.appliesUntil === "") errors.appliesUntil = "적용 종료일을 입력해 주세요.";
   else if (values.appliesFrom !== "" && values.appliesUntil < values.appliesFrom) {
     errors.appliesUntil = "적용 종료일은 시작일보다 앞설 수 없습니다.";
+  } else if (values.appliesUntil < todayKst()) {
+    errors.appliesUntil =
+      "적용 종료일은 오늘 이후로 정해 주세요. 지난 날짜로 저장하면 신청을 받을 수 없습니다.";
   }
   for (const key of RULE_KEYS) {
     const problem = checkNumber(key, values[key]);
@@ -376,6 +379,7 @@ export const VIOLATED_RULE_LABEL: Record<string, string> = {
   CONDITION_CHANGED: "조건 변경으로 맞지 않음",
   NO_PERMISSION: "신청 권한이 유효하지 않음",
   DEPUTY_VISIT_LOCKED: "다른 일정과 겹치거나 신청 쪽 사정으로 확정할 수 없음",
+  CUSTOMER_TIME_MISMATCH: "다른 일정과 겹치거나 신청 쪽 사정으로 확정할 수 없음",
   CUSTOMER_CONFLICT: "다른 일정과 겹치거나 신청 쪽 사정으로 확정할 수 없음",
   BROKER_CONFLICT: "다른 일정과 겹치거나 신청 쪽 사정으로 확정할 수 없음",
   PROPERTY_CONFLICT: "다른 일정과 겹치거나 신청 쪽 사정으로 확정할 수 없음",

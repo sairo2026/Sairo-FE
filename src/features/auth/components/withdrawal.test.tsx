@@ -93,7 +93,7 @@ describe("회원 탈퇴 화면", () => {
     expect(isMockWithdrawn()).toBe(false);
     await user.click(screen.getByLabelText(/^위 내용을 확인했습니다\./));
     await user.click(screen.getByRole("button", { name: "탈퇴하기" }));
-    await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/login"));
+    await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/login?notice=withdrawn"));
     expect(isMockWithdrawn()).toBe(true);
   });
 

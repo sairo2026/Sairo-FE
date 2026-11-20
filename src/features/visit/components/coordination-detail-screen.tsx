@@ -128,11 +128,13 @@ function CustomerSummary({ detail, isDeputy }: { detail: Detail; isDeputy: boole
 function CandidateRow({
   candidate,
   canRemove,
+  isConfirmed,
   isBusy,
   onRemove,
 }: {
   candidate: Candidate;
   canRemove: boolean;
+  isConfirmed: boolean;
   isBusy: boolean;
   onRemove: () => void;
 }) {
@@ -152,8 +154,8 @@ function CandidateRow({
           {candidate.propertyAddressDetail ? ` ${candidate.propertyAddressDetail}` : ""}
         </span>
         <span className="text-caption text-ink-2">
-          방문 {candidate.visitDurationMinutes}분 · 이동 {candidate.travelDurationMinutes}분 · 신청
-          가능 구간 {candidate.applicableSlots.length}개
+          방문 {candidate.visitDurationMinutes}분 · 이동 {candidate.travelDurationMinutes}분 ·{" "}
+          {isConfirmed ? "확정된 방문" : `신청 가능 구간 ${candidate.applicableSlots.length}개`}
           {state && state !== "ACTIVE" ? " · 허용이 끝나 신청할 수 없습니다" : ""}
         </span>
       </div>
@@ -250,6 +252,11 @@ function CandidatesPanel({ detail, isReadOnly }: { detail: Detail; isReadOnly: b
               key={candidate.candidatePropertyId}
               candidate={candidate}
               canRemove={canRemove}
+              isConfirmed={(detail.scheduleItems ?? []).some(
+                (item) =>
+                  item.candidatePropertyId === candidate.candidatePropertyId &&
+                  item.result === "SCHEDULED",
+              )}
               isBusy={removing === candidate.candidatePropertyId}
               onRemove={() => removeMutation.mutate(candidate.candidatePropertyId)}
             />
@@ -378,6 +385,7 @@ function CustomerTimePanel({ detail, isReadOnly }: { detail: Detail; isReadOnly:
       ) : (
         <div>
           <Button
+            guardDoubleClick
             variant="outlined"
             size="sm"
             disabled={isReadOnly || isClosed}
@@ -397,7 +405,7 @@ function CustomerTimePanel({ detail, isReadOnly }: { detail: Detail; isReadOnly:
             <Button variant="cancel" onClick={() => setIsConfirmingReissue(false)}>
               취소
             </Button>
-            <Button isLoading={issue.isPending} onClick={() => issue.mutate()}>
+            <Button guardDoubleClick isLoading={issue.isPending} onClick={() => issue.mutate()}>
               재발급
             </Button>
           </>

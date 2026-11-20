@@ -33,6 +33,12 @@ export function describePropertyError(error: unknown, fallback: string): string 
   if (error instanceof ApiError && error.status !== 429 && error.status < 500) {
     const known = MESSAGE_BY_CODE[error.code];
     if (known) return known;
+    const brokenPhoto = error.fieldErrors?.some(
+      (item) => item.field === "file" && item.code === "INVALID_FORMAT",
+    );
+    if (brokenPhoto) {
+      return "사진 파일을 읽을 수 없습니다. 손상되지 않은 JPG, PNG, WebP 사진인지 확인해 주세요.";
+    }
   }
   return describeAuthError(error, fallback);
 }

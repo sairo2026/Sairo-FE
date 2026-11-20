@@ -1,7 +1,9 @@
 import type { ApiError } from "./api-error";
 
 export type ApiAuthEvent =
-  { type: "session-expired"; error: ApiError } | { type: "reconsent-required"; error: ApiError };
+  | { type: "session-expired"; error: ApiError }
+  | { type: "reconsent-required"; error: ApiError }
+  | { type: "office-restricted"; error: ApiError };
 
 type Listener = (event: ApiAuthEvent) => void;
 

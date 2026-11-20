@@ -330,7 +330,7 @@ describe("고객 공개 링크 화면", () => {
   });
 
   it("서버 오류가 나면 다시 시도 안내를 보여준다", async () => {
-    server.use(http.get("/api/public/customer-visit-links/:token", () => mockErrors.forbidden()));
+    server.use(http.get("/api/public/customer-visit-links/:token", () => mockErrors.server()));
     renderLink();
     expect(await screen.findByRole("button", { name: /다시 시도/ })).not.toBeNull();
   });
@@ -342,6 +342,44 @@ describe("고객 공개 링크 화면", () => {
     expect(await screen.findByText("확정된 일정이 아직 없습니다")).not.toBeNull();
     cleanup();
     setMockVisitFollowState({
+      customerLink: { ...getMockVisitFollowState().customerLink, coordinationStatus: "CONFIRMED" },
+      customerConfirmed: {
+        state: "VALID",
+        scheduleVersion: 2,
+        managerDisplayName: "이중개",
+        managerLegalRole: "AFFILIATED_AGENT",
+        officeContactPhone: "02-1234-5678",
+        items: [
+          {
+            sortOrder: 1,
+            scheduledStartAt: "2026-11-12T10:00:00+09:00",
+            scheduledEndAt: "2026-11-12T10:30:00+09:00",
+            propertyAddress: "서울특별시 성북구 정릉로 77",
+            travelDurationMinutes: 15,
+          },
+          {
+            sortOrder: 2,
+            scheduledStartAt: "2026-11-12T11:00:00+09:00",
+            scheduledEndAt: "2026-11-12T11:30:00+09:00",
+            propertyAddress: "서울특별시 성북구 정릉로 99",
+            travelDurationMinutes: 20,
+          },
+        ],
+      },
+    });
+    renderLink();
+    await user.click(await screen.findByRole("tab", { name: "확정 일정" }));
+    expect(await screen.findByText(/1\. 서울특별시 성북구 정릉로 77/)).not.toBeNull();
+    expect(screen.getByText("확정 완료")).not.toBeNull();
+    expect(screen.getAllByText(/다음 방문까지 이동/)).toHaveLength(1);
+    expect(screen.getByText(/다음 방문까지 이동 15분/)).not.toBeNull();
+    expect(screen.getByText(/24시간까지만 볼 수 있습니다/)).not.toBeNull();
+  });
+
+  it("일부만 확정된 조율은 일부 확정으로 표시하고 마지막 방문의 이동 시간은 숨긴다", async () => {
+    const user = userEvent.setup();
+    setMockVisitFollowState({
+      customerLink: { ...getMockVisitFollowState().customerLink, coordinationStatus: "APPLYING" },
       customerConfirmed: {
         state: "VALID",
         scheduleVersion: 2,
@@ -362,8 +400,20 @@ describe("고객 공개 링크 화면", () => {
     renderLink();
     await user.click(await screen.findByRole("tab", { name: "확정 일정" }));
     expect(await screen.findByText(/1\. 서울특별시 성북구 정릉로 77/)).not.toBeNull();
-    expect(screen.getByText(/다음 방문까지 이동 15분/)).not.toBeNull();
-    expect(screen.getByText(/24시간까지만 볼 수 있습니다/)).not.toBeNull();
+    expect(screen.getByText("일부 확정")).not.toBeNull();
+    expect(screen.queryByText("확정 완료")).toBeNull();
+    expect(screen.queryByText(/다음 방문까지 이동/)).toBeNull();
+  });
+
+  it("신청이 진행 중인 조율은 조율 중 제목과 확정 일정 탭을 먼저 보여준다", async () => {
+    setMockVisitFollowState({
+      customerLink: { ...getMockVisitFollowState().customerLink, coordinationStatus: "APPLYING" },
+    });
+    renderLink();
+    expect(await screen.findByText("방문 일정을 조율하고 있습니다")).not.toBeNull();
+    expect(screen.getByRole("tab", { name: "확정 일정" }).getAttribute("aria-selected")).toBe(
+      "true",
+    );
   });
 
   it("취소·재조율 필요·대체된 일정은 비우고 사무소 문의를 안내한다", async () => {

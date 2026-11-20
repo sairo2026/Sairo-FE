@@ -212,6 +212,8 @@ async function sendOnce<T>(
     if (!skipAuthEvents) {
       if (error.isSessionExpired) emitApiAuthEvent({ type: "session-expired", error });
       else if (error.isReconsentRequired) emitApiAuthEvent({ type: "reconsent-required", error });
+      else if (error.isOfficeWriteRestricted)
+        emitApiAuthEvent({ type: "office-restricted", error });
     }
     throw error;
   }

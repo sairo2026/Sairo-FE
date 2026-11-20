@@ -4,6 +4,7 @@ import type {
 } from "@/lib/api/contracts/customer.schema";
 import type { CustomerDetail } from "../api/wire";
 import { countCodePoints, TEXT_LIMITS } from "@/shared/lib/format";
+import { htmlMarkupError } from "@/shared/lib/html-markup";
 import { objectParticle, topicParticle } from "@/shared/lib/korean";
 import { PROCESSING_BASES } from "./labels";
 import { CUSTOMER_COLLECTION_COPY } from "./legal-copy";
@@ -74,8 +75,13 @@ function lengthError(label: string, value: string, max: number): string | undefi
     : undefined;
 }
 
+function todaySeoulIso(): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date());
+}
+
 function sensitiveError(value: string): string | undefined {
-  return hasResidentNumber(value) ? SENSITIVE_DATA_MESSAGE : undefined;
+  if (hasResidentNumber(value)) return SENSITIVE_DATA_MESSAGE;
+  return htmlMarkupError(value);
 }
 
 export function validateCustomerForm(
@@ -116,8 +122,11 @@ export function validateCustomerForm(
   const purpose = values.dataPurpose.trim();
   if (purpose === "") errors.dataPurpose = `${objectParticle("수집 목적")} 입력해 주세요.`;
   else errors.dataPurpose = lengthError("수집 목적", purpose, PURPOSE_MAX);
-  if (values.retentionUntil === "")
+  if (values.retentionUntil === "") {
     errors.retentionUntil = CUSTOMER_COLLECTION_COPY.retentionMissing;
+  } else if (options.isCreate && values.retentionUntil < todaySeoulIso()) {
+    errors.retentionUntil = "보유 기한은 오늘 이후 날짜로 선택해 주세요.";
+  }
   return Object.fromEntries(
     Object.entries(errors).filter(([, message]) => message !== undefined),
   ) as CustomerFormErrors;

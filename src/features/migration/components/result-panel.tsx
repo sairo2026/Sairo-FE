@@ -11,6 +11,7 @@ import { formatSeoulDateTime } from "@/shared/lib/format";
 import { cancelImport, retryFailedImport } from "../api/migration.api";
 import type { ImportBatchDetail } from "../api/wire";
 import { migrationKeys } from "../hooks/migration-queries";
+import { RowResults } from "./row-results";
 import { ENTITY_TYPE_LABEL, NOT_CANCELLED_REASONS, SKIP_REASON_LABEL } from "../model/labels";
 import { IMPORT_COPY, describeMigrationError } from "../model/messages";
 
@@ -72,6 +73,7 @@ export function ResultPanel({ batch, isLocked }: Props) {
   async function refresh() {
     await queryClient.invalidateQueries({ queryKey: migrationKeys.batch(batch.batchId) });
     await queryClient.invalidateQueries({ queryKey: migrationKeys.batches });
+    await queryClient.invalidateQueries({ queryKey: migrationKeys.rowsAll(batch.batchId) });
   }
 
   const cancelMutation = useMutation({
@@ -103,6 +105,7 @@ export function ResultPanel({ batch, isLocked }: Props) {
   const counts = batch.counts;
   const isExecuting = batch.status === "EXECUTING";
   const isCompleted = batch.status === "COMPLETED";
+  const isFailed = batch.status === "FAILED";
   const cancellableUntil = batch.cancellableUntil ?? null;
   const isWindowOpen = cancellableUntil !== null && new Date(cancellableUntil).getTime() > now;
 
@@ -131,6 +134,9 @@ export function ResultPanel({ batch, isLocked }: Props) {
           />
         ) : null}
         {counts ? <SkippedReasons counts={counts} /> : null}
+        {counts && !isExecuting && (isCompleted || batch.status === "FAILED") ? (
+          <RowResults batch={batch} counts={counts} isLocked={isLocked} />
+        ) : null}
         {batch.failureReason && !isExecuting ? (
           <FormNotice>{batch.failureReason}</FormNotice>
         ) : null}
@@ -172,12 +178,12 @@ export function ResultPanel({ batch, isLocked }: Props) {
             {message}
           </p>
         ) : null}
-        {isCompleted && createdLink ? (
+        {(isCompleted || isFailed) && createdLink && (counts?.succeeded ?? 0) > 0 ? (
           <TextLink href={createdLink.href}>{createdLink.label}</TextLink>
         ) : null}
-        {isCompleted ? (
+        {isCompleted || isFailed ? (
           <div className="flex flex-wrap gap-3">
-            {counts && counts.failed > 0 ? (
+            {counts && (counts.failed > 0 || (isFailed && counts.unprocessed > 0)) ? (
               <Button
                 variant="outlined"
                 disabled={isLocked}
@@ -187,13 +193,15 @@ export function ResultPanel({ batch, isLocked }: Props) {
                 실패한 줄만 다시 처리
               </Button>
             ) : null}
-            <Button
-              variant="ghost"
-              disabled={isLocked || !canCancel}
-              onClick={() => setIsCancelling(true)}
-            >
-              이전 취소
-            </Button>
+            {isCompleted ? (
+              <Button
+                variant="ghost"
+                disabled={isLocked || !canCancel}
+                onClick={() => setIsCancelling(true)}
+              >
+                이전 취소
+              </Button>
+            ) : null}
           </div>
         ) : null}
         <ConfirmDialog

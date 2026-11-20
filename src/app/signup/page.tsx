@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AuthEntry } from "@/features/auth/components/auth-entry";
+import { SignedInRedirect } from "@/features/auth/components/signed-in-redirect";
 import { INDEXABLE_ROBOTS, publicPageSocialMetadata } from "@/shared/lib/site-metadata";
 
 export const metadata: Metadata = {
@@ -14,5 +15,10 @@ export const metadata: Metadata = {
 };
 
 export default function SignupPage() {
-  return <AuthEntry mode="signup" />;
+  return (
+    <>
+      <SignedInRedirect />
+      <AuthEntry mode="signup" />
+    </>
+  );
 }

@@ -612,6 +612,7 @@ describe("구성원 상세", () => {
     });
     renderOffice(<MemberDetailScreen membershipId={1} />, { role: "OWNER" });
     expect(await screen.findByText(/대표는 강등하거나 내보낼 수 없습니다/)).not.toBeNull();
+    expect(screen.queryByText("넘어갈 담당 업무")).toBeNull();
     expect(screen.queryByRole("button", { name: "내보내기" })).toBeNull();
     expect(screen.queryByRole("button", { name: "역할 변경" })).toBeNull();
   });
@@ -682,7 +683,7 @@ describe("참여 요청과 초대 관리", () => {
     await user.type(screen.getByLabelText("초대할 이메일"), "unknown@example.com");
     await user.selectOptions(screen.getByLabelText("역할"), "DEPUTY");
     await user.click(screen.getByRole("button", { name: "초대 보내기" }));
-    expect((await screen.findByRole("alert")).textContent).toContain("대상을 찾을 수 없습니다");
+    expect((await screen.findByRole("alert")).textContent).toContain("먼저 사이로에 가입한 뒤");
   });
 
   it("이미 소속된 이메일은 중복 안내를 보여준다", async () => {

@@ -37,6 +37,10 @@ export class ApiError extends Error {
     return this.details.remainingAttempts;
   }
 
+  get failedAttempts(): number | undefined {
+    return this.details.failedAttempts;
+  }
+
   get currentVersion(): number | undefined {
     return this.details.currentVersion;
   }
@@ -47,6 +51,10 @@ export class ApiError extends Error {
 
   get isStepUpRequired(): boolean {
     return this.status === 401 && this.code === API_ERROR_CODES.stepUpRequired;
+  }
+
+  get isOfficeWriteRestricted(): boolean {
+    return this.status === 403 && this.code === API_ERROR_CODES.officeWriteRestricted;
   }
 
   get isReconsentRequired(): boolean {

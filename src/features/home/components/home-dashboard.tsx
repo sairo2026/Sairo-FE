@@ -34,12 +34,15 @@ function StatCard({
   value,
   label,
   icon,
+  hint,
 }: {
   href: string;
   title: string;
   value: number;
   label: string;
   icon?: StatIcon;
+  /** 처음 보는 사용자가 항목 뜻을 알 수 있도록 제목 아래에 붙이는 한 줄 설명이다. */
+  hint?: string;
 }) {
   return (
     <Link
@@ -84,6 +87,7 @@ function StatCard({
             )}
           </span>
         </span>
+        {hint ? <span className="text-caption font-normal text-ink-3">{hint}</span> : null}
       </span>
       <span className="text-[64px] font-semibold leading-[60px] text-primary">{value}</span>
     </Link>
@@ -233,18 +237,21 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
           <StatCard
             href={coordinationListPath()}
             title="신청 대기"
+            hint="승인자가 아직 선택하지 않은 신청입니다."
             value={summary.visitRequestSummary.pendingCount}
             label="건"
           />
           <StatCard
             href={coordinationListPath()}
             title="재검증 실패"
+            hint="선택된 뒤 최신 조건과 일정 확인에 실패한 신청입니다."
             value={summary.visitRequestSummary.revalidationFailedCount}
             label="건"
           />
           <StatCard
             href={coordinationListPath()}
             title="시간 마감"
+            hint="같은 매물의 다른 신청이 확정되어 마감된 신청입니다."
             value={summary.visitRequestSummary.timeClosedCount}
             label="건"
           />

@@ -2,13 +2,14 @@ import { describe, expect, it } from "vitest";
 import { requiredRolesFor, visibleMenu } from "./menu";
 
 describe("운영 메뉴 역할", () => {
-  it("연동 설정 목록은 운영담당에게만 보이고 열린다", () => {
-    expect(visibleMenu(["PRIVACY"]).map((item) => item.key)).not.toContain("integrations");
+  it("연동 설정 목록은 운영담당과 개인정보담당에게 보이고 열린다", () => {
+    expect(visibleMenu(["PRIVACY"]).map((item) => item.key)).toContain("integrations");
     expect(visibleMenu(["OPS"]).map((item) => item.key)).toContain("integrations");
-    expect(requiredRolesFor("/ops/integrations")).toEqual(["OPS"]);
+    expect(visibleMenu(["BILLING"]).map((item) => item.key)).not.toContain("integrations");
+    expect(requiredRolesFor("/ops/integrations")).toEqual(["OPS", "PRIVACY"]);
   });
 
-  it("계약 사본 화면은 개인정보담당에게도 열린다", () => {
+  it("계약 사본 화면은 목록과 같은 역할에 열린다", () => {
     expect(requiredRolesFor("/ops/integrations/1/contract-copies")).toEqual(["OPS", "PRIVACY"]);
   });
 

@@ -152,7 +152,11 @@ describe("계약 목록", () => {
   it("계약이 없으면 빈 안내를 보여준다", async () => {
     setMockContractState({ contracts: [] });
     renderOffice(<ContractListScreen />, { role: "OWNER" });
-    expect(await screen.findByText("표시할 계약이 없습니다.")).not.toBeNull();
+    expect(
+      await screen.findByText(
+        "표시할 계약이 없습니다. 계약 등록 버튼으로 첫 계약을 등록해 보세요.",
+      ),
+    ).not.toBeNull();
   });
 
   it("조회 오류는 안내와 다시 시도 버튼을 보여준다", async () => {

@@ -19,8 +19,20 @@ export function errorResponse(
 
 export const mockErrors = {
   unauthenticated: () => errorResponse(401, "UNAUTHENTICATED", "로그인이 필요합니다."),
-  invalidCredentials: () =>
-    errorResponse(401, "INVALID_CREDENTIALS", "이메일 또는 비밀번호가 맞지 않습니다."),
+  invalidCredentials: (failedAttempts?: number) =>
+    errorResponse(
+      401,
+      "INVALID_CREDENTIALS",
+      "이메일 또는 비밀번호가 맞지 않습니다.",
+      failedAttempts === undefined
+        ? {}
+        : {
+            failedAttempts,
+            remainingAttempts: Math.max(0, 5 - failedAttempts),
+            maxAttempts: 5,
+            lockMinutes: 15,
+          },
+    ),
   stepUpRequired: () => errorResponse(401, "STEP_UP_REQUIRED", "본인 확인이 필요합니다."),
   forbidden: () => errorResponse(403, "FORBIDDEN", "권한이 없습니다."),
   reconsentRequired: () => errorResponse(403, "RECONSENT_REQUIRED", "약관 재동의가 필요합니다."),

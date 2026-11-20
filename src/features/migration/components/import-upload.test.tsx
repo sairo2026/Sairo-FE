@@ -180,3 +180,42 @@ describe("데이터 이전 업로드 화면", () => {
     ).toBe("true");
   });
 });
+
+describe("파일 준비 안내", () => {
+  it("자료를 고르기 전에는 순서와 선택 안내만 보여 준다", async () => {
+    renderOffice(<ImportUploadScreen />, { role: "OWNER" });
+    expect(await screen.findByText("이전 순서와 파일 준비")).not.toBeNull();
+    expect(screen.getByText("결과 확인과 실패한 줄 고치기")).not.toBeNull();
+    expect(screen.getByText(/이전할 자료를 선택하면 필요한 열과 샘플 파일/)).not.toBeNull();
+    expect(screen.queryByRole("link", { name: "샘플 파일 내려받기 (CSV)" })).toBeNull();
+  });
+
+  it("고객을 고르면 필수 열과 샘플 파일 링크를 보여 준다", async () => {
+    const user = userEvent.setup();
+    renderOffice(<ImportUploadScreen />, { role: "OWNER" });
+    await user.selectOptions(await screen.findByLabelText("이전할 자료"), "고객");
+    const row = screen.getByRole("rowheader", { name: "고객번호" }).closest("tr") as HTMLElement;
+    expect(row.textContent).toContain("필수");
+    const link = screen.getByRole("link", { name: "샘플 파일 내려받기 (CSV)" });
+    expect(link.getAttribute("download")).toBe("사이로_고객_이전_샘플.csv");
+    const csv = decodeURIComponent((link.getAttribute("href") ?? "").split(",").slice(1).join(","));
+    expect(csv.startsWith("﻿고객번호,고객명,연락처,이메일,메모")).toBe(true);
+  });
+
+  it("매물을 고르면 매물 열 구성으로 바뀐다", async () => {
+    const user = userEvent.setup();
+    renderOffice(<ImportUploadScreen />, { role: "OWNER" });
+    await user.selectOptions(await screen.findByLabelText("이전할 자료"), "매물");
+    expect(screen.getByRole("rowheader", { name: "매물번호" })).not.toBeNull();
+    expect(screen.queryByRole("rowheader", { name: "고객번호" })).toBeNull();
+  });
+
+  it("내용이 없는 파일은 올리기 전에 막는다", async () => {
+    const user = userEvent.setup();
+    renderOffice(<ImportUploadScreen />, { role: "OWNER" });
+    await choose(user, new File([], "빈파일.csv", { type: "text/csv" }));
+    await user.click(screen.getByRole("button", { name: "올리고 매핑하러 가기" }));
+    expect(await screen.findByText(/내용이 없는 파일입니다/)).not.toBeNull();
+    expect(push).not.toHaveBeenCalled();
+  });
+});

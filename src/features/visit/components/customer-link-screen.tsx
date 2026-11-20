@@ -294,13 +294,21 @@ function isNextOnAnotherDay(
   );
 }
 
-function ConfirmedView({ data, contact }: { data: PublicConfirmedVisitResponse; contact: string }) {
+function ConfirmedView({
+  data,
+  contact,
+  isPartial,
+}: {
+  data: PublicConfirmedVisitResponse;
+  contact: string;
+  isPartial: boolean;
+}) {
   const isValid = data.state === "VALID";
   return (
     <div className="flex flex-col gap-4">
       <p className="flex items-center gap-2">
-        <Badge tone={PUBLIC_VISIT_STATE_TONE[data.state]}>
-          {PUBLIC_VISIT_STATE_LABEL[data.state]}
+        <Badge tone={isValid && isPartial ? "blue" : PUBLIC_VISIT_STATE_TONE[data.state]}>
+          {isValid && isPartial ? "일부 확정" : PUBLIC_VISIT_STATE_LABEL[data.state]}
         </Badge>
       </p>
       <ManagerLine name={data.managerDisplayName} role={data.managerLegalRole} />
@@ -319,6 +327,7 @@ function ConfirmedView({ data, contact }: { data: PublicConfirmedVisitResponse; 
                 {formatSeoulDateTime(item.scheduledEndAt)}
               </span>
               {item.travelDurationMinutes !== null &&
+              data.items[index + 1]?.sortOrder === item.sortOrder + 1 &&
               !isNextOnAnotherDay(item, data.items[index + 1]) ? (
                 <span className="text-caption text-ink-2">
                   다음 방문까지 이동 {item.travelDurationMinutes}분
@@ -346,7 +355,15 @@ function ConfirmedView({ data, contact }: { data: PublicConfirmedVisitResponse; 
   );
 }
 
-function ConfirmedTab({ token, contact }: { token: string; contact: string }) {
+function ConfirmedTab({
+  token,
+  contact,
+  isPartial,
+}: {
+  token: string;
+  contact: string;
+  isPartial: boolean;
+}) {
   const query = useQuery({
     queryKey: ["visit-public", token, "confirmed"],
     queryFn: ({ signal }) => fetchCustomerConfirmed(token, signal),
@@ -366,7 +383,7 @@ function ConfirmedTab({ token, contact }: { token: string; contact: string }) {
       <ErrorScreen kind={toErrorScreenKind(query.error)} onRetry={() => void query.refetch()} />
     );
   }
-  return <ConfirmedView data={query.data} contact={contact} />;
+  return <ConfirmedView data={query.data} contact={contact} isPartial={isPartial} />;
 }
 
 export function CustomerLinkScreen({ token }: { token: string | undefined }) {
@@ -394,17 +411,25 @@ export function CustomerLinkScreen({ token }: { token: string | undefined }) {
   }
   const link = query.data;
   const isConfirmed = link.coordinationStatus === "CONFIRMED";
-  const tab = pickedTab ?? (isConfirmed ? "confirmed" : "times");
+  const isArranging =
+    !isConfirmed && !acceptsCustomerResponse(link.coordinationStatus, link.linkExpiresAt);
+  const tab = pickedTab ?? (isConfirmed || isArranging ? "confirmed" : "times");
   return (
     <div className="flex flex-col gap-4">
       <header className="flex flex-col gap-2">
         <h1 className="text-h2 font-bold text-ink">
-          {isConfirmed ? "방문 일정이 확정되었습니다" : "방문 가능한 시간을 알려주세요"}
+          {isConfirmed
+            ? "방문 일정이 확정되었습니다"
+            : isArranging
+              ? "방문 일정을 조율하고 있습니다"
+              : "방문 가능한 시간을 알려주세요"}
         </h1>
         <p className="text-caption text-ink-2">
           {isConfirmed
             ? "확정 일정 탭에서 방문 순서와 시각을 확인해 주세요. 제출한 가능한 시간은 가능한 시간 탭에서 볼 수 있으며 더 이상 고칠 수 없습니다."
-            : "보러 갈 수 있는 시간을 모두 골라 주세요. 담당자가 동선을 짜서 다시 안내해 드립니다."}
+            : isArranging
+              ? "담당자가 매물 주인의 승인을 받아 일정을 확정하는 중입니다. 확정된 방문은 확정 일정 탭에서 볼 수 있고, 시간을 고치려면 사무소에 문의해 주세요."
+              : "보러 갈 수 있는 시간을 모두 골라 주세요. 담당자가 동선을 짜서 다시 안내해 드립니다."}
         </p>
       </header>
       <section aria-label="안내 사무소" className={cn(SURFACE_CARD, "flex flex-col gap-3")}>
@@ -462,7 +487,13 @@ export function CustomerLinkScreen({ token }: { token: string | undefined }) {
           {
             key: "confirmed",
             label: "확정 일정",
-            panel: <ConfirmedTab token={normalized} contact={link.officeContactPhone} />,
+            panel: (
+              <ConfirmedTab
+                token={normalized}
+                contact={link.officeContactPhone}
+                isPartial={!isConfirmed}
+              />
+            ),
           },
         ]}
       />
