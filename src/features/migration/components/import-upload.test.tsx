@@ -195,11 +195,14 @@ describe("파일 준비 안내", () => {
     renderOffice(<ImportUploadScreen />, { role: "OWNER" });
     await user.selectOptions(await screen.findByLabelText("이전할 자료"), "고객");
     const row = screen.getByRole("rowheader", { name: "고객번호" }).closest("tr") as HTMLElement;
-    expect(row.textContent).toContain("필수");
+    expect(row.textContent).toContain("선택");
+    const nameRow = screen.getByRole("rowheader", { name: "고객명" }).closest("tr") as HTMLElement;
+    expect(nameRow.textContent).toContain("필수");
     const link = screen.getByRole("link", { name: "샘플 파일 내려받기 (CSV)" });
     expect(link.getAttribute("download")).toBe("사이로_고객_이전_샘플.csv");
     const csv = decodeURIComponent((link.getAttribute("href") ?? "").split(",").slice(1).join(","));
     expect(csv.startsWith("﻿고객번호,고객명,연락처,이메일,메모")).toBe(true);
+    expect(csv).toContain(",박마루,");
   });
 
   it("매물을 고르면 매물 열 구성으로 바뀐다", async () => {

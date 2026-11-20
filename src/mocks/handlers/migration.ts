@@ -112,7 +112,7 @@ export function resetMigrationState() {
 }
 
 const CUSTOMER_FIELDS = [
-  { field: "customerSourceId", label: "원본 고객 ID", type: "string", required: true },
+  { field: "customerSourceId", label: "원본 고객 ID", type: "string", required: false },
   { field: "customerName", label: "고객명", type: "string", required: true },
   { field: "customerPhone", label: "연락처", type: "string", required: false },
   { field: "customerEmail", label: "이메일", type: "string", required: false },
@@ -120,7 +120,7 @@ const CUSTOMER_FIELDS = [
 ];
 
 const PROPERTY_FIELDS = [
-  { field: "propertySourceId", label: "원본 매물 ID", type: "string", required: true },
+  { field: "propertySourceId", label: "원본 매물 ID", type: "string", required: false },
   { field: "propertyName", label: "매물명", type: "string", required: true },
   { field: "propertyAddress", label: "기본주소", type: "string", required: false },
 ];

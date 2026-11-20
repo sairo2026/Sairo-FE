@@ -11,9 +11,9 @@ export const IMPORT_GUIDE_COLUMNS: Record<GuideTarget, readonly GuideColumn[]> =
   CUSTOMER: [
     {
       header: "고객번호",
-      required: true,
+      required: false,
       description:
-        "고객마다 다른 번호입니다. 같은 번호가 다시 오면 중복으로 보고 새로 만들지 않습니다. 엑셀에 번호 열이 없으면 맨 앞에 1, 2, 3 순서의 열을 추가해 주세요.",
+        "고객마다 다른 번호입니다. 같은 번호가 다시 오면 중복으로 보고 새로 만들지 않습니다. 번호 열이 없거나 칸이 비어 있으면 사이로가 알아서 번호를 붙여 새로 등록합니다.",
       example: "C-001",
     },
     {
@@ -45,9 +45,9 @@ export const IMPORT_GUIDE_COLUMNS: Record<GuideTarget, readonly GuideColumn[]> =
   PROPERTY: [
     {
       header: "매물번호",
-      required: true,
+      required: false,
       description:
-        "매물마다 다른 번호입니다. 같은 번호가 다시 오면 중복으로 보고 새로 만들지 않습니다. 엑셀에 번호 열이 없으면 맨 앞에 1, 2, 3 순서의 열을 추가해 주세요.",
+        "매물마다 다른 번호입니다. 같은 번호가 다시 오면 중복으로 보고 새로 만들지 않습니다. 번호 열이 없거나 칸이 비어 있으면 사이로가 알아서 번호를 붙여 새로 등록합니다.",
       example: "P-001",
     },
     {
@@ -94,6 +94,7 @@ const SAMPLE_ROWS: Record<GuideTarget, readonly (readonly string[])[]> = {
   CUSTOMER: [
     ["C-001", "김가나", "010-1234-5678", "kim@example.com", "전세 문의"],
     ["C-002", "이다라", "010-9876-5432", "", "매매 상담"],
+    ["", "박마루", "010-5555-0000", "", "번호가 없는 줄"],
   ],
   PROPERTY: [
     ["P-001", "해든빌", "서울 강남구 테헤란로 1", "101호", "84.5", "2026-03-05", "50000", "공실"],
@@ -107,6 +108,7 @@ const SAMPLE_ROWS: Record<GuideTarget, readonly (readonly string[])[]> = {
       "120000",
       "임차인",
     ],
+    ["", "한강뷰", "서울 용산구 한강대로 3", "301호", "72.1", "2026-05-01", "80000", "공실"],
   ],
 };
 

@@ -72,7 +72,7 @@ export const TARGET_TYPE_LABELS: Record<MappingTargetType, string> = {
 
 export const TARGET_FIELDS: Record<MappingTargetType, TargetField[]> = {
   CUSTOMER: [
-    { field: "customerSourceId", label: "원본 고객 ID", required: true },
+    { field: "customerSourceId", label: "원본 고객 ID", required: false },
     { field: "customerName", label: "고객명", required: true },
     { field: "customerIsCorporation", label: "법인 여부", required: false },
     { field: "customerPhone", label: "연락처", required: false },
@@ -81,7 +81,7 @@ export const TARGET_FIELDS: Record<MappingTargetType, TargetField[]> = {
     { field: "customerMemo", label: "고객 메모", required: false },
   ],
   PROPERTY: [
-    { field: "propertySourceId", label: "원본 매물 ID", required: true },
+    { field: "propertySourceId", label: "원본 매물 ID", required: false },
     { field: "propertyName", label: "매물명", required: true },
     { field: "propertyAddress", label: "기본주소", required: false },
     { field: "propertyAddressDetail", label: "상세주소", required: false },
