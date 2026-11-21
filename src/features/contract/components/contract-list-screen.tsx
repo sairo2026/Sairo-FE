@@ -93,7 +93,7 @@ function ContractTable({ tab }: { tab: string }) {
             placeholder="당사자 이름"
             maxLength={100}
             onChange={(event) => setPartyName(event.target.value)}
-            className="min-w-0 flex-1 bg-transparent text-body font-medium text-ink outline-none placeholder:font-normal placeholder:text-ink-3"
+            className="min-w-0 flex-1 bg-transparent text-body font-medium text-ink outline-none placeholder:font-normal placeholder:text-muted"
           />
           <label htmlFor="contract-address-search" className="sr-only">
             매물 주소
@@ -105,7 +105,7 @@ function ContractTable({ tab }: { tab: string }) {
             placeholder="매물 주소"
             maxLength={100}
             onChange={(event) => setPropertyAddress(event.target.value)}
-            className="min-w-0 flex-1 bg-transparent text-body font-medium text-ink outline-none placeholder:font-normal placeholder:text-ink-3"
+            className="min-w-0 flex-1 bg-transparent text-body font-medium text-ink outline-none placeholder:font-normal placeholder:text-muted"
           />
           <button
             type="submit"
@@ -178,7 +178,7 @@ function ContractTable({ tab }: { tab: string }) {
                       .join(", ")}
                   </span>
                 ) : null}
-                {row.excluded ? <span className="text-caption text-ink-3">중복 제외됨</span> : null}
+                {row.excluded ? <span className="text-caption text-muted">중복 제외됨</span> : null}
               </span>
             ),
           },
@@ -227,7 +227,7 @@ function ContractTable({ tab }: { tab: string }) {
                     {labelOf(LEASE_STATUS_LABEL, row.leasePeriodStatus)}
                   </span>
                 ) : null}
-                <span className="text-caption text-ink-3">
+                <span className="text-caption text-muted">
                   잔금 {labelOf(SETTLEMENT_STATUS_LABEL, row.settlementStatus)}
                 </span>
               </span>

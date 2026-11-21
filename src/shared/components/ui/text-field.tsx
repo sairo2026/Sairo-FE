@@ -105,7 +105,7 @@ export function TextField({
           aria-invalid={error ? true : undefined}
           aria-describedby={hasMessage ? messageId : undefined}
           onChange={(event) => handleChange(event.target.value)}
-          className="min-w-0 flex-1 bg-transparent text-body font-medium text-ink outline-none placeholder:font-normal placeholder:text-ink-3 disabled:cursor-not-allowed disabled:text-ink-3"
+          className="min-w-0 flex-1 bg-transparent text-body font-medium text-ink outline-none placeholder:font-normal placeholder:text-muted disabled:cursor-not-allowed disabled:text-ink-3"
         />
         {timerText ? (
           <span role="timer" className="text-body font-medium text-danger">

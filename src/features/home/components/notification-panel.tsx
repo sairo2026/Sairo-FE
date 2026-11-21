@@ -136,7 +136,7 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
                     {notificationTypeLabel(item.type)}
                     {href ? <Chevron /> : null}
                   </span>
-                  <span className="text-[12px] text-ink-3">
+                  <span className="text-[12px] text-muted">
                     {formatSeoulDateTime(item.createdAt)}
                   </span>
                 </span>
