@@ -6,7 +6,7 @@ type Pricing = {
 };
 
 test("공개 요금 API와 /pricing이 게시된 표준 요금표를 보여준다", async ({ page, request }) => {
-  const response = await request.get("/api/public/pricing");
+  const response = await request.get("/api/public/pricing", { maxRedirects: 0 });
   expect(response.status()).toBe(200);
   const pricing = (await response.json()) as Pricing;
   expect(pricing.priceVersion).toBe("2026-STANDARD");
@@ -22,7 +22,7 @@ test("공개 요금 API와 /pricing이 게시된 표준 요금표를 보여준�
 });
 
 test("공개 사업자 정보가 응답에 있고 푸터와 약관 페이지에 표시된다", async ({ page, request }) => {
-  const response = await request.get("/api/public/company-info");
+  const response = await request.get("/api/public/company-info", { maxRedirects: 0 });
   expect(response.status()).toBe(200);
   const info = (await response.json()) as { businessName: string; businessNumber: string };
   expect(info.businessName).toBeTruthy();
@@ -43,8 +43,8 @@ for (const path of ["/legal/terms", "/legal/privacy", "/legal/refund-policy"]) {
 }
 
 test("약관 목록 API와 비로그인 컨텍스트가 계약대로 응답한다", async ({ request }) => {
-  const terms = await request.get("/api/terms");
+  const terms = await request.get("/api/terms", { maxRedirects: 0 });
   expect(terms.status()).toBe(200);
-  const context = await request.get("/api/auth/context");
+  const context = await request.get("/api/auth/context", { maxRedirects: 0 });
   expect(context.status()).toBe(401);
 });
