@@ -56,7 +56,7 @@ export const LEGAL_DOCUMENTS: readonly LegalDocument[] = [
     slug: "subscription-terms",
     title: "구독·결제 약관",
     summary: "월 선불 자동결제 구독의 요금, 결제, 해지와 가격 변경 조건입니다.",
-    version: LEGAL_DOCUMENT_VERSION,
+    version: "1.1",
     body: SUBSCRIPTION_TERMS_BODY,
     termsCode: "SUBSCRIPTION_PURCHASE",
   },
