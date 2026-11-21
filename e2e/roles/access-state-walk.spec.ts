@@ -134,11 +134,11 @@ for (const state of NOTICE_STATES) {
         const probe = attachProbe(page);
         await page.goto(path);
         await settle(page);
+        await expect(page.getByRole("heading").first(), "화면 제목").toBeVisible();
         const facts = await collectFacts(page);
         const finalPath = new URL(page.url()).pathname;
 
         expect.soft(facts.overflow, "가로 넘침").toBeLessThanOrEqual(1);
-        expect.soft(facts.headings.length, "제목 없음").toBeGreaterThan(0);
         expect.soft(probe.pageErrors, "페이지 오류").toEqual([]);
         expect.soft(probe.consoleErrors, "콘솔 오류").toEqual([]);
 

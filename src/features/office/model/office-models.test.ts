@@ -95,6 +95,21 @@ describe("참여 입력 검증", () => {
     trainingConfirmed: true,
   };
 
+  it("앞뒤 공백을 제외한 자격증 번호의 30자 경계를 검사한다", () => {
+    const agent = { ...base, role: "AGENT" as const };
+    const limit = "1".repeat(30);
+    expect(validateQualification({ ...agent, qualificationNumber: ` ${limit} ` })).toEqual({});
+    expect(validateQualification({ ...agent, qualificationNumber: `${limit}2` })).toEqual({
+      qualificationNumber: "자격증 번호는 30자 이하로 입력해 주세요.",
+    });
+  });
+
+  it("중개보조원으로 역할을 바꾸면 이전 자격증 번호 입력을 사용하지 않는다", () => {
+    const deputy = { ...base, role: "DEPUTY" as const, qualificationNumber: "1".repeat(51) };
+    expect(validateQualification(deputy)).toEqual({});
+    expect(qualificationBody(deputy)).not.toHaveProperty("qualificationNumber");
+  });
+
   it("소속공인중개사는 자격번호가 필요하고 중개보조원은 필요 없다", () => {
     expect(validateQualification({ ...base, role: "AGENT" }).qualificationNumber).toBeDefined();
     expect(validateQualification({ ...base, role: "DEPUTY" })).toEqual({});

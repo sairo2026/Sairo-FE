@@ -109,6 +109,8 @@ export function missingEvidence(
 
 export type MembershipRole = "AGENT" | "DEPUTY";
 
+export const QUALIFICATION_NUMBER_MAX_LENGTH = 30;
+
 export type QualificationValues = {
   role: MembershipRole;
   qualificationNumber: string;
@@ -123,10 +125,13 @@ export function validateQualification(
   values: QualificationValues,
 ): FieldErrors<QualificationField> {
   const errors: FieldErrors<QualificationField> = {};
-  if (values.role === "AGENT" && values.qualificationNumber.trim() === "") {
-    errors.qualificationNumber = "자격증 번호를 입력해 주세요.";
-  } else if (tooLong(values.qualificationNumber, 50)) {
-    errors.qualificationNumber = "자격증 번호는 50자 이하로 입력해 주세요.";
+  if (values.role === "AGENT") {
+    const number = values.qualificationNumber.trim();
+    if (number === "") {
+      errors.qualificationNumber = "자격증 번호를 입력해 주세요.";
+    } else if (number.length > QUALIFICATION_NUMBER_MAX_LENGTH) {
+      errors.qualificationNumber = `자격증 번호는 ${QUALIFICATION_NUMBER_MAX_LENGTH}자 이하로 입력해 주세요.`;
+    }
   }
   if (!values.employmentReportConfirmed) {
     errors.employmentReportConfirmed = "고용신고 확인에 체크해 주세요.";

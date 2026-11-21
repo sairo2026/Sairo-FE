@@ -40,6 +40,10 @@ test("사무소 등록 신청과 증빙 제출", async ({ page }) => {
   await page.getByRole("radio", { name: /새 사무소 생성/ }).click();
   await page.getByRole("button", { name: "다음" }).click();
   await expect(page).toHaveURL(/\/office\/register/);
+  const business = page.getByLabel("중개사무소 사업자등록번호");
+  await page.getByRole("button", { name: "다음" }).click();
+  await expect(business).toHaveAttribute("aria-invalid", "true");
+  await business.fill(businessNumber);
   await page.getByLabel("등록관청").fill("서울특별시 종로구");
   await page.getByLabel("개설등록번호").fill(registrationNumber);
   await page.getByRole("button", { name: "다음" }).click();
@@ -47,7 +51,6 @@ test("사무소 등록 신청과 증빙 제출", async ({ page }) => {
   await page.getByLabel("사무소 대표자명").fill(owner.name);
   await page.getByLabel("사무소 대표 연락처").fill(owner.phone.replaceAll("-", ""));
   await page.getByLabel("중개사무소 주소").fill("서울특별시 종로구 시험로 1");
-  await page.getByLabel("사업자등록번호").fill(businessNumber);
   await page.getByLabel("신청자의 등록관계").selectOption({ label: "대표 본인" });
   await page.getByRole("button", { name: "다음" }).click();
   await expect(page).toHaveURL(/\/office\/register\/evidence\?registrationId=\d+/);
@@ -65,7 +68,9 @@ test("사무소 등록 신청과 증빙 제출", async ({ page }) => {
   }
   await page.getByRole("button", { name: "등록", exact: true }).click();
   await expect(page).toHaveURL(/\/office\/review/);
-  await expect(page.getByText("심사 중").first()).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "신규 사무소 등록 심사 진행 중입니다." }),
+  ).toBeVisible();
 });
 
 test("최초 운영자가 초대를 수락하고 인증 앱을 등록한 뒤 심사담당을 초대한다", async ({
@@ -141,9 +146,7 @@ test("카드 등록 화면에 들어가면 토스 키가 없는 환경의 안내
   await expect(page.getByText(/준비|사용할 수 없|결제 창/).first()).toBeVisible();
 });
 
-test("카드 등록 결과로 돌아오고 구매 동의를 마치면 체험이 시작돼 업무 화면이 열린다", async ({
-  page,
-}) => {
+test("카드를 등록하고 첫 결제를 확인하면 업무 화면이 열린다", async ({ page }) => {
   await loginViaUi(page, owner.email, /\/(home|billing)$/);
   await page.goto("/billing/card");
   const stepUp = await pageApi(page, "POST", "/api/auth/step-up/password", { password: PASSWORD });
@@ -169,13 +172,28 @@ test("카드 등록 결과로 돌아오고 구매 동의를 마치면 체험이 
   await page.goto("/billing/consent");
   await forceCheck(page.getByRole("checkbox").nth(0));
   await forceCheck(page.getByRole("checkbox").nth(1));
+  const consentSubmitted = page.waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname === "/api/subscriptions/purchase-consent" &&
+      response.request().method() === "POST",
+  );
   await page.getByRole("button", { name: /동의/ }).last().click();
+  expect((await consentSubmitted).ok()).toBe(true);
   await page.screenshot({ path: "test-results/consent.png" });
   await page.goto("/billing");
   await page.getByRole("button", { name: "지금 결제" }).click();
+  const payment = page.getByRole("dialog", { name: "지금 결제" });
+  const paymentSubmitted = page.waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname === "/api/subscriptions/first-payment" &&
+      response.request().method() === "POST",
+  );
+  await payment.getByRole("button", { name: "결제하기", exact: true }).click();
+  expect((await paymentSubmitted).ok()).toBe(true);
+  await expect(payment).toBeHidden();
   await page.screenshot({ path: "test-results/pay-now.png" });
-  await page.goto("/home");
-  await expect(page.getByRole("heading", { name: "결제를 기다리고 있습니다" })).toHaveCount(0);
+  await page.goto("/properties/new");
+  await expect(page.getByLabel(/^매물명/)).toBeVisible();
 });
 
 function seoulDateChipName(offsetDays: number): string {
@@ -198,7 +216,7 @@ test("매물을 등록하고 목록과 상세에서 확인한다", async ({ page
   await loginViaUi(page, owner.email, /\/(home|billing)$/);
   await page.goto("/properties/new");
   await page.getByLabel(/^매물명/).fill("실API 아파트");
-  await page.getByLabel(/^카테고리/).selectOption({ label: "아파트" });
+  await page.getByRole("combobox", { name: "건물 카테고리" }).selectOption({ label: "아파트" });
   await page.getByLabel("매물 주소").fill("서울특별시 종로구 시험로 1");
   await page.getByLabel("담당 공인중개사").selectOption({ index: 1 });
   await page.getByRole("button", { name: "활성 등록" }).click();
@@ -361,13 +379,14 @@ test("승인자가 신청을 비교해 선택하면 조율이 확정된다", asy
   await expect(page.getByText("확정 완료").first()).toBeVisible();
 });
 
-test("예정 시각이 지나지 않은 방문은 결과를 기록할 수 없다", async ({ page }) => {
+test("예정 시각 전에는 취소만 방문 결과로 기록할 수 있다", async ({ page }) => {
   await loginViaUi(page, owner.email, /\/(home|billing)$/);
   await page.goto(coordinationUrl);
   await expect(page.getByText("확정 완료").first()).toBeVisible();
   await page.getByRole("button", { name: "결과 기록" }).click();
   const dialog = page.getByRole("dialog");
-  await dialog.getByLabel("방문 결과").selectOption({ label: "방문 완료" });
-  await dialog.getByRole("button", { name: "결과 저장" }).click();
-  await expect(dialog.getByText("미래 시각은 입력할 수 없습니다.")).toBeVisible();
+  const outcomes = dialog.getByRole("combobox", { name: "방문 결과" }).getByRole("option");
+  await expect(outcomes).toHaveText(["취소"]);
+  await expect(dialog.getByRole("status")).toContainText("시작 전에는 취소만 기록할 수 있습니다.");
+  await expect(dialog.getByLabel("취소 사유")).toBeVisible();
 });
