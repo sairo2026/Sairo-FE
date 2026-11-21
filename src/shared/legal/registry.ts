@@ -48,7 +48,7 @@ export const LEGAL_DOCUMENTS: readonly LegalDocument[] = [
     slug: "refund-policy",
     title: "환불정책",
     summary: "해지와 환불의 대상, 금액 계산, 신청과 처리 방법입니다.",
-    version: LEGAL_DOCUMENT_VERSION,
+    version: "1.1",
     body: REFUND_BODY,
     policyKind: "REFUND",
   },
