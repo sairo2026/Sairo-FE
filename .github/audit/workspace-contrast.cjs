@@ -54,7 +54,27 @@ async function audit(page) {
         incompleteReasons[key]=(incompleteReasons[key]??0)+1;
       }
     }
-    return {failures,incomplete:result.incomplete.reduce((a,v)=>a+v.nodes.length,0),incompleteReasons};
+    const scrollRecheck = {inactive:0,passed:0,failed:0,stillNeedsReview:0,unavailable:0};
+    const targets = result.incomplete.flatMap(rule => rule.nodes)
+      .map(node=>document.querySelector(node.target[0]));
+    for (const element of targets) {
+      if (!element || !element.isConnected) {
+        scrollRecheck.unavailable++;
+        continue;
+      }
+      if (element.closest(":disabled,[aria-disabled=true],[aria-hidden=true]")) {
+        scrollRecheck.inactive++;
+        continue;
+      }
+      element.scrollIntoView({block:"center",inline:"nearest",behavior:"instant"});
+      await new Promise(resolve=>window.requestAnimationFrame(()=>window.requestAnimationFrame(resolve)));
+      const recheck = await window.axe.run(element,{runOnly:{type:"rule",values:["color-contrast"]}});
+      if (recheck.violations.length) scrollRecheck.failed++;
+      else if (recheck.incomplete.length) scrollRecheck.stillNeedsReview++;
+      else if (recheck.passes.length) scrollRecheck.passed++;
+      else scrollRecheck.unavailable++;
+    }
+    return {failures,incomplete:result.incomplete.reduce((a,v)=>a+v.nodes.length,0),incompleteReasons,scrollRecheck};
   });
 }
 (async()=>{

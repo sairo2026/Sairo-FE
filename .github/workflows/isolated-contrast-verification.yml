@@ -1,8 +1,8 @@
-name: Isolated contrast verification
+name: Isolated contrast scroll review
 
 on:
   push:
-    branches: [audit/workspace-contrast-verification]
+    branches: [audit/workspace-contrast-scroll-review]
 
 permissions:
   contents: read
@@ -10,7 +10,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-24.04
-    timeout-minutes: 16
+    timeout-minutes: 22
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
