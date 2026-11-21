@@ -47,7 +47,7 @@ export async function signupViaUi(page: Page, request: APIRequestContext, member
   await expect(page.getByText("인증이 완료되었습니다.")).toHaveCount(2);
   await page.getByLabel(/이용약관에 동의합니다/).check({ force: true });
   await page.getByRole("button", { name: "다음" }).click();
-  await page.getByLabel(/^비밀번호\*?$/).fill(PASSWORD);
+  await page.getByLabel(/^비밀번호 설정/).fill(PASSWORD);
   await page.getByLabel(/^비밀번호 확인/).fill(PASSWORD);
   await page.getByRole("button", { name: "가입하기" }).click();
   await expect(page).toHaveURL(/\/office\/start$/);
