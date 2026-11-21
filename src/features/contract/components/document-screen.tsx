@@ -287,7 +287,7 @@ function DocumentBody({ detail }: { detail: ContractDetailResponse }) {
         </Button>
       </div>
       {detail.documents.length === 0 ? (
-        <p className="text-caption text-ink-3">첨부된 서류가 없습니다.</p>
+        <p className="text-caption text-muted">첨부된 서류가 없습니다.</p>
       ) : (
         <ul className="flex flex-col gap-3">
           {detail.documents.map((document) => (
@@ -331,7 +331,7 @@ function DocumentBody({ detail }: { detail: ContractDetailResponse }) {
                 </p>
               ) : null}
               {document.piiMaskingConfirmed ? (
-                <p className="text-caption text-ink-3">{CONTRACT_ENTRY_COPY.maskedCopy}</p>
+                <p className="text-caption text-muted">{CONTRACT_ENTRY_COPY.maskedCopy}</p>
               ) : null}
               <div className="flex flex-wrap items-start gap-2">
                 <DownloadButton contractId={detail.contractId} document={document} />

@@ -187,7 +187,7 @@ function DisputeModal({ item, onClose }: { item: ReceivedItem; onClose: () => vo
             className="min-h-24 rounded-control border border-line px-3 py-2 text-body text-ink"
             aria-invalid={errors.reasonText ? true : undefined}
           />
-          <p className="text-caption text-ink-3">
+          <p className="text-caption text-muted">
             {reasonText.length}/{DISPUTE_TEXT_LIMIT}자 · 고객 이름과 연락처를 넣지 마세요.
           </p>
           {errors.reasonText ? (
@@ -271,7 +271,7 @@ function ReceivedTable({ scope }: { scope: ReviewScope }) {
                 <span className="flex flex-col text-caption">
                   <span>{labelOf(DISPUTE_STATUS_LABEL, row.dispute.status)}</span>
                   {row.dispute.decisionNote ? <span>{row.dispute.decisionNote}</span> : null}
-                  <span className="text-ink-3">같은 평가에는 다시 이의를 낼 수 없습니다.</span>
+                  <span className="text-muted">같은 평가에는 다시 이의를 낼 수 없습니다.</span>
                 </span>
               ) : row.canDispute ? (
                 <Button
@@ -283,7 +283,7 @@ function ReceivedTable({ scope }: { scope: ReviewScope }) {
                   이의 제기
                 </Button>
               ) : (
-                <span className="text-caption text-ink-3">
+                <span className="text-caption text-muted">
                   마지막 입력 시각부터 30일이 지나 이의를 낼 수 없습니다.
                 </span>
               ),

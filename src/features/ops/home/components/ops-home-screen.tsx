@@ -39,7 +39,7 @@ function QueueCard({ card, home }: { card: HomeQueueCard; home: OpsHomeResponse 
       {isLinked ? (
         <p className="mt-3 text-caption font-semibold text-primary">처리 화면으로 이동</p>
       ) : (
-        <p className="mt-3 text-caption text-ink-3">읽기 전용 (처리 권한 없음)</p>
+        <p className="mt-3 text-caption text-muted">읽기 전용 (처리 권한 없음)</p>
       )}
     </>
   );

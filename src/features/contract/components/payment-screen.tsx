@@ -353,7 +353,7 @@ function PaymentBody({ detail }: { detail: ContractDetailResponse }) {
                         {item.transactions.map((transaction) => (
                           <li
                             key={transaction.transactionId}
-                            className={`text-caption ${transaction.isSuperseded ? "text-ink-3 line-through" : "text-ink"}`}
+                            className={`text-caption ${transaction.isSuperseded ? "text-muted line-through" : "text-ink"}`}
                           >
                             {formatSeoulDate(transaction.actualDate)}{" "}
                             {formatKrw(transaction.actualAmount)} · 확인{" "}

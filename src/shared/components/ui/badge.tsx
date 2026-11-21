@@ -32,7 +32,7 @@ const toneClass: Record<BadgeTone, string> = {
   violet: "bg-tag-violet text-tag-violet-ink",
   silver: "bg-tag-silver text-tag-silver-ink",
   crimson: "bg-tag-crimson text-tag-crimson-ink",
-  gray: "border border-line bg-white text-ink-3",
+  gray: "border border-line bg-white text-muted",
 };
 
 export type BadgeProps = { tone: BadgeTone; children: ReactNode; className?: string };
@@ -69,7 +69,7 @@ export function TradeTypeTag({ type }: { type: TradeType }) {
 export function DDayTag({ daysLeft }: { daysLeft: number | null }) {
   if (daysLeft === null) {
     return (
-      <span className="inline-flex h-10 min-w-[100px] items-center justify-center rounded-control border border-line bg-white px-5 text-body font-medium text-ink-3">
+      <span className="inline-flex h-10 min-w-[100px] items-center justify-center rounded-control border border-line bg-white px-5 text-body font-medium text-muted">
         없음
       </span>
     );
@@ -84,7 +84,7 @@ export function DDayTag({ daysLeft }: { daysLeft: number | null }) {
         isUnder90
           ? "border-primary bg-primary-soft font-semibold text-primary"
           : isOverdue
-            ? "border-line bg-white font-medium text-ink-3"
+            ? "border-line bg-white font-medium text-muted"
             : "border-line bg-white font-medium text-ink-2",
       )}
     >

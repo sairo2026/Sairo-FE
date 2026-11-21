@@ -40,7 +40,7 @@ export function SearchField({
         placeholder={placeholder}
         maxLength={100}
         onChange={(event) => onValueChange(event.target.value)}
-        className="min-w-0 flex-1 bg-transparent text-body font-medium text-ink outline-none placeholder:font-normal placeholder:text-ink-3"
+        className="min-w-0 flex-1 bg-transparent text-body font-medium text-ink outline-none placeholder:font-normal placeholder:text-muted"
       />
       <button
         type="submit"

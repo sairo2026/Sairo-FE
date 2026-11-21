@@ -112,7 +112,7 @@ export function ApproverPreferredPanel({ base, readOnly }: { base: string; readO
               >
                 <span className="text-body text-ink">
                   {item.applicantOfficeName} · {item.applicantBrokerName}
-                  <span className="ml-2 text-caption text-ink-3">
+                  <span className="ml-2 text-caption text-muted">
                     지정 {formatSeoulDateTime(item.designatedAt)}
                   </span>
                 </span>
