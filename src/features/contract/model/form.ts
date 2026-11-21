@@ -5,7 +5,14 @@ import type {
   ContractDraftUpdateRequest,
   ContractRenewRequest,
 } from "@/lib/api/contracts/contract.schema";
-import { TEXT_LIMITS, countCodePoints } from "@/shared/lib/format";
+import {
+  CONTACT_NUMBER_ERROR,
+  TEXT_LIMITS,
+  countCodePoints,
+  isContactNumber,
+  normalizeContactNumber,
+  trimContactNumber,
+} from "@/shared/lib/format";
 import { isLease } from "./labels";
 import type { ContractCorrectionRequest } from "../api/contract.api";
 import { topicParticle } from "@/shared/lib/korean";
@@ -130,7 +137,13 @@ function todaySeoulIso(): string {
 export function validateContractForm(
   values: ContractFormValues,
   mode: Mode,
-  options: { requireManager?: boolean } = {},
+  options: {
+    requireManager?: boolean;
+    original?: {
+      sellerLandlordParties: ReadonlyArray<{ phone: string | null }>;
+      buyerTenantParties: ReadonlyArray<{ phone: string | null }>;
+    } | null;
+  } = {},
 ): Record<string, string> {
   const errors: Record<string, string> = {};
   const strict = mode === "sign";
@@ -157,6 +170,27 @@ export function validateContractForm(
   }
   if (values.signedDate !== "" && values.signedDate > todaySeoulIso()) {
     errors.signedDate = "체결일은 오늘보다 늦을 수 없습니다.";
+  }
+  const storedPhones = new Set([
+    ...(options.original?.sellerLandlordParties ?? []).map((party) => party.phone),
+    ...(options.original?.buyerTenantParties ?? []).map((party) => party.phone),
+  ]);
+  for (const [field, parties] of [
+    ["sellerLandlordParties", values.sellerParties],
+    ["buyerTenantParties", values.buyerParties],
+  ] as const) {
+    const invalid = parties.some((party) => {
+      const phone = trimContactNumber(party.phone);
+      return (
+        party.name.trim() !== "" &&
+        phone !== null &&
+        !storedPhones.has(phone) &&
+        !isContactNumber(phone)
+      );
+    });
+    if (invalid) {
+      errors[field] = CONTACT_NUMBER_ERROR;
+    }
   }
   if (!strict) return errors;
 
@@ -196,7 +230,7 @@ function partyRequests(parties: PartyInput[]) {
     .filter((party) => party.name.trim() !== "")
     .map((party) => ({
       name: party.name.trim(),
-      phone: nullIfEmpty(party.phone),
+      phone: normalizeContactNumber(party.phone),
       customerId: party.customerId === "" ? null : Number(party.customerId),
     }));
 }
@@ -289,7 +323,7 @@ export function toCorrectionRequest(
         partyId: party.partyId,
         sequenceNo: index + 1,
         name: party.name.trim(),
-        phone: nullIfEmpty(party.phone),
+        phone: normalizeContactNumber(party.phone),
         customerId: party.customerId === "" ? null : Number(party.customerId),
       }));
   const amounts = amountsFor(values);

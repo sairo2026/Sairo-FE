@@ -88,37 +88,56 @@ export function formatArea(area: number | null | undefined): string {
   return `${area.toFixed(2)}㎡`;
 }
 
+export const CONTACT_NUMBER_ERROR =
+  "연락처는 숫자 7~15자리로 입력해 주세요. +는 맨 앞에만 쓸 수 있고 공백, 하이픈, 괄호를 사용할 수 있습니다.";
+
 const CONTACT_MAX_LENGTH = 30;
 const CONTACT_CHARACTERS = /^\+?[0-9() -]+$/;
 const CONTACT_MIN_DIGITS = 7;
 const CONTACT_MAX_DIGITS = 15;
 
-/** 고객·계약 연락처 형식. 서버가 받는 값(+로 시작 가능, 숫자·괄호·하이픈·공백 7~15자리)과 같다. */
+function isContactWhitespace(code: number): boolean {
+  return (
+    (code >= 9 && code <= 13) ||
+    (code >= 28 && code <= 32) ||
+    code === 0x1680 ||
+    (code >= 0x2000 && code <= 0x200a && code !== 0x2007) ||
+    code === 0x2028 ||
+    code === 0x2029 ||
+    code === 0x205f ||
+    code === 0x3000
+  );
+}
+
+/** 서버의 String.strip()과 같은 공백만 제거한다. */
+export function trimContactNumber(value: string): string | null {
+  let start = 0;
+  let end = value.length;
+  while (start < end && isContactWhitespace(value.charCodeAt(start))) start++;
+  while (end > start && isContactWhitespace(value.charCodeAt(end - 1))) end--;
+  return start === end ? null : value.slice(start, end);
+}
+
+/** 서버가 저장하는 국내 휴대전화 표기로 맞춘다. */
+export function normalizeContactNumber(value: string): string | null {
+  const text = trimContactNumber(value);
+  const mobile = text?.match(/^(01[016789])-?([0-9]{3,4})-?([0-9]{4})$/);
+  return mobile ? mobile.slice(1).join("-") : text;
+}
+
+/** 고객·계약 연락처 형식. */
 export function isContactNumber(value: string): boolean {
-  const text = value.trim();
-  if (text.length > CONTACT_MAX_LENGTH || !CONTACT_CHARACTERS.test(text)) return false;
+  const text = trimContactNumber(value);
+  if (text === null || text.length > CONTACT_MAX_LENGTH || !CONTACT_CHARACTERS.test(text)) {
+    return false;
+  }
   const digits = text.replace(/\D/g, "").length;
   return digits >= CONTACT_MIN_DIGITS && digits <= CONTACT_MAX_DIGITS;
 }
 
-/**
- * 숫자만 남기고 전화번호 하이픈을 자동으로 넣는다.
- * allowInternational이면 국가번호(+)로 시작하거나 숫자가 11자리를 넘는 번호는 자릿수와 모양이 달라 입력한 그대로 둔다.
- */
+/** 인증용 국내 전화번호에 하이픈을 자동으로 넣는다. 연락처는 입력을 보존한다. */
 export function formatPhone(input: string, allowInternational = false): string {
-  if (allowInternational && input.trimStart().startsWith("+")) {
-    const rest = input
-      .trimStart()
-      .slice(1)
-      .replace(/[^0-9() -]/g, "");
-    return `+${rest}`.slice(0, CONTACT_MAX_LENGTH);
-  }
-  if (allowInternational && input.replace(/\D/g, "").length > 11) {
-    return input
-      .trimStart()
-      .replace(/[^0-9() -]/g, "")
-      .slice(0, CONTACT_MAX_LENGTH);
-  }
+  if (allowInternational) return input;
   const digits = input.replace(/\D/g, "").slice(0, 11);
   if (digits.startsWith("02")) {
     if (digits.length <= 2) return digits;

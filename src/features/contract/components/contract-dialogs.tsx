@@ -378,7 +378,7 @@ export function CorrectionDialog({ detail, onClose }: DialogProps) {
   });
 
   function submit() {
-    const next = validateContractForm(values, "sign", { requireManager: false });
+    const next = validateContractForm(values, "sign", { requireManager: false, original: detail });
     const problem = validateReason(reason);
     if (problem) next.reason = problem;
     if (date === "" || time === "") next.effectiveAt = "실제 효력 날짜와 시간을 입력해 주세요.";

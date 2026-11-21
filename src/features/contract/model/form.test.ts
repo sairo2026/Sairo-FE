@@ -17,7 +17,7 @@ function leaseForm() {
     ...emptyContractForm("2"),
     dealType: "MONTHLY",
     signedDate: "2026-11-01",
-    sellerParties: [newParty({ name: " 박임대 ", phone: "010" }), newParty()],
+    sellerParties: [newParty({ name: " 박임대 ", phone: "1".repeat(15) }), newParty()],
     buyerParties: [newParty({ name: "최임차", customerId: "7" })],
     depositAmount: "1,000,000",
     monthlyRentAmount: "500000",
@@ -64,12 +64,21 @@ describe("계약 입력 모델", () => {
   it("이름이 빈 당사자는 요청에서 빼고 이름은 앞뒤 공백을 지운다", () => {
     const request = toCreateRequest(leaseForm());
     expect(request.sellerLandlordParties).toEqual([
-      { name: "박임대", phone: "010", customerId: null },
+      { name: "박임대", phone: "1".repeat(15), customerId: null },
     ]);
     expect(request.buyerTenantParties[0]?.customerId).toBe(7);
     expect(request.depositAmount).toBe(1000000);
     expect(request.balanceDueDate).toBeNull();
     expect(request.balanceDueDatePendingReason).toBe("협의 중");
+  });
+
+  it("새 연락처는 초안과 체결에서 검증하고 기존 연락처는 보존한다", () => {
+    const form = leaseForm();
+    form.sellerParties = [newParty({ name: "당사자", phone: "기존 값" })];
+    const original = { sellerLandlordParties: [{ phone: "기존 값" }], buyerTenantParties: [] };
+    expect(validateContractForm(form, "draft").sellerLandlordParties).toBeDefined();
+    expect(validateContractForm(form, "sign").sellerLandlordParties).toBeDefined();
+    expect(validateContractForm(form, "draft", { original }).sellerLandlordParties).toBeUndefined();
   });
 
   it("매매는 보증금과 임대기간을 보내지 않는다", () => {

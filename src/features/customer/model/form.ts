@@ -3,7 +3,14 @@ import type {
   CustomerUpdateRequest,
 } from "@/lib/api/contracts/customer.schema";
 import type { CustomerDetail } from "../api/wire";
-import { countCodePoints, isContactNumber, TEXT_LIMITS } from "@/shared/lib/format";
+import {
+  CONTACT_NUMBER_ERROR,
+  countCodePoints,
+  isContactNumber,
+  normalizeContactNumber,
+  TEXT_LIMITS,
+  trimContactNumber,
+} from "@/shared/lib/format";
 import { htmlMarkupError } from "@/shared/lib/html-markup";
 import { objectParticle, topicParticle } from "@/shared/lib/korean";
 import { PROCESSING_BASES } from "./labels";
@@ -85,22 +92,21 @@ function sensitiveError(value: string): string | undefined {
 
 export function validateCustomerForm(
   values: CustomerFormValues,
-  options: { isCreate: boolean },
+  options: {
+    isCreate: boolean;
+    original?: Pick<CustomerDetail, "phone" | "secondaryPhone"> | null;
+  },
 ): CustomerFormErrors {
   const errors: CustomerFormErrors = {};
   const nameLabel = values.isCorporation ? "법인명" : "이름";
   const name = values.name.trim();
   if (name === "") errors.name = `${objectParticle(nameLabel)} 입력해 주세요.`;
   else errors.name = lengthError(nameLabel, name, TEXT_LIMITS.title) ?? sensitiveError(name);
-  const phone = values.phone.trim();
-  if (phone !== "" && !isContactNumber(phone)) {
-    errors.phone =
-      "연락처 형식을 확인해 주세요. 010-0000-0000처럼 숫자와 하이픈으로 입력해 주세요.";
-  }
-  const secondary = values.secondaryPhone.trim();
-  if (secondary !== "" && !isContactNumber(secondary)) {
-    errors.secondaryPhone =
-      "보조 연락처 형식을 확인해 주세요. 010-0000-0000처럼 숫자와 하이픈으로 입력해 주세요.";
+  for (const field of ["phone", "secondaryPhone"] as const) {
+    const phone = trimContactNumber(values[field]);
+    if (phone !== null && phone !== options.original?.[field] && !isContactNumber(phone)) {
+      errors[field] = CONTACT_NUMBER_ERROR;
+    }
   }
   const email = values.email.trim();
   if (email !== "" && !EMAIL_PATTERN.test(email)) {
@@ -147,8 +153,8 @@ export function toCreateRequest(values: CustomerFormValues): CustomerCreateReque
     processingBasis: values.processingBasis,
     dataPurpose: values.dataPurpose.trim(),
     retentionUntil: values.retentionUntil,
-    phone: nullable(values.phone),
-    secondaryPhone: nullable(values.secondaryPhone),
+    phone: normalizeContactNumber(values.phone),
+    secondaryPhone: normalizeContactNumber(values.secondaryPhone),
     email: nullable(values.email),
     memo: nullable(values.memo),
   };
@@ -161,8 +167,8 @@ export function toUpdateRequest(values: CustomerFormValues): CustomerUpdateReque
     dataSource: values.dataSource.trim(),
     dataPurpose: values.dataPurpose.trim(),
     retentionUntil: values.retentionUntil,
-    phone: nullable(values.phone),
-    secondaryPhone: nullable(values.secondaryPhone),
+    phone: trimContactNumber(values.phone),
+    secondaryPhone: trimContactNumber(values.secondaryPhone),
     email: nullable(values.email),
     memo: nullable(values.memo),
   };
