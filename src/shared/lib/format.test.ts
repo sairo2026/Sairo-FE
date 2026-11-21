@@ -55,6 +55,18 @@ describe("format", () => {
     expect(formatPhone("01012345678", true)).toBe("010-1234-5678");
   });
 
+  it("국가번호를 허용하면 11자리를 넘는 숫자는 서버 허용 범위까지 자르지 않는다", () => {
+    expect(formatPhone("123456789012345", true)).toBe("123456789012345");
+    expect(isContactNumber(formatPhone("123456789012345", true))).toBe(true);
+    expect(formatPhone("821012345678", true)).toBe("821012345678");
+    expect(formatPhone("(82) 10-1234-5678 ", true)).toBe("(82) 10-1234-5678 ");
+    expect(formatPhone("１２３４５６７８９０１２", true)).toBe("");
+    expect(formatPhone("1".repeat(40), true)).toHaveLength(30);
+    expect(formatPhone("1234567890123456", true)).toBe("1234567890123456");
+    expect(isContactNumber(formatPhone("1234567890123456", true))).toBe(false);
+    expect(formatPhone("010123456789", false)).toBe("010-1234-5678");
+  });
+
   it("국가번호를 허용하지 않는 입력은 +를 지우고 숫자만 남긴다", () => {
     expect(formatPhone("+8210")).toBe("821-0");
   });

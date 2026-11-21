@@ -103,7 +103,7 @@ export function isContactNumber(value: string): boolean {
 
 /**
  * 숫자만 남기고 전화번호 하이픈을 자동으로 넣는다.
- * allowInternational이면 국가번호(+)로 시작하는 번호는 자릿수와 모양이 달라 입력한 그대로 둔다.
+ * allowInternational이면 국가번호(+)로 시작하거나 숫자가 11자리를 넘는 번호는 자릿수와 모양이 달라 입력한 그대로 둔다.
  */
 export function formatPhone(input: string, allowInternational = false): string {
   if (allowInternational && input.trimStart().startsWith("+")) {
@@ -112,6 +112,12 @@ export function formatPhone(input: string, allowInternational = false): string {
       .slice(1)
       .replace(/[^0-9() -]/g, "");
     return `+${rest}`.slice(0, CONTACT_MAX_LENGTH);
+  }
+  if (allowInternational && input.replace(/\D/g, "").length > 11) {
+    return input
+      .trimStart()
+      .replace(/[^0-9() -]/g, "")
+      .slice(0, CONTACT_MAX_LENGTH);
   }
   const digits = input.replace(/\D/g, "").slice(0, 11);
   if (digits.startsWith("02")) {
