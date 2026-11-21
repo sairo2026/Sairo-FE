@@ -468,7 +468,8 @@ function SubscriptionView({ subscription }: { subscription: SubscriptionCurrent 
           <StatusBadge tone={status?.tone ?? "gray"} label={status?.label ?? subscription.status} />
           <span className="text-body text-ink-2">
             {PLAN_LABEL[subscription.plan] ?? subscription.plan} · 과금 인원{" "}
-            {subscription.memberCount}명 · 가격 버전 {subscription.priceVersion}
+            {subscription.memberCount}명
+            {subscription.priceVersion ? ` · 가격 버전 ${subscription.priceVersion}` : null}
           </span>
         </div>
         <StatusBody subscription={subscription} chargeAmount={chargeAmount} />

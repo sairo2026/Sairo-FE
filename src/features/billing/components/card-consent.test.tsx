@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { http } from "msw";
+import { http, HttpResponse } from "msw";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { errorResponse, mockErrors } from "@/mocks/error-responses";
 import { billingState, buildSubscription, resetBillingState } from "@/mocks/handlers/billing";
@@ -108,6 +108,17 @@ describe("카드 등록", () => {
       "카드 등록 기능을 준비하고 있습니다",
     );
     expect(launcher.requestBillingAuth).not.toHaveBeenCalled();
+  });
+
+  it("적용할 가격 버전이 없어도 카드 등록 안내를 확인할 수 있다", async () => {
+    server.use(
+      http.get("/api/subscriptions/current", () =>
+        HttpResponse.json({ ...buildSubscription(), priceVersion: null }),
+      ),
+    );
+    renderOffice(<CardScreen launcher={fakeLauncher()} />, { role: "OWNER" });
+    expect(await screen.findByRole("checkbox", { name: /^위 안내를 확인했습니다/ })).not.toBeNull();
+    expect(billingState.sessionIssued).toBe(false);
   });
 
   it("세션 발급이 실패하면 결제된 금액이 없다고 안내한다", async () => {
