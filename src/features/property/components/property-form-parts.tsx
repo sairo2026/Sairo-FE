@@ -182,7 +182,7 @@ export function CustomerNamePicker({
                   >
                     {item.name}
                     {item.phone ? (
-                      <span className="ml-2 text-caption text-ink-3">
+                      <span className="ml-2 text-caption text-muted">
                         끝자리 {item.phone.replace(/\D/g, "").slice(-4)}
                       </span>
                     ) : null}

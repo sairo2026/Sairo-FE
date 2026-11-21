@@ -12,7 +12,7 @@ export function OpsPublicFrame({
   children?: ReactNode;
 }) {
   return (
-    <main className="mx-auto w-full max-w-md px-4 py-24">
+    <main data-workspace className="mx-auto w-full max-w-md px-4 py-24">
       <Card>
         <h1 className="text-h1 font-bold text-ink">{title}</h1>
         {description ? <p className="mt-3 text-body text-ink-2">{description}</p> : null}

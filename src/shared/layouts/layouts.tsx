@@ -60,7 +60,7 @@ export function PublicSiteLayout({ children, footer }: LayoutProps & { footer?: 
 export function ApproverLayout({ children }: LayoutProps) {
   return (
     <ToastProvider>
-      <div className="min-h-dvh bg-surface text-ink">
+      <div data-workspace className="min-h-dvh bg-surface text-ink">
         <main className="mx-auto w-full max-w-lg px-4 pt-10 pb-16 sm:px-6">
           <BrandLogo className="mb-6 w-28" />
           {children}
@@ -97,6 +97,7 @@ export function OfficeLayout({
   return (
     <ToastProvider>
       <div
+        data-workspace
         className={cn(
           "work-density min-h-dvh text-ink lg:grid lg:grid-cols-[200px_minmax(0,1fr)]",
           tone === "board" ? "bg-surface" : "bg-white",
@@ -151,7 +152,7 @@ export function OpsLayout({
 }: LayoutProps & { navItems: OpsNavItem[]; activeKey?: string; headerRight?: ReactNode }) {
   return (
     <ToastProvider>
-      <div className="min-h-dvh bg-surface text-ink">
+      <div data-workspace className="min-h-dvh bg-surface text-ink">
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-4 bg-primary-pressed px-6 text-body font-bold text-white">
           <span className="flex items-center gap-3">
             <BrandLogo variant="horizontal-white" className="w-24" />

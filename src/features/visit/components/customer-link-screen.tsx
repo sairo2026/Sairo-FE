@@ -193,7 +193,7 @@ function TimeForm({ token, link }: { token: string; link: PublicVisitLinkRespons
           시간을 모두 해제하고 제출하면 앞서 보낸 가능한 시간이 모두 취소됩니다.
         </FormNotice>
       ) : null}
-      <p className="text-caption text-ink-3">
+      <p className="text-caption text-muted">
         키보드의 Tab과 방향키로도 시간을 고를 수 있습니다. 마감 전에는 제출한 시간을 다시 고칠 수
         있습니다.
       </p>

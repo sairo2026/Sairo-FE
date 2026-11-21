@@ -185,7 +185,7 @@ function SettlementBody({ yearMonth }: { yearMonth: string }) {
                     </p>
                   ) : null}
                   {group.id === "outstanding" || group.id === "overcollected" ? (
-                    <p className="text-caption text-ink-3">
+                    <p className="text-caption text-muted">
                       사무소 합계입니다. 지급의무자별 내역은 상세 내역에서 봅니다.
                     </p>
                   ) : null}

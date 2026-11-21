@@ -165,7 +165,7 @@ export function ConditionForm({
                 </Button>
               </div>
               {ranges.length === 0 ? (
-                <p className="text-caption text-ink-3">가능한 시간대가 없습니다.</p>
+                <p className="text-caption text-muted">가능한 시간대가 없습니다.</p>
               ) : null}
               {ranges.map((range) => (
                 <RangeRow

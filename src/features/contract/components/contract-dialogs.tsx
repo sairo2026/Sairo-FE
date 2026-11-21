@@ -56,7 +56,7 @@ function ReasonBox({
         aria-invalid={error ? true : undefined}
         className="w-full rounded-control border border-line px-4 py-3 text-body text-ink focus:border-primary"
       />
-      <p className="text-caption text-ink-3">{REASON_LIMIT}자까지 입력할 수 있습니다.</p>
+      <p className="text-caption text-muted">{REASON_LIMIT}자까지 입력할 수 있습니다.</p>
       {error ? (
         <p role="alert" className="text-caption text-danger">
           {error}

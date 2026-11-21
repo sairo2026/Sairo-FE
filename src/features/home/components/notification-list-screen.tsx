@@ -144,7 +144,7 @@ function GeneralNotifications() {
                               </span>
                             )}
                           </span>
-                          <span className="text-caption text-ink-3">
+                          <span className="text-caption text-muted">
                             {formatSeoulDateTime(item.createdAt)}
                           </span>
                         </span>
@@ -254,7 +254,7 @@ function VisitRequestNotices() {
                       >
                         {NOTICE_TYPE_LABEL[item.noticeType] ?? "방문 신청"}
                       </Badge>
-                      <span className="text-caption text-ink-3">
+                      <span className="text-caption text-muted">
                         {formatSeoulDateTime(item.createdAt)}
                       </span>
                     </span>

@@ -86,7 +86,7 @@ function TrackCard({
     <li className="flex flex-col gap-3 rounded-card-flat border border-line bg-white px-5 py-4">
       <span className="text-caption font-semibold text-ink-2">{title}</span>
       <span>{badge}</span>
-      {note ? <span className="text-caption text-ink-3">{note}</span> : null}
+      {note ? <span className="text-caption text-muted">{note}</span> : null}
       {action}
     </li>
   );

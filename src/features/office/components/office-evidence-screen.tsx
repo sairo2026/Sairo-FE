@@ -77,7 +77,7 @@ function EvidenceFileField({
           <span
             className={cn(
               "min-w-0 flex-1 truncate",
-              file ? "font-medium text-primary" : "font-normal text-ink-3",
+              file ? "font-medium text-primary" : "font-normal text-muted",
             )}
           >
             {file ? file.name : "컴퓨터에서 파일 선택"}
