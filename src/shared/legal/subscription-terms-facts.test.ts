@@ -25,7 +25,9 @@ describe("구독·결제 약관의 사실 정정", () => {
   it("결제 실패, 제한 시작, 미납 종료 때 대표에게 알리는 기준을 적는다", () => {
     const body = subscriptionTerms();
     expect(body).toContain("서비스 안 알림과 이메일로 알립니다");
-    expect(body).toContain("종료 안내 이메일에는 자료를 조회하고 내려받을 수 있는 반환 기간이 끝나는 시각");
+    expect(body).toContain(
+      "종료 안내 이메일에는 자료를 조회하고 내려받을 수 있는 반환 기간이 끝나는 시각",
+    );
   });
 
   it("바로 종료와 회원 탈퇴를 환불 사유로 적지 않는다", () => {
