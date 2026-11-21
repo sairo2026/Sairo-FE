@@ -17,11 +17,16 @@ const DEFAULT_TIMEOUT_MS = 10_000;
 const DEFAULT_RETRY = { attempts: 2, baseDelayMs: 300 };
 
 export function parseCookieValue(cookieHeader: string, name: string): string | null {
-  for (const cookie of cookieHeader.split("; ")) {
+  for (const part of cookieHeader.split(";")) {
+    const cookie = part.trimStart();
     const separatorIndex = cookie.indexOf("=");
     if (separatorIndex === -1) continue;
     if (cookie.slice(0, separatorIndex) === name) {
-      return decodeURIComponent(cookie.slice(separatorIndex + 1));
+      try {
+        return decodeURIComponent(cookie.slice(separatorIndex + 1)) || null;
+      } catch {
+        return null;
+      }
     }
   }
   return null;
@@ -42,6 +47,7 @@ export async function ensureCsrfToken(): Promise<string | null> {
   csrfPriming ??= fetch(CSRF_PRIMING_PATH, {
     credentials: "include",
     headers: { [REQUEST_ID_HEADER]: createRequestId() },
+    signal: AbortSignal.timeout(DEFAULT_TIMEOUT_MS),
   })
     .then(
       () => undefined,

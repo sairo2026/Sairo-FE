@@ -17,7 +17,8 @@ import { OpsScreen } from "../components/common/ops-screen";
 import { OpsStatusBadge } from "../components/common/ops-status-badge";
 import { describeOpsError } from "../model/ops-errors";
 import { useOpsSession } from "../model/ops-session";
-import { saveBlob, useInquiryActions, useInquiryDetail } from "./inquiry-api";
+import { saveBlob } from "@/shared/lib/save-blob";
+import { useInquiryActions, useInquiryDetail } from "./inquiry-api";
 import {
   ATTACHMENT_LIMIT,
   CATEGORY_LABELS,

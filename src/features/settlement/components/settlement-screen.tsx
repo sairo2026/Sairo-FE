@@ -13,7 +13,8 @@ import { Button } from "@/shared/components/ui/button";
 import { PageHeader } from "@/shared/components/ui/page-header";
 import { formatCount, formatKrw, formatSeoulDateTime } from "@/shared/lib/format";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
-import { fetchSettlementCsv, saveBlob } from "../api/settlement.api";
+import { saveBlob } from "@/shared/lib/save-blob";
+import { fetchSettlementCsv } from "../api/settlement.api";
 import { useSettlement, useSettlementList } from "../hooks/settlement-queries";
 import { describeSettlementError, isOutOfRangeMonth } from "../model/errors";
 import {

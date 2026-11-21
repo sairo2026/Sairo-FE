@@ -52,8 +52,15 @@ describe("ErrorScreen", () => {
   });
 
   it("추적 번호를 문의 번호로 보여준다", () => {
-    render(<ErrorScreen kind="server" traceId="trace-9" />);
-    expect(screen.getByText("문의 번호: trace-9")).not.toBeNull();
+    const reference = "00000000-0000-4000-8000-000000000001";
+    render(<ErrorScreen kind="server" traceId={reference} />);
+    expect(screen.getByText(`문의 번호: ${reference}`)).not.toBeNull();
+  });
+
+  it("추적 번호 자리에 진단 문구가 들어와도 화면에 표시하지 않는다", () => {
+    render(<ErrorScreen kind="server" traceId="Internal diagnostic information" />);
+    expect(screen.queryByText(/Internal diagnostic information/)).toBeNull();
+    expect(screen.getByRole("heading", { name: ERROR_SCREEN_COPY.server.title })).not.toBeNull();
   });
 
   it("서버 오류와 네트워크 오류는 경고로 알린다", () => {

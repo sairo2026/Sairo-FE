@@ -419,6 +419,27 @@ describe("구독 구매 동의", () => {
     );
   });
 
+  it("동의 저장 실패 시 체크 상태를 유지하고 완료로 표시하지 않는다", async () => {
+    let submissions = 0;
+    server.use(
+      http.post("/api/subscriptions/purchase-consent", () => {
+        submissions += 1;
+        return errorResponse(500, "INTERNAL_ERROR", "Internal diagnostic information");
+      }),
+    );
+    const user = userEvent.setup();
+    renderOffice(<ConsentScreen />, { role: "OWNER" });
+    for (const box of await screen.findAllByRole("checkbox")) await user.click(box);
+    await user.click(screen.getByRole("button", { name: "동의하고 확인 완료" }));
+    await screen.findAllByText(/일시적인 오류가 발생했습니다/);
+    expect(screen.getAllByRole<HTMLInputElement>("checkbox").every((box) => box.checked)).toBe(
+      true,
+    );
+    expect(screen.queryByText(/Internal diagnostic information/)).toBeNull();
+    expect(submissions).toBe(1);
+    expect(billingState.subscription.readiness.hasValidConsent).toBe(false);
+  });
+
   it("동의를 마쳤고 카드도 있으면 결제 준비 완료를 알린다", async () => {
     billingState.subscription = buildSubscription({
       readiness: { hasBillingKey: true, hasValidConsent: false },
