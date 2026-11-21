@@ -35,6 +35,7 @@ import { describeOfficeError, describeRemaining, fieldErrorMap } from "../model/
 import {
   formatBusinessNumber,
   qualificationBody,
+  QUALIFICATION_NUMBER_MAX_LENGTH,
   validateQualification,
 } from "../model/validation";
 import type { FieldErrors, MembershipRole, QualificationField } from "../model/validation";
@@ -435,7 +436,7 @@ function QualificationFields({
           value={qualificationNumber}
           onValueChange={(next) => onChange({ qualificationNumber: next })}
           error={errors.qualificationNumber}
-          maxLength={50}
+          hint={`앞뒤 공백을 제외하고 ${QUALIFICATION_NUMBER_MAX_LENGTH}자 이하로 입력해 주세요.`}
         />
       ) : null}
       <Checklist
