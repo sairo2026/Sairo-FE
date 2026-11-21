@@ -62,7 +62,7 @@ test("스모크 6 가입과 8 로그인과 로그아웃", async ({ page, request
 test("스모크 7 카카오 시작은 인가 화면으로 302를 돌려준다", async ({ request }) => {
   const response = await request.get(`${API_ORIGIN}/api/auth/kakao/start`, { maxRedirects: 0 });
   expect(response.status()).toBe(302);
-  const location = new URL(response.headers()["location"]);
+  const location = new URL(response.headers()["location"] ?? "about:blank");
   expect(location.origin).toBe("https://kauth.stub.invalid");
   expect(location.searchParams.has("state")).toBeTruthy();
 });
