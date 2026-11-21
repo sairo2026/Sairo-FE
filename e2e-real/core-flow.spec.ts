@@ -146,9 +146,7 @@ test("카드 등록 화면에 들어가면 토스 키가 없는 환경의 안내
   await expect(page.getByText(/준비|사용할 수 없|결제 창/).first()).toBeVisible();
 });
 
-test("카드 등록 결과로 돌아오고 구매 동의를 마치면 체험이 시작돼 업무 화면이 열린다", async ({
-  page,
-}) => {
+test("카드를 등록하고 첫 결제를 확인하면 업무 화면이 열린다", async ({ page }) => {
   await loginViaUi(page, owner.email, /\/(home|billing)$/);
   await page.goto("/billing/card");
   const stepUp = await pageApi(page, "POST", "/api/auth/step-up/password", { password: PASSWORD });
@@ -174,13 +172,28 @@ test("카드 등록 결과로 돌아오고 구매 동의를 마치면 체험이 
   await page.goto("/billing/consent");
   await forceCheck(page.getByRole("checkbox").nth(0));
   await forceCheck(page.getByRole("checkbox").nth(1));
+  const consentSubmitted = page.waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname === "/api/subscriptions/purchase-consent" &&
+      response.request().method() === "POST",
+  );
   await page.getByRole("button", { name: /동의/ }).last().click();
+  expect((await consentSubmitted).ok()).toBe(true);
   await page.screenshot({ path: "test-results/consent.png" });
   await page.goto("/billing");
   await page.getByRole("button", { name: "지금 결제" }).click();
+  const payment = page.getByRole("dialog", { name: "지금 결제" });
+  const paymentSubmitted = page.waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname === "/api/subscriptions/first-payment" &&
+      response.request().method() === "POST",
+  );
+  await payment.getByRole("button", { name: "결제하기", exact: true }).click();
+  expect((await paymentSubmitted).ok()).toBe(true);
+  await expect(payment).toBeHidden();
   await page.screenshot({ path: "test-results/pay-now.png" });
-  await page.goto("/home");
-  await expect(page.getByRole("heading", { name: "결제를 기다리고 있습니다" })).toHaveCount(0);
+  await page.goto("/properties/new");
+  await expect(page.getByLabel(/^매물명/)).toBeVisible();
 });
 
 function seoulDateChipName(offsetDays: number): string {
@@ -203,7 +216,7 @@ test("매물을 등록하고 목록과 상세에서 확인한다", async ({ page
   await loginViaUi(page, owner.email, /\/(home|billing)$/);
   await page.goto("/properties/new");
   await page.getByLabel(/^매물명/).fill("실API 아파트");
-  await page.getByLabel(/^카테고리/).selectOption({ label: "아파트" });
+  await page.getByRole("combobox", { name: "건물 카테고리" }).selectOption({ label: "아파트" });
   await page.getByLabel("매물 주소").fill("서울특별시 종로구 시험로 1");
   await page.getByLabel("담당 공인중개사").selectOption({ index: 1 });
   await page.getByRole("button", { name: "활성 등록" }).click();
