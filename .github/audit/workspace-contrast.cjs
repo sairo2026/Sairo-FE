@@ -38,7 +38,23 @@ async function audit(page) {
         muted:!!element?.classList.contains("text-ink-3"),
         workspace:!!element?.closest(".work-density, [data-workspace]") };
     }));
-    return {failures,incomplete:result.incomplete.reduce((a,v)=>a+v.nodes.length,0)};
+    const incompleteReasons = {};
+    for (const resultRule of result.incomplete) {
+      for (const node of resultRule.nodes) {
+        const check = [...node.any,...node.all,...node.none].find(item=>item.result===undefined || item.result===null) ?? node.any[0];
+        const element = document.querySelector(node.target[0]);
+        const message = check?.message ?? "";
+        const knownReason = /overlap|obscur/i.test(message) ? "overlap" :
+          /image|gradient/i.test(message) ? "background-image-or-gradient" :
+          /background/i.test(message) ? "background-uncertain" :
+          /same color/i.test(message) ? "same-color" : "other";
+        const offscreen = element ? element.getBoundingClientRect().top >= innerHeight || element.getBoundingClientRect().bottom <= 0 : false;
+        const hidden = Boolean(element?.closest(':disabled,[aria-disabled=true],[aria-hidden=true]'));
+        const key=[knownReason,offscreen?"offscreen":"inView",hidden?"inactive":"active"].join("/");
+        incompleteReasons[key]=(incompleteReasons[key]??0)+1;
+      }
+    }
+    return {failures,incomplete:result.incomplete.reduce((a,v)=>a+v.nodes.length,0),incompleteReasons};
   });
 }
 (async()=>{
@@ -76,7 +92,7 @@ async function audit(page) {
         publicCandidate:!!document.querySelector("[data-public-contrast]"),
         notFound:document.body.innerText.includes("페이지를 찾을 수 없습니다")
      }));
-     fs.appendFileSync("contrast-run.ndjson",JSON.stringify({route:x.route,width,status:response?.status(),...flags,...output})+"\n");
+     fs.appendFileSync("contrast-run.ndjson",JSON.stringify({route:x.route,width,status:response?.status(),...flags,matchedPath:new URL(page.url()).pathname===route.split("?")[0],...output})+"\n");
     } catch(e) {fs.appendFileSync("contrast-run.ndjson",JSON.stringify({route:x.route,width,errorType:e.name})+"\n");}
    }
    await ctx.close();
