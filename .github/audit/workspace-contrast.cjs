@@ -73,19 +73,28 @@ async function audit(page) {
       if (recheck.violations.length) scrollRecheck.failed++;
       else if (recheck.incomplete.length) {
         scrollRecheck.stillNeedsReview++;
+        element.focus();
+        element.scrollIntoView({block:"nearest",inline:"center",behavior:"instant"});
+        await new Promise(resolve=>window.requestAnimationFrame(()=>window.requestAnimationFrame(resolve)));
         const rect=element.getBoundingClientRect();
         const x=Math.min(innerWidth-1,Math.max(0,(rect.left+rect.right)/2));
         const y=Math.min(innerHeight-1,Math.max(0,(rect.top+rect.bottom)/2));
         const hit=document.elementsFromPoint(x,y)[0];
         const scroll=element.closest("nav");
         const ranges=[];
-        for (const child of element.childNodes) {
-          if (child.nodeType===3 && child.textContent.trim()) {
+        const textNodes=document.createTreeWalker(element,NodeFilter.SHOW_TEXT);
+        for (let textNode=textNodes.nextNode();textNode;textNode=textNodes.nextNode()) {
+          if (textNode.textContent.trim()) {
             const range=document.createRange();
-            range.selectNode(child);
+            range.selectNodeContents(textNode);
             ranges.push(...range.getClientRects());
           }
         }
+        const clip=scroll?.getBoundingClientRect();
+        const visibleText=ranges.length>0&&ranges.every(r=>
+          r.left>=Math.max(0,clip?.left??0)-1&&r.top>=Math.max(0,clip?.top??0)-1&&
+          r.right<=Math.min(innerWidth,clip?.right??innerWidth)+1&&r.bottom<=Math.min(innerHeight,clip?.bottom??innerHeight)+1
+        );
         const styles=getComputedStyle(element);
         const backgrounds=[];
         for (let at=element; at&&backgrounds.length<8; at=at.parentElement) {
@@ -97,7 +106,7 @@ async function audit(page) {
           tag:element.tagName,region:element.closest("nav,header,main,table")?.tagName,
           foreground:styles.color,font:styles.fontSize,backgrounds,
           overlapsAtCenter:Boolean(hit&&!element.contains(hit)&&!hit.contains(element)),
-          allTextLinesInsideViewport:ranges.length>0&&ranges.every(r=>r.left>=0&&r.top>=0&&r.right<=innerWidth&&r.bottom<=innerHeight),
+          allTextLinesInsideViewport:visibleText,focused:document.activeElement===element,
           horizontalMenu:scroll?.scrollWidth>scroll?.clientWidth,
         });
       }
