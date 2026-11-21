@@ -7,6 +7,7 @@ import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import { DateTimeField } from "@/shared/components/ui/date-time-field";
 import { SelectField } from "@/shared/components/ui/select-field";
+import { TableScroll } from "@/shared/components/ui/table-scroll";
 import { TextField } from "@/shared/components/ui/text-field";
 import { formatSeoulDate, formatSeoulDateTime } from "@/shared/lib/format";
 import { OpsScreen } from "../components/common/ops-screen";
@@ -148,7 +149,7 @@ function CopyList({ items }: { items: ContractCopy[] }) {
     );
   }
   return (
-    <div className="overflow-x-auto rounded-card-flat border border-line bg-white">
+    <TableScroll label="계약서 사본 목록" className="rounded-card-flat border border-line bg-white">
       <table className="w-full border-collapse text-left">
         <caption className="sr-only">계약서 사본 목록</caption>
         <thead>
@@ -184,7 +185,7 @@ function CopyList({ items }: { items: ContractCopy[] }) {
           ))}
         </tbody>
       </table>
-    </div>
+    </TableScroll>
   );
 }
 

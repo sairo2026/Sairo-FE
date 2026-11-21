@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { TermsCatalogResponse } from "@/lib/api/contracts/auth.schema";
 import { Checkbox, TermsItem } from "@/shared/components/ui/select-field";
+import { TableScroll } from "@/shared/components/ui/table-scroll";
 import { LegalDocumentModal } from "@/shared/legal/legal-document-view";
 import { findLegalDocumentByTermsCode } from "@/shared/legal/registry";
 import type { LegalDocument } from "@/shared/legal/registry";
@@ -201,7 +202,10 @@ export function CollectionNoticeTable() {
     <section aria-label={COLLECTION_TABLE_COPY.title} className="flex flex-col gap-3">
       <h2 className="text-body font-semibold text-ink">{COLLECTION_TABLE_COPY.title}</h2>
       <p className="text-caption text-ink-2">{COLLECTION_TABLE_COPY.intro}</p>
-      <div className="overflow-x-auto rounded-control border border-line">
+      <TableScroll
+        label={COLLECTION_TABLE_COPY.title}
+        className="rounded-control border border-line"
+      >
         <table className="w-full min-w-[28rem] border-collapse text-left text-caption">
           <caption className="sr-only">{COLLECTION_TABLE_COPY.title}</caption>
           <thead className="bg-surface">
@@ -225,7 +229,7 @@ export function CollectionNoticeTable() {
             ))}
           </tbody>
         </table>
-      </div>
+      </TableScroll>
       <p className="text-caption text-ink-2">{COLLECTION_TABLE_COPY.footer}</p>
     </section>
   );
