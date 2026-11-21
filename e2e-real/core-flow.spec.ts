@@ -379,13 +379,14 @@ test("승인자가 신청을 비교해 선택하면 조율이 확정된다", asy
   await expect(page.getByText("확정 완료").first()).toBeVisible();
 });
 
-test("예정 시각이 지나지 않은 방문은 결과를 기록할 수 없다", async ({ page }) => {
+test("예정 시각 전에는 취소만 방문 결과로 기록할 수 있다", async ({ page }) => {
   await loginViaUi(page, owner.email, /\/(home|billing)$/);
   await page.goto(coordinationUrl);
   await expect(page.getByText("확정 완료").first()).toBeVisible();
   await page.getByRole("button", { name: "결과 기록" }).click();
   const dialog = page.getByRole("dialog");
-  await dialog.getByLabel("방문 결과").selectOption({ label: "방문 완료" });
-  await dialog.getByRole("button", { name: "결과 저장" }).click();
-  await expect(dialog.getByText("미래 시각은 입력할 수 없습니다.")).toBeVisible();
+  const outcomes = dialog.getByRole("combobox", { name: "방문 결과" }).getByRole("option");
+  await expect(outcomes).toHaveText(["취소"]);
+  await expect(dialog.getByRole("status")).toContainText("시작 전에는 취소만 기록할 수 있습니다.");
+  await expect(dialog.getByLabel("취소 사유")).toBeVisible();
 });
