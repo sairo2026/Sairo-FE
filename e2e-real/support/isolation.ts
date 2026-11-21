@@ -25,7 +25,7 @@ export async function protectLocalContext(context: BrowserContext) {
       // A test can close its context while a page prefetch is still running.
       if (
         error instanceof Error &&
-        /Request context disposed|Test ended|Target page, context or browser has been closed/.test(
+        /Request context disposed|Fetch response has been disposed|Test ended|Target page, context or browser has been closed/.test(
           error.message,
         )
       ) {
