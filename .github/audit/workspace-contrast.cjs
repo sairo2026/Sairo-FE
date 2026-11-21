@@ -38,7 +38,82 @@ async function audit(page) {
         muted:!!element?.classList.contains("text-ink-3"),
         workspace:!!element?.closest(".work-density, [data-workspace]") };
     }));
-    return {failures,incomplete:result.incomplete.reduce((a,v)=>a+v.nodes.length,0)};
+    const incompleteReasons = {};
+    for (const resultRule of result.incomplete) {
+      for (const node of resultRule.nodes) {
+        const check = [...node.any,...node.all,...node.none].find(item=>item.result===undefined || item.result===null) ?? node.any[0];
+        const element = document.querySelector(node.target[0]);
+        const message = check?.message ?? "";
+        const knownReason = /overlap|obscur/i.test(message) ? "overlap" :
+          /image|gradient/i.test(message) ? "background-image-or-gradient" :
+          /background/i.test(message) ? "background-uncertain" :
+          /same color/i.test(message) ? "same-color" : "other";
+        const offscreen = element ? element.getBoundingClientRect().top >= innerHeight || element.getBoundingClientRect().bottom <= 0 : false;
+        const hidden = Boolean(element?.closest(':disabled,[aria-disabled=true],[aria-hidden=true]'));
+        const key=[knownReason,offscreen?"offscreen":"inView",hidden?"inactive":"active"].join("/");
+        incompleteReasons[key]=(incompleteReasons[key]??0)+1;
+      }
+    }
+    const reviewDetails=[];
+    const scrollRecheck = {inactive:0,passed:0,failed:0,stillNeedsReview:0,unavailable:0};
+    const targets = result.incomplete.flatMap(rule => rule.nodes)
+      .map(node=>document.querySelector(node.target[0]));
+    for (const element of targets) {
+      if (!element || !element.isConnected) {
+        scrollRecheck.unavailable++;
+        continue;
+      }
+      if (element.closest(":disabled,[aria-disabled=true],[aria-hidden=true]")) {
+        scrollRecheck.inactive++;
+        continue;
+      }
+      element.scrollIntoView({block:"center",inline:"nearest",behavior:"instant"});
+      await new Promise(resolve=>window.requestAnimationFrame(()=>window.requestAnimationFrame(resolve)));
+      const recheck = await window.axe.run(element,{runOnly:{type:"rule",values:["color-contrast"]}});
+      if (recheck.violations.length) scrollRecheck.failed++;
+      else if (recheck.incomplete.length) {
+        scrollRecheck.stillNeedsReview++;
+        element.focus();
+        element.scrollIntoView({block:"nearest",inline:"center",behavior:"instant"});
+        await new Promise(resolve=>window.requestAnimationFrame(()=>window.requestAnimationFrame(resolve)));
+        const rect=element.getBoundingClientRect();
+        const x=Math.min(innerWidth-1,Math.max(0,(rect.left+rect.right)/2));
+        const y=Math.min(innerHeight-1,Math.max(0,(rect.top+rect.bottom)/2));
+        const hit=document.elementsFromPoint(x,y)[0];
+        const scroll=element.closest("nav");
+        const ranges=[];
+        const textNodes=document.createTreeWalker(element,NodeFilter.SHOW_TEXT);
+        for (let textNode=textNodes.nextNode();textNode;textNode=textNodes.nextNode()) {
+          if (textNode.textContent.trim()) {
+            const range=document.createRange();
+            range.selectNodeContents(textNode);
+            ranges.push(...range.getClientRects());
+          }
+        }
+        const clip=scroll?.getBoundingClientRect();
+        const visibleText=ranges.length>0&&ranges.every(r=>
+          r.left>=Math.max(0,clip?.left??0)-1&&r.top>=Math.max(0,clip?.top??0)-1&&
+          r.right<=Math.min(innerWidth,clip?.right??innerWidth)+1&&r.bottom<=Math.min(innerHeight,clip?.bottom??innerHeight)+1
+        );
+        const styles=getComputedStyle(element);
+        const backgrounds=[];
+        for (let at=element; at&&backgrounds.length<8; at=at.parentElement) {
+          const cs=getComputedStyle(at);
+          backgrounds.push({color:cs.backgroundColor,image:cs.backgroundImage!=="none",opacity:cs.opacity});
+          if(/^rgb\(/.test(cs.backgroundColor))break;
+        }
+        reviewDetails.push({
+          tag:element.tagName,region:element.closest("nav,header,main,table")?.tagName,
+          foreground:styles.color,font:styles.fontSize,backgrounds,
+          overlapsAtCenter:Boolean(hit&&!element.contains(hit)&&!hit.contains(element)),
+          allTextLinesInsideViewport:visibleText,focused:document.activeElement===element,
+          horizontalMenu:scroll?.scrollWidth>scroll?.clientWidth,
+        });
+      }
+      else if (recheck.passes.length) scrollRecheck.passed++;
+      else scrollRecheck.unavailable++;
+    }
+    return {failures,incomplete:result.incomplete.reduce((a,v)=>a+v.nodes.length,0),incompleteReasons,scrollRecheck,reviewDetails};
   });
 }
 (async()=>{
