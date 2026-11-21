@@ -59,7 +59,7 @@ const tradeLabel: Record<TradeType, string> = { monthly: "월세", jeonse: "전�
 
 export function TradeTypeTag({ type }: { type: TradeType }) {
   return (
-    <span className="inline-flex min-w-[60px] items-center justify-center rounded-control bg-surface px-4 py-2 text-body font-medium text-ink">
+    <span className="inline-flex min-w-[60px] items-center justify-center bg-surface px-4 py-2 text-body font-medium text-ink">
       {tradeLabel[type]}
     </span>
   );
@@ -69,7 +69,7 @@ export function TradeTypeTag({ type }: { type: TradeType }) {
 export function DDayTag({ daysLeft }: { daysLeft: number | null }) {
   if (daysLeft === null) {
     return (
-      <span className="inline-flex h-10 min-w-[100px] items-center justify-center rounded-control border border-line bg-white px-3 text-body font-medium text-ink-3">
+      <span className="inline-flex h-10 min-w-[100px] items-center justify-center rounded-control border border-line bg-white px-5 text-body font-medium text-ink-3">
         없음
       </span>
     );
@@ -80,7 +80,7 @@ export function DDayTag({ daysLeft }: { daysLeft: number | null }) {
     <span
       aria-label={isOverdue ? `만기 ${-daysLeft}일 지남` : undefined}
       className={cn(
-        "inline-flex h-10 min-w-[100px] items-center justify-center rounded-control border px-3 text-body",
+        "inline-flex h-10 min-w-[100px] items-center justify-center rounded-control border px-5 text-body",
         isUnder90
           ? "border-primary bg-primary-soft font-semibold text-primary"
           : isOverdue
