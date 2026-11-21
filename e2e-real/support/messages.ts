@@ -16,7 +16,10 @@ export async function capturedMessage(
   await expect
     .poll(
       async () => {
-        const response = await request.get(url, { headers: { "X-E2E-Token": token } });
+        const response = await request.get(url, {
+          maxRedirects: 0,
+          headers: { "X-E2E-Token": token },
+        });
         if (response.status() !== 200) return false;
         const message = (await response.json()) as Captured;
         if (options.match && !options.match.test(message.body)) return false;

@@ -1,8 +1,13 @@
 import { test as base } from "@playwright/test";
+import { protectLocalContext } from "./isolation";
 
 export { expect } from "@playwright/test";
 
 export const test = base.extend<{ apiFailures: void }>({
+  context: async ({ context }, use) => {
+    await protectLocalContext(context);
+    await use(context);
+  },
   apiFailures: [
     async ({ page }, use, testInfo) => {
       const failures: string[] = [];

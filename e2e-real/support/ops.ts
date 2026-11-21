@@ -4,7 +4,8 @@ import { routeKakaoStub } from "./kakao-stub";
 import { requireEnv } from "./env";
 import { totpCode } from "./totp";
 
-export const FRONT_ORIGIN = "http://localhost:3000";
+import { FRONT_ORIGIN } from "./env";
+import { protectLocalContext } from "./isolation";
 
 export type OperatorSession = {
   context: BrowserContext;
@@ -24,9 +25,11 @@ export function bootstrapInvitationPath(): string {
 async function newOperatorContext(browser: Browser, kakaoUserId: number) {
   const context = await browser.newContext({
     baseURL: FRONT_ORIGIN,
+    serviceWorkers: "block",
     locale: "ko-KR",
     timezoneId: "Asia/Seoul",
   });
+  await protectLocalContext(context);
   await routeKakaoStub(context, kakaoUserId, FRONT_ORIGIN);
   return context;
 }
@@ -112,6 +115,7 @@ export async function xsrfHeaders(context: BrowserContext): Promise<Record<strin
 
 export async function operatorStepUp(session: OperatorSession) {
   const response = await session.context.request.post(`${FRONT_ORIGIN}/api/ops/auth/step-up`, {
+    maxRedirects: 0,
     data: { otpCode: totpCode(session.secret) },
     headers: await xsrfHeaders(session.context),
   });

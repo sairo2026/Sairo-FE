@@ -10,6 +10,7 @@ export default defineConfig({
   timeout: 90_000,
   reporter: "list",
   use: {
+    serviceWorkers: "block",
     baseURL: `http://localhost:${port}`,
     trace: "retain-on-failure",
     locale: "ko-KR",
