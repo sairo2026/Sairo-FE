@@ -10,15 +10,28 @@ export async function protectLocalContext(context: BrowserContext) {
       await route.abort("blockedbyclient");
       return;
     }
-    const response = await route.fetch({ maxRedirects: 0 });
-    const location = response.headers()["location"];
-    if (response.status() >= 300 && response.status() < 400 && location) {
-      const target = new URL(location, url);
-      if (!allowed.has(target.origin)) {
-        await route.abort("blockedbyclient");
+    try {
+      const response = await route.fetch({ maxRedirects: 0 });
+      const location = response.headers()["location"];
+      if (response.status() >= 300 && response.status() < 400 && location) {
+        const target = new URL(location, url);
+        if (!allowed.has(target.origin)) {
+          await route.abort("blockedbyclient");
+          return;
+        }
+      }
+      await route.fulfill({ response });
+    } catch (error) {
+      // A test can close its context while a page prefetch is still running.
+      if (
+        error instanceof Error &&
+        /Request context disposed|Fetch response has been disposed|Test ended|Target page, context or browser has been closed/.test(
+          error.message,
+        )
+      ) {
         return;
       }
+      throw error;
     }
-    await route.fulfill({ response });
   });
 }
