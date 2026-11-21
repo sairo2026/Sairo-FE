@@ -231,6 +231,28 @@ describe("고객 수정", () => {
     expect(ifMatch).toBe("1");
   });
 
+  it.each(["+82-10-1234-5678", "01012345678", "0212345678"])(
+    "이전한 고객의 연락처 %s는 다른 항목만 고쳐도 저장된다",
+    async (phone) => {
+      setMockCustomerState({
+        customers: [buildMockCustomer({ customerId: 303, name: "이전고객", phone })],
+      });
+      let sentPhone: unknown = null;
+      server.use(
+        http.patch("/api/customers/303", async ({ request }) => {
+          sentPhone = ((await request.json()) as { phone?: unknown }).phone;
+          return Response.json(getMockCustomerState().customers[0]);
+        }),
+      );
+      const user = userEvent.setup();
+      renderOffice(<CustomerEditScreen customerId={303} />, { role: "AGENT" });
+      await user.type(await screen.findByLabelText("업무 메모"), "메모");
+      await user.click(screen.getByRole("button", { name: "저장" }));
+      await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/customers/303"));
+      expect(sentPhone).toBe(phone);
+    },
+  );
+
   it("다른 사용자가 먼저 고쳤으면 충돌을 알리고 최신 내용을 다시 불러온다", async () => {
     server.use(http.patch("/api/customers/301", () => mockErrors.versionConflict(3)));
     const user = userEvent.setup();

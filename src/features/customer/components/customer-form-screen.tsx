@@ -325,6 +325,7 @@ export function CustomerForm(props: FormProps) {
             label="연락처"
             placeholder="고객의 연락처를 입력해 주세요."
             kind="tel"
+            allowInternational
             value={values.phone}
             onValueChange={(value) => setField("phone", value)}
             error={errors.phone}
@@ -340,6 +341,7 @@ export function CustomerForm(props: FormProps) {
             label="보조 연락처"
             placeholder="숫자만 입력해 주세요."
             kind="tel"
+            allowInternational
             value={values.secondaryPhone}
             hint="대리 연락자를 쓰는 경우 번호를 넣고 업무 메모에 대리인 정보를 적어 주세요."
             onValueChange={(value) => setField("secondaryPhone", value)}

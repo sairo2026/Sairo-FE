@@ -101,6 +101,46 @@ describe("고객 입력 검증", () => {
   });
 });
 
+describe("고객 연락처 검증은 서버 규칙보다 엄격하지 않다", () => {
+  const phoneError = (phone: string) =>
+    validateCustomerForm({ ...valid, phone }, { isCreate: false }).phone;
+
+  it.each([
+    "010-1234-5678",
+    "01012345678",
+    "0212345678",
+    "02 1234 5678",
+    "(02) 123-4567",
+    "+82-10-1234-5678",
+    "+82 10 1234 5678",
+    "1588-1234",
+  ])("서버가 받는 %s는 저장을 막지 않는다", (phone) => {
+    expect(phoneError(phone)).toBeUndefined();
+  });
+
+  it.each([
+    "abc",
+    "123456",
+    "010-1234-5678 / 02-123-4567 / 031-123-4567",
+    "82+10-1234-5678",
+    "1234567890123456",
+    "010.1234.5678",
+  ])("서버가 거절하는 %s는 화면에서도 거절한다", (phone) => {
+    expect(phoneError(phone)).toBeDefined();
+  });
+
+  it("보조 연락처도 같은 규칙을 쓴다", () => {
+    const errors = validateCustomerForm(
+      { ...valid, secondaryPhone: "+82-10-1234-5678" },
+      { isCreate: false },
+    );
+    expect(errors.secondaryPhone).toBeUndefined();
+    expect(
+      validateCustomerForm({ ...valid, secondaryPhone: "abc" }, { isCreate: false }).secondaryPhone,
+    ).toBeDefined();
+  });
+});
+
 describe("고객 병합 규칙", () => {
   const older = buildMockCustomer({
     customerId: 20,

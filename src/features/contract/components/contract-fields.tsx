@@ -126,6 +126,7 @@ function PartyEditor({
           <TextField
             label={`${legend} ${index + 1} 연락처`}
             kind="tel"
+            allowInternational
             value={party.phone}
             onValueChange={(phone) => update(party.key, { phone })}
           />
