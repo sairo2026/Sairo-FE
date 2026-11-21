@@ -12,7 +12,9 @@ export default async function Page({ params }: { params: Promise<{ token: string
   const { token } = await params;
   return (
     <ApproverLayout>
-      <ApproverLinkScreen token={token} />
+      <div data-public-contrast className="contents">
+        <ApproverLinkScreen token={token} />
+      </div>
     </ApproverLayout>
   );
 }

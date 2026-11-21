@@ -6,9 +6,9 @@ export const metadata: Metadata = { title: "이메일 가입" };
 
 export default function SignupEmailPage() {
   return (
-    <>
+    <div data-public-contrast className="contents">
       <SignedInRedirect />
       <SignupEmailFlow />
-    </>
+    </div>
   );
 }

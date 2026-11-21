@@ -8,5 +8,9 @@ type Props = { searchParams: Promise<{ token?: string }> };
 
 export default async function Page({ searchParams }: Props) {
   const { token } = await searchParams;
-  return <SignupEmailFlow token={normalizeLinkToken(token) ?? undefined} />;
+  return (
+    <div data-public-contrast className="contents">
+      <SignupEmailFlow token={normalizeLinkToken(token) ?? undefined} />
+    </div>
+  );
 }
