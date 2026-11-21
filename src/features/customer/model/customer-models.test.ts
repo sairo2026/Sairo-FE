@@ -74,7 +74,7 @@ describe("고객 입력 검증", () => {
       { ...valid, phone: "1234", secondaryPhone: "010", email: "abc" },
       { isCreate: true },
     );
-    expect(errors.phone).toContain("010-0000-0000");
+    expect(errors.phone).toContain("7~15자리");
     expect(errors.secondaryPhone).toBeDefined();
     expect(errors.email).toBeDefined();
   });
@@ -127,6 +127,18 @@ describe("고객 연락처 검증은 서버 규칙보다 엄격하지 않다", (
     "010.1234.5678",
   ])("서버가 거절하는 %s는 화면에서도 거절한다", (phone) => {
     expect(phoneError(phone)).toBeDefined();
+  });
+
+  it("보존 중인 기존 값으로 수정한 경우만 예외로 둔다", () => {
+    const original = { phone: "기존 값", secondaryPhone: null };
+    expect(
+      validateCustomerForm({ ...valid, phone: original.phone }, { isCreate: false, original })
+        .phone,
+    ).toBeUndefined();
+    expect(
+      validateCustomerForm({ ...valid, phone: "다른 값" }, { isCreate: false, original }).phone,
+    ).toBeDefined();
+    expect(toUpdateRequest({ ...valid, phone: "1".repeat(15) }).phone).toBe("1".repeat(15));
   });
 
   it("보조 연락처도 같은 규칙을 쓴다", () => {

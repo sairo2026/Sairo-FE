@@ -27,7 +27,7 @@ export type TextFieldProps = Omit<
   /** 인증 상태 문구. */
   statusText?: ReactNode;
   required?: boolean;
-  /** 전화번호 입력(kind tel)에서 +로 시작하는 국가번호 번호를 그대로 받는다. */
+  /** 인증용 전화번호 형식으로 변환하지 않고 업무 연락처 입력값을 보존한다. */
   allowInternational?: boolean;
 };
 
