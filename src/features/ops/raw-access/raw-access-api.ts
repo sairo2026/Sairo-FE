@@ -129,14 +129,3 @@ export async function fetchGrantFile(
   if (!response.ok) throw await toApiError(response);
   return { blob: await response.blob(), sha256: response.headers.get("X-Content-SHA256") };
 }
-
-export function saveBlob(blob: Blob, fileName: string): void {
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = fileName;
-  document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
-  URL.revokeObjectURL(url);
-}

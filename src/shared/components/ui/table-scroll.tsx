@@ -35,7 +35,10 @@ export function TableScroll({ label, children, className }: TableScrollProps) {
         role={isOverflowing ? "group" : undefined}
         aria-label={isOverflowing ? `${label} 가로 스크롤` : undefined}
         tabIndex={isOverflowing ? 0 : undefined}
-        className={cn("scroll-area overflow-x-auto", className)}
+        className={cn(
+          "scroll-area overflow-x-auto focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary",
+          className,
+        )}
       >
         {children}
       </div>

@@ -14,6 +14,7 @@ import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import { PageHeader } from "@/shared/components/ui/page-header";
 import { Checkbox } from "@/shared/components/ui/select-field";
+import { TableScroll } from "@/shared/components/ui/table-scroll";
 import { fetchWithdrawalPreview, withdrawAccount } from "../api/account.api";
 import { WITHDRAWAL_COPY, describeRetentionPeriod } from "../model/withdrawal-copy";
 
@@ -36,7 +37,10 @@ function RetainedItemsTable({ items }: { items: WithdrawalPreviewResponse["retai
     <section aria-label={WITHDRAWAL_COPY.retainedTitle} className="flex flex-col gap-3">
       <h2 className="text-h2 font-semibold text-ink">{WITHDRAWAL_COPY.retainedTitle}</h2>
       <p className="text-caption text-ink-2">{WITHDRAWAL_COPY.retainedIntro}</p>
-      <div className="overflow-x-auto rounded-control border border-line">
+      <TableScroll
+        label={WITHDRAWAL_COPY.retainedTitle}
+        className="rounded-control border border-line"
+      >
         <table className="w-full min-w-[34rem] border-collapse text-left text-caption">
           <caption className="sr-only">{WITHDRAWAL_COPY.retainedTitle}</caption>
           <thead className="bg-surface">
@@ -61,7 +65,7 @@ function RetainedItemsTable({ items }: { items: WithdrawalPreviewResponse["retai
             ))}
           </tbody>
         </table>
-      </div>
+      </TableScroll>
       <p className="text-caption text-ink-2">{WITHDRAWAL_COPY.retainedFooter}</p>
     </section>
   );

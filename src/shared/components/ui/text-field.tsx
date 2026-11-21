@@ -27,6 +27,8 @@ export type TextFieldProps = Omit<
   /** 인증 상태 문구. */
   statusText?: ReactNode;
   required?: boolean;
+  /** 전화번호 입력(kind tel)에서 +로 시작하는 국가번호 번호를 그대로 받는다. */
+  allowInternational?: boolean;
 };
 
 const inputTypeByKind: Record<TextFieldKind, string> = {
@@ -49,6 +51,7 @@ export function TextField({
   timerText,
   statusText,
   required,
+  allowInternational,
   id,
   className,
   maxLength,
@@ -62,7 +65,7 @@ export function TextField({
   const hasMessage = Boolean(error || hint || statusText);
 
   function handleChange(raw: string) {
-    if (kind === "tel") return onValueChange(formatPhone(raw));
+    if (kind === "tel") return onValueChange(formatPhone(raw, allowInternational));
     if (kind === "number") return onValueChange(raw.replace(/\D/g, ""));
     return onValueChange(raw);
   }

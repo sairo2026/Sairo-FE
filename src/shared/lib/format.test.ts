@@ -9,6 +9,7 @@ import {
   formatSeoulDate,
   formatSeoulDateTime,
   formatTimeSlot,
+  isContactNumber,
   isValidTitle,
 } from "./format";
 
@@ -43,6 +44,42 @@ describe("format", () => {
     expect(formatPhone("010")).toBe("010");
     expect(formatPhone("0212345678")).toBe("02-1234-5678");
     expect(formatPhone("abc010-1234")).toBe("010-1234");
+  });
+
+  it("국가번호를 허용하면 +로 시작하는 번호는 입력한 그대로 둔다", () => {
+    expect(formatPhone("+82-10-1234-5678", true)).toBe("+82-10-1234-5678");
+    expect(formatPhone("+82 10 1234 5678", true)).toBe("+82 10 1234 5678");
+    expect(formatPhone("+8210abc", true)).toBe("+8210");
+    expect(formatPhone("+82+10", true)).toBe("+8210");
+    expect(formatPhone("+" + "1".repeat(40), true)).toHaveLength(30);
+    expect(formatPhone("01012345678", true)).toBe("010-1234-5678");
+  });
+
+  it("국가번호를 허용하면 11자리를 넘는 숫자는 서버 허용 범위까지 자르지 않는다", () => {
+    expect(formatPhone("123456789012345", true)).toBe("123456789012345");
+    expect(isContactNumber(formatPhone("123456789012345", true))).toBe(true);
+    expect(formatPhone("821012345678", true)).toBe("821012345678");
+    expect(formatPhone("(82) 10-1234-5678 ", true)).toBe("(82) 10-1234-5678 ");
+    expect(formatPhone("１２３４５６７８９０１２", true)).toBe("");
+    expect(formatPhone("1".repeat(40), true)).toHaveLength(30);
+    expect(formatPhone("1234567890123456", true)).toBe("1234567890123456");
+    expect(isContactNumber(formatPhone("1234567890123456", true))).toBe(false);
+    expect(formatPhone("010123456789", false)).toBe("010-1234-5678");
+  });
+
+  it("국가번호를 허용하지 않는 입력은 +를 지우고 숫자만 남긴다", () => {
+    expect(formatPhone("+8210")).toBe("821-0");
+  });
+
+  it("연락처 형식은 서버 규칙과 같다", () => {
+    expect(isContactNumber("010-1234-5678")).toBe(true);
+    expect(isContactNumber(" +82 10 1234 5678 ")).toBe(true);
+    expect(isContactNumber("(02) 123-4567")).toBe(true);
+    expect(isContactNumber("123456")).toBe(false);
+    expect(isContactNumber("1234567890123456")).toBe(false);
+    expect(isContactNumber("82+10-1234-5678")).toBe(false);
+    expect(isContactNumber("010-1234-5678".padEnd(31, "-"))).toBe(false);
+    expect(isContactNumber("")).toBe(false);
   });
 
   it("이름·제목은 공백 제거 후 1~100자만 허용한다", () => {

@@ -37,8 +37,10 @@ export function landingPathFor(context: AccessInfo): string {
 }
 
 export function safeNextPath(next: string | null | undefined): string | null {
-  if (!next) return null;
-  if (!next.startsWith("/") || next.startsWith("//") || next.includes("\\")) return null;
-  if (next.startsWith("/login") || next.startsWith("/signup")) return null;
-  return next;
+  if (!next?.startsWith("/") || next.startsWith("//") || /[\\\p{Cc}]/u.test(next)) return null;
+  const base = "https://internal.invalid";
+  const target = new URL(next, base);
+  if (target.origin !== base || target.pathname.startsWith("//")) return null;
+  if (target.pathname.startsWith("/login") || target.pathname.startsWith("/signup")) return null;
+  return target.pathname + target.search + target.hash;
 }

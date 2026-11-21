@@ -3,7 +3,7 @@ import type {
   CustomerUpdateRequest,
 } from "@/lib/api/contracts/customer.schema";
 import type { CustomerDetail } from "../api/wire";
-import { countCodePoints, TEXT_LIMITS } from "@/shared/lib/format";
+import { countCodePoints, isContactNumber, TEXT_LIMITS } from "@/shared/lib/format";
 import { htmlMarkupError } from "@/shared/lib/html-markup";
 import { objectParticle, topicParticle } from "@/shared/lib/korean";
 import { PROCESSING_BASES } from "./labels";
@@ -40,7 +40,6 @@ export const EMPTY_CUSTOMER_FORM: CustomerFormValues = {
   retentionUntil: "",
 };
 
-const PHONE_PATTERN = /^0\d{1,2}-\d{3,4}-\d{4}$/;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const RESIDENT_NUMBER_PATTERN = /\d{6}\s?-?\s?[1-8]\d{6}/;
 const SOURCE_MAX = 100;
@@ -94,12 +93,14 @@ export function validateCustomerForm(
   if (name === "") errors.name = `${objectParticle(nameLabel)} 입력해 주세요.`;
   else errors.name = lengthError(nameLabel, name, TEXT_LIMITS.title) ?? sensitiveError(name);
   const phone = values.phone.trim();
-  if (phone !== "" && !PHONE_PATTERN.test(phone)) {
-    errors.phone = "연락처를 010-0000-0000 형식으로 입력해 주세요.";
+  if (phone !== "" && !isContactNumber(phone)) {
+    errors.phone =
+      "연락처 형식을 확인해 주세요. 010-0000-0000처럼 숫자와 하이픈으로 입력해 주세요.";
   }
   const secondary = values.secondaryPhone.trim();
-  if (secondary !== "" && !PHONE_PATTERN.test(secondary)) {
-    errors.secondaryPhone = "보조 연락처를 010-0000-0000 형식으로 입력해 주세요.";
+  if (secondary !== "" && !isContactNumber(secondary)) {
+    errors.secondaryPhone =
+      "보조 연락처 형식을 확인해 주세요. 010-0000-0000처럼 숫자와 하이픈으로 입력해 주세요.";
   }
   const email = values.email.trim();
   if (email !== "" && !EMAIL_PATTERN.test(email)) {

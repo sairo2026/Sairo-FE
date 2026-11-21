@@ -48,7 +48,7 @@ function StatCard({
     <Link
       href={href}
       aria-label={`${title} ${value}${label}`}
-      className={`group flex flex-col rounded-card border border-line bg-white px-7 py-8 clickable-card ${icon ? "gap-[52px] lg:h-[254px]" : "gap-10"}`}
+      className={`group flex flex-col rounded-card border border-line bg-white px-6 py-6 clickable-card ${icon ? "gap-10 lg:h-[214px]" : "gap-8"}`}
     >
       <span className="flex flex-col gap-3">
         {icon ? (
@@ -89,7 +89,7 @@ function StatCard({
         </span>
         {hint ? <span className="text-caption font-normal text-ink-3">{hint}</span> : null}
       </span>
-      <span className="text-[64px] font-semibold leading-[60px] text-primary">{value}</span>
+      <span className="text-[56px] font-semibold leading-[52px] text-primary">{value}</span>
     </Link>
   );
 }
@@ -131,7 +131,7 @@ function FirstUseGuide({ isOwner, needsCard }: { isOwner: boolean; needsCard: bo
   return (
     <section
       aria-labelledby="home-first-use"
-      className="flex flex-col gap-4 rounded-card border border-line bg-white px-7 py-6"
+      className="flex flex-col gap-4 rounded-card border border-line bg-white px-6 py-5"
     >
       <div className="flex flex-col gap-1">
         <h2 id="home-first-use" className="text-h2 font-semibold text-ink">
@@ -182,7 +182,7 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
           }
         />
       </div>
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-[repeat(3,minmax(0,326px))]">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-[repeat(3,minmax(0,292px))]">
         <StatCard
           href="/coordinations"
           title="오늘 방문 목록"
@@ -257,10 +257,10 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
           />
         </div>
       </section>
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[443px_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[400px_minmax(0,1fr)]">
         <section
           aria-labelledby="home-tasks"
-          className="flex flex-col gap-5 rounded-card border border-line bg-white p-8"
+          className="flex flex-col gap-5 rounded-card border border-line bg-white p-6"
         >
           <div className="flex items-center justify-between gap-3">
             <h2 id="home-tasks" className="text-h2 font-semibold text-ink">
@@ -396,7 +396,7 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
         <div className="flex flex-col gap-5">
           <section
             aria-labelledby="home-status"
-            className="rounded-card border border-line bg-white p-8"
+            className="rounded-card border border-line bg-white p-6"
           >
             <h2 id="home-status" className="mb-4 text-h2 font-semibold text-ink">
               방문 조율 현황
@@ -418,7 +418,7 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
           </section>
           <section
             aria-labelledby="home-calendar"
-            className="rounded-card border border-line bg-white p-8"
+            className="rounded-card border border-line bg-white p-6"
           >
             <h2 id="home-calendar" className="mb-4 text-h2 font-semibold text-ink">
               캘린더

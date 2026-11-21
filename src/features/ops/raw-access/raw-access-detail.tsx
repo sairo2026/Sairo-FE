@@ -11,7 +11,8 @@ import { OpsReasonDialog } from "../components/common/ops-reason-dialog";
 import { OpsScreen } from "../components/common/ops-screen";
 import { OpsStatusBadge } from "../components/common/ops-status-badge";
 import { useHasOpsRole, useOpsSession } from "../model/ops-session";
-import { saveBlob, useRawAccessActions, useRawAccessDetail } from "./raw-access-api";
+import { saveBlob } from "@/shared/lib/save-blob";
+import { useRawAccessActions, useRawAccessDetail } from "./raw-access-api";
 import {
   ACCESS_WINDOW_MINUTES,
   APPROVAL_VALID_HOURS,

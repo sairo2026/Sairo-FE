@@ -12,6 +12,9 @@ import type { ErrorAudience } from "./error-audience";
 
 type ScreenCopy = { title: string; description: string; isAlert: boolean };
 
+// Spring sends a UUID and Next.js sends a decimal digest for server errors.
+const SUPPORT_REFERENCE = /^(?:[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}|\d{1,10})$/i;
+
 export const ERROR_SCREEN_COPY: Record<ErrorScreenKind, ScreenCopy> = {
   unauthenticated: {
     title: "로그인이 필요합니다",
@@ -177,7 +180,9 @@ export function ErrorScreen({
         {title ?? copy.title}
       </h1>
       <p className="text-body text-ink-2">{description ?? copy.description}</p>
-      {traceId ? <p className="text-caption text-ink-3">문의 번호: {traceId}</p> : null}
+      {traceId && SUPPORT_REFERENCE.test(traceId) ? (
+        <p className="text-caption text-ink-3">문의 번호: {traceId}</p>
+      ) : null}
       <div className="mt-2 flex flex-wrap justify-center gap-2">
         {onRetry && isRetryable(kind) ? (
           <RetryAction key={waitSeconds} seconds={waitSeconds} onRetry={onRetry} />

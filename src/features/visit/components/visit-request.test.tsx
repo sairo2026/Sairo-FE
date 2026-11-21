@@ -104,6 +104,23 @@ describe("방문 신청", () => {
     );
   });
 
+  it("신청 저장이 실패해도 선택한 구간을 잃지 않고 자동 재제출하지 않는다", async () => {
+    prepare();
+    const submit = vi.fn(() => mockErrors.server());
+    server.use(http.post("/api/visit-coordinations/801/visit-requests", submit));
+    const user = userEvent.setup();
+    renderOffice(<CoordinationDetailScreen coordinationId={801} />, { role: "AGENT" });
+    await openForm(user);
+    await pickSlot(user);
+    await user.click(screen.getByRole("button", { name: "방문 신청 제출" }));
+    await screen.findAllByText(/일시적인 오류가 발생했습니다/);
+    expect(getMockVisitRequestState().requests).toHaveLength(0);
+    expect(submit).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("button", { name: "방문 신청 제출" })).not.toBeNull();
+    await user.click(screen.getByRole("button", { name: "방문 신청 제출" }));
+    await waitFor(() => expect(submit).toHaveBeenCalledTimes(2));
+  });
+
   it("구간을 고르면 구간 전체가 아니라 일정 구성의 방문 소요시간만큼만 채운다", async () => {
     prepare({ visitDurationMinutes: 30 });
     const user = userEvent.setup();

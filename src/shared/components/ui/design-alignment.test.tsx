@@ -3,6 +3,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { OfficeLayout, OpsLayout } from "@/shared/layouts/layouts";
 import { Badge, DDayTag, ScheduleTag, TradeTypeTag } from "./badge";
+import { Button } from "./button";
 import { Chip } from "./chip";
 import { DateTimeField } from "./date-time-field";
 import { Modal } from "./modal";
@@ -12,6 +13,14 @@ import { TextAreaField } from "./textarea-field";
 import { TextField } from "./text-field";
 
 afterEach(cleanup);
+
+describe("버튼 규격", () => {
+  it("기본 버튼은 내용 사이에 8px 간격을 둔다", () => {
+    render(<Button isLoading>저장</Button>);
+
+    expect(screen.getByRole("button", { name: "저장" }).classList.contains("gap-2")).toBe(true);
+  });
+});
 
 describe("폼 라벨 규격", () => {
   it("라벨은 20 SemiBold이고 필수 별표는 Red2 색이며 스크린리더가 읽지 않는다", () => {
@@ -82,7 +91,7 @@ describe("선택 버튼과 태그 규격", () => {
     expect(screen.getByRole("button", { name: "전체" }).className).toContain("min-h-11");
   });
 
-  it("거래유형 태그는 16 Medium, D-Day 태그는 90일 이내만 SemiBold이다", () => {
+  it("거래유형은 직각 태그로 표시하고 만기 태그는 같은 여백을 쓴다", () => {
     render(
       <>
         <TradeTypeTag type="jeonse" />
@@ -92,9 +101,13 @@ describe("선택 버튼과 태그 규격", () => {
       </>,
     );
     expect(screen.getByText("전세").className).toContain("text-body");
+    expect(screen.getByText("전세").className).not.toContain("rounded-control");
     expect(screen.getByText("D-30").className).toContain("font-semibold");
     expect(screen.getByText("D-200").className).toContain("text-ink-2");
     expect(screen.getByText("없음").className).toContain("text-ink-3");
+    for (const label of ["D-30", "D-200", "없음"]) {
+      expect(screen.getByText(label).className).toContain("px-5");
+    }
   });
 
   it("조율 현황 칸은 상태 이름과 건수를 한 덩어리로 보여준다", () => {
@@ -158,14 +171,14 @@ describe("모달과 사이드 메뉴 규격", () => {
     expect(screen.getByRole("link", { name: "나" }).className).toContain("text-h2");
   });
 
-  it("사무소 레이아웃은 사이드바 폭 220을 쓰고 홈은 board 바탕을 쓴다", () => {
+  it("사무소 레이아웃은 사이드바 폭 200을 쓰고 홈은 board 바탕을 쓴다", () => {
     const { container, rerender } = render(
       <OfficeLayout activeKey="home">
         <p>본문</p>
       </OfficeLayout>,
     );
     const root = container.firstElementChild as HTMLElement;
-    expect(root.className).toContain("lg:grid-cols-[220px_minmax(0,1fr)]");
+    expect(root.className).toContain("lg:grid-cols-[200px_minmax(0,1fr)]");
     expect(root.className).toContain("bg-white");
     rerender(
       <OfficeLayout activeKey="home" tone="board">

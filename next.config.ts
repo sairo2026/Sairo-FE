@@ -4,13 +4,30 @@ const API_PROXY_TARGET = process.env.API_PROXY_TARGET ?? "http://localhost:8080"
 
 const IS_API_MOCKING = process.env.NEXT_PUBLIC_API_MOCKING === "enabled";
 
+const REPORT_ONLY_POLICY = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'none'",
+  "form-action 'self'",
+  "script-src 'self' https://js.tosspayments.com",
+  "style-src 'self' 'unsafe-inline'",
+  "font-src 'self'",
+  "img-src 'self' blob: data:",
+  "connect-src 'self'",
+  "frame-src 'self'",
+].join("; ");
+
 const TOKEN_LINK_PATHS = [
+  "/billing/card/result",
+  "/ops/invitations/accept",
   "/signup/verify-email",
   "/password/reset",
   "/unsubscribe",
   "/settings/login-methods/verify-email",
   "/settings/login-methods/kakao-callback",
   "/auth/kakao/step-up/callback",
+  "/grant/verify",
   "/settings/contact/verify-email",
 ];
 
@@ -31,6 +48,14 @@ const nextConfig: NextConfig = {
       { key: "Cache-Control", value: "no-store" },
     ];
     return [
+      ...(process.env.NODE_ENV === "production"
+        ? [
+            {
+              source: "/:path*",
+              headers: [{ key: "Content-Security-Policy-Report-Only", value: REPORT_ONLY_POLICY }],
+            },
+          ]
+        : []),
       { source: "/visit-responses/:path*", headers: noReferrerHeaders },
       ...TOKEN_LINK_PATHS.map((source) => ({ source, headers: noReferrerHeaders })),
     ];

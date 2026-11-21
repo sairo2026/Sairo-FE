@@ -437,6 +437,24 @@ describe("실행 결과", () => {
     expect(screen.getByText(/고객 9001: 외부 연결이 생긴 항목/)).not.toBeNull();
   });
 
+  it("취소 요청이 실패하면 완료 기록을 유지하고 자동으로 다시 취소하지 않는다", async () => {
+    let submissions = 0;
+    server.use(
+      http.post("/api/import-batches/:batchId/cancel", () => {
+        submissions += 1;
+        return mockErrors.server();
+      }),
+    );
+    const user = userEvent.setup();
+    openBatch(301);
+    await user.click(await screen.findByRole("button", { name: "이전 취소" }));
+    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "이전 취소" }));
+    await screen.findAllByText(/일시적인 오류가 발생했습니다/);
+    expect(screen.getByText("실행 결과")).not.toBeNull();
+    expect(screen.queryByText("55건을 취소했습니다.")).toBeNull();
+    expect(submissions).toBe(1);
+  });
+
   it("취소할 수 없으면 사유 문구를 보여준다", async () => {
     server.use(
       http.post("/api/import-batches/:batchId/cancel", () =>

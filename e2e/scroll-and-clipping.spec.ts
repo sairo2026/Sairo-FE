@@ -6,6 +6,37 @@ import { fixMockClock } from "./support/scenario";
 // 모의 자료가 적어도 문서가 스크롤되도록 뷰포트 높이를 낮춰서 본다.
 const SHORT_VIEWPORT_HEIGHT = 320;
 
+for (const [route, tableCount, name = /가로 스크롤$/] of [
+  ["/account/withdrawal", 1],
+  ["/billing/refunds", 1, "환불 기준 가로 스크롤"],
+  ["/legal/privacy", 4],
+  ["/legal/processing-outsourcing", 1],
+  ["/legal/refund-policy", 1],
+  ["/ops/integrations/1/contract-copies", 1],
+  ["/signup/email", 1],
+  ["/signup/kakao", 1],
+  ["/signup/verify-email", 1],
+  ["/support", 1, "위탁 업체 목록 표 가로 스크롤"],
+] as const) {
+  test(`${route}: 키보드로 넓은 표를 가로 스크롤한다`, async ({ page }) => {
+    await useMockOfficeRole(page, "OWNER");
+    await page.setViewportSize({ width: 390, height: 800 });
+    await page.goto(route);
+    await settle(page);
+
+    const containers = page.getByRole("group", { name, exact: true });
+    await expect(containers).toHaveCount(tableCount);
+    for (const container of await containers.all()) {
+      await expect(container).toHaveAttribute("tabindex", "0");
+      await container.focus();
+      await page.keyboard.press("ArrowRight");
+      await expect
+        .poll(() => container.evaluate((element) => element.scrollLeft))
+        .toBeGreaterThan(0);
+    }
+  });
+}
+
 async function shrinkViewport(page: Page) {
   const size = page.viewportSize();
   if (!size) throw new Error("뷰포트 크기를 알 수 없습니다.");

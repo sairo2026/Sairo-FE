@@ -157,9 +157,19 @@ describe("OfficeAccessGate", () => {
 
   it("서버 오류는 오류 화면과 추적 번호를 보여주고 다시 시도하면 복구한다", async () => {
     let shouldFail = true;
+    const reference = "00000000-0000-4000-8000-000000000001";
     server.use(
       http.get("/api/auth/context", () =>
-        shouldFail ? mockErrors.server() : Response.json(MOCK_ACTIVE_CONTEXT),
+        shouldFail
+          ? Response.json(
+              {
+                code: "INTERNAL_ERROR",
+                message: "Internal diagnostic information",
+                traceId: reference,
+              },
+              { status: 500 },
+            )
+          : Response.json(MOCK_ACTIVE_CONTEXT),
       ),
     );
     renderWithQuery(
@@ -171,7 +181,8 @@ describe("OfficeAccessGate", () => {
       () => expect(screen.getByRole("heading", { name: "문제가 발생했습니다" })).not.toBeNull(),
       { timeout: 4000 },
     );
-    expect(screen.getByText("문의 번호: mock-trace-0001")).not.toBeNull();
+    expect(screen.getByText(`문의 번호: ${reference}`)).not.toBeNull();
+    expect(screen.queryByText("Internal diagnostic information")).toBeNull();
     shouldFail = false;
     await userEvent.click(screen.getByRole("button", { name: "다시 시도" }));
     await waitFor(() => expect(screen.getByText("업무 화면 AGENT 쓰기가능")).not.toBeNull());
@@ -502,6 +513,32 @@ describe("AuthEventsProvider", () => {
     server.use(http.get("/api/work", () => mockErrors.reconsentRequired()));
     await expect(apiFetch("/api/work")).rejects.toMatchObject({ status: 403 });
     await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/reconsent"));
+  });
+
+  it("쓰기 제한 응답 뒤 접근 상태를 다시 조회해 현재 화면을 읽기 전용으로 바꾼다", async () => {
+    let writes = 0;
+    server.use(
+      http.post("/api/work", () => {
+        writes += 1;
+        setMockAuthContext(contextOf({ accessCondition: "PAYMENT_OVERDUE" }));
+        return Response.json(
+          { code: "OFFICE_WRITE_RESTRICTED", message: "읽기 전용" },
+          { status: 403 },
+        );
+      }),
+    );
+    renderWithQuery(
+      <AuthEventsProvider>
+        <OfficeAccessGate>
+          <AccessProbe />
+        </OfficeAccessGate>
+      </AuthEventsProvider>,
+    );
+    await screen.findByText("업무 화면 AGENT 쓰기가능");
+    await expect(apiFetch("/api/work", { method: "POST" })).rejects.toMatchObject({ status: 403 });
+    await screen.findByText(/업무 화면 AGENT 읽기/);
+    expect(writes).toBe(1);
+    expect(navigation.replace).not.toHaveBeenCalled();
   });
 
   it("재인증 대화상자에서 비밀번호를 확인하면 막혔던 요청이 이어서 성공한다", async () => {
