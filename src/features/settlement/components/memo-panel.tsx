@@ -99,7 +99,7 @@ function MemoEditor({ yearMonth, memo }: { yearMonth: string; memo: MonthlyMemoR
         aria-invalid={error ? true : undefined}
         className="w-full rounded-control border border-line px-4 py-3 text-body text-ink focus:border-primary"
       />
-      <div className="flex items-center justify-between text-caption text-ink-3">
+      <div className="flex items-center justify-between text-caption text-muted">
         <span>
           {countCodePoints(text)} / {MEMO_LIMIT}자
         </span>

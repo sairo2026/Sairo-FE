@@ -8,20 +8,20 @@ const member = newMember("실API스모크");
 test.describe.configure({ mode: "serial" });
 
 test("스모크 1 헬스", async ({ request }) => {
-  const response = await request.get(`${API_ORIGIN}/actuator/health`);
+  const response = await request.get(`${API_ORIGIN}/actuator/health`, { maxRedirects: 0 });
   expect(response.status()).toBe(200);
   expect(((await response.json()) as { status: string }).status).toBe("UP");
 });
 
 test("스모크 2 공개 요금은 게시된 요금표를 돌려준다", async ({ request }) => {
-  const response = await request.get(`${API_ORIGIN}/api/public/pricing`);
+  const response = await request.get(`${API_ORIGIN}/api/public/pricing`, { maxRedirects: 0 });
   expect(response.status()).toBe(200);
   const body = (await response.json()) as { plans: { baseAmount: number }[] };
   expect(body.plans.length).toBeGreaterThan(0);
 });
 
 test("스모크 3 사업자 정보에 사업자명과 번호가 있다", async ({ request }) => {
-  const response = await request.get(`${API_ORIGIN}/api/public/company-info`);
+  const response = await request.get(`${API_ORIGIN}/api/public/company-info`, { maxRedirects: 0 });
   expect(response.status()).toBe(200);
   const body = (await response.json()) as Record<string, string | null>;
   expect(body.businessName).toBeTruthy();
@@ -30,7 +30,7 @@ test("스모크 3 사업자 정보에 사업자명과 번호가 있다", async (
 });
 
 test("스모크 4 약관 목록과 약관 페이지", async ({ page, request }) => {
-  const terms = await request.get(`${API_ORIGIN}/api/terms`);
+  const terms = await request.get(`${API_ORIGIN}/api/terms`, { maxRedirects: 0 });
   expect(terms.status()).toBe(200);
   for (const path of ["/legal/terms", "/legal/privacy", "/legal/refund-policy", "/pricing"]) {
     const response = await page.goto(path);
@@ -40,7 +40,7 @@ test("스모크 4 약관 목록과 약관 페이지", async ({ page, request }) 
 });
 
 test("스모크 5 비로그인 컨텍스트는 401이다", async ({ request }) => {
-  const response = await request.get(`${API_ORIGIN}/api/auth/context`);
+  const response = await request.get(`${API_ORIGIN}/api/auth/context`, { maxRedirects: 0 });
   expect(response.status()).toBe(401);
 });
 
@@ -62,12 +62,15 @@ test("스모크 6 가입과 8 로그인과 로그아웃", async ({ page, request
 test("스모크 7 카카오 시작은 인가 화면으로 302를 돌려준다", async ({ request }) => {
   const response = await request.get(`${API_ORIGIN}/api/auth/kakao/start`, { maxRedirects: 0 });
   expect(response.status()).toBe(302);
-  expect(response.headers()["location"]).toContain("state=");
+  const location = new URL(response.headers()["location"] ?? "about:blank");
+  expect(location.origin).toBe("https://kauth.stub.invalid");
+  expect(location.searchParams.has("state")).toBeTruthy();
 });
 
 test("스모크 9 카카오 연결 해제 웹훅은 3초 안에 응답한다", async ({ request }) => {
   const started = Date.now();
   const response = await request.post(`${API_ORIGIN}/api/webhooks/kakao/unlink`, {
+    maxRedirects: 0,
     data: {},
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
   });

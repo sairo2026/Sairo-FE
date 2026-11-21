@@ -253,7 +253,7 @@ export function PropertyListScreen() {
       widthClass: "w-[260px]",
       render: (row: Row) => {
         const offers = row.activeOfferSummary;
-        if (offers.length === 0) return <span className="text-ink-3">제안 없음</span>;
+        if (offers.length === 0) return <span className="text-muted">제안 없음</span>;
         return (
           <ul className="flex flex-col gap-1">
             {offers.map((offer) => (

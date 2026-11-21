@@ -37,7 +37,7 @@ function withOptionalMark(children: ReactNode): ReactNode {
     <>
       {base}
       {gap}
-      <span className={cn("font-semibold text-ink-3", gap === "" && "ml-1")}>(선택)</span>
+      <span className={cn("font-semibold text-muted", gap === "" && "ml-1")}>(선택)</span>
     </>
   );
 }

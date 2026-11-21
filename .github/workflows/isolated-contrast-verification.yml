@@ -24,6 +24,7 @@ jobs:
       - run: npm run build
         env:
           NEXT_PUBLIC_API_MOCKING: enabled
+      - run: npx playwright test e2e/public-form-contrast.spec.ts --retries=0
       - name: Measure actual candidate styles in Chromium
         shell: bash
         env:

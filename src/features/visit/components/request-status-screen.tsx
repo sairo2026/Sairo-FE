@@ -69,7 +69,7 @@ function NoticePanel({ requestIds }: { requestIds: number[] }) {
                     <span className="text-caption text-ink-2">
                       {NOTICE_TYPE_DESCRIPTION[item.noticeType] ?? ""}
                     </span>
-                    <span className="text-caption text-ink-3">
+                    <span className="text-caption text-muted">
                       {formatSeoulDateTime(item.createdAt)}
                     </span>
                   </div>

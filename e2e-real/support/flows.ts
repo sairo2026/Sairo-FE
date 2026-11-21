@@ -1,3 +1,5 @@
+import { protectLocalContext } from "./isolation";
+import { FRONT_ORIGIN } from "./env";
 import {
   expect,
   type APIRequestContext,
@@ -107,10 +109,12 @@ export async function forceCheck(locator: Locator) {
 
 export async function openPublicPage(browser: Browser) {
   const context = await browser.newContext({
-    baseURL: "http://localhost:3000",
+    baseURL: FRONT_ORIGIN,
+    serviceWorkers: "block",
     locale: "ko-KR",
     timezoneId: "Asia/Seoul",
   });
+  await protectLocalContext(context);
   const page = await context.newPage();
   page.on("response", async (response) => {
     const url = new URL(response.url());

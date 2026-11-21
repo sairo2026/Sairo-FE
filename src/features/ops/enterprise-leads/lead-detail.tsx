@@ -60,7 +60,7 @@ function StageTracker({ lead }: { lead: LeadDetail }) {
                   ? "rounded-control bg-primary px-4 py-2 text-caption font-bold text-white"
                   : isDone
                     ? "rounded-control bg-primary-soft px-4 py-2 text-caption font-semibold text-primary"
-                    : "rounded-control border border-line px-4 py-2 text-caption text-ink-3"
+                    : "rounded-control border border-line px-4 py-2 text-caption text-muted"
               }
             >
               {isCurrent ? `${LEAD_STATUS[lead.status]?.label ?? lead.status} (현재)` : stage.label}

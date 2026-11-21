@@ -30,7 +30,7 @@ function RowName({ row }: { row: ImportRow }) {
   return (
     <span className="flex flex-col">
       <span className="font-semibold text-ink">{name}</span>
-      {row.sourceId ? <span className="text-ink-3">원본 번호 {row.sourceId}</span> : null}
+      {row.sourceId ? <span className="text-muted">원본 번호 {row.sourceId}</span> : null}
     </span>
   );
 }

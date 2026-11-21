@@ -85,7 +85,7 @@ function TransferTimeline({ view }: { view: TransferView }) {
               className={
                 reached
                   ? "min-w-24 rounded-control border border-primary bg-primary-soft px-4 py-3"
-                  : "min-w-24 rounded-control border border-line bg-surface px-4 py-3 text-ink-3"
+                  : "min-w-24 rounded-control border border-line bg-surface px-4 py-3 text-muted"
               }
             >
               <p className="text-body font-semibold">{label}</p>
