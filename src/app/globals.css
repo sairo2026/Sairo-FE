@@ -16,16 +16,11 @@
   --control-border: #6b7280;
   --text-secondary: #3d4959;
   --text-disabled: #9ca3af;
-  --text-muted: var(--text-disabled);
-  --danger: #ff2c2c;
-  /* 필수 입력 별표. 글자가 아닌 장식이라 3:1 대비 요구 대상이 아니며 필수 여부는 required 속성이 알린다. */
-  --required: #ff5050;
-}
-
-/* 업무 화면의 보조 문구, 선택 표시, 빈 상태는 읽을 수 있어야 한다. */
-[data-workspace] {
+  /* 보조 문구와 오류 글자는 흰 바탕에서 4.5:1 이상이어야 한다. 비활성 글자(--text-disabled)는 별도로 둔다. */
   --text-muted: #596273;
   --danger: #b42318;
+  /* 필수 입력 별표. 글자가 아닌 장식이라 3:1 대비 요구 대상이 아니며 필수 여부는 required 속성이 알린다. */
+  --required: #ff5050;
 }
 
 @theme inline {
