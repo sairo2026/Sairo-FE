@@ -4,9 +4,9 @@ import { protectLocalContext } from "./isolation";
 export { expect } from "@playwright/test";
 
 export const test = base.extend<{ apiFailures: void }>({
-  context: async ({ context }, use) => {
+  context: async ({ context }, run) => {
     await protectLocalContext(context);
-    await use(context);
+    await run(context);
   },
   apiFailures: [
     async ({ page }, use, testInfo) => {
