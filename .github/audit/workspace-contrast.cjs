@@ -54,6 +54,7 @@ async function audit(page) {
         incompleteReasons[key]=(incompleteReasons[key]??0)+1;
       }
     }
+    const reviewDetails=[];
     const scrollRecheck = {inactive:0,passed:0,failed:0,stillNeedsReview:0,unavailable:0};
     const targets = result.incomplete.flatMap(rule => rule.nodes)
       .map(node=>document.querySelector(node.target[0]));
@@ -70,11 +71,40 @@ async function audit(page) {
       await new Promise(resolve=>window.requestAnimationFrame(()=>window.requestAnimationFrame(resolve)));
       const recheck = await window.axe.run(element,{runOnly:{type:"rule",values:["color-contrast"]}});
       if (recheck.violations.length) scrollRecheck.failed++;
-      else if (recheck.incomplete.length) scrollRecheck.stillNeedsReview++;
+      else if (recheck.incomplete.length) {
+        scrollRecheck.stillNeedsReview++;
+        const rect=element.getBoundingClientRect();
+        const x=Math.min(innerWidth-1,Math.max(0,(rect.left+rect.right)/2));
+        const y=Math.min(innerHeight-1,Math.max(0,(rect.top+rect.bottom)/2));
+        const hit=document.elementsFromPoint(x,y)[0];
+        const scroll=element.closest("nav");
+        const ranges=[];
+        for (const child of element.childNodes) {
+          if (child.nodeType===3 && child.textContent.trim()) {
+            const range=document.createRange();
+            range.selectNode(child);
+            ranges.push(...range.getClientRects());
+          }
+        }
+        const styles=getComputedStyle(element);
+        const backgrounds=[];
+        for (let at=element; at&&backgrounds.length<8; at=at.parentElement) {
+          const cs=getComputedStyle(at);
+          backgrounds.push({color:cs.backgroundColor,image:cs.backgroundImage!=="none",opacity:cs.opacity});
+          if(/^rgb\(/.test(cs.backgroundColor))break;
+        }
+        reviewDetails.push({
+          tag:element.tagName,region:element.closest("nav,header,main,table")?.tagName,
+          foreground:styles.color,font:styles.fontSize,backgrounds,
+          overlapsAtCenter:Boolean(hit&&!element.contains(hit)&&!hit.contains(element)),
+          allTextLinesInsideViewport:ranges.length>0&&ranges.every(r=>r.left>=0&&r.top>=0&&r.right<=innerWidth&&r.bottom<=innerHeight),
+          horizontalMenu:scroll?.scrollWidth>scroll?.clientWidth,
+        });
+      }
       else if (recheck.passes.length) scrollRecheck.passed++;
       else scrollRecheck.unavailable++;
     }
-    return {failures,incomplete:result.incomplete.reduce((a,v)=>a+v.nodes.length,0),incompleteReasons,scrollRecheck};
+    return {failures,incomplete:result.incomplete.reduce((a,v)=>a+v.nodes.length,0),incompleteReasons,scrollRecheck,reviewDetails};
   });
 }
 (async()=>{
