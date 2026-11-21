@@ -2,6 +2,7 @@
 
 /* 디자인 토큰: 값은 디자인 파일의 색상·글자 스타일 정의를 옮긴 것이다. */
 :root {
+  --font-pretendard: "Pretendard Variable";
   --background: #ffffff;
   --foreground: #111827;
   --primary: #3335a6;

@@ -22,8 +22,17 @@ export function CreateLink({
   children: ReactNode;
   isDisabled?: boolean;
 }) {
+  if (isDisabled) {
+    // 비활성일 때는 링크 요소를 쓰지 않아 Tab 이동과 Enter 실행이 모두 막힌다.
+    return (
+      <span role="link" aria-disabled="true" className={CREATE_CLASS}>
+        <PlusIcon />
+        {children}
+      </span>
+    );
+  }
   return (
-    <Link href={href} aria-disabled={isDisabled || undefined} className={CREATE_CLASS}>
+    <Link href={href} className={CREATE_CLASS}>
       <PlusIcon />
       {children}
     </Link>
