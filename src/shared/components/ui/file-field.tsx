@@ -61,7 +61,7 @@ export function FileField({
         <span
           className={cn(
             "min-w-0 flex-1 truncate text-body",
-            file ? "font-medium text-ink" : "text-ink-3",
+            file ? "font-medium text-ink" : "text-muted",
           )}
         >
           {file ? file.name : placeholder}

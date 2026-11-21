@@ -60,7 +60,7 @@ export function PublicSiteLayout({ children, footer }: LayoutProps & { footer?: 
 export function ApproverLayout({ children }: LayoutProps) {
   return (
     <ToastProvider>
-      <div className="min-h-dvh bg-surface text-ink">
+      <div data-workspace className="min-h-dvh bg-surface text-ink">
         <main className="mx-auto w-full max-w-lg px-4 pt-10 pb-16 sm:px-6">
           <BrandLogo className="mb-6 w-28" />
           {children}
@@ -97,6 +97,7 @@ export function OfficeLayout({
   return (
     <ToastProvider>
       <div
+        data-workspace
         className={cn(
           "work-density min-h-dvh text-ink lg:grid lg:grid-cols-[200px_minmax(0,1fr)]",
           tone === "board" ? "bg-surface" : "bg-white",
@@ -151,14 +152,16 @@ export function OpsLayout({
 }: LayoutProps & { navItems: OpsNavItem[]; activeKey?: string; headerRight?: ReactNode }) {
   return (
     <ToastProvider>
-      <div className="min-h-dvh bg-surface text-ink">
-        <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-4 bg-primary-pressed px-6 text-body font-bold text-white">
-          <span className="flex items-center gap-3">
+      <div data-workspace className="min-h-dvh bg-surface text-ink">
+        <header className="sticky top-0 z-30 flex min-h-14 flex-wrap items-center justify-between gap-x-4 gap-y-2 bg-primary-pressed px-4 py-2 text-body font-bold text-white sm:px-6 lg:h-14 lg:flex-nowrap lg:py-0">
+          <span className="flex shrink-0 items-center gap-3 whitespace-nowrap">
             <BrandLogo variant="horizontal-white" className="w-24" />
             <span>운영 콘솔</span>
           </span>
           {headerRight ? (
-            <div className="flex items-center gap-3 text-caption">{headerRight}</div>
+            <div className="flex w-full min-w-0 items-center justify-between gap-3 text-caption sm:w-auto sm:flex-1 sm:justify-end">
+              {headerRight}
+            </div>
           ) : null}
         </header>
         <div className="lg:grid lg:grid-cols-[220px_minmax(0,1fr)]">

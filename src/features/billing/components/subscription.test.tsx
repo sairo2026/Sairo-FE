@@ -49,6 +49,18 @@ describe("구독 현황", () => {
     expect(await screen.findByText("무료 이용 중")).not.toBeNull();
   });
 
+  it("적용할 가격 버전이 없으면 구독 상태와 인원만 표시한다", async () => {
+    server.use(
+      http.get("/api/subscriptions/current", () =>
+        HttpResponse.json({ ...buildSubscription(), priceVersion: null }),
+      ),
+    );
+    show();
+    expect(await screen.findByText("무료 이용 중")).not.toBeNull();
+    expect(screen.getByText(/과금 인원/)).not.toBeNull();
+    expect(screen.queryByText(/가격 버전/)).toBeNull();
+  });
+
   it("권한이 없으면(403) 권한 없음 화면을 보여준다", async () => {
     server.use(http.get("/api/subscriptions/current", () => mockErrors.forbidden()));
     show();

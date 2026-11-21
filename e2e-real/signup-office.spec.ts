@@ -1,4 +1,4 @@
-import { test } from "@playwright/test";
+import { test } from "./support/test";
 import { newMember, signupViaUi } from "./support/flows";
 
 test("signup uses actual email and phone codes from the local backend", async ({

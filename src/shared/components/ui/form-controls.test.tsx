@@ -52,6 +52,7 @@ describe("Button", () => {
     render(<Button disabled>다음</Button>);
     const className = screen.getByRole("button", { name: "다음" }).className;
     expect(className).toContain("text-ink-3");
+    expect(className).not.toContain("text-muted");
     expect(className).toContain("bg-white");
     expect(className).toContain("border-ink-3");
     expect(className).not.toContain("bg-primary");

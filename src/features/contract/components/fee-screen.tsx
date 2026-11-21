@@ -517,7 +517,7 @@ function FeeBody({ detail }: { detail: ContractDetailResponse }) {
                 지급의무자별 미수금·초과수납
               </h2>
               {data.payers.length === 0 ? (
-                <p className="text-caption text-ink-3">청구가 없어 집계할 내용이 없습니다.</p>
+                <p className="text-caption text-muted">청구가 없어 집계할 내용이 없습니다.</p>
               ) : (
                 <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
                   {data.payers.map((payer) => (
@@ -589,7 +589,7 @@ function FeeBody({ detail }: { detail: ContractDetailResponse }) {
                           {fee.revisions.map((revision) => (
                             <li
                               key={revision.revisionId}
-                              className={`text-caption ${revision.isSuperseded ? "text-ink-3 line-through" : "text-ink"}`}
+                              className={`text-caption ${revision.isSuperseded ? "text-muted line-through" : "text-ink"}`}
                             >
                               {labelOf(FEE_REVISION_TYPE_LABEL, revision.revisionType)}{" "}
                               {formatSeoulDate(revision.effectiveDate)}{" "}
@@ -602,13 +602,13 @@ function FeeBody({ detail }: { detail: ContractDetailResponse }) {
                       <div>
                         <h3 className="text-caption font-semibold text-ink-2">수납·환급 내역</h3>
                         {fee.transactions.length === 0 ? (
-                          <p className="mt-1 text-caption text-ink-3">기록된 거래가 없습니다.</p>
+                          <p className="mt-1 text-caption text-muted">기록된 거래가 없습니다.</p>
                         ) : (
                           <ul className="mt-1 flex flex-col gap-1">
                             {fee.transactions.map((transaction) => (
                               <li
                                 key={transaction.transactionId}
-                                className={`text-caption ${transaction.isSuperseded ? "text-ink-3 line-through" : "text-ink"}`}
+                                className={`text-caption ${transaction.isSuperseded ? "text-muted line-through" : "text-ink"}`}
                               >
                                 {labelOf(FEE_TRANSACTION_LABEL, transaction.transactionType)}{" "}
                                 {formatSeoulDate(transaction.actualDate)}{" "}

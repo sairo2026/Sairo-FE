@@ -168,6 +168,6 @@ describe("체크박스와 입력 라벨의 필수·선택 표시", () => {
     );
     const labels = Array.from(document.querySelectorAll("label")).map((node) => node.textContent);
     expect(labels).toEqual(["메모(선택)", "요청 내용 (선택)", "이름*"]);
-    expect(document.querySelectorAll("label span.text-ink-3")).toHaveLength(2);
+    expect(document.querySelectorAll("label span.text-muted")).toHaveLength(2);
   });
 });

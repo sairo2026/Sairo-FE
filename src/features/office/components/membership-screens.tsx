@@ -825,7 +825,7 @@ function MembershipStatusBody({ membership }: { membership: MembershipStatus }) 
           </Button>
         ) : null}
       </ButtonRow>
-      <p className="text-center text-caption text-ink-3">
+      <p className="text-center text-caption text-muted">
         <Link href="/access" className="hover:underline">
           접근 안내 보기
         </Link>
