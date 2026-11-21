@@ -19,7 +19,9 @@ describe("환불정책의 사실 정정", () => {
     if (!refund) throw new Error("환불정책이 없습니다");
     expect(refund.body).not.toContain("신청과 관계없이");
     expect(refund.body).toContain("종료 또는 중단 시점에 시스템이 접수합니다");
-    expect(refund.body).toContain("서비스 장애와 결제 승인 지연의 환불은 결제 내역 화면의 신청 사유에 없으므로");
+    expect(refund.body).toContain(
+      "서비스 장애와 결제 승인 지연의 환불은 결제 내역 화면의 신청 사유에 없으므로",
+    );
   });
 
   it("영업일 3일 검토는 노력 의무로 적는다", () => {
