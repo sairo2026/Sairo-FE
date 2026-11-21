@@ -135,6 +135,25 @@ describe("이메일 로그인", () => {
     await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/home"));
   });
 
+  it("로그인 서버 오류에 내부 진단 문구를 띄우거나 자동으로 다시 제출하지 않는다", async () => {
+    const login = vi.fn(() =>
+      HttpResponse.json(
+        { code: "INTERNAL_ERROR", message: "Internal diagnostic information" },
+        { status: 500 },
+      ),
+    );
+    server.use(http.post("/api/auth/login", login));
+    const user = userEvent.setup();
+    renderWithQuery(<EmailLoginForm />);
+    await user.type(screen.getByLabelText("이메일 주소"), "member@example.test");
+    await user.type(screen.getByLabelText("비밀번호"), "example-password");
+    await user.click(screen.getByRole("button", { name: "로그인" }));
+    expect(await screen.findByRole("alert")).not.toBeNull();
+    expect(screen.queryByText(/Internal diagnostic information/)).toBeNull();
+    expect(login).toHaveBeenCalledTimes(1);
+    expect(navigation.replace).not.toHaveBeenCalled();
+  });
+
   it("미가입과 비밀번호 오류는 같은 문구로 안내한다", async () => {
     const user = userEvent.setup();
     renderWithQuery(<EmailLoginForm />);
