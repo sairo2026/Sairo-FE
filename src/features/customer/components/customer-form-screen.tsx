@@ -19,7 +19,7 @@ import { RadioGroup, SelectField } from "@/shared/components/ui/select-field";
 import { TextField } from "@/shared/components/ui/text-field";
 import { useAssignableMembers } from "@/shared/session/assignable-members";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
-import { trimContactNumber } from "@/shared/lib/format";
+import { normalizeContactNumber } from "@/shared/lib/format";
 import { createCustomer, findDuplicateCustomers, updateCustomer } from "../api/customer.api";
 import { customerKeys, useCustomerDetail } from "../hooks/customer-queries";
 import {
@@ -241,7 +241,7 @@ export function CustomerForm(props: FormProps) {
     const nextErrors = validateCustomerForm(values, { isCreate: !isEdit, original: current });
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
-    const phone = trimContactNumber(values.phone);
+    const phone = normalizeContactNumber(values.phone);
     if (!isEdit && values.name.trim() !== "" && phone !== null) {
       try {
         const result = await findDuplicateCustomers(values.name.trim(), phone);

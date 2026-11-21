@@ -10,6 +10,7 @@ import {
   formatSeoulDateTime,
   formatTimeSlot,
   isContactNumber,
+  normalizeContactNumber,
   isValidTitle,
 } from "./format";
 
@@ -57,6 +58,13 @@ describe("format", () => {
     "123\t4567",
   ])("업무 연락처 입력은 검증 전에 값을 바꾸지 않는다", (input) => {
     expect(formatPhone(input, true)).toBe(input);
+  });
+
+  it("저장 전에 국내 휴대전화만 서버 표기로 맞춘다", () => {
+    const mobile = "010" + "1".repeat(8);
+    expect(normalizeContactNumber(mobile)).toBe("010-1111-1111");
+    expect(normalizeContactNumber("02" + "1".repeat(9))).toBe("02" + "1".repeat(9));
+    expect(normalizeContactNumber("1".repeat(15))).toBe("1".repeat(15));
   });
 
   it("국가번호를 허용하지 않는 입력은 +를 지우고 숫자만 남긴다", () => {

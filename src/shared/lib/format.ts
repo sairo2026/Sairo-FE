@@ -118,6 +118,13 @@ export function trimContactNumber(value: string): string | null {
   return start === end ? null : value.slice(start, end);
 }
 
+/** 서버가 저장하는 국내 휴대전화 표기로 맞춘다. */
+export function normalizeContactNumber(value: string): string | null {
+  const text = trimContactNumber(value);
+  const mobile = text?.match(/^(01[016789])-?([0-9]{3,4})-?([0-9]{4})$/);
+  return mobile ? mobile.slice(1).join("-") : text;
+}
+
 /** 고객·계약 연락처 형식. */
 export function isContactNumber(value: string): boolean {
   const text = trimContactNumber(value);

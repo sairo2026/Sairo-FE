@@ -10,6 +10,7 @@ import {
   TEXT_LIMITS,
   countCodePoints,
   isContactNumber,
+  normalizeContactNumber,
   trimContactNumber,
 } from "@/shared/lib/format";
 import { isLease } from "./labels";
@@ -229,7 +230,7 @@ function partyRequests(parties: PartyInput[]) {
     .filter((party) => party.name.trim() !== "")
     .map((party) => ({
       name: party.name.trim(),
-      phone: trimContactNumber(party.phone),
+      phone: normalizeContactNumber(party.phone),
       customerId: party.customerId === "" ? null : Number(party.customerId),
     }));
 }
@@ -322,7 +323,7 @@ export function toCorrectionRequest(
         partyId: party.partyId,
         sequenceNo: index + 1,
         name: party.name.trim(),
-        phone: trimContactNumber(party.phone),
+        phone: normalizeContactNumber(party.phone),
         customerId: party.customerId === "" ? null : Number(party.customerId),
       }));
   const amounts = amountsFor(values);

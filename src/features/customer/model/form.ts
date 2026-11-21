@@ -7,6 +7,7 @@ import {
   CONTACT_NUMBER_ERROR,
   countCodePoints,
   isContactNumber,
+  normalizeContactNumber,
   TEXT_LIMITS,
   trimContactNumber,
 } from "@/shared/lib/format";
@@ -152,8 +153,8 @@ export function toCreateRequest(values: CustomerFormValues): CustomerCreateReque
     processingBasis: values.processingBasis,
     dataPurpose: values.dataPurpose.trim(),
     retentionUntil: values.retentionUntil,
-    phone: trimContactNumber(values.phone),
-    secondaryPhone: trimContactNumber(values.secondaryPhone),
+    phone: normalizeContactNumber(values.phone),
+    secondaryPhone: normalizeContactNumber(values.secondaryPhone),
     email: nullable(values.email),
     memo: nullable(values.memo),
   };
