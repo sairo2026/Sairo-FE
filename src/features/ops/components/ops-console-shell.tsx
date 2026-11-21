@@ -51,13 +51,14 @@ export function OpsConsoleShell({ children }: { children: ReactNode }) {
       activeKey={activeMenuKey(pathname)}
       headerRight={
         <>
-          <span>
+          <span className="min-w-0 wrap-anywhere">
             {session.name}
             {session.roles.length > 0
               ? ` · ${session.roles.map((role) => OPS_ROLE_LABELS[role]).join(", ")}`
               : ""}
           </span>
           <Button
+            className="shrink-0"
             variant="outlined"
             size="sm"
             isLoading={isLoggingOut}
