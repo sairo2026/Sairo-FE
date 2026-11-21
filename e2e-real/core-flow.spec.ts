@@ -40,6 +40,10 @@ test("사무소 등록 신청과 증빙 제출", async ({ page }) => {
   await page.getByRole("radio", { name: /새 사무소 생성/ }).click();
   await page.getByRole("button", { name: "다음" }).click();
   await expect(page).toHaveURL(/\/office\/register/);
+  const business = page.getByLabel("중개사무소 사업자등록번호");
+  await page.getByRole("button", { name: "다음" }).click();
+  await expect(business).toHaveAttribute("aria-invalid", "true");
+  await business.fill(businessNumber);
   await page.getByLabel("등록관청").fill("서울특별시 종로구");
   await page.getByLabel("개설등록번호").fill(registrationNumber);
   await page.getByRole("button", { name: "다음" }).click();
@@ -47,7 +51,6 @@ test("사무소 등록 신청과 증빙 제출", async ({ page }) => {
   await page.getByLabel("사무소 대표자명").fill(owner.name);
   await page.getByLabel("사무소 대표 연락처").fill(owner.phone.replaceAll("-", ""));
   await page.getByLabel("중개사무소 주소").fill("서울특별시 종로구 시험로 1");
-  await page.getByLabel("사업자등록번호").fill(businessNumber);
   await page.getByLabel("신청자의 등록관계").selectOption({ label: "대표 본인" });
   await page.getByRole("button", { name: "다음" }).click();
   await expect(page).toHaveURL(/\/office\/register\/evidence\?registrationId=\d+/);
@@ -65,7 +68,9 @@ test("사무소 등록 신청과 증빙 제출", async ({ page }) => {
   }
   await page.getByRole("button", { name: "등록", exact: true }).click();
   await expect(page).toHaveURL(/\/office\/review/);
-  await expect(page.getByText("심사 중").first()).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "신규 사무소 등록 심사 진행 중입니다." }),
+  ).toBeVisible();
 });
 
 test("최초 운영자가 초대를 수락하고 인증 앱을 등록한 뒤 심사담당을 초대한다", async ({
