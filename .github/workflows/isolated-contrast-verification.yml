@@ -1,0 +1,48 @@
+name: Isolated contrast verification
+
+on:
+  push:
+    branches: [audit/workspace-contrast-verification]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+        env:
+          NEXT_PUBLIC_API_MOCKING: enabled
+      - name: Measure actual candidate styles in Chromium
+        shell: bash
+        env:
+          NEXT_PUBLIC_API_MOCKING: enabled
+        run: |
+          set -euo pipefail
+          npm exec next start -- --hostname 127.0.0.1 --port 18718 > local-next.log 2>&1 &
+          app=$!
+          trap 'kill "$app" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 25); do
+            if curl --fail --silent --output /dev/null http://127.0.0.1:18718; then break; fi
+            sleep 1
+          done
+          node .github/audit/workspace-contrast.cjs
+          jq -s '{observations:length,pages:(map(.route)|unique|length),unrendered:(map(select(.notFound==true or .errorType!=null))|length),workspaces:(map(select(.workspace==true))|length),workspaceViolations:(map(select(.workspace==true)|[.failures[]|select(.disabled==false)]|length)|add),manualReview:(map(.incomplete // 0)|add)}' contrast-run.ndjson
+      - name: Save contrast measurements
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: isolated-contrast-measurements
+          path: contrast-run.ndjson
+          retention-days: 7
