@@ -11,6 +11,7 @@ const TOKEN_LINK_PATHS = [
   "/settings/login-methods/verify-email",
   "/settings/login-methods/kakao-callback",
   "/auth/kakao/step-up/callback",
+  "/grant/verify",
   "/settings/contact/verify-email",
 ];
 

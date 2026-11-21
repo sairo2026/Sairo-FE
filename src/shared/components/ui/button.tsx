@@ -74,8 +74,8 @@ export function Button({
         onClick?.(event);
       }}
       className={cn(
-        "inline-flex items-center justify-center gap-1.5 rounded-control text-body transition-[color,background-color,border-color,box-shadow] duration-150",
-        size === "md" ? "h-12 min-w-[120px] px-10" : "h-9 px-3.5 text-caption",
+        "inline-flex items-center justify-center rounded-control text-body transition-[color,background-color,border-color,box-shadow] duration-150",
+        size === "md" ? "h-12 min-w-[120px] gap-2 px-10" : "h-9 gap-1.5 px-3.5 text-caption",
         fullWidth && "w-full",
         isWide && !fullWidth && "w-[230px]",
         !disabled && variantClass[variant],
