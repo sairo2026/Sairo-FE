@@ -136,7 +136,7 @@ export function EmailLoginForm({ next }: { next?: string }) {
             >
               {mismatch.count}
             </p>
-            <p className="text-caption font-normal text-ink-3">{mismatch.notice}</p>
+            <p className="text-caption font-normal text-muted">{mismatch.notice}</p>
           </div>
         ) : null}
         {isLocked ? (
@@ -148,7 +148,7 @@ export function EmailLoginForm({ next }: { next?: string }) {
             <p className="text-body font-semibold">
               <span role="timer">{formatClock(lock.remaining)}</span> 뒤에 다시 시도해 주세요.
             </p>
-            <p className="text-caption font-normal text-ink-3">{LOGIN_LOCK_NOTICE}</p>
+            <p className="text-caption font-normal text-muted">{LOGIN_LOCK_NOTICE}</p>
           </div>
         ) : null}
         <div className="mt-8 flex justify-center gap-8 text-caption underline">
