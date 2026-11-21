@@ -19,6 +19,7 @@ import { RadioGroup, SelectField } from "@/shared/components/ui/select-field";
 import { TextField } from "@/shared/components/ui/text-field";
 import { useAssignableMembers } from "@/shared/session/assignable-members";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
+import { trimContactNumber } from "@/shared/lib/format";
 import { createCustomer, findDuplicateCustomers, updateCustomer } from "../api/customer.api";
 import { customerKeys, useCustomerDetail } from "../hooks/customer-queries";
 import {
@@ -237,12 +238,13 @@ export function CustomerForm(props: FormProps) {
   async function submit() {
     setFormError(undefined);
     setIsConflict(false);
-    const nextErrors = validateCustomerForm(values, { isCreate: !isEdit });
+    const nextErrors = validateCustomerForm(values, { isCreate: !isEdit, original: current });
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
-    if (!isEdit && values.name.trim() !== "" && values.phone.trim() !== "") {
+    const phone = trimContactNumber(values.phone);
+    if (!isEdit && values.name.trim() !== "" && phone !== null) {
       try {
-        const result = await findDuplicateCustomers(values.name.trim(), values.phone.trim());
+        const result = await findDuplicateCustomers(values.name.trim(), phone);
         if (result.items.length > 0) {
           setDuplicates(result.items);
           return;
@@ -339,7 +341,7 @@ export function CustomerForm(props: FormProps) {
           />
           <TextField
             label="보조 연락처"
-            placeholder="숫자만 입력해 주세요."
+            placeholder="보조 연락처를 입력해 주세요."
             kind="tel"
             allowInternational
             value={values.secondaryPhone}

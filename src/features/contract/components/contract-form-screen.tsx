@@ -127,7 +127,10 @@ function FormBody({
   });
 
   function submit(mode: "draft" | "sign") {
-    const next = validateContractForm(values, mode, { requireManager: contract === null });
+    const next = validateContractForm(values, mode, {
+      requireManager: contract === null,
+      original: contract,
+    });
     if (targetPropertyId === null) next.propertyId = "매물을 선택해 주세요.";
     setErrors(next);
     if (Object.keys(next).length > 0) {

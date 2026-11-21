@@ -46,25 +46,17 @@ describe("format", () => {
     expect(formatPhone("abc010-1234")).toBe("010-1234");
   });
 
-  it("국가번호를 허용하면 +로 시작하는 번호는 입력한 그대로 둔다", () => {
-    expect(formatPhone("+82-10-1234-5678", true)).toBe("+82-10-1234-5678");
-    expect(formatPhone("+82 10 1234 5678", true)).toBe("+82 10 1234 5678");
-    expect(formatPhone("+8210abc", true)).toBe("+8210");
-    expect(formatPhone("+82+10", true)).toBe("+8210");
-    expect(formatPhone("+" + "1".repeat(40), true)).toHaveLength(30);
-    expect(formatPhone("01012345678", true)).toBe("010-1234-5678");
-  });
-
-  it("국가번호를 허용하면 11자리를 넘는 숫자는 서버 허용 범위까지 자르지 않는다", () => {
-    expect(formatPhone("123456789012345", true)).toBe("123456789012345");
-    expect(isContactNumber(formatPhone("123456789012345", true))).toBe(true);
-    expect(formatPhone("821012345678", true)).toBe("821012345678");
-    expect(formatPhone("(82) 10-1234-5678 ", true)).toBe("(82) 10-1234-5678 ");
-    expect(formatPhone("１２３４５６７８９０１２", true)).toBe("");
-    expect(formatPhone("1".repeat(40), true)).toHaveLength(30);
-    expect(formatPhone("1234567890123456", true)).toBe("1234567890123456");
-    expect(isContactNumber(formatPhone("1234567890123456", true))).toBe(false);
-    expect(formatPhone("010123456789", false)).toBe("010-1234-5678");
+  it.each([
+    "1".repeat(15),
+    "1".repeat(16),
+    "02" + "1".repeat(9),
+    "+82 (10) 1234-5678",
+    "1".repeat(7) + "-".repeat(24),
+    "１２３４５６７",
+    "123a4567",
+    "123\t4567",
+  ])("업무 연락처 입력은 검증 전에 값을 바꾸지 않는다", (input) => {
+    expect(formatPhone(input, true)).toBe(input);
   });
 
   it("국가번호를 허용하지 않는 입력은 +를 지우고 숫자만 남긴다", () => {
@@ -80,6 +72,22 @@ describe("format", () => {
     expect(isContactNumber("82+10-1234-5678")).toBe(false);
     expect(isContactNumber("010-1234-5678".padEnd(31, "-"))).toBe(false);
     expect(isContactNumber("")).toBe(false);
+  });
+
+  it.each([
+    ["1".repeat(6), false],
+    ["1".repeat(7), true],
+    ["1".repeat(15), true],
+    ["1".repeat(16), false],
+    ["1".repeat(7).padEnd(30, "-"), true],
+    ["1".repeat(7).padEnd(31, "-"), false],
+    ["+82 (10) 1234-5678", true],
+    ["１２３４５６７", false],
+    ["123\t4567", false],
+    ["\u00a01234567", false],
+    ["\u30001234567 ", true],
+  ])("연락처의 길이와 문자 경계는 서버 규칙을 따른다", (input, valid) => {
+    expect(isContactNumber(formatPhone(input, true))).toBe(valid);
   });
 
   it("이름·제목은 공백 제거 후 1~100자만 허용한다", () => {
