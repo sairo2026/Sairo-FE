@@ -246,7 +246,7 @@ export const SubscriptionCurrentResponseSchema = z.object({
   status: z.string(),
   plan: z.string(),
   memberCount: z.number(),
-  priceVersion: z.string(),
+  priceVersion: z.string().nullable(),
   startCustomer: z.record(z.string(), z.unknown()).nullable(),
   pendingPriceChangeNoticeCount: z.number(),
   trialEndsAt: z.iso.datetime({ offset: true }).nullable().optional(),
