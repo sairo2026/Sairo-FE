@@ -79,7 +79,7 @@ function PhotoPicker({
 function Thumb({ url, alt }: { url: string | null; alt: string }) {
   if (url === null) {
     return (
-      <div className="flex h-32 items-center justify-center bg-surface text-caption text-ink-3">
+      <div className="flex h-32 items-center justify-center bg-surface text-caption text-muted">
         미리보기 없음
       </div>
     );

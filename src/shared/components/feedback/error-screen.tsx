@@ -181,7 +181,7 @@ export function ErrorScreen({
       </h1>
       <p className="text-body text-ink-2">{description ?? copy.description}</p>
       {traceId && SUPPORT_REFERENCE.test(traceId) ? (
-        <p className="text-caption text-ink-3">문의 번호: {traceId}</p>
+        <p className="text-caption text-muted">문의 번호: {traceId}</p>
       ) : null}
       <div className="mt-2 flex flex-wrap justify-center gap-2">
         {onRetry && isRetryable(kind) ? (

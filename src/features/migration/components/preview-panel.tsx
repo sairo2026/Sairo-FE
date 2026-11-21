@@ -37,7 +37,7 @@ function ValueList({
     <dl className="flex flex-col gap-0.5">
       {entries.map(([key, value]) => (
         <div key={key} className="flex gap-2">
-          <dt className="text-ink-3">{isTargetField ? targetFieldLabel(key) : key}</dt>
+          <dt className="text-muted">{isTargetField ? targetFieldLabel(key) : key}</dt>
           <dd className="text-ink">{value === null ? "(비어 있음)" : String(value)}</dd>
         </div>
       ))}

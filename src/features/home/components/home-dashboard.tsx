@@ -87,7 +87,7 @@ function StatCard({
             )}
           </span>
         </span>
-        {hint ? <span className="text-caption font-normal text-ink-3">{hint}</span> : null}
+        {hint ? <span className="text-caption font-normal text-muted">{hint}</span> : null}
       </span>
       <span className="text-[56px] font-semibold leading-[52px] text-primary">{value}</span>
     </Link>
@@ -290,7 +290,7 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
           <div className="flex flex-col gap-2">
             <h3 className="text-body font-semibold text-ink-2">오늘 방문</h3>
             {summary.todayScheduledVisits.length === 0 ? (
-              <p className="text-caption text-ink-3">오늘 확정된 방문이 없습니다.</p>
+              <p className="text-caption text-muted">오늘 확정된 방문이 없습니다.</p>
             ) : (
               <ul className="flex flex-col gap-2">
                 {summary.todayScheduledVisits.map((visit) => (
@@ -340,7 +340,7 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
             <div className="flex flex-col gap-2">
               <h3 className="text-body font-semibold text-ink-2">오늘·예정 업무</h3>
               {upcoming.length === 0 ? (
-                <p className="text-caption text-ink-3">오늘 할 업무가 없습니다.</p>
+                <p className="text-caption text-muted">오늘 할 업무가 없습니다.</p>
               ) : (
                 <ul aria-label="오늘 예정 업무" className="flex flex-col gap-2">
                   {upcoming.map((task) => (
@@ -363,7 +363,7 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
             <div className="flex flex-col gap-2">
               <h3 className="text-body font-semibold text-ink-2">임대 만기 90일 전 후속업무</h3>
               {summary.openFollowupTasks.length === 0 ? (
-                <p className="text-caption text-ink-3">제출할 후속업무가 없습니다.</p>
+                <p className="text-caption text-muted">제출할 후속업무가 없습니다.</p>
               ) : (
                 <ul aria-label="계약 후속업무" className="flex flex-col gap-2">
                   {summary.openFollowupTasks.map((task) => (

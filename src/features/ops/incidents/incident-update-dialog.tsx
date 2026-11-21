@@ -33,7 +33,7 @@ function StageTrack({ current }: { current: IncidentStage }) {
           key={stage}
           aria-current={stage === current ? "step" : undefined}
           className={
-            index <= currentIndex ? "font-semibold text-primary" : "font-medium text-ink-3"
+            index <= currentIndex ? "font-semibold text-primary" : "font-medium text-muted"
           }
         >
           {index > 0 ? <span aria-hidden="true"> → </span> : null}

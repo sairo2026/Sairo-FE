@@ -45,7 +45,7 @@ export function MiniCalendar({ days }: { days: Day[] }) {
       <div role="grid" aria-label="이번 달 일정" className="grid grid-cols-7 gap-1 text-center">
         <div role="row" className="contents">
           {WEEKDAYS.map((weekday) => (
-            <span key={weekday} role="columnheader" className="text-caption text-ink-3">
+            <span key={weekday} role="columnheader" className="text-caption text-muted">
               {weekday}
             </span>
           ))}

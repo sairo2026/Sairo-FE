@@ -104,7 +104,7 @@ describe("선택 버튼과 태그 규격", () => {
     expect(screen.getByText("전세").className).not.toContain("rounded-control");
     expect(screen.getByText("D-30").className).toContain("font-semibold");
     expect(screen.getByText("D-200").className).toContain("text-ink-2");
-    expect(screen.getByText("없음").className).toContain("text-ink-3");
+    expect(screen.getByText("없음").className).toContain("text-muted");
     for (const label of ["D-30", "D-200", "없음"]) {
       expect(screen.getByText(label).className).toContain("px-5");
     }

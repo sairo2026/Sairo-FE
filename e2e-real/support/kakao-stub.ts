@@ -37,6 +37,13 @@ export async function routeKakaoStub(context: BrowserContext, kakaoUserId: numbe
         return;
       }
     }
+    if (response.status() >= 300 && response.status() < 400) {
+      // Playwright routing sees the initial request, so a redirect must be checked here.
+      if (!location || new URL(location, route.request().url()).origin !== origin) {
+        await route.abort("blockedbyclient");
+        return;
+      }
+    }
     await route.fulfill({ response });
   });
 }
