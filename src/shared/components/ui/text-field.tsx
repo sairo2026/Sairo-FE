@@ -77,7 +77,7 @@ export function TextField({
           <FieldLabel htmlFor={inputId} required={required}>
             {label}
           </FieldLabel>
-          <span className="text-caption text-ink-3" aria-hidden="true">
+          <span className="text-caption text-muted" aria-hidden="true">
             {Array.from(value).length}/{maxLength}
           </span>
         </div>
@@ -136,7 +136,7 @@ export function TextField({
         </p>
       ) : null}
       {maxLength && !error && !isOffice ? (
-        <p className="text-right text-caption text-ink-3" aria-hidden="true">
+        <p className="text-right text-caption text-muted" aria-hidden="true">
           {Array.from(value).length}/{maxLength}
         </p>
       ) : null}
