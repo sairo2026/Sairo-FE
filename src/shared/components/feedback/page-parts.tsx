@@ -16,15 +16,17 @@ export function FlowFrame({
   title,
   description,
   width,
+  as,
   children,
 }: {
   title: string;
   description?: string;
   width?: "sm" | "md";
+  as?: "div" | "main";
   children: ReactNode;
 }) {
   return (
-    <AuthFrame title={title} description={description} width={width} variant="form">
+    <AuthFrame title={title} description={description} width={width} as={as} variant="form">
       {children}
     </AuthFrame>
   );
