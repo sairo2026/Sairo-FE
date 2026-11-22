@@ -123,7 +123,7 @@ export function GrantAuthScreen({ kind, grantId }: { kind: GrantKind; grantId: n
 
   if (grantId === null) {
     return (
-      <FlowFrame title={title} width="md">
+      <FlowFrame as="div" title={title} width="md">
         <FormAlert>권한 안내에 담긴 링크로 다시 접속해 주세요.</FormAlert>
         <SupportLine />
       </FlowFrame>
@@ -131,6 +131,7 @@ export function GrantAuthScreen({ kind, grantId }: { kind: GrantKind; grantId: n
   }
   return (
     <FlowFrame
+      as="div"
       title={title}
       description={kind === "return" ? RETURN_COPY.reauth : RETURN_COPY.archive}
       width="md"
@@ -213,7 +214,7 @@ export function GrantVerifyScreen({
   if (pending === undefined) return <PageSkeleton label="본인 확인을 준비하는 중입니다." />;
   if (!credential || !pending || errorCode) {
     return (
-      <FlowFrame title="본인 확인" width="md">
+      <FlowFrame as="div" title="본인 확인" width="md">
         <FormAlert>
           본인 확인을 완료하지 못했습니다. 권한 안내에 담긴 링크로 다시 시도해 주세요.
         </FormAlert>
@@ -223,7 +224,7 @@ export function GrantVerifyScreen({
   }
   if (mutation.isError) {
     return (
-      <FlowFrame title="본인 확인" width="md">
+      <FlowFrame as="div" title="본인 확인" width="md">
         <FormAlert>{describeGrantError(mutation.error)}</FormAlert>
         <SupportLine />
       </FlowFrame>
@@ -305,7 +306,12 @@ export function ReturnGrantScreen() {
   const unauthorized =
     query.error instanceof ApiError && (query.error.status === 401 || query.error.status === 403);
   return (
-    <FlowFrame title="자료 반환" description="구독이 끝난 뒤 자료를 내보냅니다." width="md">
+    <FlowFrame
+      as="div"
+      title="자료 반환"
+      description="구독이 끝난 뒤 자료를 내보냅니다."
+      width="md"
+    >
       {query.isPending ? (
         <PageSkeleton label="반환권한을 확인하는 중입니다." />
       ) : unauthorized ? (
@@ -350,6 +356,7 @@ export function ArchiveGrantScreen() {
     query.error instanceof ApiError && (query.error.status === 401 || query.error.status === 403);
   return (
     <FlowFrame
+      as="div"
       title="보관 문서"
       description="별도 보관계약으로 보관 중인 문서의 권한 상태입니다."
       width="md"

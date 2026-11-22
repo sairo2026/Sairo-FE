@@ -10,6 +10,7 @@ export function AuthFrame({
   width = "md",
   variant = "default",
   tagline,
+  as: Root = "main",
 }: {
   title: string;
   description?: string;
@@ -18,6 +19,8 @@ export function AuthFrame({
   /** form은 로고 없이 제목만 둔 가입·비밀번호 카드, login은 로고와 한 줄 소개를 둔 이메일 로그인 카드다. */
   variant?: "default" | "form" | "login";
   tagline?: string;
+  /** 기본은 화면의 주 영역(main)이다. 이미 main이 있는 작업 틀 안에서 쓸 때만 div로 바꾼다. */
+  as?: "div" | "main";
 }) {
   if (variant === "login") {
     return (
@@ -37,7 +40,7 @@ export function AuthFrame({
   }
   const isForm = variant === "form";
   return (
-    <div className="flex flex-1 items-center justify-center bg-surface px-4 py-12 sm:py-16">
+    <Root className="flex flex-1 items-center justify-center bg-surface px-4 py-12 sm:py-16">
       <Card
         tone="elevated"
         shadow={isForm ? "modal" : "auth"}
@@ -56,7 +59,7 @@ export function AuthFrame({
         ) : null}
         <div className="mt-8 sm:mt-11">{children}</div>
       </Card>
-    </div>
+    </Root>
   );
 }
 
