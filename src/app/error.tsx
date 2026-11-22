@@ -12,11 +12,13 @@ export default function RootError({
   reset: () => void;
 }) {
   return (
-    <ErrorScreen
-      kind={toErrorScreenKind(error)}
-      traceId={error instanceof ApiError ? error.traceId : (error.digest ?? undefined)}
-      retryAfterSeconds={error instanceof ApiError ? error.retryAfterSeconds : undefined}
-      onRetry={reset}
-    />
+    <main>
+      <ErrorScreen
+        kind={toErrorScreenKind(error)}
+        traceId={error instanceof ApiError ? error.traceId : (error.digest ?? undefined)}
+        retryAfterSeconds={error instanceof ApiError ? error.retryAfterSeconds : undefined}
+        onRetry={reset}
+      />
+    </main>
   );
 }
