@@ -62,4 +62,43 @@ jobs:
             });
           }
           TS
-          npx playwright test --config .github/audit/cross.config.ts contact-preservation.spec.ts audit-fixture-landmarks
+          npx playwright test --config .github/audit/cross.config.ts --project=chromium --project=firefox --project=webkit contact-preservation.spec.ts audit-fixture-landmarks
+      - name: Exercise mobile Safari and Android Chrome profiles
+        shell: bash
+        run: |
+          cat > e2e/audit-fixture-mobile.spec.ts <<'TS'
+          import { expect, test } from "@playwright/test";
+          import { settle, useMockOfficeRole } from "./support/app";
+
+          test("mobile email form, invalid state, and error landmark", async ({ page }) => {
+            const errors: string[] = [];
+            page.on("pageerror", error => errors.push(error.name));
+            await page.goto("/login/email");
+            await settle(page);
+            await page.getByRole("button", { name: "로그인", exact: true }).tap();
+            await expect(page.getByLabel("이메일 주소")).toHaveAttribute("aria-invalid", "true");
+            await page.goto("/audit-fixture-missing");
+            await expect(page.getByRole("main")).toHaveCount(1);
+            await expect(page.getByRole("heading", {name:"페이지를 찾을 수 없습니다"})).toBeVisible();
+            expect(errors).toEqual([]);
+          });
+
+          test("mobile office navigation and list widths", async ({ page }) => {
+            await useMockOfficeRole(page,"OWNER");
+            const errors: string[] = [];
+            page.on("pageerror", error => errors.push(error.name));
+            await page.goto("/home");
+            await settle(page);
+            const nav=page.getByRole("navigation",{name:"주요 메뉴"});
+            await nav.getByRole("link",{name:"매물 관리",exact:true}).tap();
+            await expect(page).toHaveURL(/\/properties$/);
+            await settle(page);
+            expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBeTruthy();
+            await nav.getByRole("link",{name:"고객 관리",exact:true}).tap();
+            await expect(page).toHaveURL(/\/customers$/);
+            await settle(page);
+            expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBeTruthy();
+            expect(errors).toEqual([]);
+          });
+          TS
+          npx playwright test --config .github/audit/cross.config.ts --project=mobile-safari --project=mobile-chrome audit-fixture-mobile
