@@ -1,22 +1,38 @@
 import { expect, test } from "@playwright/test";
 
-test("공개 화면에는 보안 헤더가 적용되고 CSP는 일부 지시어만 강제된다", async ({ page }) => {
+test("공개 화면에는 nonce 기반 CSP가 강제되고 위반 없이 화면이 동작한다", async ({ page }) => {
+  await page.addInitScript(() => {
+    (window as unknown as { __cspViolations: string[] }).__cspViolations = [];
+    document.addEventListener("securitypolicyviolation", (event) => {
+      (window as unknown as { __cspViolations: string[] }).__cspViolations.push(
+        `${event.violatedDirective} ${event.blockedURI}`,
+      );
+    });
+  });
   const response = await page.goto("/login");
   expect(response?.ok()).toBe(true);
   const headers = response?.headers() ?? {};
-  expect(headers["content-security-policy"]).toBe(
-    "frame-ancestors 'none'; object-src 'none'; base-uri 'self'",
+  const policy = headers["content-security-policy"] ?? "";
+  expect(policy).toMatch(
+    /script-src 'self' 'nonce-[^']+' 'strict-dynamic' https:\/\/js\.tosspayments\.com/,
   );
+  const scriptDirective = policy.split("; ").find((d) => d.startsWith("script-src")) ?? "";
+  expect(scriptDirective).not.toContain("'unsafe-inline'");
+  expect(scriptDirective).not.toContain("'unsafe-eval'");
+  expect(policy).toContain("object-src 'none'");
+  expect(policy).toContain("frame-ancestors 'none'");
+  expect(headers["content-security-policy-report-only"]).toBeUndefined();
   expect(headers["x-frame-options"]).toBe("DENY");
   expect(headers["x-content-type-options"]).toBe("nosniff");
   expect(headers["referrer-policy"]).toBe("strict-origin-when-cross-origin");
   expect(headers["permissions-policy"]).toContain("camera=()");
   expect(headers["permissions-policy"]).toContain("geolocation=()");
-  expect(headers["content-security-policy-report-only"]).toContain("object-src 'none'");
-  expect(headers["content-security-policy-report-only"]).toContain(
-    "script-src 'self' https://js.tosspayments.com",
-  );
   await expect(page.getByRole("link", { name: "이메일로 시작하기" })).toBeVisible();
+  await page.waitForLoadState("networkidle");
+  const violations = await page.evaluate(
+    () => (window as unknown as { __cspViolations: string[] }).__cspViolations,
+  );
+  expect(violations).toEqual([]);
 });
 
 for (const path of ["/billing/card/result", "/ops/invitations/accept"]) {
