@@ -3,7 +3,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { ErrorScreen } from "@/shared/components/feedback/error-screen";
-import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
+import { FormAlert } from "@/shared/components/feedback/form-frame";
 import { DetailList, TextLink } from "@/shared/components/feedback/page-parts";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
