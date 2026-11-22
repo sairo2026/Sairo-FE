@@ -13,7 +13,9 @@ test("공개 화면에는 nonce 기반 CSP가 강제되고 위반 없이 화면�
   expect(response?.ok()).toBe(true);
   const headers = response?.headers() ?? {};
   const policy = headers["content-security-policy"] ?? "";
-  expect(policy).toMatch(/script-src 'self' 'nonce-[^']+' 'strict-dynamic' https:\/\/js\.tosspayments\.com/);
+  expect(policy).toMatch(
+    /script-src 'self' 'nonce-[^']+' 'strict-dynamic' https:\/\/js\.tosspayments\.com/,
+  );
   const scriptDirective = policy.split("; ").find((d) => d.startsWith("script-src")) ?? "";
   expect(scriptDirective).not.toContain("'unsafe-inline'");
   expect(scriptDirective).not.toContain("'unsafe-eval'");
