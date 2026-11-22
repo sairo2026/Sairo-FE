@@ -97,10 +97,6 @@ export const SETTINGS_COPY = {
   closeConfirmLabel: "위 내용을 확인했고 사무소를 종료합니다.",
   closeConfirmRequired: "종료 확인에 체크해 주세요.",
   closeSubmit: "사무소 종료",
-  closeDoneTitle: "사무소가 종료되었습니다",
-  closeDone: (expires: string) => `반환 권한 만료일은 ${expires}입니다.`,
-  closeArchiveRequested: "보관계약 신청이 접수되었습니다. 운영자 승인 뒤 보관 권한이 발급됩니다.",
-  closeReturnLink: "자료 반환 안내",
   ownerOnly: "사무소 종료는 대표만 할 수 있습니다.",
 } as const;
 

@@ -390,3 +390,33 @@ test("예정 시각 전에는 취소만 방문 결과로 기록할 수 있다", 
   await expect(dialog.getByRole("status")).toContainText("시작 전에는 취소만 기록할 수 있습니다.");
   await expect(dialog.getByLabel("취소 사유")).toBeVisible();
 });
+
+test("사무소 종료 후 반환 권한으로 다시 확인하고 자료 반환 화면을 연다", async ({ page }) => {
+  await loginViaUi(page, owner.email, /\/home$/);
+  await page.goto("/office/close");
+  const submit = page.getByRole("button", { name: "사무소 종료", exact: true });
+  await submit.click();
+  await expect(page.getByText("보관계약 신청 여부를 선택해 주세요.")).toBeVisible();
+  await expect(page.getByText("종료 확인에 체크해 주세요.")).toBeVisible();
+
+  const stepUp = await pageApi(page, "POST", "/api/auth/step-up/password", { password: PASSWORD });
+  expect(stepUp.status).toBe(200);
+  await forceCheck(page.getByLabel("신청하지 않습니다", { exact: true }));
+  await forceCheck(page.getByLabel(/^위 내용을 확인했고 사무소를 종료합니다\./));
+  const response = page.waitForResponse(
+    (res) => res.request().method() === "POST" && res.url().endsWith("/api/offices/current/close"),
+  );
+  await submit.click();
+  expect((await response).status()).toBe(200);
+
+  await expect(page).toHaveURL(/\/grant\?/);
+  await expect(page.getByText("사무소가 종료되었습니다.", { exact: true })).toBeVisible();
+  const previousSession = await pageApi(page, "GET", "/api/auth/context");
+  expect(previousSession.status).toBe(401);
+
+  await page.getByLabel("비밀번호", { exact: true }).fill(PASSWORD);
+  await page.getByRole("button", { name: "이메일 비밀번호로 확인" }).click();
+  await expect(page).toHaveURL(/\/return$/);
+  await expect(page.getByRole("heading", { name: "자료 반환" })).toBeVisible();
+  await expect(page.getByText("권한 만료", { exact: true })).toBeVisible();
+});

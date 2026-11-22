@@ -1,18 +1,16 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { ErrorScreen } from "@/shared/components/feedback/error-screen";
-import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
+import { FormAlert } from "@/shared/components/feedback/form-frame";
 import { DetailList, TextLink } from "@/shared/components/feedback/page-parts";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import { PageHeader } from "@/shared/components/ui/page-header";
 import { Checkbox, RadioGroup } from "@/shared/components/ui/select-field";
-import { formatSeoulDateTime } from "@/shared/lib/format";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { closeOffice } from "../api/settings.api";
-import type { OfficeCloseResult } from "../api/settings.api";
 import { useOfficeMemberships, useSubscriptionSummary } from "../hooks/settings-queries";
 import { SETTINGS_COPY as COPY, describeSettingsError } from "../model/copy";
 
@@ -55,50 +53,30 @@ function Summary() {
   );
 }
 
-function Done({ result }: { result: OfficeCloseResult }) {
-  return (
-    <Card title={COPY.closeDoneTitle}>
-      <div className="flex flex-col gap-4">
-        <FormNotice>{COPY.closeDone(formatSeoulDateTime(result.returnExpiresAt))}</FormNotice>
-        {result.archiveRequestStatus === "REQUESTED" ? (
-          <p className="text-caption text-ink">{COPY.closeArchiveRequested}</p>
-        ) : null}
-        <p className="text-caption text-ink-2">{COPY.closeReturn}</p>
-        <TextLink href="/billing/return-guide">{COPY.closeReturnLink}</TextLink>
-      </div>
-    </Card>
-  );
-}
-
 export function OfficeCloseScreen() {
   const { role } = useOfficeAccess();
-  const queryClient = useQueryClient();
   const [archiveChoice, setArchiveChoice] = useState("");
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState<string>();
-  const [result, setResult] = useState<OfficeCloseResult>();
 
   const mutation = useMutation({
     mutationFn: closeOffice,
-    onSuccess: async (closed) => {
-      setError(undefined);
-      setResult(closed);
-      await queryClient.invalidateQueries({ queryKey: ["auth"] });
+    onSuccess: (closed) => {
+      // The successful close revokes the office session. Start the separate grant authentication
+      // in a fresh document so the office shell cannot redirect the user to ordinary login.
+      const params = new URLSearchParams({
+        type: "return",
+        grantId: String(closed.returnGrantId),
+        notice:
+          closed.archiveRequestStatus === "REQUESTED" ? "office-closed-archive" : "office-closed",
+      });
+      window.location.replace(`/grant?${params}`);
     },
     onError: (caught) => setError(describeSettingsError(caught, "사무소를 종료하지 못했습니다.")),
   });
 
   if (role !== "OWNER") return <ErrorScreen kind="forbidden" />;
-  if (result) {
-    return (
-      <div className="flex flex-col gap-6">
-        <PageHeader title={COPY.closeTitle} />
-        <Done result={result} />
-      </div>
-    );
-  }
-
   function submit() {
     const next: Record<string, string> = {};
     if (archiveChoice !== "REQUEST" && archiveChoice !== "DECLINE") {
@@ -160,7 +138,7 @@ export function OfficeCloseScreen() {
           </div>
           {error ? <FormAlert>{error}</FormAlert> : null}
           <div className="flex gap-3">
-            <Button isLoading={mutation.isPending} onClick={submit}>
+            <Button isLoading={mutation.isPending || mutation.isSuccess} onClick={submit}>
               {COPY.closeSubmit}
             </Button>
             <TextLink href="/office">취소</TextLink>
