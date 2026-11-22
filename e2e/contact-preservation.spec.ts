@@ -8,7 +8,16 @@ const routes = [
 ] as const;
 
 for (const [route, labels] of routes) {
-  test(`${route}: 붙여넣은 업무 연락처의 자릿수와 금지 문자를 보존한다`, async ({ page }) => {
+  test(`${route}: 붙여넣은 업무 연락처의 자릿수와 금지 문자를 보존한다`, async ({
+    browserName,
+    context,
+    page,
+  }) => {
+    // Chromium headless requires explicit clipboard access. The other engines
+    // reject these Playwright permissions and use the trusted click below.
+    if (browserName === "chromium") {
+      await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    }
     await page.goto(route);
     await settle(page);
 
