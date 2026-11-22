@@ -18,6 +18,29 @@ const REPORT_ONLY_POLICY = [
   "frame-src 'self'",
 ].join("; ");
 
+// 위반 없음을 증명하지 못한 나머지 지시어는 Report-Only로 두고, 안전하게 강제할 수 있는 지시어만 차단한다.
+const ENFORCED_POLICY = ["frame-ancestors 'none'", "object-src 'none'", "base-uri 'self'"].join(
+  "; ",
+);
+
+const PERMISSIONS_POLICY = [
+  "camera=()",
+  "microphone=()",
+  "geolocation=()",
+  "usb=()",
+  "bluetooth=()",
+  "serial=()",
+  "hid=()",
+].join(", ");
+
+const BASE_SECURITY_HEADERS = [
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Permissions-Policy", value: PERMISSIONS_POLICY },
+  { key: "Content-Security-Policy", value: ENFORCED_POLICY },
+];
+
 const TOKEN_LINK_PATHS = [
   "/billing/card/result",
   "/ops/invitations/accept",
@@ -48,6 +71,7 @@ const nextConfig: NextConfig = {
       { key: "Cache-Control", value: "no-store" },
     ];
     return [
+      { source: "/:path*", headers: BASE_SECURITY_HEADERS },
       ...(process.env.NODE_ENV === "production"
         ? [
             {
