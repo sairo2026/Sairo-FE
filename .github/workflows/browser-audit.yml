@@ -1,0 +1,65 @@
+name: Cross-browser and error landmark audit
+
+on:
+  push:
+    branches: [audit/cross-browser-and-error-landmark]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - name: Build isolated application and error fixture
+        shell: bash
+        env:
+          NEXT_PUBLIC_API_MOCKING: enabled
+        run: |
+          mkdir -p src/app/audit-fixture-error
+          cat > src/app/audit-fixture-error/page.tsx <<'TS'
+          export const dynamic = "force-dynamic";
+          export default function Page() {
+            throw new Error("Isolated route error fixture");
+          }
+          TS
+          npm run build
+      - name: Reproduce unsupported clipboard grants
+        shell: bash
+        run: |
+          set -euo pipefail
+          git show 0f02459:e2e/contact-preservation.spec.ts > e2e/audit-fixture-clipboard-before.spec.ts
+          if npx playwright test --config .github/audit/cross.config.ts --project=firefox --project=webkit audit-fixture-clipboard-before > clipboard-before.log 2>&1; then
+            echo "The previous test did not reproduce"
+            exit 1
+          fi
+          grep -E -i 'unknown permission|clipboard-write|clipboard-read' clipboard-before.log | head -8
+      - name: Exercise clipboard and real Next.js error pages
+        shell: bash
+        run: |
+          cat > e2e/audit-fixture-landmarks.spec.ts <<'TS'
+          import { expect, test } from "@playwright/test";
+
+          for (const [path, title] of [
+            ["/audit-fixture-error", "문제가 발생했습니다"],
+            ["/audit-fixture-missing", "페이지를 찾을 수 없습니다"],
+          ]) {
+            test(path, async ({ page }) => {
+              await page.goto(path);
+              await expect(page.getByRole("main")).toHaveCount(1);
+              await expect(page.getByRole("main").getByRole("heading", { name: title })).toBeVisible();
+            });
+          }
+          TS
+          npx playwright test --config .github/audit/cross.config.ts contact-preservation.spec.ts audit-fixture-landmarks
