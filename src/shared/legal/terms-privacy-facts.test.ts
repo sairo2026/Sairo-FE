@@ -20,7 +20,7 @@ describe("이용약관과 개인정보처리방침의 사실 정정", () => {
     const privacy = findLegalDocument("privacy");
     if (!privacy) throw new Error("개인정보처리방침이 없습니다");
     expect(privacy.body).not.toContain("카카오 식별자와 연락처의 암호화 저장");
-    expect(privacy.body).not.toContain("데이터베이스와 파일 저장소의 암호화");
+    expect(privacy.body).toContain("데이터베이스와 파일 저장소의 저장 시 암호화");
     expect(privacy.body).toContain("승인자 연락처와 비회원 권리 요청 연락처");
   });
 
