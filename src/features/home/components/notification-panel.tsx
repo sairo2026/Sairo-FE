@@ -9,7 +9,7 @@ import { markNotificationRead } from "../api/home.api";
 import { homeKeys, useNotifications } from "../hooks/home-queries";
 import { notificationLink, notificationTypeLabel } from "../model/labels";
 
-export type NotificationPanelProps = { onClose: () => void };
+export type NotificationPanelProps = { onClose: () => void; onNavigate: () => void };
 
 const ITEM_CLASS = "flex w-full flex-col gap-2 rounded-control border bg-surface p-5 text-left";
 
@@ -33,7 +33,7 @@ function Chevron() {
 }
 
 /** 상단 종 아이콘에서 열리는 오른쪽 알림 패널. 전체 목록은 알림함 화면에서 본다. */
-export function NotificationPanel({ onClose }: NotificationPanelProps) {
+export function NotificationPanel({ onClose, onNavigate }: NotificationPanelProps) {
   const queryClient = useQueryClient();
   const closeRef = useRef<HTMLButtonElement>(null);
   const query = useNotifications({ unreadOnly: false, page: 0, size: 25 });
@@ -151,7 +151,7 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
                     className={className}
                     onClick={() => {
                       if (!item.read) read.mutate(item.notificationId);
-                      onClose();
+                      onNavigate();
                     }}
                   >
                     {content}
@@ -175,7 +175,7 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
       )}
       <Link
         href="/notifications"
-        onClick={onClose}
+        onClick={onNavigate}
         className="mt-auto w-fit text-caption font-semibold text-primary underline-offset-4 clickable-link"
       >
         알림함에서 모두 보기
