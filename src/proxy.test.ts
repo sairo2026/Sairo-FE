@@ -191,6 +191,42 @@ describe("엣지 토큰 헤더", () => {
   });
 });
 
+describe("콘텐츠 보안 정책 헤더", () => {
+  it("화면 응답에 요청마다 다른 nonce가 든 강제 CSP를 붙이고 요청 헤더로도 넘긴다", () => {
+    vi.stubEnv("COMING_SOON", "false");
+    const first = proxy(new NextRequest("https://app.sairo.agency/login"));
+    const second = proxy(new NextRequest("https://app.sairo.agency/login"));
+    const policy = first.headers.get("Content-Security-Policy") ?? "";
+    const nonce = /'nonce-([^']+)'/.exec(policy)?.[1];
+    expect(nonce).toBeTruthy();
+    expect(first.headers.get("x-middleware-request-x-nonce")).toBe(nonce);
+    expect(first.headers.get("x-middleware-request-content-security-policy")).toBe(policy);
+    expect(second.headers.get("Content-Security-Policy")).not.toBe(policy);
+    expect(first.headers.get("Content-Security-Policy-Report-Only")).toBeNull();
+  });
+
+  it("CSP_MODE=report-only이면 보고 전용 헤더만 붙인다", () => {
+    vi.stubEnv("COMING_SOON", "false");
+    vi.stubEnv("CSP_MODE", "report-only");
+    const response = proxy(new NextRequest("https://app.sairo.agency/login"));
+    expect(response.headers.get("Content-Security-Policy")).toBeNull();
+    expect(response.headers.get("Content-Security-Policy-Report-Only")).toContain("nonce-");
+  });
+
+  it("출시 준비 모드의 안내 페이지 응답에도 붙인다", () => {
+    vi.stubEnv("COMING_SOON", "true");
+    const response = proxy(new NextRequest("https://app.sairo.agency/properties"));
+    expect(response.headers.get("Content-Security-Policy")).toContain("strict-dynamic");
+  });
+
+  it("API 응답에는 붙이지 않는다", () => {
+    vi.stubEnv("COMING_SOON", "false");
+    const response = proxy(new NextRequest("https://app.sairo.agency/api/terms"));
+    expect(response.headers.get("Content-Security-Policy")).toBeNull();
+    expect(response.headers.get("x-middleware-request-x-nonce")).toBeNull();
+  });
+});
+
 describe("프록시 적용 범위", () => {
   it("메일 로고 같은 공개 정적 파일 경로는 프록시를 거치지 않는다", () => {
     const pattern = new RegExp(`^${config.matcher[0]}$`);
