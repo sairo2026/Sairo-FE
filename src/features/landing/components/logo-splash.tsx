@@ -3,6 +3,7 @@
 import { useServerInsertedHTML } from "next/navigation";
 import { useEffect, useSyncExternalStore } from "react";
 import { BrandLogo } from "@/shared/components/ui/brand-logo";
+import { useCspNonce } from "@/shared/lib/csp-nonce";
 import {
   SPLASH_BOOT_SCRIPT,
   SPLASH_DURATION_MS,
@@ -15,8 +16,13 @@ import {
 const DISMISS_EVENTS = ["pointerdown", "keydown", "wheel", "touchstart"] as const;
 
 export function LogoSplash() {
+  const nonce = useCspNonce();
   useServerInsertedHTML(() => (
-    <script id="sairo-splash-boot" dangerouslySetInnerHTML={{ __html: SPLASH_BOOT_SCRIPT }} />
+    <script
+      id="sairo-splash-boot"
+      nonce={nonce}
+      dangerouslySetInnerHTML={{ __html: SPLASH_BOOT_SCRIPT }}
+    />
   ));
   const phase = useSyncExternalStore(subscribeSplashPhase, readSplashPhase, readServerSplashPhase);
 
