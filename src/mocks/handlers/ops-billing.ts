@@ -91,6 +91,7 @@ type MockRefund = {
   rejectionReason: string | null;
   pgRefundId: string | null;
   resolvedAt: string | null;
+  failureReason: string | null;
 };
 
 type MockEntry = {
@@ -277,9 +278,12 @@ function refund(id: number, patch: Partial<MockRefund>): MockRefund {
     rejectionReason: null,
     pgRefundId: null,
     resolvedAt: null,
+    failureReason: null,
     ...patch,
   };
 }
+
+const FAILURE_TEXT = "결제대행사가 취소를 거절했습니다. 코드 ALREADY_CANCELED_PAYMENT";
 
 function seedRefunds(): MockRefund[] {
   const reviewed = (operatorId: number, name: string) => ({
@@ -331,13 +335,40 @@ function seedRefunds(): MockRefund[] {
       resolvedAt: iso(Date.now() - DAY),
       ...reviewed(2, "박지원"),
     }),
-    refund(7, { officeId: 9, invoiceId: 5, status: "FAILED", ...reviewed(2, "박지원") }),
+    refund(7, {
+      officeId: 9,
+      invoiceId: 5,
+      status: "FAILED",
+      failureReason: FAILURE_TEXT,
+      ...reviewed(2, "박지원"),
+    }),
     refund(8, { status: "VERIFYING", pgRefundId: "cd34********", ...reviewed(2, "박지원") }),
     refund(9, {
       status: "REJECTED",
       rejectionReason: "환불 대상 기간이 아닙니다.",
       refundAmount: null,
       ...reviewed(2, "박지원"),
+    }),
+    refund(10, {
+      officeId: 9,
+      invoiceId: 5,
+      reasonCode: "LATE_APPROVAL",
+      reasonEventType: "LATE_APPROVAL",
+      reasonEventId: "late-3",
+      status: "FAILED",
+      failureReason: "결제대행사가 취소를 처리하지 못했습니다.",
+      refundAmount: 11000,
+      entitlementAmount: 11000,
+      ...reviewed(2, "박지원"),
+    }),
+    refund(11, {
+      invoiceId: 3,
+      reasonCode: "POLICY_COMPENSATION",
+      reasonEventType: "POLICY_COMPENSATION",
+      reasonEventId: "case-11",
+      status: "FAILED",
+      failureReason: FAILURE_TEXT,
+      ...reviewed(1, "운영 김사이"),
     }),
   ];
 }
@@ -851,6 +882,65 @@ export const opsBillingHandlers: RequestHandler[] = [
     row.resolvedAt = new Date().toISOString();
     row.reservedAmount = 0;
     return HttpResponse.json({ refundId: row.refundId, status: "COMPLETED", failureReason: null });
+  }),
+
+  http.post("/api/ops/refund-requests/:id/reopen", async ({ params, request }) => {
+    const rejected = requireMockOps(["BILLING"]);
+    if (rejected) return rejected;
+    const stepUp = requireMockStepUp();
+    if (stepUp) return stepUp;
+    const row = state.refunds.find((item) => String(item.refundId) === String(params.id));
+    if (!row) return mockErrors.notFound();
+    const body = await readBody(request);
+    const errors: FieldError[] = [];
+    if (textOf(body.reason) === "")
+      errors.push({ field: "reason", message: "되돌리는 사유를 적어야 합니다." });
+    if (body.pgStateConfirmed !== true)
+      errors.push({
+        field: "pgStateConfirmed",
+        message: "PG에서 아직 취소되지 않았음을 확인해야 합니다.",
+      });
+    if (errors.length > 0) return mockErrors.validation(errors);
+    if (row.status !== "FAILED") return invalidTransition();
+    row.status = "APPROVED";
+    row.failureReason = null;
+    row.resolvedAt = null;
+    return HttpResponse.json({ refundId: row.refundId, status: "APPROVED" });
+  }),
+
+  http.post("/api/ops/refund-requests/:id/resolve-manually", async ({ params, request }) => {
+    const rejected = requireMockOps(["BILLING"]);
+    if (rejected) return rejected;
+    const stepUp = requireMockStepUp();
+    if (stepUp) return stepUp;
+    const row = state.refunds.find((item) => String(item.refundId) === String(params.id));
+    if (!row) return mockErrors.notFound();
+    const body = await readBody(request);
+    const errors: FieldError[] = [];
+    const reference = textOf(body.reference);
+    if (reference === "" || reference.length > 150)
+      errors.push({ field: "reference", message: "PG 취소 근거를 150자 이내로 적어야 합니다." });
+    if (textOf(body.reason) === "")
+      errors.push({ field: "reason", message: "직접 처리한 사유를 적어야 합니다." });
+    if (body.pgCancelConfirmed !== true)
+      errors.push({
+        field: "pgCancelConfirmed",
+        message: "PG에서 취소된 금액을 확인해야 합니다.",
+      });
+    if (errors.length > 0) return mockErrors.validation(errors);
+    if (row.reasonCode === "POLICY_COMPENSATION" && row.reviewedByOperatorId === me())
+      return errorResponse(
+        403,
+        "SELF_APPROVAL_FORBIDDEN",
+        "검토 승인한 운영자는 수동 완료할 수 없습니다.",
+      );
+    if (row.status !== "FAILED") return invalidTransition();
+    row.status = "COMPLETED";
+    row.failureReason = null;
+    row.pgRefundId = `MANU${"*".repeat(Math.max(reference.length - 4, 0))}`.slice(0, 15);
+    row.resolvedAt = new Date().toISOString();
+    row.reservedAmount = 0;
+    return HttpResponse.json({ refundId: row.refundId, status: "COMPLETED" });
   }),
 
   http.get("/api/ops/billing/reconciliation", ({ request }) => {
