@@ -19,9 +19,28 @@ describe("환불정책의 사실 정정", () => {
     if (!refund) throw new Error("환불정책이 없습니다");
     expect(refund.body).not.toContain("신청과 관계없이");
     expect(refund.body).toContain("종료 또는 중단 시점에 시스템이 접수합니다");
+    expect(refund.body).toContain("서비스 장애의 환불은 결제 내역 화면의 신청 사유에 없으므로");
+  });
+
+  it("서비스 장애 환불은 일할 계산이 아니라 회사가 정한 금액으로 적고 종료 뒤 승인 결제는 사무소 종료 뒤로 한정한다", () => {
+    const refund = findLegalDocument("refund-policy");
+    if (!refund) throw new Error("환불정책이 없습니다");
     expect(refund.body).toContain(
-      "서비스 장애와 결제 승인 지연의 환불은 결제 내역 화면의 신청 사유에 없으므로",
+      "회사가 장애의 영향을 확인해 정한 금액이며 이미 결제한 금액을 넘지 않습니다",
     );
+    expect(refund.body).toContain(
+      "사무소를 종료한 뒤 결제 승인 지연이나 시스템 오류로 승인된 금액",
+    );
+    expect(refund.body).toContain(
+      "사무소를 종료한 뒤 승인된 결제는 시스템이 환불로 접수하고 운영자가 검토합니다",
+    );
+  });
+
+  it("회원 탈퇴 조건은 유일한 대표가 아니라 대표 전체에 적용한다", () => {
+    const refund = findLegalDocument("refund-policy");
+    if (!refund) throw new Error("환불정책이 없습니다");
+    expect(refund.body).not.toContain("유일한 대표");
+    expect(refund.body).toContain("대표를 이전해 대표가 아니게 된 뒤에 탈퇴할 수 있습니다");
   });
 
   it("영업일 3일 검토는 노력 의무로 적는다", () => {
