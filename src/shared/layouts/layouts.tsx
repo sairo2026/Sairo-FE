@@ -99,11 +99,16 @@ export function OfficeLayout({
       <div
         data-workspace
         className={cn(
-          "work-density min-h-dvh text-ink lg:grid lg:grid-cols-[200px_minmax(0,1fr)]",
+          "work-density min-h-dvh text-ink lg:grid lg:grid-cols-[220px_minmax(0,1fr)]",
           tone === "board" ? "bg-surface" : "bg-white",
         )}
       >
-        <aside className="border-b border-line bg-white px-6 py-6 lg:sticky lg:top-0 lg:z-30 lg:h-dvh lg:self-start lg:overflow-y-auto lg:border lg:px-6 lg:pt-6">
+        <aside
+          className={cn(
+            "border-b border-line px-6 py-6 lg:sticky lg:top-0 lg:z-30 lg:h-dvh lg:self-start lg:overflow-y-auto lg:border lg:px-6 lg:pt-6",
+            tone === "board" ? "bg-white" : "bg-surface",
+          )}
+        >
           <Link href="/home" aria-label="사이로 홈" className="mb-6 block lg:mb-10">
             <BrandLogo className="w-28" />
           </Link>
@@ -134,7 +139,7 @@ export function OfficeLayout({
         </div>
         <WindowScrollHint
           tone={tone === "board" ? "surface" : "white"}
-          className="lg:left-[200px]"
+          className="lg:left-[220px]"
         />
       </div>
     </ToastProvider>

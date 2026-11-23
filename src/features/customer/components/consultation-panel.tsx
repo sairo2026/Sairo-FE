@@ -98,9 +98,11 @@ function validateForm(input: {
 function CreateForm({
   customerId,
   onCreated,
+  onClose,
 }: {
   customerId: number;
   onCreated: (message: string) => void;
+  onClose: () => void;
 }) {
   const queryClient = useQueryClient();
   const initial = seoulParts(new Date());
@@ -119,8 +121,6 @@ function CreateForm({
         consultationType: type,
       }),
     onSuccess: async () => {
-      setContent("");
-      setFormError(undefined);
       onCreated("상담 이력을 등록했습니다.");
       await queryClient.invalidateQueries({ queryKey: customerKeys.all });
     },
@@ -131,69 +131,84 @@ function CreateForm({
     },
   });
 
+  const submit = () => {
+    setFormError(undefined);
+    const next = validateForm({ date, time, content });
+    setErrors(next);
+    if (Object.keys(next).length === 0) mutation.mutate();
+  };
+
   return (
-    <form
-      noValidate
-      className="flex flex-col gap-4 rounded-card-flat border border-dashed border-line p-5"
-      onSubmit={(event) => {
-        event.preventDefault();
-        setFormError(undefined);
-        const next = validateForm({ date, time, content });
-        setErrors(next);
-        if (Object.keys(next).length === 0) mutation.mutate();
-      }}
+    <Modal
+      isOpen
+      size="form"
+      title="상담 이력 등록"
+      onClose={onClose}
+      footer={
+        <>
+          <Button variant="cancel" onClick={onClose} disabled={mutation.isPending}>
+            취소
+          </Button>
+          <Button isLoading={mutation.isPending} onClick={submit}>
+            등록
+          </Button>
+        </>
+      }
     >
-      <h3 className="text-body font-semibold text-ink">상담 이력 등록</h3>
-      <p className="text-caption text-ink-2">
-        작성자는 입력하지 않으며 로그인한 구성원이 자동으로 기록됩니다. 최초문의는 고객당 한 건만
-        지정할 수 있습니다.
-      </p>
-      <SelectField
-        label="상담 구분"
-        value={type}
-        options={CONSULTATION_TYPES.map((value) => ({
-          value,
-          label: CONSULTATION_TYPE_LABEL[value],
-        }))}
-        onValueChange={setType}
-      />
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <DateTimeField
-          label="상담 날짜"
-          kind="date"
-          value={date}
-          onValueChange={(value) => {
-            setDate(value);
-            setErrors((existing) => ({ ...existing, date: undefined }));
-          }}
-          error={errors.date}
-        />
-        <DateTimeField
-          label="상담 시각"
-          kind="time"
-          value={time}
-          onValueChange={(value) => {
-            setTime(value);
-            setErrors((existing) => ({ ...existing, time: undefined }));
-          }}
-          error={errors.time}
-        />
-      </div>
-      <ContentField
-        value={content}
-        onValueChange={(value) => {
-          setContent(value);
-          setErrors((existing) => ({ ...existing, content: undefined }));
+      <form
+        noValidate
+        className="flex flex-col gap-4"
+        onSubmit={(event) => {
+          event.preventDefault();
+          submit();
         }}
-        error={errors.content}
-      />
-      {formError ? <FormAlert>{formError}</FormAlert> : null}
-      <div>
-        <Button type="submit" size="sm" isLoading={mutation.isPending}>
-          상담 등록
-        </Button>
-      </div>
-    </form>
+      >
+        <p className="text-caption text-ink-2">
+          작성자는 입력하지 않으며 로그인한 구성원이 자동으로 기록됩니다. 최초문의는 고객당 한 건만
+          지정할 수 있습니다.
+        </p>
+        <SelectField
+          label="상담 구분"
+          value={type}
+          options={CONSULTATION_TYPES.map((value) => ({
+            value,
+            label: CONSULTATION_TYPE_LABEL[value],
+          }))}
+          onValueChange={setType}
+        />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <DateTimeField
+            label="상담 날짜"
+            kind="date"
+            value={date}
+            onValueChange={(value) => {
+              setDate(value);
+              setErrors((existing) => ({ ...existing, date: undefined }));
+            }}
+            error={errors.date}
+          />
+          <DateTimeField
+            label="상담 시각"
+            kind="time"
+            value={time}
+            onValueChange={(value) => {
+              setTime(value);
+              setErrors((existing) => ({ ...existing, time: undefined }));
+            }}
+            error={errors.time}
+          />
+        </div>
+        <ContentField
+          value={content}
+          onValueChange={(value) => {
+            setContent(value);
+            setErrors((existing) => ({ ...existing, content: undefined }));
+          }}
+          error={errors.content}
+        />
+        {formError ? <FormAlert>{formError}</FormAlert> : null}
+      </form>
+    </Modal>
   );
 }
 
@@ -368,6 +383,7 @@ export function ConsultationPanel({
 }) {
   const query = useConsultations(customerId);
   const [notice, setNotice] = useState<string>();
+  const [creating, setCreating] = useState(false);
   const [correcting, setCorrecting] = useState<Consultation | null>(null);
   const [revisionsOf, setRevisionsOf] = useState<number | null>(null);
   return (
@@ -420,7 +436,23 @@ export function ConsultationPanel({
           )
         }
       </QueryGate>
-      {canEdit ? <CreateForm customerId={customerId} onCreated={setNotice} /> : null}
+      {canEdit ? (
+        <div>
+          <Button size="sm" onClick={() => setCreating(true)}>
+            상담 등록
+          </Button>
+        </div>
+      ) : null}
+      {creating ? (
+        <CreateForm
+          customerId={customerId}
+          onClose={() => setCreating(false)}
+          onCreated={(message) => {
+            setCreating(false);
+            setNotice(message);
+          }}
+        />
+      ) : null}
       {correcting ? (
         <CorrectionDialog
           consultation={correcting}
