@@ -246,7 +246,7 @@ function TaskDialogBody({ task, onClose }: TaskDialogProps) {
             disabled={auto}
           />
           <DateTimeField
-            label="시간(선택)"
+            label="예정 시간 (선택)"
             kind="time"
             value={values.dueTime}
             onValueChange={(v) => set("dueTime", v)}

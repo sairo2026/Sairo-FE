@@ -40,7 +40,7 @@ export function ExistingAccountNotice({
   return (
     <AuthFrame
       variant="form"
-      title={existingAccountFound ? "이미 가입된 계정이 있습니다" : "계정을 찾지 못했습니다"}
+      title={existingAccountFound ? "이미 가입된 계정이 있습니다." : "계정을 찾지 못했습니다"}
       description={
         existingAccountFound
           ? "확인한 이메일 또는 휴대폰 번호로 가입한 계정이 있습니다. 새로 가입하지 않고 기존 계정으로 로그인해 주세요."
