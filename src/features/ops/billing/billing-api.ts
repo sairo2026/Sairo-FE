@@ -6,11 +6,14 @@ import {
   OpsBillingReconciliationResolveResponseSchema,
   OpsRefundDetailResponseSchema,
   OpsRefundExecuteResponseSchema,
+  OpsRefundReprocessResponseSchema,
   OpsRefundRequestListResponseSchema,
   OpsRefundReviewResponseSchema,
 } from "@/lib/api/contracts/ops.schema";
 import type {
   OpsBillingReconciliationResolveRequest,
+  RefundManualResolveRequest,
+  RefundReopenRequest,
   RefundRequestReviewRequest,
 } from "@/lib/api/contracts/ops.schema";
 import { apiFetch } from "@/shared/api/client";
@@ -76,6 +79,24 @@ export function useRefundActions(refundId: number) {
         apiFetch(`/api/ops/refund-requests/${refundId}/execute`, {
           method: "POST",
           schema: OpsRefundExecuteResponseSchema,
+        }),
+      onSuccess: refresh,
+    }),
+    reopen: useMutation({
+      mutationFn: (body: RefundReopenRequest) =>
+        apiFetch(`/api/ops/refund-requests/${refundId}/reopen`, {
+          method: "POST",
+          body,
+          schema: OpsRefundReprocessResponseSchema,
+        }),
+      onSuccess: refresh,
+    }),
+    resolveManually: useMutation({
+      mutationFn: (body: RefundManualResolveRequest) =>
+        apiFetch(`/api/ops/refund-requests/${refundId}/resolve-manually`, {
+          method: "POST",
+          body,
+          schema: OpsRefundReprocessResponseSchema,
         }),
       onSuccess: refresh,
     }),

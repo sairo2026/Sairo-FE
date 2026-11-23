@@ -206,7 +206,7 @@ export function ContractFields({
       <div className="flex flex-col gap-8">
         <div className="grid grid-cols-1 gap-x-[45px] gap-y-[22px] lg:grid-cols-[repeat(2,minmax(0,510px))]">
           <SelectField
-            label="거래유형"
+            label="거래 유형"
             required
             value={values.dealType}
             options={DEAL_TYPES.map((type) => ({
@@ -254,7 +254,7 @@ export function ContractFields({
         <div className="grid grid-cols-1 gap-x-[45px] gap-y-[22px] lg:grid-cols-[repeat(2,minmax(0,510px))]">
           {values.dealType === "SALE" ? (
             <TextField
-              label="매매가(원)"
+              label="매매가 (원)"
               kind="number"
               inputMode="numeric"
               value={values.salePrice}
@@ -264,7 +264,7 @@ export function ContractFields({
           ) : null}
           {lease ? (
             <TextField
-              label="보증금(원)"
+              label="보증금 (원)"
               kind="number"
               inputMode="numeric"
               value={values.depositAmount}
@@ -274,7 +274,7 @@ export function ContractFields({
           ) : null}
           {values.dealType === "MONTHLY" ? (
             <TextField
-              label="월세(원)"
+              label="월세 (원)"
               kind="number"
               inputMode="numeric"
               value={values.monthlyRentAmount}

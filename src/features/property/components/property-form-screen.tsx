@@ -650,7 +650,7 @@ export function PropertyForm(props: FormProps) {
             />
             <TextField
               label="매물 상세 주소 (선택)"
-              placeholder="호수 등 상세 주소를 입력해 주세요."
+              placeholder="호수 등 매물의 상세 주소를 입력해 주세요."
               value={values.addressDetail}
               onValueChange={(value) => setField("addressDetail", value)}
               error={errors.addressDetail}

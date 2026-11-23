@@ -105,6 +105,7 @@ function DetailBody({ detail }: { detail: ContractDetailResponse }) {
   return (
     <div className="flex flex-col gap-8">
       <PageHeader
+        breadcrumb={[{ label: "계약 관리", href: "/contracts" }, { label: "계약 상세" }]}
         title={property.data?.name ?? `계약 ${detail.contractId}`}
         description={`${labelOf(DEAL_TYPE_LABEL, detail.dealType)} 계약${property.data?.address ? ` · ${property.data.address}` : ""}`}
         actions={

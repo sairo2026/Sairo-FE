@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
+import { CSP_NONCE_HEADER } from "@/shared/lib/csp";
+import { CspNonceProvider } from "@/shared/lib/csp-nonce";
 import { preload } from "react-dom";
 import type { ReactNode } from "react";
 // 글자 묶음별로 나뉜 서브셋이라 화면에 쓰인 글자의 묶음만 내려받는다. 글꼴 이름은 Pretendard Variable이다.
@@ -95,14 +98,18 @@ type RootLayoutProps = Readonly<{
   children: ReactNode;
 }>;
 
-export default function RootLayout({ children }: RootLayoutProps) {
+export default async function RootLayout({ children }: RootLayoutProps) {
+  // 요청마다 달라지는 nonce를 HTML에 넣어야 하므로 모든 화면을 요청 시점에 렌더링한다.
+  const nonce = (await headers()).get(CSP_NONCE_HEADER) ?? undefined;
   for (const url of CORE_FONT_SUBSETS) {
     preload(url.pathname, { as: "font", type: "font/woff2", crossOrigin: "anonymous" });
   }
   return (
     <html lang="ko" className="h-full antialiased" suppressHydrationWarning>
       <body className="min-h-full flex flex-col">
-        <Providers>{children}</Providers>
+        <CspNonceProvider nonce={nonce}>
+          <Providers>{children}</Providers>
+        </CspNonceProvider>
       </body>
     </html>
   );

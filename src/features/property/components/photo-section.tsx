@@ -53,7 +53,7 @@ function PhotoPicker({
   return (
     <div className="flex w-[276px] max-w-full shrink-0 flex-col gap-2">
       <label className="relative flex h-[207px] w-[276px] max-w-full cursor-pointer items-center justify-center rounded-[6.5px] bg-primary-soft text-body font-medium text-primary hover:bg-primary-line">
-        사진 추가
+        클릭해서 사진 업로드
         <input
           type="file"
           accept="image/jpeg,image/png,image/webp"
