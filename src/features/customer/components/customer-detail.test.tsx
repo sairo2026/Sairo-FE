@@ -437,9 +437,11 @@ describe("상담 이력", () => {
     await openTab(user, "상담 이력");
     await screen.findByText("예산을 다시 확인했다.");
     await user.click(screen.getByRole("button", { name: "상담 등록" }));
-    expect(await screen.findByText("상담 내용을 입력해 주세요.")).not.toBeNull();
-    await user.type(screen.getByLabelText("상담 내용"), "계약 일정을 조율했다.");
-    await user.click(screen.getByRole("button", { name: "상담 등록" }));
+    const dialog = await screen.findByRole("dialog", { name: "상담 이력 등록" });
+    await user.click(within(dialog).getByRole("button", { name: "등록" }));
+    expect(await within(dialog).findByText("상담 내용을 입력해 주세요.")).not.toBeNull();
+    await user.type(within(dialog).getByLabelText("상담 내용"), "계약 일정을 조율했다.");
+    await user.click(within(dialog).getByRole("button", { name: "등록" }));
     expect(await screen.findByText("상담 이력을 등록했습니다.")).not.toBeNull();
     expect(await screen.findByText("계약 일정을 조율했다.")).not.toBeNull();
   });
@@ -448,6 +450,7 @@ describe("상담 이력", () => {
     const user = userEvent.setup();
     renderOffice(<CustomerDetailScreen customerId={301} />, { role: "AGENT" });
     await openTab(user, "상담 이력");
+    await user.click(await screen.findByRole("button", { name: "상담 등록" }));
     expect(await screen.findByText(/로그인한 구성원이 자동으로 기록됩니다/)).not.toBeNull();
     expect(screen.queryByLabelText(/작성자/)).toBeNull();
   });
@@ -457,10 +460,12 @@ describe("상담 이력", () => {
     renderOffice(<CustomerDetailScreen customerId={301} />, { role: "AGENT" });
     await openTab(user, "상담 이력");
     await screen.findByText("예산을 다시 확인했다.");
-    await user.selectOptions(screen.getByLabelText("상담 구분"), "FIRST_INQUIRY");
-    await user.type(screen.getByLabelText("상담 내용"), "또 최초문의");
     await user.click(screen.getByRole("button", { name: "상담 등록" }));
-    expect(await screen.findByText(/이미 최초문의가 있습니다/)).not.toBeNull();
+    const dialog = await screen.findByRole("dialog", { name: "상담 이력 등록" });
+    await user.selectOptions(within(dialog).getByLabelText("상담 구분"), "FIRST_INQUIRY");
+    await user.type(within(dialog).getByLabelText("상담 내용"), "또 최초문의");
+    await user.click(within(dialog).getByRole("button", { name: "등록" }));
+    expect(await within(dialog).findByText(/이미 최초문의가 있습니다/)).not.toBeNull();
   });
 
   it("상담 정정에는 사유가 필요하고 정정하면 이력 횟수가 늘어난다", async () => {
