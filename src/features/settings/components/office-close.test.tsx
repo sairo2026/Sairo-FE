@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, screen } from "@testing-library/react";
+import { cleanup, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http } from "msw";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
@@ -15,6 +15,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 let stopServer: () => void;
+const navigate = vi.fn();
 
 beforeAll(() => {
   stopServer = startMockServer();
@@ -22,6 +23,8 @@ beforeAll(() => {
 
 afterEach(() => {
   cleanup();
+  vi.unstubAllGlobals();
+  navigate.mockReset();
   server.resetHandlers();
   resetSettingsState();
 });
@@ -60,29 +63,30 @@ describe("사무소 종료 확인", () => {
     expect(settingsState.closeCount).toBe(0);
   });
 
-  it("보관계약을 신청하지 않고 종료하면 반환 권한 만료일을 보여준다", async () => {
+  it("종료 성공 후 기존 세션을 거치지 않고 발급된 반환 권한의 본인 확인으로 이동한다", async () => {
     const user = userEvent.setup();
     renderOffice(<OfficeCloseScreen />, { role: "OWNER" });
+    vi.stubGlobal("location", { ...window.location, replace: navigate });
     await user.click(screen.getByLabelText("신청하지 않습니다"));
     await user.click(screen.getByLabelText(/^위 내용을 확인했고 사무소를 종료합니다\./));
     await user.click(screen.getByRole("button", { name: "사무소 종료" }));
-    expect(await screen.findByText("사무소가 종료되었습니다")).not.toBeNull();
-    expect(screen.getByText("반환 권한 만료일은 2026-12-10 09:00입니다.")).not.toBeNull();
-    expect(screen.queryByText(/보관계약 신청이 접수되었습니다/)).toBeNull();
-    expect(screen.getByRole("link", { name: "자료 반환 안내" }).getAttribute("href")).toBe(
-      "/billing/return-guide",
+    await waitFor(() =>
+      expect(navigate).toHaveBeenCalledWith("/grant?type=return&grantId=101&notice=office-closed"),
     );
   });
 
-  it("보관계약을 신청하면 운영자 승인 안내를 보여준다", async () => {
+  it("보관계약 신청까지 접수되면 반환 본인 확인 화면에 해당 완료 안내를 전달한다", async () => {
     const user = userEvent.setup();
     renderOffice(<OfficeCloseScreen />, { role: "OWNER" });
+    vi.stubGlobal("location", { ...window.location, replace: navigate });
     await user.click(screen.getByLabelText("신청합니다"));
     await user.click(screen.getByLabelText(/^위 내용을 확인했고 사무소를 종료합니다\./));
     await user.click(screen.getByRole("button", { name: "사무소 종료" }));
-    expect(
-      await screen.findByText(/보관계약 신청이 접수되었습니다. 운영자 승인 뒤/),
-    ).not.toBeNull();
+    await waitFor(() =>
+      expect(navigate).toHaveBeenCalledWith(
+        "/grant?type=return&grantId=101&notice=office-closed-archive",
+      ),
+    );
   });
 
   it("재인증이 없으면 본인 확인 안내를 보여준다", async () => {

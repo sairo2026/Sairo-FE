@@ -11,7 +11,8 @@ import { PageSkeleton } from "@/shared/components/feedback/skeleton";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import { logout } from "../api/auth-context.api";
-import { useAuthContext } from "../hooks/use-auth-context";
+import { ReconnectingScreen } from "@/shared/components/feedback/reconnecting-screen";
+import { isReconnecting, useAuthContext } from "../hooks/use-auth-context";
 import { describeAccess } from "../model/access-notice";
 import { AUTH_ROUTES } from "../model/routes";
 
@@ -51,6 +52,7 @@ export function AccessNoticeScreen() {
     if (redirectTarget !== null) router.replace(redirectTarget);
   }, [redirectTarget, router]);
 
+  if (isReconnecting(query)) return <ReconnectingScreen onRetry={() => void query.refetch()} />;
   if (query.isPending || redirectTarget !== null) {
     return <PageSkeleton label="접근 상태를 확인하는 중입니다." />;
   }

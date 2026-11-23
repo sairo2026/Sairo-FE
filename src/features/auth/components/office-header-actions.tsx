@@ -28,7 +28,11 @@ export function OfficeHeaderActions() {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuId = useId();
   const menuRef = useRef<HTMLDivElement>(null);
-  const closePanel = useCallback(() => setPanelOpen(false), []);
+  const notificationTriggerRef = useRef<HTMLButtonElement>(null);
+  const closePanel = useCallback(() => {
+    setPanelOpen(false);
+    notificationTriggerRef.current?.focus();
+  }, []);
   function leaveSession() {
     queryClient.clear();
     router.replace(AUTH_ROUTES.login);
@@ -108,6 +112,7 @@ export function OfficeHeaderActions() {
       </div>
       <button
         type="button"
+        ref={notificationTriggerRef}
         aria-label={unreadCount > 0 ? `알림 열기, 읽지 않은 알림 ${unreadCount}건` : "알림 열기"}
         aria-expanded={panelOpen}
         onClick={() => setPanelOpen((open) => !open)}
@@ -133,7 +138,9 @@ export function OfficeHeaderActions() {
           />
         ) : null}
       </button>
-      {panelOpen ? <NotificationPanel onClose={closePanel} /> : null}
+      {panelOpen ? (
+        <NotificationPanel onClose={closePanel} onNavigate={() => setPanelOpen(false)} />
+      ) : null}
     </div>
   );
 }

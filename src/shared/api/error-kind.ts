@@ -22,3 +22,11 @@ export function toErrorScreenKind(error: unknown): ErrorScreenKind {
   }
   return "server";
 }
+
+const TRANSIENT_GATEWAY_STATUSES = new Set([502, 503, 504]);
+
+/** 서버가 재시작하는 등 잠시 뒤 다시 보내면 풀리는 오류인지 판정한다. 사용자의 취소는 제외한다. */
+export function isTransientGatewayError(error: unknown): boolean {
+  if (error instanceof ApiNetworkError) return error.kind !== "aborted";
+  return error instanceof ApiError && TRANSIENT_GATEWAY_STATUSES.has(error.status);
+}

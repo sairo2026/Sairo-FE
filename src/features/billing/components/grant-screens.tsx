@@ -101,7 +101,15 @@ function SupportLine() {
   );
 }
 
-export function GrantAuthScreen({ kind, grantId }: { kind: GrantKind; grantId: number | null }) {
+export function GrantAuthScreen({
+  kind,
+  grantId,
+  notice,
+}: {
+  kind: GrantKind;
+  grantId: number | null;
+  notice?: string | null;
+}) {
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [fieldError, setFieldError] = useState<string>();
@@ -136,6 +144,14 @@ export function GrantAuthScreen({ kind, grantId }: { kind: GrantKind; grantId: n
       description={kind === "return" ? RETURN_COPY.reauth : RETURN_COPY.archive}
       width="md"
     >
+      {kind === "return" && (notice === "office-closed" || notice === "office-closed-archive") ? (
+        <FormNotice>
+          사무소가 종료되었습니다.
+          {notice === "office-closed-archive"
+            ? " 보관계약 신청이 접수되었습니다. 운영자 승인 뒤 보관 권한이 발급됩니다."
+            : null}
+        </FormNotice>
+      ) : null}
       <form
         noValidate
         className="flex flex-col gap-4"

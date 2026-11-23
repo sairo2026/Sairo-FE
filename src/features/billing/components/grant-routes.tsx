@@ -7,7 +7,13 @@ export function GrantAuthRoute() {
   const params = useSearchParams();
   const kind = params.get("type") === "archive" ? "archive" : "return";
   const raw = Number(params.get("grantId"));
-  return <GrantAuthScreen kind={kind} grantId={Number.isInteger(raw) && raw > 0 ? raw : null} />;
+  return (
+    <GrantAuthScreen
+      kind={kind}
+      grantId={Number.isInteger(raw) && raw > 0 ? raw : null}
+      notice={params.get("notice")}
+    />
+  );
 }
 
 export function GrantVerifyRoute() {

@@ -188,6 +188,63 @@ describe("OfficeAccessGate", () => {
     await waitFor(() => expect(screen.getByText("업무 화면 AGENT 쓰기가능")).not.toBeNull());
   });
 
+  it("게이트웨이 502가 이어져도 오류 화면 대신 재연결 안내를 보이고 복구되면 업무 화면을 연다", async () => {
+    let calls = 0;
+    server.use(
+      http.get("/api/auth/context", () => {
+        calls += 1;
+        return calls <= 4
+          ? new Response("<html>502 Bad Gateway</html>", { status: 502 })
+          : Response.json(MOCK_ACTIVE_CONTEXT);
+      }),
+    );
+    renderWithQuery(
+      <OfficeAccessGate>
+        <AccessProbe />
+      </OfficeAccessGate>,
+    );
+    await waitFor(
+      () =>
+        expect(
+          screen.getByRole("heading", { name: "서비스에 다시 연결하는 중입니다" }),
+        ).not.toBeNull(),
+      { timeout: 4000 },
+    );
+    expect(screen.queryByRole("heading", { name: "문제가 발생했습니다" })).toBeNull();
+    expect(screen.getByRole("button", { name: "지금 다시 시도" })).not.toBeNull();
+    await waitFor(() => expect(screen.getByText("업무 화면 AGENT 쓰기가능")).not.toBeNull(), {
+      timeout: 10_000,
+    });
+    expect(navigation.replace).not.toHaveBeenCalled();
+  });
+
+  it("재연결 중 세션이 만료된 것으로 확인되면 로그인 화면으로 보낸다", async () => {
+    let calls = 0;
+    server.use(
+      http.get("/api/auth/context", () => {
+        calls += 1;
+        return calls <= 3 ? new Response(null, { status: 502 }) : mockErrors.unauthenticated();
+      }),
+    );
+    renderWithQuery(
+      <OfficeAccessGate>
+        <AccessProbe />
+      </OfficeAccessGate>,
+    );
+    await waitFor(
+      () =>
+        expect(
+          screen.getByRole("heading", { name: "서비스에 다시 연결하는 중입니다" }),
+        ).not.toBeNull(),
+      { timeout: 4000 },
+    );
+    await waitFor(
+      () => expect(navigation.replace).toHaveBeenCalledWith("/login?next=%2Fproperties"),
+      { timeout: 10_000 },
+    );
+    expect(screen.queryByText(/업무 화면/)).toBeNull();
+  });
+
   it("429는 대기 시간을 보여준다", async () => {
     server.use(http.get("/api/auth/context", () => mockErrors.rateLimited(30)));
     renderWithQuery(
