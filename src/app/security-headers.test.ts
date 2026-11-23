@@ -20,8 +20,16 @@ describe("보안 응답 헤더 설정", () => {
     expect(byKey["Permissions-Policy"]).toContain("geolocation=()");
   });
 
-  it("강제 CSP는 위반을 증명한 지시어만 담는다", async () => {
+  it("전체 경로 규칙에는 CSP를 두지 않아 프록시가 붙이는 정책과 겹치지 않는다", async () => {
     const headers = await headersFor("/:path*");
+
+    expect(headers.some((h) => h.key.toLowerCase().startsWith("content-security-policy"))).toBe(
+      false,
+    );
+  });
+
+  it("프록시를 거치지 않는 정적 경로에는 기준선 CSP만 붙인다", async () => {
+    const headers = await headersFor("/_next/static/:path*");
     const enforced = headers.find((h) => h.key === "Content-Security-Policy")?.value;
 
     expect(enforced).toBe("frame-ancestors 'none'; object-src 'none'; base-uri 'self'");
