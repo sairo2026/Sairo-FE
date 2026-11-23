@@ -48,4 +48,8 @@ describe("구독·결제 약관의 사실 정정", () => {
     );
     expect(body).not.toContain("장애가 영향을 준 기간을 반영해");
   });
+
+  it("처리에 실패한 환불은 운영자가 다시 처리한다고 적는다", () => {
+    expect(subscriptionTerms()).toContain("처리에 실패한 환불은 운영자가 확인해 다시 처리합니다");
+  });
 });
