@@ -333,7 +333,7 @@ export function CustomerForm(props: FormProps) {
             error={errors.phone}
           />
           <TextField
-            label="이메일"
+            label="이메일 주소"
             placeholder="고객의 이메일 주소를 입력해 주세요."
             value={values.email}
             onValueChange={(value) => setField("email", value)}

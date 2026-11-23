@@ -485,7 +485,7 @@ describe("이메일 가입 완료", () => {
     await user.type(await screen.findByLabelText(/^비밀번호 설정\*?$/), "abcd1234!");
     await user.type(screen.getByLabelText(/^비밀번호 확인/), "abcd1234!");
     await user.click(screen.getByRole("button", { name: "가입하기" }));
-    expect(await screen.findByText("이미 가입된 계정이 있습니다")).not.toBeNull();
+    expect(await screen.findByText("이미 가입된 계정이 있습니다.")).not.toBeNull();
     expect(screen.getByRole("link", { name: "이메일로 로그인" })).not.toBeNull();
     expect(screen.getByRole("link", { name: "비밀번호 찾기" })).not.toBeNull();
     await user.click(screen.getByRole("button", { name: "가입 화면으로 돌아가기" }));
@@ -645,7 +645,7 @@ describe("카카오 가입 보완 입력", () => {
     await screen.findByText("인증이 완료되었습니다.");
     await user.click(screen.getByLabelText(/이용약관에 동의합니다/));
     await user.click(screen.getByRole("button", { name: "가입하기" }));
-    expect(await screen.findByText("이미 가입된 계정이 있습니다")).not.toBeNull();
+    expect(await screen.findByText("이미 가입된 계정이 있습니다.")).not.toBeNull();
     expect(screen.getByRole("link", { name: "카카오로 로그인" })).not.toBeNull();
   });
 
