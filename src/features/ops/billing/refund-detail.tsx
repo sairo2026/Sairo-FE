@@ -17,6 +17,7 @@ import { useOpsSession } from "../model/ops-session";
 import type { OpsRefundDetailResponse } from "@/lib/api/contracts/ops.schema";
 import { useRefundActions, useRefundDetail } from "./billing-api";
 import { BillingNav } from "./billing-nav";
+import { RefundManualResolveDialog, RefundReopenDialog } from "./refund-recovery-dialogs";
 import {
   BILLING_PRIVACY_NOTICE,
   REFUND_REASON_LABELS,
@@ -33,7 +34,7 @@ const AMOUNT_REASONS: readonly string[] = [
   "POLICY_COMPENSATION",
 ];
 
-type Dialog = "approve" | "reject" | "execute" | null;
+type Dialog = "approve" | "reject" | "execute" | "reopen" | "resolve" | null;
 
 const EXECUTE_RESULT_TEXT: Record<string, string> = {
   COMPLETED: "환불을 완료했습니다.",
@@ -189,6 +190,7 @@ function RecordCard({ detail }: { detail: OpsRefundDetailResponse }) {
             value: detail.reviewedAt ? formatSeoulDateTime(detail.reviewedAt) : null,
           },
           { label: "거절 사유", value: detail.rejectionReason },
+          { label: "실패 사유", value: detail.failureReason },
           { label: "PG 환불 참조 번호", value: detail.pgRefundId },
           {
             label: "PG 결과 확정 일시",
@@ -280,7 +282,33 @@ function RefundBody({ detail }: { detail: OpsRefundDetailResponse }) {
               <p className="text-caption text-ink-2">{STEP_UP_NOTICE}</p>
             </>
           ) : null}
-          {!isReviewable && detail.status !== "APPROVED" ? (
+          {detail.status === "FAILED" ? (
+            <>
+              <p role="note" className="text-caption text-ink-2">
+                PG가 취소를 거절해 실패한 환불입니다. PG 관리자 화면에서 취소 여부를 확인한 뒤,
+                취소되지 않았으면 다시 열어 실행하고 직접 취소했으면 수동 완료로 닫아 주세요. 다시
+                열면 다음 실행은 새 멱등키로 PG에 나갑니다.
+              </p>
+              {isSelfExecution ? (
+                <p role="note" className="text-caption text-danger">
+                  정책 외 보상은 검토 승인한 운영자가 수동 완료할 수 없습니다. 다른 결제담당이
+                  처리해 주세요.
+                </p>
+              ) : null}
+              <div className="flex gap-3">
+                <Button onClick={() => setDialog("reopen")}>다시 열기</Button>
+                <Button
+                  variant="ghost"
+                  disabled={isSelfExecution}
+                  onClick={() => setDialog("resolve")}
+                >
+                  수동 완료
+                </Button>
+              </div>
+              <p className="text-caption text-ink-2">{STEP_UP_NOTICE}</p>
+            </>
+          ) : null}
+          {!isReviewable && detail.status !== "APPROVED" && detail.status !== "FAILED" ? (
             <p className="text-body text-ink-2">
               {detail.status === "VERIFYING"
                 ? "PG 결과를 확인하는 중입니다. 대사 화면에서 확정 여부를 확인해 주세요."
@@ -314,6 +342,29 @@ function RefundBody({ detail }: { detail: OpsRefundDetailResponse }) {
         onSubmit={async (reason) => {
           await actions.review.mutateAsync({ decision: "REJECT", note: reason });
           setNotice({ tone: "ok", text: "환불 검토를 거절했습니다." });
+        }}
+        onClose={() => setDialog(null)}
+      />
+      <RefundReopenDialog
+        isOpen={dialog === "reopen"}
+        onSubmit={async ({ reason }) => {
+          await actions.reopen.mutateAsync({ reason, pgStateConfirmed: true });
+          setNotice({
+            tone: "ok",
+            text: "환불을 승인 상태로 되돌렸습니다. 환불 실행으로 다시 요청할 수 있습니다.",
+          });
+        }}
+        onClose={() => setDialog(null)}
+      />
+      <RefundManualResolveDialog
+        isOpen={dialog === "resolve"}
+        onSubmit={async ({ reason, reference }) => {
+          await actions.resolveManually.mutateAsync({
+            reference,
+            reason,
+            pgCancelConfirmed: true,
+          });
+          setNotice({ tone: "ok", text: "수동 처리로 환불을 완료했습니다." });
         }}
         onClose={() => setDialog(null)}
       />

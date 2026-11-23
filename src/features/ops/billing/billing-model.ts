@@ -59,6 +59,8 @@ export const RECONCILIATION_SOURCE_LABELS: Record<string, string> = {
 export const REFUND_REVIEWABLE = ["RECEIVED", "REVIEWING"];
 export const STEP_UP_NOTICE =
   "이 처리는 고위험 작업이라 실행 전에 5분 이내 재인증이 필요합니다. 되돌릴 수 없고 모든 처리는 감사 로그에 남습니다.";
+export const REFUND_RECOVERY_AUDIT_NOTICE =
+  "처리한 운영자, 사유, 근거는 감사 로그에 남고 환불 이력에서 확인할 수 있습니다.";
 export const BILLING_PRIVACY_NOTICE =
   "카드번호, 계좌번호, 결제키 원문은 이 화면에 표시하지 않습니다.";
 

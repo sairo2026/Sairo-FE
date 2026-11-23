@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Modal } from "@/shared/components/ui/modal";
 import { TextAreaField } from "@/shared/components/ui/textarea-field";
@@ -15,6 +15,8 @@ export type OpsReasonDialogProps = {
   reasonHint?: string;
   maxLength?: number;
   confirmLabel: string;
+  /** 입력이 길어 작은 화면에서 넘칠 수 있으면 form으로 지정해 본문을 스크롤한다. */
+  size?: ComponentProps<typeof Modal>["size"];
   /** 사유 외 추가 입력과 안내. */
   children?: ReactNode;
   /** 사유 외 조건(추가 입력 검증)이 충족됐는지. */
@@ -32,6 +34,7 @@ export function OpsReasonDialog({
   reasonHint,
   maxLength = 500,
   confirmLabel,
+  size,
   children,
   isReady = true,
   onSubmit,
@@ -69,6 +72,7 @@ export function OpsReasonDialog({
     <Modal
       isOpen={isOpen}
       title={title}
+      size={size}
       onClose={close}
       footer={
         <>

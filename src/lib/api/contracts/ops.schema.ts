@@ -2439,8 +2439,28 @@ export const OpsRefundDetailResponseSchema = z.object({
   rejectionReason: z.string().nullable(),
   pgRefundId: z.string().nullable(),
   resolvedAt: z.iso.datetime({ offset: true }).nullable(),
+  failureReason: z.string().nullable().optional(),
 });
 export type OpsRefundDetailResponse = z.infer<typeof OpsRefundDetailResponseSchema>;
+
+export const RefundReopenRequestSchema = z.object({
+  reason: z.string(),
+  pgStateConfirmed: z.boolean(),
+});
+export type RefundReopenRequest = z.infer<typeof RefundReopenRequestSchema>;
+
+export const RefundManualResolveRequestSchema = z.object({
+  reference: z.string(),
+  reason: z.string(),
+  pgCancelConfirmed: z.boolean(),
+});
+export type RefundManualResolveRequest = z.infer<typeof RefundManualResolveRequestSchema>;
+
+export const OpsRefundReprocessResponseSchema = z.object({
+  refundId: z.number(),
+  status: z.enum(["APPROVED", "COMPLETED"]),
+});
+export type OpsRefundReprocessResponse = z.infer<typeof OpsRefundReprocessResponseSchema>;
 
 export const OpsPrivacyRequestDetailResponseSchema = z.object({
   requestId: z.number(),
