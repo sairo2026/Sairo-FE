@@ -282,7 +282,9 @@ describe("약관과 환불정책 페이지", () => {
     expect(screen.getByRole("heading", { name: "제23조 (준거법과 관할)" })).not.toBeNull();
     const toc = screen.getByRole("navigation", { name: "이용약관 목차" });
     expect(within(toc).getAllByRole("link").length).toBeGreaterThanOrEqual(23);
-    expect(screen.getByText("시행 버전 1.1")).not.toBeNull();
+    expect(screen.getByText("시행 버전 1.1 / 시행일 2026년 12월 16일")).not.toBeNull();
+    const previous = screen.getByRole("link", { name: "이전 시행 버전 1.0 보기" });
+    expect(previous.getAttribute("href")).toBe("/legal/previous/terms/1.0");
   });
 
   it("환불정책은 환불 기준을 보여주고 초안 표기를 노출하지 않는다", () => {
