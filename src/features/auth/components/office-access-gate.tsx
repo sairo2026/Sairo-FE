@@ -8,7 +8,8 @@ import { toErrorScreenKind } from "@/shared/api/error-kind";
 import { ErrorScreen } from "@/shared/components/feedback/error-screen";
 import { PageSkeleton } from "@/shared/components/feedback/skeleton";
 import { OfficeLayout } from "@/shared/layouts/layouts";
-import { useAuthContext } from "../hooks/use-auth-context";
+import { ReconnectingScreen } from "@/shared/components/feedback/reconnecting-screen";
+import { isReconnecting, useAuthContext } from "../hooks/use-auth-context";
 import { describeGrace } from "../model/access-notice";
 import { decideAccess, isOfficeRole } from "../model/access-policy";
 import { getOfficeMenu, resolveActiveMenu } from "../model/role-menu";
@@ -33,6 +34,7 @@ export function OfficeAccessGate({ children }: { children: ReactNode }) {
     if (redirectTarget !== null) router.replace(redirectTarget);
   }, [redirectTarget, router]);
 
+  if (isReconnecting(query)) return <ReconnectingScreen onRetry={() => void query.refetch()} />;
   if (query.isPending) return <PageSkeleton label="접근 상태를 확인하는 중입니다." />;
   if (query.isError && !isUnauthenticated) {
     return (

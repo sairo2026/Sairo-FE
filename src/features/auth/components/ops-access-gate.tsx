@@ -9,7 +9,8 @@ import { ErrorScreen } from "@/shared/components/feedback/error-screen";
 import { PageSkeleton } from "@/shared/components/feedback/skeleton";
 import { OpsSessionProvider } from "@/features/ops/model/ops-session";
 import { toOpsRoles } from "@/features/ops/model/roles";
-import { useOperatorMe } from "../hooks/use-auth-context";
+import { ReconnectingScreen } from "@/shared/components/feedback/reconnecting-screen";
+import { isReconnecting, useOperatorMe } from "../hooks/use-auth-context";
 import { decideOpsAccess } from "../model/access-policy";
 
 /** 운영 콘솔(/ops)은 사무소 세션과 분리돼 있어 운영자 확인에 성공한 경우에만 연다. */
@@ -27,6 +28,7 @@ export function OpsAccessGate({ children }: { children: ReactNode }) {
     if (to !== null) router.replace(to);
   }, [to, router]);
 
+  if (isReconnecting(query)) return <ReconnectingScreen onRetry={() => void query.refetch()} />;
   if (query.isPending || to !== null) return <PageSkeleton label="운영자 확인 중입니다." />;
   if (query.isError) {
     return (

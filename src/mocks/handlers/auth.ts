@@ -57,8 +57,40 @@ function toLoginResponse(context: AuthContextResponse) {
   };
 }
 
+/** 브라우저 시험이 서버 재시작 상황을 만들 때 쓴다. 쉼표로 이은 상태 코드를 앞에서부터 한 번씩 응답한다. */
+export const MOCK_CONTEXT_FAULTS_STORAGE_KEY = "sairo-mock-context-faults";
+
+let contextFaults: number[] | null = null;
+
+function takeContextFault(): number | null {
+  if (contextFaults === null) {
+    let raw: string | null = null;
+    try {
+      raw =
+        typeof localStorage === "undefined"
+          ? null
+          : localStorage.getItem(MOCK_CONTEXT_FAULTS_STORAGE_KEY);
+    } catch {
+      raw = null;
+    }
+    contextFaults = (raw ?? "")
+      .split(",")
+      .map((value) => Number(value.trim()))
+      .filter((value) => Number.isInteger(value) && value >= 400);
+  }
+  return contextFaults.shift() ?? null;
+}
+
 export const authHandlers = [
   http.get("/api/auth/context", () => {
+    const fault = takeContextFault();
+    if (fault === 401) return mockErrors.unauthenticated();
+    if (fault !== null) {
+      return new Response("<html><body>Bad Gateway</body></html>", {
+        status: fault,
+        headers: { "Content-Type": "text/html" },
+      });
+    }
     if (!state.context) return mockErrors.unauthenticated();
     return HttpResponse.json(state.context);
   }),
