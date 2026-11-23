@@ -86,7 +86,7 @@ export const ERROR_CODE_COPY: Record<string, string> = {
   RECONSENT_REQUIRED:
     "개정된 약관에 다시 동의해야 업무를 이어갈 수 있습니다. 안내에 따라 동의해 주세요.",
   OFFICE_WRITE_RESTRICTED:
-    "결제 지연이나 인증 상태 때문에 지금은 저장할 수 없고 읽기만 가능합니다. 사무소 대표가 구독·결제 화면에서 상태를 풀면 다시 저장할 수 있습니다.",
+    "결제 전이거나 결제 지연·인증 상태 때문에 지금은 저장할 수 없고 읽기만 가능합니다. 사무소 대표가 구독·결제 화면에서 결제를 마치거나 상태를 풀면 다시 저장할 수 있습니다.",
   APPLY_GRANT_INACTIVE:
     "신청 허용이 만료되었거나 회수되어 신청할 수 없습니다. 출입승인 상태와 허용 현황을 확인해 주세요.",
   APPROVER_READ_ONLY:
