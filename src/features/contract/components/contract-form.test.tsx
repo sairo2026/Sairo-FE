@@ -54,10 +54,10 @@ function setDate(label: string, value: string) {
 }
 
 async function fillLease(user: User) {
-  await user.selectOptions(screen.getByLabelText(/거래유형/), "JEONSE");
+  await user.selectOptions(screen.getByLabelText(/거래 유형/), "JEONSE");
   await user.type(screen.getByLabelText("매도·임대인 1 이름"), "박임대");
   await user.type(screen.getByLabelText("매수·임차인 1 이름"), "최임차");
-  await user.type(screen.getByLabelText("보증금(원)"), "300000000");
+  await user.type(screen.getByLabelText("보증금 (원)"), "300000000");
   setDate("체결일", "2026-11-01");
   setDate("임대 시작일", "2026-12-01");
   setDate("임대 만기일", "2028-11-30");
@@ -69,12 +69,12 @@ describe("계약 등록", () => {
     const user = userEvent.setup();
     renderOffice(<ContractCreateScreen propertyId={501} />, { role: "OWNER" });
     expect(await screen.findByRole("link", { name: /국민대 앞 아파트/ })).not.toBeNull();
-    expect(screen.queryByLabelText("매매가(원)")).toBeNull();
-    await user.selectOptions(screen.getByLabelText(/거래유형/), "SALE");
-    expect(screen.getByLabelText("매매가(원)")).not.toBeNull();
-    expect(screen.queryByLabelText("보증금(원)")).toBeNull();
-    await user.selectOptions(screen.getByLabelText(/거래유형/), "MONTHLY");
-    expect(screen.getByLabelText("월세(원)")).not.toBeNull();
+    expect(screen.queryByLabelText("매매가 (원)")).toBeNull();
+    await user.selectOptions(screen.getByLabelText(/거래 유형/), "SALE");
+    expect(screen.getByLabelText("매매가 (원)")).not.toBeNull();
+    expect(screen.queryByLabelText("보증금 (원)")).toBeNull();
+    await user.selectOptions(screen.getByLabelText(/거래 유형/), "MONTHLY");
+    expect(screen.getByLabelText("월세 (원)")).not.toBeNull();
     expect(screen.getByLabelText("임대 시작일")).not.toBeNull();
   });
 
@@ -95,7 +95,7 @@ describe("계약 등록", () => {
   it("임대 만기가 시작보다 이르면 오류로 표시한다", async () => {
     const user = userEvent.setup();
     renderOffice(<ContractCreateScreen propertyId={501} />, { role: "OWNER" });
-    await screen.findByLabelText(/거래유형/);
+    await screen.findByLabelText(/거래 유형/);
     await fillLease(user);
     setDate("임대 만기일", "2026-01-01");
     await user.click(screen.getByRole("button", { name: "체결 등록" }));
@@ -116,7 +116,7 @@ describe("계약 등록", () => {
     setMockContractState({ contracts: [] });
     const user = userEvent.setup();
     renderOffice(<ContractCreateScreen propertyId={501} />, { role: "OWNER" });
-    await screen.findByLabelText(/거래유형/);
+    await screen.findByLabelText(/거래 유형/);
     await pickManager(user);
     await fillLease(user);
     await user.click(screen.getByRole("button", { name: "체결 등록" }));
@@ -131,7 +131,7 @@ describe("계약 등록", () => {
     setMockContractState({ contracts: [] });
     const user = userEvent.setup();
     renderOffice(<ContractCreateScreen propertyId={501} />, { role: "OWNER" });
-    await screen.findByLabelText(/거래유형/);
+    await screen.findByLabelText(/거래 유형/);
     await pickManager(user);
     await fillLease(user);
     setDate("잔금 예정일", "");
@@ -146,9 +146,9 @@ describe("계약 등록", () => {
   it("초안은 거래유형과 담당자만 있어도 저장된다", async () => {
     const user = userEvent.setup();
     renderOffice(<ContractCreateScreen propertyId={501} />, { role: "OWNER" });
-    await screen.findByLabelText(/거래유형/);
+    await screen.findByLabelText(/거래 유형/);
     await pickManager(user);
-    await user.selectOptions(screen.getByLabelText(/거래유형/), "SALE");
+    await user.selectOptions(screen.getByLabelText(/거래 유형/), "SALE");
     await user.click(screen.getByRole("button", { name: "초안 저장" }));
     await waitFor(() => expect(navigation.push).toHaveBeenCalled());
     expect(getMockContractState().contracts.at(-1)?.detail.contractStatus).toBe("DRAFT");
@@ -166,7 +166,7 @@ describe("계약 등록", () => {
     );
     const user = userEvent.setup();
     renderOffice(<ContractCreateScreen propertyId={501} />, { role: "OWNER" });
-    await screen.findByLabelText(/거래유형/);
+    await screen.findByLabelText(/거래 유형/);
     await pickManager(user);
     await fillLease(user);
     await user.click(screen.getByRole("button", { name: "체결 등록" }));
@@ -178,7 +178,7 @@ describe("계약 등록", () => {
   it("같은 매물에 기간이 겹치는 체결 계약이 있으면 409 안내를 보여준다", async () => {
     const user = userEvent.setup();
     renderOffice(<ContractCreateScreen propertyId={501} />, { role: "OWNER" });
-    await screen.findByLabelText(/거래유형/);
+    await screen.findByLabelText(/거래 유형/);
     await pickManager(user);
     await fillLease(user);
     setDate("임대 시작일", "2027-01-01");
@@ -192,9 +192,9 @@ describe("계약 등록", () => {
     setMockContractState({ archivedPropertyIds: [501] });
     const user = userEvent.setup();
     renderOffice(<ContractCreateScreen propertyId={501} />, { role: "OWNER" });
-    await screen.findByLabelText(/거래유형/);
+    await screen.findByLabelText(/거래 유형/);
     await pickManager(user);
-    await user.selectOptions(screen.getByLabelText(/거래유형/), "SALE");
+    await user.selectOptions(screen.getByLabelText(/거래 유형/), "SALE");
     await user.click(screen.getByRole("button", { name: "초안 저장" }));
     expect(await screen.findByText(/보관된 매물에는 계약을 등록할 수 없습니다/)).not.toBeNull();
   });
@@ -203,9 +203,9 @@ describe("계약 등록", () => {
     server.use(http.post("/api/properties/501/contracts/drafts", () => mockErrors.rateLimited(20)));
     const user = userEvent.setup();
     renderOffice(<ContractCreateScreen propertyId={501} />, { role: "OWNER" });
-    await screen.findByLabelText(/거래유형/);
+    await screen.findByLabelText(/거래 유형/);
     await pickManager(user);
-    await user.selectOptions(screen.getByLabelText(/거래유형/), "SALE");
+    await user.selectOptions(screen.getByLabelText(/거래 유형/), "SALE");
     await user.click(screen.getByRole("button", { name: "초안 저장" }));
     expect(await screen.findByText(/요청이 너무 많습니다/)).not.toBeNull();
   });

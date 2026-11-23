@@ -184,7 +184,7 @@ function ContractTable({ tab }: { tab: string }) {
           },
           {
             key: "deal",
-            header: "거래유형",
+            header: "거래 유형",
             widthClass: "w-[96px]",
             render: (row) => labelOf(DEAL_TYPE_LABEL, row.dealType),
           },

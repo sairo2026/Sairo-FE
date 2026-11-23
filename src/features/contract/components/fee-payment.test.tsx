@@ -139,7 +139,7 @@ describe("중개보수·수납", () => {
     const user = userEvent.setup();
     renderOffice(<FeeScreen contractId={9101} />, { role: "OWNER" });
     expect(await screen.findByText("등록된 중개보수 청구가 없습니다.")).not.toBeNull();
-    await user.click(screen.getByRole("button", { name: "+ 청구 등록" }));
+    await user.click(screen.getByRole("button", { name: "청구 등록" }));
     const dialog = await screen.findByRole("dialog");
     await user.selectOptions(within(dialog).getByLabelText(/지급의무자/), "SELLER_LANDLORD:910101");
     await fillAmounts(user, dialog);
@@ -151,7 +151,7 @@ describe("중개보수·수납", () => {
   it("합계가 공급가액과 세액의 합과 다르면 오류로 표시한다", async () => {
     const user = userEvent.setup();
     renderOffice(<FeeScreen contractId={9101} />, { role: "OWNER" });
-    await user.click(await screen.findByRole("button", { name: "+ 청구 등록" }));
+    await user.click(await screen.findByRole("button", { name: "청구 등록" }));
     const dialog = await screen.findByRole("dialog");
     await user.selectOptions(within(dialog).getByLabelText(/지급의무자/), "SELLER_LANDLORD:910101");
     await fillAmounts(user, dialog, "1000000");
@@ -167,7 +167,7 @@ describe("중개보수·수납", () => {
   it("필수값이 비어 있으면 항목별 오류를 보인다", async () => {
     const user = userEvent.setup();
     renderOffice(<FeeScreen contractId={9101} />, { role: "OWNER" });
-    await user.click(await screen.findByRole("button", { name: "+ 청구 등록" }));
+    await user.click(await screen.findByRole("button", { name: "청구 등록" }));
     const dialog = await screen.findByRole("dialog");
     await user.click(within(dialog).getByRole("button", { name: "청구 등록" }));
     expect(await within(dialog).findByText("지급의무자를 선택해 주세요.")).not.toBeNull();
@@ -189,9 +189,9 @@ describe("중개보수·수납", () => {
     });
     renderOffice(<FeeScreen contractId={9101} />, { role: "OWNER" });
     expect(await screen.findByText(/초안 계약에는 청구를 등록할 수 없습니다/)).not.toBeNull();
-    expect(
-      (screen.getByRole("button", { name: "+ 청구 등록" }) as HTMLButtonElement).disabled,
-    ).toBe(true);
+    expect((screen.getByRole("button", { name: "청구 등록" }) as HTMLButtonElement).disabled).toBe(
+      true,
+    );
   });
 
   it("수납을 기록하면 순수납액이 늘고 환급이 순수납액을 넘으면 막는다", async () => {
@@ -295,7 +295,7 @@ describe("중개보수·수납", () => {
     );
     const user = userEvent.setup();
     renderOffice(<FeeScreen contractId={9101} />, { role: "OWNER" });
-    await user.click(await screen.findByRole("button", { name: "+ 청구 등록" }));
+    await user.click(await screen.findByRole("button", { name: "청구 등록" }));
     const dialog = await screen.findByRole("dialog");
     await user.selectOptions(within(dialog).getByLabelText(/지급의무자/), "SELLER_LANDLORD:910101");
     await fillAmounts(user, dialog);
@@ -387,14 +387,14 @@ describe("계약 대금·분할 지급", () => {
     expect(screen.getByText("미지급")).not.toBeNull();
     await user.click(screen.getByRole("button", { name: "잔금 1회 실지급 기록" }));
     dialog = await screen.findByRole("dialog");
-    await user.type(within(dialog).getByLabelText(/실지급 금액/), "100000000");
+    await user.type(within(dialog).getByLabelText(/실제 지급액/), "100000000");
     setDate(dialog, "실제 지급일", "2026-12-01");
     await user.click(within(dialog).getByRole("button", { name: "기록" }));
     expect(await screen.findByText("일부 지급")).not.toBeNull();
     expect(screen.getByText(/확인 이중개/)).not.toBeNull();
     await user.click(screen.getByRole("button", { name: "잔금 1회 실지급 기록" }));
     dialog = await screen.findByRole("dialog");
-    await user.type(within(dialog).getByLabelText(/실지급 금액/), "170000000");
+    await user.type(within(dialog).getByLabelText(/실제 지급액/), "170000000");
     setDate(dialog, "실제 지급일", "2026-12-02");
     await user.click(within(dialog).getByRole("button", { name: "기록" }));
     expect(await screen.findByText("지급 완료")).not.toBeNull();
@@ -423,7 +423,7 @@ describe("계약 대금·분할 지급", () => {
     renderOffice(<PaymentScreen contractId={9101} />, { role: "OWNER" });
     await user.click(await screen.findByRole("button", { name: "계약금 1회 실지급 기록" }));
     const dialog = await screen.findByRole("dialog");
-    await user.type(within(dialog).getByLabelText(/실지급 금액/), "2000");
+    await user.type(within(dialog).getByLabelText(/실제 지급액/), "2000");
     setDate(dialog, "실제 지급일", "2026-11-20");
     await user.selectOptions(within(dialog).getByLabelText(/대체할 기존 실지급/), "9");
     await user.click(within(dialog).getByRole("button", { name: "기록" }));

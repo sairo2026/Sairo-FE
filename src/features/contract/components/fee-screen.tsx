@@ -506,7 +506,7 @@ function FeeBody({ detail }: { detail: ContractDetailResponse }) {
       ) : null}
       <div>
         <Button disabled={isDraft || isReadOnly} onClick={() => setDialog({ kind: "create" })}>
-          + 청구 등록
+          청구 등록
         </Button>
       </div>
       <QueryGate query={query} loadingLabel="중개보수 내역을 불러오는 중입니다.">

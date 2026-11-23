@@ -151,6 +151,7 @@ export function CoordinationCreateScreen({
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
+        breadcrumb={[{ label: "방문 조율", href: "/coordinations" }, { label: "조율 생성" }]}
         title="조율 만들기"
         description="고객 한 명과 후보 매물을 골라 조율을 시작합니다."
       />

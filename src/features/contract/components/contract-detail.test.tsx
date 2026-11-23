@@ -127,7 +127,7 @@ describe("계약 상세 세 가지 상태", () => {
     renderOffice(<ContractDetailScreen contractId={9502} />, { role: "OWNER" });
     expect(await screen.findByRole("link", { name: "초안 수정" })).not.toBeNull();
     expect(screen.queryByRole("button", { name: "상태 변경" })).toBeNull();
-    expect(screen.queryByText("핵심정보 버전 이력")).toBeNull();
+    expect(screen.queryByText("버전 이력")).toBeNull();
     expect(screen.getByText(/초안에는 서류를 올릴 수 없습니다/)).not.toBeNull();
   });
 });
