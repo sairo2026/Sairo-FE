@@ -41,6 +41,7 @@ function ReopenForm({ isOpen, onSubmit, onClose }: DialogProps) {
     <OpsReasonDialog
       isOpen={isOpen}
       title="실패한 환불 다시 열기"
+      size="form"
       reasonLabel="다시 여는 사유"
       reasonHint="PG 관리자 화면에서 확인한 내용과 다시 여는 이유를 적어 주세요."
       maxLength={1000}
@@ -75,6 +76,7 @@ function ManualResolveForm({ isOpen, onSubmit, onClose }: DialogProps) {
     <OpsReasonDialog
       isOpen={isOpen}
       title="실패한 환불 수동 완료"
+      size="form"
       reasonLabel="직접 처리한 사유"
       reasonHint="PG 관리자 화면에서 직접 취소한 경위를 적어 주세요."
       maxLength={1000}
