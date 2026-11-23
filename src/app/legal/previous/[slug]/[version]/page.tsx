@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import { LegalDocumentScreen } from "@/features/billing/components/legal-document-screen";
 import { PublicBusinessFooterServer } from "@/features/billing/components/public-business-footer.server";
 import { PublicSiteLayout } from "@/shared/layouts/layouts";
@@ -20,7 +20,7 @@ export default async function Page({
 }) {
   const { slug, version } = await params;
   const document = findPreviousLegalDocument(slug, version);
-  if (!document) notFound();
+  if (!document) redirect("/legal");
   return (
     <PublicSiteLayout footer={<PublicBusinessFooterServer />}>
       <LegalDocumentScreen slug={slug as LegalDocumentSlug} previousVersion={version} />
