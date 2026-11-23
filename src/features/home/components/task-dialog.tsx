@@ -217,6 +217,7 @@ function TaskDialogBody({ task, onClose }: TaskDialogProps) {
         ) : null}
         <TextField
           label="할 일 제목"
+          placeholder="이 업무를 간단히 설명하는 제목을 작성해 주세요."
           required
           value={values.title}
           onValueChange={(v) => set("title", v)}
@@ -280,6 +281,7 @@ function TaskDialogBody({ task, onClose }: TaskDialogProps) {
         )}
         <TextField
           label="메모(선택)"
+          placeholder="메모를 입력해 주세요."
           value={values.memo}
           onValueChange={(v) => set("memo", v)}
           error={errors.memo}
