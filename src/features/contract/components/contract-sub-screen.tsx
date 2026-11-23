@@ -17,7 +17,7 @@ const SUB_ITEMS: Array<{ key: SubKey; label: string }> = [
   { key: "documents", label: "서류" },
   { key: "fees", label: "중개보수·수납" },
   { key: "payments", label: "계약 대금" },
-  { key: "followups", label: "후속업무" },
+  { key: "followups", label: "후속 업무" },
 ];
 
 export function ContractSubNav({
@@ -81,6 +81,11 @@ function SubBody({
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
+        breadcrumb={[
+          { label: "계약 관리", href: "/contracts" },
+          { label: "계약 상세", href: `/contracts/${detail.contractId}` },
+          { label: title },
+        ]}
         title={title}
         description={`${property.data?.name ?? `계약 ${detail.contractId}`} · ${labelOf(DEAL_TYPE_LABEL, detail.dealType)} · ${labelOf(CONTRACT_STATUS_LABEL, detail.contractStatus)}. ${description}`}
       />

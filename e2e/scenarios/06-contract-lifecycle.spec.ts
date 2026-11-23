@@ -14,7 +14,7 @@ test.describe("시나리오 6 전세 계약 초안부터 재계약과 정상 종
     await test.step("/contracts/new에서 거래유형과 담당자만 넣어 초안을 저장한다", async () => {
       await page.goto("/contracts/new?propertyId=502");
       await expect(page.getByRole("heading", { name: "계약 등록" })).toBeVisible();
-      await page.getByLabel(/거래유형/).selectOption("JEONSE");
+      await page.getByLabel(/거래 유형/).selectOption("JEONSE");
       const manager = page.getByLabel(/담당 공인중개사/);
       await expect(manager.locator("option", { hasText: "이중개" })).toHaveCount(1);
       await manager.selectOption({ label: "이중개" });
@@ -29,7 +29,7 @@ test.describe("시나리오 6 전세 계약 초안부터 재계약과 정상 종
       await page.getByLabel("체결일", { exact: true }).fill("2025-01-10");
       await page.getByLabel("매도·임대인 1 이름").fill("박임대");
       await page.getByLabel("매수·임차인 1 이름").fill("최임차");
-      await page.getByLabel("보증금(원)", { exact: true }).fill("300000000");
+      await page.getByLabel("보증금 (원)", { exact: true }).fill("300000000");
       await page.getByLabel("임대 시작일", { exact: true }).fill("2025-02-08");
       await page.getByLabel("임대 만기일", { exact: true }).fill("2027-01-09");
       await page.getByLabel("잔금 예정일", { exact: true }).fill("2025-02-01");
@@ -55,7 +55,7 @@ test.describe("시나리오 6 전세 계약 초안부터 재계약과 정상 종
     await test.step("재계약을 등록하면 새 계약이 기존 계약을 이전 계약으로 가리킨다", async () => {
       await page.getByRole("link", { name: "재계약" }).click();
       await expect(page.getByRole("heading", { name: "재계약" })).toBeVisible();
-      await expect(page.getByLabel(/거래유형/)).toBeDisabled();
+      await expect(page.getByLabel(/거래 유형/)).toBeDisabled();
       const manager = page.getByLabel(/담당 공인중개사/);
       await expect(manager.locator("option", { hasText: "이중개" })).toHaveCount(1);
       await manager.selectOption({ label: "이중개" });

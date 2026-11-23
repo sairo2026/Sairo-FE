@@ -133,7 +133,7 @@ function ScheduleDialog({
           error={errors.scheduledDate}
         />
         <TextField
-          label="예정액(원)"
+          label="예정액 (원)"
           kind="number"
           inputMode="numeric"
           required
@@ -226,7 +226,7 @@ function PaymentDialog({
           확인자와 확인 시각은 현재 사용자와 지금 시각으로 자동 기록됩니다.
         </p>
         <TextField
-          label="실지급 금액(원)"
+          label="실제 지급액 (원)"
           kind="number"
           inputMode="numeric"
           required

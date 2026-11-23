@@ -9,6 +9,7 @@ import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { DetailList, MutedNote } from "@/shared/components/feedback/page-parts";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
 import { Badge } from "@/shared/components/ui/badge";
+import { Breadcrumb } from "@/shared/components/ui/breadcrumb";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import { Modal } from "@/shared/components/ui/modal";
@@ -258,6 +259,9 @@ function DetailBody({ customer }: { customer: CustomerDetail }) {
     <div className="flex flex-col gap-6">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-2">
+          <Breadcrumb
+            items={[{ label: "고객 관리", href: "/customers" }, { label: "고객 상세" }]}
+          />
           <h1 className="text-h1 font-bold text-ink">{customer.name}</h1>
           <div className="flex flex-wrap items-center gap-2">
             {customer.roles.map((item) =>

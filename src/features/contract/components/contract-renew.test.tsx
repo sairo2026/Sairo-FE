@@ -59,7 +59,7 @@ describe("재계약", () => {
     expect(screen.getByDisplayValue("300000000")).not.toBeNull();
     expect((screen.getByLabelText("체결일") as HTMLInputElement).value).toBe("");
     expect((screen.getByLabelText("임대 시작일") as HTMLInputElement).value).toBe("");
-    expect((screen.getByLabelText(/거래유형/) as HTMLSelectElement).disabled).toBe(true);
+    expect((screen.getByLabelText(/거래 유형/) as HTMLSelectElement).disabled).toBe(true);
   });
 
   it("월세 계약은 월세 금액도 채운다", async () => {
