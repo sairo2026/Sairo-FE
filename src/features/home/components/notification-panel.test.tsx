@@ -45,7 +45,7 @@ describe("알림 패널", () => {
       ],
     });
     const user = userEvent.setup();
-    renderOffice(<NotificationPanel onClose={vi.fn()} />, { role: "OWNER" });
+    renderOffice(<NotificationPanel onClose={vi.fn()} onNavigate={vi.fn()} />, { role: "OWNER" });
     const panel = await screen.findByRole("dialog", { name: "알림" });
     await user.click(await within(panel).findByRole("button", { name: "공지입니다. 읽음 처리" }));
     await waitFor(() => expect(getMockWorkState().notifications[0]?.read).toBe(true));
@@ -67,7 +67,7 @@ describe("알림 패널", () => {
         }),
       ],
     });
-    renderOffice(<NotificationPanel onClose={vi.fn()} />, { role: "OWNER" });
+    renderOffice(<NotificationPanel onClose={vi.fn()} onNavigate={vi.fn()} />, { role: "OWNER" });
     const panel = await screen.findByRole("dialog", { name: "알림" });
     expect(await within(panel).findByText("읽은 공지입니다.")).not.toBeNull();
     expect(within(panel).queryByRole("button", { name: /읽음 처리/ })).toBeNull();

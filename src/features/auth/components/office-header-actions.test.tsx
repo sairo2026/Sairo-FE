@@ -57,16 +57,23 @@ describe("사무소 상단 동작", () => {
     ).toBe("/notifications");
   });
 
-  it("알림 패널은 닫기 버튼과 ESC로 닫힌다", async () => {
+  it("알림 패널은 닫기 버튼과 Escape로 닫히고 열기 버튼에 초점을 돌려준다", async () => {
     const user = userEvent.setup();
     renderOffice(<OfficeHeaderActions />, { role: "OWNER" });
-    await user.click(await screen.findByRole("button", { name: /알림 열기/ }));
-    await user.click(await screen.findByRole("button", { name: "알림 닫기" }));
+    const trigger = await screen.findByRole("button", { name: /알림 열기/ });
+
+    await user.click(trigger);
+    const close = await screen.findByRole("button", { name: "알림 닫기" });
+    expect(document.activeElement).toBe(close);
+    await user.click(close);
     expect(screen.queryByRole("dialog", { name: "알림" })).toBeNull();
-    await user.click(screen.getByRole("button", { name: /알림 열기/ }));
+    expect(document.activeElement).toBe(trigger);
+
+    await user.keyboard("{Enter}");
     await screen.findByRole("dialog", { name: "알림" });
     await user.keyboard("{Escape}");
     expect(screen.queryByRole("dialog", { name: "알림" })).toBeNull();
+    expect(document.activeElement).toBe(trigger);
   });
 
   it("이미 세션이 끝났을 때 로그아웃하면 오류 없이 로그인 화면으로 보낸다", async () => {
