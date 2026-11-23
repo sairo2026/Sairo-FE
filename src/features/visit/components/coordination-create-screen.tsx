@@ -23,6 +23,7 @@ import {
 import { describeVisitError, isApiCode } from "../model/messages";
 import { prefillNoticeMessages } from "../model/prefill-notices";
 import { addDays, todayKst, validatePeriod } from "../model/time";
+import { CoordinationStepper } from "./coordination-stepper";
 import { CandidatePicker, CustomerPicker } from "./pickers";
 import type { CandidateChoice } from "./pickers";
 
@@ -153,6 +154,7 @@ export function CoordinationCreateScreen({
         title="조율 만들기"
         description="고객 한 명과 후보 매물을 골라 조율을 시작합니다."
       />
+      <CoordinationStepper current={0} />
       {isReadOnly ? <FormNotice>읽기만 가능한 상태라 조율을 만들 수 없습니다.</FormNotice> : null}
       {prefillNotices.map((message) => (
         <FormNotice key={message}>{message}</FormNotice>

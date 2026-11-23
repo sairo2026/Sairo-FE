@@ -48,6 +48,7 @@ import type { IssuedLink } from "./issued-link-dialog";
 import { ConfirmationSection } from "./confirmation-section";
 import { LifecycleSection } from "./lifecycle-section";
 import { CandidatePicker } from "./pickers";
+import { CoordinationStepper, coordinationStepIndex } from "./coordination-stepper";
 import { ResultSection } from "./result-section";
 import { ChangeSection, RequestsSection } from "./request-section";
 import { ScheduleBlockedCandidates } from "./schedule-blocked-candidates";
@@ -704,6 +705,7 @@ function DetailBody({ detail }: { detail: Detail }) {
   const alert = detail.rescheduleAlert;
   const [suggestedStarts, setSuggestedStarts] = useState<Record<number, string>>({});
   const stage = statusStage(detail.status, (detail.scheduleItems ?? []).length > 0);
+  const stepIndex = coordinationStepIndex(detail.status);
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-wrap items-end justify-between gap-4">
@@ -726,6 +728,7 @@ function DetailBody({ detail }: { detail: Detail }) {
           목록
         </Link>
       </header>
+      {stepIndex === null ? null : <CoordinationStepper current={stepIndex} />}
       {alert ? (
         <FormAlert>
           재조율이 필요합니다. {alert.reason ?? RESCHEDULE_TRIGGER_TEXT[alert.triggerType]} (
