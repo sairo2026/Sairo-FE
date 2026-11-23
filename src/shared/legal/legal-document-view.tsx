@@ -14,7 +14,7 @@ function useDocumentBlocks(document: LegalDocument, effectiveDate?: string) {
     () =>
       prepareLegalBlocks(
         document.body,
-        buildLegalValues(document.version, company.data, effectiveDate),
+        buildLegalValues(document.version, company.data, effectiveDate ?? document.effectiveDate),
       ),
     [document, company.data, effectiveDate],
   );

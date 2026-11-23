@@ -49,6 +49,25 @@ describe("구독·결제 약관의 사실 정정", () => {
     expect(body).not.toContain("장애가 영향을 준 기간을 반영해");
   });
 
+  it("무료 이용이 끝난 뒤 첫 결제가 실패하면 재시도와 유예 없이 구독이 끝난다고 적고 재시도는 갱신 결제에 한정한다", () => {
+    const body = subscriptionTerms();
+    expect(body).toContain(
+      "1. 갱신 결제에 실패하면 회사는 청구 예정 시각부터 1시간 뒤, 3일 뒤, 7일 뒤에",
+    );
+    expect(body).toContain(
+      "2. 무료 이용이 끝난 뒤 첫 결제에 실패하면 재시도와 미납 유예 없이 구독이 바로 종료됩니다",
+    );
+    expect(body).toContain("종료된 때부터 30일 동안 자료를 조회하고 내려받을 수 있으며");
+  });
+
+  it("종료 뒤 승인된 결제는 전액 환불 요청으로 접수하고 운영자가 금액을 확인한다고 적는다", () => {
+    const body = subscriptionTerms();
+    expect(body).not.toContain("환불로 접수해 운영자가 검토합니다");
+    expect(body).toContain(
+      "사무소를 종료한 뒤 승인된 결제는 전액 환불 요청으로 접수하고 운영자가 환불 금액을 확인합니다",
+    );
+  });
+
   it("처리에 실패한 환불은 운영자가 다시 처리한다고 적는다", () => {
     expect(subscriptionTerms()).toContain("처리에 실패한 환불은 운영자가 확인해 다시 처리합니다");
   });

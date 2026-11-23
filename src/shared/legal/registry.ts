@@ -3,6 +3,10 @@ import { PRIVACY_BODY } from "./documents/privacy";
 import { PROCESSING_OUTSOURCING_BODY } from "./documents/processing-outsourcing";
 import { REFUND_BODY } from "./documents/refund";
 import { SUBSCRIPTION_TERMS_BODY } from "./documents/subscription-terms";
+import { PRIVACY_BODY_1_0 } from "./documents/previous/privacy-1-0";
+import { REFUND_BODY_1_0 } from "./documents/previous/refund-1-0";
+import { SUBSCRIPTION_TERMS_BODY_1_0 } from "./documents/previous/subscription-terms-1-0";
+import { TERMS_BODY_1_0 } from "./documents/previous/terms-1-0";
 import { TERMS_BODY } from "./documents/terms";
 
 export type LegalDocumentSlug =
@@ -19,6 +23,10 @@ export type LegalDocument = {
   summary: string;
   version: string;
   body: string;
+  /** 화면에 표시하는 시행일이다. 서버 약관 카탈로그의 효력 시각과 같은 날짜를 적는다. */
+  effectiveDate?: string;
+  /** 직전 시행 버전의 본문이다. 시행 버전이 바뀐 문서만 가진다. */
+  previous?: { version: string; body: string };
   termsCode?: string;
   policyKind?: string;
 };
@@ -32,6 +40,8 @@ export const LEGAL_DOCUMENTS: readonly LegalDocument[] = [
     summary: "사무소가 사이로를 이용하는 조건과 회사와 사무소의 권리와 의무입니다.",
     version: "1.1",
     body: TERMS_BODY,
+    effectiveDate: "2026년 12월 16일",
+    previous: { version: "1.0", body: TERMS_BODY_1_0 },
     termsCode: "TOS",
     policyKind: "TERMS",
   },
@@ -41,6 +51,8 @@ export const LEGAL_DOCUMENTS: readonly LegalDocument[] = [
     summary: "사이로가 처리하는 개인정보의 항목, 목적, 보유 기간과 정보주체의 권리입니다.",
     version: "1.1",
     body: PRIVACY_BODY,
+    effectiveDate: "2026년 12월 16일",
+    previous: { version: "1.0", body: PRIVACY_BODY_1_0 },
     termsCode: "PRIVACY",
     policyKind: "PRIVACY",
   },
@@ -50,6 +62,8 @@ export const LEGAL_DOCUMENTS: readonly LegalDocument[] = [
     summary: "해지와 환불의 대상, 금액 계산, 신청과 처리 방법입니다.",
     version: "1.1",
     body: REFUND_BODY,
+    effectiveDate: "2026년 11월 23일",
+    previous: { version: "1.0", body: REFUND_BODY_1_0 },
     policyKind: "REFUND",
   },
   {
@@ -58,6 +72,8 @@ export const LEGAL_DOCUMENTS: readonly LegalDocument[] = [
     summary: "월 선불 자동결제 구독의 요금, 결제, 해지와 가격 변경 조건입니다.",
     version: "1.1",
     body: SUBSCRIPTION_TERMS_BODY,
+    effectiveDate: "2026년 12월 16일",
+    previous: { version: "1.0", body: SUBSCRIPTION_TERMS_BODY_1_0 },
     termsCode: "SUBSCRIPTION_PURCHASE",
   },
   {
@@ -99,4 +115,25 @@ export function findLegalDocumentByPolicyKind(kind: string): LegalDocument | und
 
 export function legalDocumentPath(slug: LegalDocumentSlug): string {
   return `/legal/${slug}`;
+}
+
+export function previousLegalDocumentPath(slug: LegalDocumentSlug, version: string): string {
+  return `/legal/previous/${slug}/${version}`;
+}
+
+/** 직전 시행 버전을 현재 문서와 같은 형태로 돌려준다. 시행일은 알 수 없어 비운다. */
+export function findPreviousLegalDocument(
+  slug: string,
+  version: string,
+): LegalDocument | undefined {
+  const current = findLegalDocument(slug);
+  if (!current?.previous || current.previous.version !== version) return undefined;
+  return {
+    ...current,
+    title: `${current.title} 이전 버전`,
+    version: current.previous.version,
+    body: current.previous.body,
+    effectiveDate: undefined,
+    previous: undefined,
+  };
 }
