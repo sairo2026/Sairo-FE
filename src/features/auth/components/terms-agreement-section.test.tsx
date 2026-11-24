@@ -153,7 +153,7 @@ describe("약관 동의 영역의 필수·선택 표시", () => {
     expect(screen.getByRole("table")).toBeTruthy();
   });
 
-  it("서버가 제시한 1.0 이용약관을 열고 이전 시행 버전 링크를 제공한다", async () => {
+  it("서버가 제시한 1.0 이용약관을 열고 같은 버전의 전문 링크를 제공한다", async () => {
     render(
       <QueryClientProvider
         client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
