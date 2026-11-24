@@ -32,6 +32,21 @@ export default defineConfig({
         hasTouch: true,
       },
     },
+    {
+      name: "firefox-smoke",
+      testMatch: /(report-only-csp|ops-refund-reprocess)\.spec\.ts/,
+      use: { ...devices["Desktop Firefox"] },
+    },
+    {
+      name: "webkit-smoke",
+      testMatch: /(report-only-csp|ops-refund-reprocess)\.spec\.ts/,
+      use: { ...devices["Desktop Safari"] },
+    },
+    {
+      name: "mobile-webkit-smoke",
+      testMatch: /(report-only-csp|ops-refund-reprocess)\.spec\.ts/,
+      use: { ...devices["iPhone 13"] },
+    },
   ],
   webServer: {
     command: `npm run start -- --port ${PORT}`,
