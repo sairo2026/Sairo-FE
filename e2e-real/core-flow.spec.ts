@@ -417,14 +417,19 @@ test("격리 DB의 실패 환불을 운영 화면에서 재처리하고 수동 �
     expect(response.status()).toBe(200);
     return ((await response.json()) as { count: number }).count;
   }
-
   const operator = await storedOperatorLogin(browser, "reviewer");
   const page = operator.page;
+  function refundLink(refundId: number) {
+    return page.locator(`a[href="/ops/billing/refunds/${refundId}"]`);
+  }
   const retry = await failedRefund();
   await page.goto("/ops/billing/refunds");
   await page.getByLabel("환불 상태").selectOption("FAILED");
   await page.getByRole("button", { name: "조회" }).click();
-  await expect(page.getByRole("link", { name: String(retry.refundId), exact: true })).toBeVisible();
+  await expect(refundLink(retry.refundId)).toBeVisible();
+  await expect(page.getByRole("row").filter({ has: refundLink(retry.refundId) })).toContainText(
+    "환불 실패",
+  );
   await page.goto(`/ops/billing/refunds/${retry.refundId}`);
   await expect(page.getByText("STUB_CANCEL_DECLINED")).toBeVisible();
   await operatorStepUp(operator);
@@ -440,6 +445,16 @@ test("격리 DB의 실패 환불을 운영 화면에서 재처리하고 수동 �
     .getByRole("button", { name: "환불 실행" })
     .click();
   await expect(page.getByText("환불을 완료했습니다.")).toBeVisible();
+  const retriedRefund = await operator.context.request.get(
+    `${FRONT_ORIGIN}/api/ops/refund-requests/${retry.refundId}`,
+  );
+  expect(retriedRefund.status()).toBe(200);
+  expect(await retriedRefund.json()).toMatchObject({ status: "COMPLETED" });
+  const retriedInvoice = await operator.context.request.get(
+    `${FRONT_ORIGIN}/api/ops/billing/invoices/${retry.invoiceId}`,
+  );
+  expect(retriedInvoice.status()).toBe(200);
+  expect(await retriedInvoice.json()).toMatchObject({ status: "FULLY_REFUNDED" });
   expect(await auditCount(retry.refundId)).toBe(1);
 
   const manual = await failedRefund();
@@ -453,7 +468,27 @@ test("격리 DB의 실패 환불을 운영 화면에서 재처리하고 수동 �
   await resolve.getByLabel("PG 콘솔에서 직접 취소한 것을 확인했습니다").check({ force: true });
   await resolve.getByRole("button", { name: "수동 완료" }).click();
   await expect(page.getByText("수동 처리로 환불을 완료했습니다.")).toBeVisible();
+  const manualRefund = await operator.context.request.get(
+    `${FRONT_ORIGIN}/api/ops/refund-requests/${manual.refundId}`,
+  );
+  expect(manualRefund.status()).toBe(200);
+  expect(await manualRefund.json()).toMatchObject({ status: "COMPLETED" });
+  const manualInvoice = await operator.context.request.get(
+    `${FRONT_ORIGIN}/api/ops/billing/invoices/${manual.invoiceId}`,
+  );
+  expect(manualInvoice.status()).toBe(200);
+  expect(await manualInvoice.json()).toMatchObject({ status: "FULLY_REFUNDED" });
   expect(await auditCount(manual.refundId)).toBe(1);
+
+  await page.goto("/ops/billing/refunds");
+  await page.getByLabel("환불 상태").selectOption("FAILED");
+  await page.getByRole("button", { name: "조회" }).click();
+  await expect(refundLink(retry.refundId)).toHaveCount(0);
+  await expect(refundLink(manual.refundId)).toHaveCount(0);
+  await page.getByLabel("환불 상태").selectOption("COMPLETED");
+  await page.getByRole("button", { name: "조회" }).click();
+  await expect(refundLink(retry.refundId)).toBeVisible();
+  await expect(refundLink(manual.refundId)).toBeVisible();
   await operator.context.close();
 });
 
