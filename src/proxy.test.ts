@@ -192,6 +192,16 @@ describe("엣지 토큰 헤더", () => {
 });
 
 describe("콘텐츠 보안 정책 헤더", () => {
+  it("로컬 HTTP에서만 혼합 콘텐츠 업그레이드를 생략한다", () => {
+    vi.stubEnv("COMING_SOON", "false");
+    const local = proxy(new NextRequest("http://localhost:3000/login"));
+    const production = proxy(new NextRequest("https://app.sairo.agency/login"));
+    expect(local.headers.get("Content-Security-Policy")).not.toContain("upgrade-insecure-requests");
+    expect(local.headers.get("Content-Security-Policy")).toContain("strict-dynamic");
+    expect(production.headers.get("Content-Security-Policy")).toContain(
+      "upgrade-insecure-requests",
+    );
+  });
   it("화면 응답에 요청마다 다른 nonce가 든 강제 CSP를 붙이고 요청 헤더로도 넘긴다", () => {
     vi.stubEnv("COMING_SOON", "false");
     const first = proxy(new NextRequest("https://app.sairo.agency/login"));
