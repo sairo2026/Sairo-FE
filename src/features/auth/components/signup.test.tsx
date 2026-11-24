@@ -66,6 +66,19 @@ async function fillInfoStep(user: ReturnType<typeof userEvent.setup>) {
 }
 
 describe("이메일 가입 기본 정보", () => {
+  it("서버 약관의 원문 버전이 없으면 전체 동의를 막고 정확한 오류를 안내한다", async () => {
+    setMockTermsVersion("9.9");
+    const user = userEvent.setup();
+    renderWithQuery(<SignupEmailFlow token={VALID_TOKEN} />);
+    await screen.findByText("기본 가입 정보 입력");
+    expect(screen.getByRole("checkbox", { name: "필수 약관 전체 동의" })).toHaveProperty(
+      "disabled",
+      true,
+    );
+    await user.click(screen.getByRole("button", { name: "다음" }));
+    expect(screen.getAllByText(/약관 버전이 갱신되었습니다/).length).toBeGreaterThan(0);
+    expect(screen.queryByText("이용약관에 동의해야 가입할 수 있습니다.")).toBeNull();
+  });
   it("약관을 불러오는 동안 로딩을 보여주고 카탈로그 항목을 그대로 표시한다", async () => {
     renderWithQuery(<SignupEmailFlow />);
     expect(screen.getByText("약관을 불러오는 중입니다.")).not.toBeNull();
@@ -447,7 +460,7 @@ describe("이메일 가입 완료", () => {
   it("가입하는 동안 약관이 바뀌면 안내를 겹쳐 띄우고 입력값을 지키며 바뀐 항목만 비운다", async () => {
     const user = userEvent.setup();
     await toPasswordStep(user);
-    setMockTermsVersion("2026-12-01");
+    setMockTermsVersion("1.1");
     await user.type(screen.getByLabelText(/^비밀번호 설정\*?$/), "abcd1234!");
     await user.type(screen.getByLabelText(/^비밀번호 확인/), "abcd1234!");
     await user.click(screen.getByRole("button", { name: "가입하기" }));
@@ -558,6 +571,19 @@ describe("이메일 가입 완료", () => {
 });
 
 describe("카카오 가입 보완 입력", () => {
+  it("서버 약관의 원문 버전이 없으면 가입을 막고 정확한 오류를 안내한다", async () => {
+    setMockTermsVersion("9.9");
+    const user = userEvent.setup();
+    renderWithQuery(<KakaoSignupForm />);
+    await screen.findByRole("heading", { name: "카카오로 가입" });
+    expect(screen.getByRole("checkbox", { name: "필수 약관 전체 동의" })).toHaveProperty(
+      "disabled",
+      true,
+    );
+    await user.click(screen.getByRole("button", { name: "가입하기" }));
+    expect(screen.getAllByText(/약관 버전이 갱신되었습니다/).length).toBeGreaterThan(0);
+    expect(screen.queryByText("이용약관에 동의해야 가입할 수 있습니다.")).toBeNull();
+  });
   it("계정 조회 응답의 이름을 채워 보여주고 마케팅 항목은 숨긴다", async () => {
     setMockMe({
       ...MOCK_ME,
@@ -624,7 +650,7 @@ describe("카카오 가입 보완 입력", () => {
     await verifyPhone(user);
     await screen.findByText("인증이 완료되었습니다.");
     await user.click(screen.getByLabelText(/이용약관에 동의합니다/));
-    setMockTermsVersion("2026-12-01");
+    setMockTermsVersion("1.1");
     await user.click(screen.getByRole("button", { name: "가입하기" }));
     const dialog = await screen.findByRole("dialog");
     expect(within(dialog).getByText(/아직 가입되지 않았습니다/)).not.toBeNull();

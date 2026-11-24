@@ -5,7 +5,10 @@ import type { TermsCatalogResponse } from "@/lib/api/contracts/auth.schema";
 import { Checkbox, TermsItem } from "@/shared/components/ui/select-field";
 import { TableScroll } from "@/shared/components/ui/table-scroll";
 import { LegalDocumentModal } from "@/shared/legal/legal-document-view";
-import { findLegalDocumentByTermsCode } from "@/shared/legal/registry";
+import {
+  findLegalDocumentByTermsCode,
+  findLegalDocumentByTermsCodeAndVersion,
+} from "@/shared/legal/registry";
 import type { LegalDocument } from "@/shared/legal/registry";
 import { COLLECTION_TABLE_COPY, PRIVACY_NOTICE_COPY, SIGNUP_TERMS_COPY } from "../model/legal-copy";
 import { breakSentences } from "@/shared/lib/sentences";
@@ -37,8 +40,48 @@ export function isAgreementItem(item: TermsCatalogItem): boolean {
   return item.category !== "NOTICE";
 }
 
-export function areRequiredTermsAgreed(items: TermsCatalogItem[], selection: TermsSelection) {
-  return items.filter((item) => item.required).every((item) => selection[item.termsCode] === true);
+export function areRequiredTermsAgreed(
+  items: TermsCatalogItem[],
+  selection: TermsSelection,
+  hasLoginEmail = true,
+) {
+  return (
+    !hasBlockingTermsVersionMismatch(items, hasLoginEmail) &&
+    visibleTerms(items, hasLoginEmail).every(
+      (item) => !item.required || selection[item.termsCode] === true,
+    )
+  );
+}
+
+export function hasBlockingTermsVersionMismatch(
+  items: TermsCatalogItem[],
+  hasLoginEmail = true,
+): boolean {
+  return visibleTerms(items, hasLoginEmail).some(
+    (item) => (item.required || item.category === "NOTICE") && isLocalVersionUnavailable(item),
+  );
+}
+
+function isLocalVersionUnavailable(item: TermsCatalogItem): boolean {
+  return (
+    findLegalDocumentByTermsCode(item.termsCode) !== undefined &&
+    findLegalDocumentByTermsCodeAndVersion(item.termsCode, item.version) === undefined
+  );
+}
+
+export function selectedSignupAgreements(
+  items: TermsCatalogItem[],
+  selection: TermsSelection,
+  hasLoginEmail = true,
+) {
+  return visibleTerms(items, hasLoginEmail)
+    .filter(
+      (item) =>
+        isAgreementItem(item) &&
+        selection[item.termsCode] === true &&
+        !isLocalVersionUnavailable(item),
+    )
+    .map((item) => ({ termsCode: item.termsCode, version: item.version }));
 }
 
 function labelFor(item: TermsCatalogItem): string {
@@ -78,17 +121,26 @@ export function TermsAgreementSection({
   const [openDocument, setOpenDocument] = useState<LegalDocument | null>(null);
 
   function openFullText(item: TermsCatalogItem) {
-    const document = findLegalDocumentByTermsCode(item.termsCode);
+    const document = findLegalDocumentByTermsCodeAndVersion(item.termsCode, item.version);
     if (document) setOpenDocument(document);
   }
 
-  const requiredItems = items.filter((item) => isAgreementItem(item) && item.required);
+  const visibleItems = visibleTerms(items, hasLoginEmail);
+  const blockingVersionMismatch = hasBlockingTermsVersionMismatch(items, hasLoginEmail);
+  const optionalVersionMismatch = visibleItems.some(
+    (item) => !item.required && item.category !== "NOTICE" && isLocalVersionUnavailable(item),
+  );
+  const requiredItems = visibleItems.filter((item) => isAgreementItem(item) && item.required);
   const isAllRequiredChecked =
-    requiredItems.length > 0 && requiredItems.every((item) => selection[item.termsCode] === true);
+    requiredItems.length > 0 &&
+    !blockingVersionMismatch &&
+    requiredItems.every((item) => selection[item.termsCode] === true);
 
   function toggleRequired(checked: boolean) {
     const next = { ...selection };
-    for (const item of requiredItems) next[item.termsCode] = checked;
+    for (const item of requiredItems) {
+      if (!isLocalVersionUnavailable(item)) next[item.termsCode] = checked;
+    }
     onChange(next);
   }
 
@@ -102,19 +154,24 @@ export function TermsAgreementSection({
           <Checkbox
             variant="form"
             checked={isAllRequiredChecked}
+            disabled={blockingVersionMismatch}
             onCheckedChange={toggleRequired}
             className="font-medium"
             label={<span className="text-primary">{SIGNUP_TERMS_COPY.selectAllRequiredLabel}</span>}
           />
         ) : null}
-        {items.map((item) => {
-          const hasBody = findLegalDocumentByTermsCode(item.termsCode) !== undefined;
+        {visibleItems.map((item) => {
+          const hasBody =
+            findLegalDocumentByTermsCodeAndVersion(item.termsCode, item.version) !== undefined;
+          const versionUnavailable = isLocalVersionUnavailable(item);
           const isChanged = changedCodes.includes(item.termsCode) && !selection[item.termsCode];
           if (!isAgreementItem(item)) {
             return (
               <div key={item.termsCode} className="flex items-center justify-between gap-3">
                 <p className="text-body text-ink">{labelFor(item)}</p>
-                <FullTextLink item={item} hasBody={hasBody} onOpen={openFullText} />
+                {versionUnavailable ? null : (
+                  <FullTextLink item={item} hasBody={hasBody} onOpen={openFullText} />
+                )}
               </div>
             );
           }
@@ -125,7 +182,8 @@ export function TermsAgreementSection({
                 isRequired={item.required}
                 checked={selection[item.termsCode] === true}
                 onCheckedChange={(checked) => onChange({ ...selection, [item.termsCode]: checked })}
-                href={hasBody ? undefined : item.documentUrl}
+                disabled={versionUnavailable}
+                href={!versionUnavailable && !hasBody ? item.documentUrl : undefined}
                 onViewFull={hasBody ? () => openFullText(item) : undefined}
                 viewFullLabel={`${fullTextName(item)} 전문 보기`}
               />
@@ -146,7 +204,21 @@ export function TermsAgreementSection({
         <p className="text-caption text-ink-2">{SIGNUP_TERMS_COPY.noEmailMarketingNotice}</p>
       ) : null}
       <p className="text-caption text-ink-2">{PRIVACY_NOTICE_COPY.notice}</p>
-      <p className="text-caption text-ink-2">{SIGNUP_TERMS_COPY.footerNotice}</p>
+      {blockingVersionMismatch ? (
+        <p role="alert" className="text-caption text-danger">
+          {SIGNUP_TERMS_COPY.versionMismatchError}
+        </p>
+      ) : null}
+      {optionalVersionMismatch ? (
+        <p role="status" className="text-caption text-ink-2">
+          선택 동의의 현재 본문을 확인할 수 없어 선택할 수 없습니다. 가입은 계속할 수 있습니다.
+        </p>
+      ) : null}
+      <p className="text-caption text-ink-2">
+        {visibleItems.some((item) => isAgreementItem(item) && !item.required)
+          ? SIGNUP_TERMS_COPY.footerNotice
+          : SIGNUP_TERMS_COPY.requiredOnlyNotice}
+      </p>
       {error ? (
         <p role="alert" className="text-caption text-danger">
           {error}
@@ -199,38 +271,43 @@ function FullTextLink({
 
 export function CollectionNoticeTable() {
   return (
-    <section aria-label={COLLECTION_TABLE_COPY.title} className="flex flex-col gap-3">
-      <h2 className="text-body font-semibold text-ink">{COLLECTION_TABLE_COPY.title}</h2>
-      <p className="text-caption text-ink-2">{COLLECTION_TABLE_COPY.intro}</p>
-      <TableScroll
-        label={COLLECTION_TABLE_COPY.title}
-        className="rounded-control border border-line"
-      >
-        <table className="w-full min-w-[28rem] border-collapse text-left text-caption">
-          <caption className="sr-only">{COLLECTION_TABLE_COPY.title}</caption>
-          <thead className="bg-surface">
-            <tr>
-              {COLLECTION_TABLE_COPY.columns.map((column) => (
-                <th key={column} scope="col" className="px-3 py-2 font-semibold text-ink">
-                  {column}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {COLLECTION_TABLE_COPY.rows.map((row) => (
-              <tr key={row[0]} className="border-t border-line align-top">
-                {row.map((cell, index) => (
-                  <td key={index} className="px-3 py-2 text-ink-2">
-                    {cell}
-                  </td>
+    <section aria-label={COLLECTION_TABLE_COPY.title}>
+      <h2 className="sr-only">{COLLECTION_TABLE_COPY.title}</h2>
+      <details className="rounded-control border border-line bg-surface px-4 py-3">
+        <summary className="cursor-pointer text-body font-semibold text-ink">
+          {COLLECTION_TABLE_COPY.title} 자세히 보기
+        </summary>
+        <p className="mt-3 text-caption text-ink-2">{COLLECTION_TABLE_COPY.intro}</p>
+        <TableScroll
+          label={COLLECTION_TABLE_COPY.title}
+          className="mt-3 rounded-control border border-line bg-white"
+        >
+          <table className="w-full min-w-[28rem] border-collapse text-left text-caption">
+            <caption className="sr-only">{COLLECTION_TABLE_COPY.title}</caption>
+            <thead className="bg-surface">
+              <tr>
+                {COLLECTION_TABLE_COPY.columns.map((column) => (
+                  <th key={column} scope="col" className="px-3 py-2 font-semibold text-ink">
+                    {column}
+                  </th>
                 ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </TableScroll>
-      <p className="text-caption text-ink-2">{COLLECTION_TABLE_COPY.footer}</p>
+            </thead>
+            <tbody>
+              {COLLECTION_TABLE_COPY.rows.map((row) => (
+                <tr key={row[0]} className="border-t border-line align-top">
+                  {row.map((cell, index) => (
+                    <td key={index} className="px-3 py-2 text-ink-2">
+                      {cell}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </TableScroll>
+        <p className="mt-3 text-caption text-ink-2">{COLLECTION_TABLE_COPY.footer}</p>
+      </details>
     </section>
   );
 }

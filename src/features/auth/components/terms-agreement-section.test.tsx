@@ -2,10 +2,16 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, describe, expect, it } from "vitest";
 import { Checkbox } from "@/shared/components/ui/select-field";
 import { FieldLabel } from "@/shared/components/ui/field-label";
-import { areRequiredTermsAgreed, TermsAgreementSection } from "./terms-agreement-section";
+import {
+  areRequiredTermsAgreed,
+  CollectionNoticeTable,
+  selectedSignupAgreements,
+  TermsAgreementSection,
+} from "./terms-agreement-section";
 import type { TermsCatalogItem, TermsSelection } from "./terms-agreement-section";
 
 const ITEMS: TermsCatalogItem[] = [
@@ -123,6 +129,95 @@ describe("약관 동의 영역의 필수·선택 표시", () => {
     await userEvent.click(screen.getByRole("checkbox", { name: /공지·혜택 안내를 받고/ }));
     await userEvent.click(screen.getByRole("checkbox", { name: /공지·혜택 안내를 받고/ }));
     expect(screen.getByTestId("ready").textContent).toBe("true");
+  });
+
+  it("선택 동의가 보이지 않으면 선택 항목 안내를 표시하지 않는다", () => {
+    render(
+      <TermsAgreementSection
+        items={ITEMS}
+        selection={{}}
+        onChange={() => {}}
+        hasLoginEmail={false}
+      />,
+    );
+    expect(screen.queryByText(/선택 항목에 동의하지 않아도/)).toBeNull();
+  });
+
+  it("개인정보 수집 표는 접은 상태로 시작하고 펼칠 수 있다", async () => {
+    render(<CollectionNoticeTable />);
+    const summary = screen.getByText("개인정보 수집·이용 안내 자세히 보기");
+    const details = summary.closest("details");
+    expect(details?.open).toBe(false);
+    await userEvent.click(summary);
+    expect(details?.open).toBe(true);
+    expect(screen.getByRole("table")).toBeTruthy();
+  });
+
+  it("서버가 제시한 1.0 이용약관을 열고 이전 시행 버전 링크를 제공한다", async () => {
+    render(
+      <QueryClientProvider
+        client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
+      >
+        <Harness />
+      </QueryClientProvider>,
+    );
+    await userEvent.click(screen.getByRole("button", { name: /이용약관 전문 보기/ }));
+    const dialog = screen.getByRole("dialog");
+    expect(dialog.textContent).toContain("시행 버전 1.0");
+    expect(dialog.textContent).not.toContain("이전 시행 버전");
+    expect(dialog.querySelector('a[href="/legal/previous/terms/1.0"]')).not.toBeNull();
+  });
+
+  it("서버 버전에 맞는 로컬 원문이 없으면 해당 동의를 막는다", () => {
+    const firstItem = ITEMS[0];
+    if (!firstItem) throw new Error("약관 테스트 항목이 없습니다");
+    const unknown = [{ ...firstItem, version: "9.9" }];
+    render(<TermsAgreementSection items={unknown} selection={{ TOS: true }} onChange={() => {}} />);
+    expect(screen.getByRole("checkbox", { name: /이용약관에 동의합니다/ })).toHaveProperty(
+      "disabled",
+      true,
+    );
+    expect(screen.getByRole("alert").textContent).toContain("약관 버전이 갱신되었습니다");
+    expect(screen.getByRole("checkbox", { name: "필수 약관 전체 동의" })).toHaveProperty(
+      "disabled",
+      true,
+    );
+    expect(areRequiredTermsAgreed(unknown, { TOS: true })).toBe(false);
+  });
+
+  it("선택 동의 버전만 맞지 않아도 필수 동의를 마치면 가입할 수 있다", () => {
+    const items = ITEMS.map((item) =>
+      item.termsCode === "MARKETING" ? { ...item, version: "9.9" } : item,
+    );
+    render(<TermsAgreementSection items={items} selection={{ TOS: true }} onChange={() => {}} />);
+    expect(screen.getByRole("checkbox", { name: /공지·혜택 안내를 받고/ })).toHaveProperty(
+      "disabled",
+      true,
+    );
+    expect(screen.getByRole("status").textContent).toContain("가입은 계속할 수 있습니다");
+    expect(areRequiredTermsAgreed(items, { TOS: true })).toBe(true);
+    expect(selectedSignupAgreements(items, { TOS: true, MARKETING: true })).toEqual([
+      { termsCode: "TOS", version: "1.0" },
+    ]);
+  });
+
+  it("이메일이 없어서 숨긴 마케팅 버전 불일치는 가입을 막지 않는다", () => {
+    const items = ITEMS.map((item) =>
+      item.termsCode === "MARKETING" ? { ...item, version: "9.9" } : item,
+    );
+    render(
+      <TermsAgreementSection
+        items={items}
+        selection={{ TOS: true }}
+        onChange={() => {}}
+        hasLoginEmail={false}
+      />,
+    );
+    expect(screen.queryByRole("status")).toBeNull();
+    expect(areRequiredTermsAgreed(items, { TOS: true }, false)).toBe(true);
+    expect(selectedSignupAgreements(items, { TOS: true, MARKETING: true }, false)).toEqual([
+      { termsCode: "TOS", version: "1.0" },
+    ]);
   });
 });
 

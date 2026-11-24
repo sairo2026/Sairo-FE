@@ -412,6 +412,7 @@ export type TermsItemProps = {
   href?: string;
   onViewFull?: () => void;
   viewFullLabel?: string;
+  disabled?: boolean;
 };
 
 /** 항목별 체크, 필수·선택 표시, 전문 보기 링크를 한 행에 둔다. */
@@ -423,12 +424,14 @@ export function TermsItem({
   href,
   onViewFull,
   viewFullLabel,
+  disabled,
 }: TermsItemProps) {
   return (
     <div className="flex items-center justify-between gap-3">
       <Checkbox
         checked={checked}
         onCheckedChange={onCheckedChange}
+        disabled={disabled}
         className="font-medium"
         variant="form"
         requirement={isRequired ? "required" : "optional"}
