@@ -4,6 +4,7 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     setupFiles: ["./src/shared/testing/setup.ts"],
+    environmentOptions: { jsdom: { url: "http://localhost/" } },
     testTimeout: 20000,
     exclude: ["**/node_modules/**", "e2e/**", "e2e-real/**", ".next/**"],
   },
