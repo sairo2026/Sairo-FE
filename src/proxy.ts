@@ -23,6 +23,13 @@ function isApiPath(pathname: string): boolean {
   return pathname === "/api" || pathname.startsWith("/api/");
 }
 
+function isHttpLoopback(request: NextRequest): boolean {
+  return (
+    request.nextUrl.protocol === "http:" &&
+    ["localhost", "127.0.0.1", "[::1]"].includes(request.nextUrl.hostname)
+  );
+}
+
 // The API origin trusts the client address header from this edge only when this token matches.
 function nextWithEdgeToken(request: NextRequest, headers: Headers): NextResponse {
   if (!isApiPath(request.nextUrl.pathname)) {
@@ -78,7 +85,11 @@ export function proxy(request: NextRequest) {
     return apiResponse;
   }
   const nonce = createNonce();
-  const policy = buildContentSecurityPolicy(nonce, process.env.NODE_ENV === "development");
+  const policy = buildContentSecurityPolicy(
+    nonce,
+    process.env.NODE_ENV === "development",
+    isHttpLoopback(request),
+  );
   headers.set(CSP_NONCE_HEADER, nonce);
   headers.set("Content-Security-Policy", policy);
   const response = route(request, headers);

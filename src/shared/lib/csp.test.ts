@@ -23,6 +23,13 @@ describe("콘텐츠 보안 정책", () => {
     expect(buildContentSecurityPolicy("abc", true)).toContain("'unsafe-eval'");
   });
 
+  it("루프백 HTTP의 프로덕션 빌드는 요청 업그레이드 없이 nonce 정책을 유지한다", () => {
+    const policy = buildContentSecurityPolicy("abc", false, true);
+    expect(policy).not.toContain("upgrade-insecure-requests");
+    expect(policy).toContain("'nonce-abc' 'strict-dynamic'");
+    expect(policy).not.toContain("'unsafe-eval'");
+  });
+
   it("모드에 따라 강제 또는 보고 전용 헤더를 고른다", () => {
     expect(resolveCspMode({})).toBe("enforce");
     expect(resolveCspMode({ CSP_MODE: "report-only" })).toBe("report-only");

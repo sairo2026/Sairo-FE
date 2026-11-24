@@ -26,7 +26,11 @@ export function resolveCspMode(env: Readonly<Record<string, string | undefined>>
   return env.CSP_MODE === "report-only" ? "report-only" : "enforce";
 }
 
-export function buildContentSecurityPolicy(nonce: string, isDev: boolean): string {
+export function buildContentSecurityPolicy(
+  nonce: string,
+  isDev: boolean,
+  isHttpLoopback = false,
+): string {
   const directives = [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' ${TOSS_SCRIPT_SOURCES.join(" ")}${
@@ -42,7 +46,7 @@ export function buildContentSecurityPolicy(nonce: string, isDev: boolean): strin
     "base-uri 'self'",
     "form-action 'self'",
     "frame-ancestors 'none'",
-    ...(isDev ? [] : ["upgrade-insecure-requests"]),
+    ...(isDev || isHttpLoopback ? [] : ["upgrade-insecure-requests"]),
   ];
   return directives.map((d) => d.replace(/\s+/g, " ").trim()).join("; ");
 }
