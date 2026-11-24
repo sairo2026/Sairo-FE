@@ -101,6 +101,8 @@ jobs:
         run: >-
           npx playwright test e2e/report-only-csp.spec.ts e2e/ops-refund-reprocess.spec.ts
           --project=firefox-smoke --project=webkit-smoke --project=mobile-webkit-smoke
+        env:
+          HOME: /root
 
       - name: Upload report
         if: failure()
