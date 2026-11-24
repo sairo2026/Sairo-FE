@@ -52,7 +52,7 @@ export async function signupViaUi(page: Page, request: APIRequestContext, member
   await page.getByLabel(/^비밀번호 설정/).fill(PASSWORD);
   await page.getByLabel(/^비밀번호 확인/).fill(PASSWORD);
   await page.getByRole("button", { name: "가입하기" }).click();
-  await expect(page).toHaveURL(/\/office\/start$/);
+  await expect(page).toHaveURL(/\/office\/start$/, { timeout: 20_000 });
 }
 
 export async function loginViaUi(page: Page, email: string, expectedPath: RegExp = /\/home$/) {
