@@ -199,7 +199,7 @@ export function OpsPromotionsScreen() {
                 <p className="text-ink-2">
                   {campaign.status} · {campaign.freeMonths}개월 ·{" "}
                   {campaign.selfRedeemable ? "대표 직접 적용" : "운영자 지급"} ·{" "}
-                  {campaign.maxOffices == null
+                  {campaign.maxOffices === null
                     ? "적용 사무소 한도 없음"
                     : `최대 ${campaign.maxOffices}개 사무소`}{" "}
                   · {formatSeoulDateTime(campaign.startsAt)} ~{" "}
@@ -213,7 +213,7 @@ export function OpsPromotionsScreen() {
                     onClick={() => {
                       if (
                         window.confirm(
-                          `작성자가 아닌 다른 결제 담당 운영자로 재인증한 뒤 이 캠페인을 활성화합니까?\n적용 방식: ${campaign.selfRedeemable ? "대표 직접 적용" : "운영자 지급"}\n적용 한도: ${campaign.maxOffices == null ? "없음" : `${campaign.maxOffices}개 사무소`}`,
+                          `작성자가 아닌 다른 결제 담당 운영자로 재인증한 뒤 이 캠페인을 활성화합니까?\n적용 방식: ${campaign.selfRedeemable ? "대표 직접 적용" : "운영자 지급"}\n적용 한도: ${campaign.maxOffices === null ? "없음" : `${campaign.maxOffices}개 사무소`}`,
                         )
                       )
                         void act(
