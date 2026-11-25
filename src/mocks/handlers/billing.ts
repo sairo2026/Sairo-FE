@@ -405,6 +405,8 @@ export const billingHandlers = [
   http.get("/api/public/company-info", () => HttpResponse.json(EMPTY_COMPANY_INFO)),
   http.get("/api/billing/plans", () => HttpResponse.json(plans())),
   http.get("/api/subscriptions/current", () => HttpResponse.json(billingState.subscription)),
+  http.get("/api/billing/promotion-periods/current", () => HttpResponse.json(null)),
+  http.get("/api/billing/promotion-periods", () => HttpResponse.json([])),
   http.get("/api/terms", ({ request }) => {
     const context = new URL(request.url).searchParams.get("context");
     if (context !== "CARD_REGISTRATION") return undefined;
