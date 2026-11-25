@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import { TextField } from "@/shared/components/ui/text-field";
+import { Checkbox } from "@/shared/components/ui/select-field";
 import { formatSeoulDateTime } from "@/shared/lib/format";
 import { fetchOfficeDetail } from "../offices/api/ops-offices-api";
 import { BillingNav } from "../billing/billing-nav";
@@ -26,6 +27,7 @@ export function OpsPromotionsScreen() {
   const [ends, setEnds] = useState("");
   const [months, setMonths] = useState("1");
   const [maximum, setMaximum] = useState("");
+  const [selfRedeemable, setSelfRedeemable] = useState(false);
   const [officeText, setOfficeText] = useState("");
   const [selectedCampaign, setSelectedCampaign] = useState<number | null>(null);
   const [reconcileGrant, setReconcileGrant] = useState<{
@@ -73,23 +75,37 @@ export function OpsPromotionsScreen() {
       !Number.isInteger(count) ||
       count < 1 ||
       count > 120 ||
-      (cap !== null && (!Number.isInteger(cap) || cap < 1))
+      (cap !== null && (!Number.isInteger(cap) || cap < 1)) ||
+      (selfRedeemable && (code.length < 16 || cap === null))
     ) {
-      setFailure("이름, 대문자 코드, 적용 기간, 무료 개월 수를 확인해 주세요.");
+      setFailure(
+        selfRedeemable
+          ? "직접 적용 코드는 16자 이상이며 최대 사무소 수가 필요합니다. 기간과 무료 개월 수도 확인해 주세요."
+          : "이름, 대문자 코드, 적용 기간, 무료 개월 수를 확인해 주세요.",
+      );
       return;
     }
-    await act(
-      () =>
-        actions.create.mutateAsync({
-          name: name.trim(),
-          code,
-          applicationStartsAt: start,
-          applicationEndsAt: end,
-          freeMonths: count,
-          maxOffices: cap,
-        }),
-      "초안이 생성되었습니다. 다른 결제 담당 운영자의 재인증 승인이 있어야 활성화됩니다.",
-    );
+    setFailure(null);
+    setSuccess(null);
+    try {
+      await actions.create.mutateAsync({
+        name: name.trim(),
+        code,
+        applicationStartsAt: start,
+        applicationEndsAt: end,
+        freeMonths: count,
+        maxOffices: cap,
+        selfRedeemable,
+      });
+      setCode("");
+      setSuccess(
+        selfRedeemable
+          ? "직접 적용 초안이 생성되었습니다. 코드는 목록에서 일부만 보입니다. 다른 결제 담당 운영자의 재인증 승인이 있어야 활성화됩니다."
+          : "초안이 생성되었습니다. 다른 결제 담당 운영자의 재인증 승인이 있어야 활성화됩니다.",
+      );
+    } catch {
+      setFailure("초안을 만들지 못했습니다. 운영자 권한과 입력값을 확인해 주세요.");
+    }
   }
 
   const busy = Object.values(actions).some((action) => action.isPending);
@@ -106,7 +122,12 @@ export function OpsPromotionsScreen() {
       <Card title="캠페인 초안 만들기">
         <div className="grid gap-3 sm:grid-cols-2">
           <TextField label="캠페인 이름" value={name} onValueChange={setName} />
-          <TextField label="코드 (대문자·숫자)" value={code} onValueChange={setCode} />
+          <TextField
+            label="코드 (대문자·숫자)"
+            value={code}
+            onValueChange={(value) => setCode(value.toUpperCase())}
+            autoComplete="off"
+          />
           <label className="flex flex-col gap-1 text-body">
             적용 시작 (한국시간)
             <input
@@ -139,6 +160,20 @@ export function OpsPromotionsScreen() {
           />
         </div>
         <div className="mt-4">
+          <Checkbox
+            label="사무소 대표가 코드로 직접 적용하도록 허용"
+            checked={selfRedeemable}
+            onCheckedChange={setSelfRedeemable}
+          />
+          {selfRedeemable ? (
+            <p className="mt-2 text-body text-ink-2">
+              16자 이상 코드와 적용 사무소 수 상한이 필요합니다. 코드는 생성 후 목록에 일부만
+              표시되므로 생성 전에 안전하게 보관해 주세요. 별도 운영자의 승인 전에는 사용할 수
+              없습니다.
+            </p>
+          ) : null}
+        </div>
+        <div className="mt-4">
           <Button disabled={busy} onClick={() => void create()}>
             초안 생성
           </Button>
@@ -158,11 +193,17 @@ export function OpsPromotionsScreen() {
             >
               <div>
                 <p className="font-semibold">
-                  {campaign.name} · {campaign.code}
+                  {campaign.name} ·{" "}
+                  {campaign.selfRedeemable ? `****${campaign.code.slice(-4)}` : campaign.code}
                 </p>
                 <p className="text-ink-2">
                   {campaign.status} · {campaign.freeMonths}개월 ·{" "}
-                  {formatSeoulDateTime(campaign.startsAt)} ~ {formatSeoulDateTime(campaign.endsAt)}
+                  {campaign.selfRedeemable ? "대표 직접 적용" : "운영자 지급"} ·{" "}
+                  {campaign.maxOffices === null
+                    ? "적용 사무소 한도 없음"
+                    : `최대 ${campaign.maxOffices}개 사무소`}{" "}
+                  · {formatSeoulDateTime(campaign.startsAt)} ~{" "}
+                  {formatSeoulDateTime(campaign.endsAt)}
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -172,7 +213,7 @@ export function OpsPromotionsScreen() {
                     onClick={() => {
                       if (
                         window.confirm(
-                          "작성자가 아닌 다른 결제 담당 운영자로 재인증한 뒤 이 캠페인을 활성화합니까?",
+                          `작성자가 아닌 다른 결제 담당 운영자로 재인증한 뒤 이 캠페인을 활성화합니까?\n적용 방식: ${campaign.selfRedeemable ? "대표 직접 적용" : "운영자 지급"}\n적용 한도: ${campaign.maxOffices === null ? "없음" : `${campaign.maxOffices}개 사무소`}`,
                         )
                       )
                         void act(
