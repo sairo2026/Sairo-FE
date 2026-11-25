@@ -34,17 +34,17 @@ export default defineConfig({
     },
     {
       name: "firefox-smoke",
-      testMatch: /(report-only-csp|ops-refund-reprocess)\.spec\.ts/,
+      testMatch: /(report-only-csp|ops-refund-reprocess|office-start-mobile)\.spec\.ts/,
       use: { ...devices["Desktop Firefox"] },
     },
     {
       name: "webkit-smoke",
-      testMatch: /(report-only-csp|ops-refund-reprocess)\.spec\.ts/,
+      testMatch: /(report-only-csp|ops-refund-reprocess|office-start-mobile)\.spec\.ts/,
       use: { ...devices["Desktop Safari"] },
     },
     {
       name: "mobile-webkit-smoke",
-      testMatch: /(report-only-csp|ops-refund-reprocess)\.spec\.ts/,
+      testMatch: /(report-only-csp|ops-refund-reprocess|office-start-mobile)\.spec\.ts/,
       use: { ...devices["iPhone 13"] },
     },
   ],
