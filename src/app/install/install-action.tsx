@@ -10,13 +10,14 @@ type InstallPromptEvent = Event & {
 const standaloneQuery = "(display-mode: standalone)";
 
 function subscribeToDisplayMode(onChange: () => void) {
+  if (typeof window.matchMedia !== "function") return () => {};
   const media = window.matchMedia(standaloneQuery);
   media.addEventListener("change", onChange);
   return () => media.removeEventListener("change", onChange);
 }
 
 function isStandalone() {
-  return window.matchMedia(standaloneQuery).matches;
+  return typeof window.matchMedia === "function" && window.matchMedia(standaloneQuery).matches;
 }
 
 export function InstallAction() {
