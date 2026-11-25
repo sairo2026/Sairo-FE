@@ -11,7 +11,7 @@ export function PromotionStatementScreen({ id }: { id: number }) {
   const periods = usePromotionPeriods();
 
   return (
-    <main className="mx-auto min-h-screen max-w-[800px] bg-white px-5 py-8 text-ink sm:px-12 sm:py-12">
+    <div className="mx-auto min-h-screen max-w-[800px] bg-white px-5 py-8 text-ink sm:px-12 sm:py-12">
       <div className="mb-8 flex flex-wrap items-center justify-between gap-3 print:hidden">
         <Link
           className="text-body font-semibold text-primary hover:underline"
@@ -114,6 +114,6 @@ export function PromotionStatementScreen({ id }: { id: number }) {
           );
         }}
       </QueryGate>
-    </main>
+    </div>
   );
 }
