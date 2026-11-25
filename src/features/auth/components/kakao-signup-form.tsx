@@ -112,7 +112,7 @@ export function KakaoSignupForm() {
   const terms = visibleTerms([...termsQuery.data.items], false);
   if (terms.length === 0) {
     return (
-      <AuthFrame title="카카오로 가입" width="sm">
+      <AuthFrame title="사이로에 오신 걸 환영해요!" width="sm">
         <EmptyState
           title="지금은 가입할 수 없습니다"
           description="적용 중인 약관을 찾지 못했습니다. 잠시 뒤에 다시 시도해 주세요."
@@ -206,7 +206,7 @@ export function KakaoSignupForm() {
 
   return (
     <>
-      <AuthFrame variant="form" title="카카오로 가입">
+      <AuthFrame variant="form" title="사이로에 오신 걸 환영해요!">
         <form
           noValidate
           className="flex flex-col gap-7"
@@ -215,7 +215,11 @@ export function KakaoSignupForm() {
             void submit();
           }}
         >
-          <p className="text-body text-ink-2">{KAKAO_EXTRA_INFO_NOTICE}</p>
+          <h2 className="text-h2 font-semibold text-primary">카카오로 가입</h2>
+          <p className="text-body text-ink-2">
+            카카오 인증을 마쳤습니다. 가입 정보와 약관을 확인해 주세요.
+          </p>
+          <p className="text-caption text-ink-2">{KAKAO_EXTRA_INFO_NOTICE}</p>
           <TextField
             label="이름"
             value={name}
@@ -298,7 +302,7 @@ export function KakaoSignupForm() {
               취소
             </Link>
             <Button type="submit" isLoading={isBusy}>
-              가입하기
+              회원가입하기
             </Button>
           </div>
         </form>

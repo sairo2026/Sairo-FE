@@ -34,9 +34,18 @@ export function AuthEntry({
   return (
     <main className="flex flex-1 items-center justify-center bg-surface px-4 py-16">
       <Card tone="elevated" className="min-h-[451px] w-full max-w-[460px]">
-        <h1 className="sr-only">{isLogin ? "로그인" : "회원가입"}</h1>
-        <div className="flex flex-col items-center gap-10">
+        <div className="flex flex-col items-center gap-8">
           <BrandLogo variant="vertical" className="w-48" />
+          <div className="text-center">
+            <h1 className="text-h1 font-bold text-ink">
+              {isLogin ? "다시 만나서 반가워요!" : "사이로에 오신 걸 환영해요!"}
+            </h1>
+            <p className="mt-2 text-body text-ink-2">
+              {isLogin
+                ? "사이로 계정으로 로그인해 업무를 이어가세요."
+                : "계정을 만들고 부동산 업무 관리를 시작하세요."}
+            </p>
+          </div>
           <div className="mx-auto flex w-full max-w-[360px] flex-col gap-3">
             {errorMessage ? <FormAlert>{errorMessage}</FormAlert> : null}
             {noticeMessage && !errorMessage ? <FormNotice>{noticeMessage}</FormNotice> : null}
@@ -46,11 +55,16 @@ export function AuthEntry({
             >
               카카오로 시작하기
             </a>
+            <p className="text-center text-caption text-ink-2">
+              {isLogin
+                ? "처음 이용한다면 카카오 인증 후 가입 단계로 안내합니다."
+                : "이미 가입한 카카오 계정은 로그인됩니다."}
+            </p>
             <Link
               href={emailHref}
               className="flex h-[68px] w-full items-center justify-center rounded-xl bg-primary-soft text-h2 font-semibold text-ink transition-colors hover:bg-primary-line active:bg-primary-line"
             >
-              이메일로 시작하기
+              {isLogin ? "이메일로 로그인하기" : "이메일로 회원가입하기"}
             </Link>
             {isLogin ? null : (
               <p className="mt-1 whitespace-pre-line text-caption text-ink-2">
@@ -61,14 +75,14 @@ export function AuthEntry({
           <p className="text-caption text-ink-2">
             {isLogin ? (
               <>
-                아직 계정이 없나요?{" "}
+                아직 계정이 없으신가요?{" "}
                 <Link href="/signup" className="font-semibold text-primary clickable-link">
                   회원가입
                 </Link>
               </>
             ) : (
               <>
-                이미 계정이 있나요?{" "}
+                이미 계정이 있으신가요?{" "}
                 <Link href="/login" className="font-semibold text-primary clickable-link">
                   로그인
                 </Link>
