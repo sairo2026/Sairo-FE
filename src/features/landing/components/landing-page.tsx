@@ -144,6 +144,9 @@ export function LandingPage({ pricing, footer }: LandingPageProps) {
                 <EntryLink href={ENTRY_LINKS.pricing.href} tone="outlined">
                   {ENTRY_LINKS.pricing.label}
                 </EntryLink>
+                <EntryLink href="/install" tone="ghost">
+                  PC에 설치해 사용하기
+                </EntryLink>
               </div>
             </div>
             <div className="rounded-card border border-primary-line bg-white px-6 py-7 shadow-popup sm:px-8">

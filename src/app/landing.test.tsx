@@ -67,6 +67,7 @@ describe("서비스 첫 화면", () => {
     expect(hrefOf("가입하고 시작하기", main)).toBe("/signup");
     expect(hrefOf("요금 보기", main)).toBe("#pricing");
     expect(hrefOf("요금 자세히 보기", main)).toBe("/pricing");
+    expect(hrefOf("PC에 설치해 사용하기", main)).toBe("/install");
     expect(hrefOf("본문으로 건너뛰기")).toBe("#main");
     expect(main.getAttribute("id")).toBe("main");
   });
