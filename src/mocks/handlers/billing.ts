@@ -353,6 +353,10 @@ function invoiceDetail(invoiceId: number): InvoiceDetail | null {
         pgOrderId: `order-${invoiceId}-1`,
         pgTransactionId: "txn-1",
         result: item.status === "FAILED" ? "FAILED" : "SUCCESS",
+        receiptUrl:
+          item.status === "FAILED"
+            ? null
+            : "https://dashboard.tosspayments.com/sales-slip?transactionId=mock-only",
         failureCategory: item.status === "FAILED" ? "CARD_UNUSABLE" : null,
         attemptedAt: item.periodStart,
       },
