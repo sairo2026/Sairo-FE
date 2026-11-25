@@ -30,7 +30,12 @@ export function PromotionStatementScreen({ id }: { id: number }) {
       <QueryGate query={periods} loadingLabel="이용내역서를 불러오는 중입니다.">
         {(items) => {
           const period = items.find((item) => item.id === id);
-          if (!period) return <p role="alert">이용내역서를 찾을 수 없습니다.</p>;
+          if (!period)
+            return (
+              <div role="alert">
+                <h1 className="text-h1 font-bold">이용내역서를 찾을 수 없습니다.</h1>
+              </div>
+            );
           return (
             <article
               aria-label="무료 프로모션 이용내역서"

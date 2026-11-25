@@ -764,6 +764,16 @@ function approvedCount(eventId: number): number {
 }
 
 export const opsBillingHandlers: RequestHandler[] = [
+  http.get("/api/ops/promotions/campaigns", () => {
+    const rejected = requireMockOps(["BILLING"]);
+    if (rejected) return rejected;
+    return HttpResponse.json([]);
+  }),
+  http.get("/api/ops/promotions/grants", () => {
+    const rejected = requireMockOps(["BILLING"]);
+    if (rejected) return rejected;
+    return HttpResponse.json([]);
+  }),
   http.get("/api/ops/billing/invoices", ({ request }) => {
     const rejected = requireMockOps(["BILLING"]);
     if (rejected) return rejected;
