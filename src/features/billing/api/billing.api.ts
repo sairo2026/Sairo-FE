@@ -77,6 +77,14 @@ export function fetchCurrentPromotion() {
   });
 }
 
+export function redeemPromotionCode(code: string) {
+  return apiFetch("/api/billing/promotion-periods/redeem", {
+    method: "POST",
+    body: { code },
+    schema: z.object({ id: z.number() }),
+  });
+}
+
 export function fetchCardNotice() {
   return apiFetch(withQuery("/api/terms", { context: "CARD_REGISTRATION" }), {
     schema: TermsCatalogResponseSchema,

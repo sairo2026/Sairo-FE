@@ -1,7 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { useCurrentPromotion, usePromotionPeriods } from "../hooks/billing-queries";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { ApiError } from "@/shared/api/client";
+import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
+import { Button } from "@/shared/components/ui/button";
+import { TextField } from "@/shared/components/ui/text-field";
+import { useOfficeAccess } from "@/shared/session/office-access-context";
+import { redeemPromotionCode } from "../api/billing.api";
+import {
+  billingKeys,
+  useCurrentPromotion,
+  usePromotionPeriods,
+  useSubscription,
+} from "../hooks/billing-queries";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
 import { Card } from "@/shared/components/ui/card";
 import { PageHeader } from "@/shared/components/ui/page-header";
@@ -10,6 +23,49 @@ import { formatKrw, formatSeoulDate, formatSeoulDateTime } from "@/shared/lib/fo
 export function PromotionPeriodsScreen() {
   const periods = usePromotionPeriods();
   const current = useCurrentPromotion();
+  const subscription = useSubscription();
+  const { role } = useOfficeAccess();
+  const queryClient = useQueryClient();
+  const [code, setCode] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const redeem = useMutation({
+    mutationFn: redeemPromotionCode,
+    onSuccess: async () => {
+      setCode("");
+      setError(null);
+      setNotice("무료 프로모션이 적용됐습니다. 이용기간과 할인 내역을 확인해 주세요.");
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: billingKeys.currentPromotion }),
+        queryClient.invalidateQueries({ queryKey: billingKeys.promotionPeriods }),
+        queryClient.invalidateQueries({ queryKey: billingKeys.subscription }),
+      ]);
+    },
+    onError: (caught) => {
+      setNotice(null);
+      setError(
+        caught instanceof ApiError && caught.status === 429
+          ? "코드 확인 요청이 많습니다. 잠시 후 다시 시도해 주세요."
+          : caught instanceof ApiError && caught.status === 403
+            ? "프로모션 코드는 사무소 대표만 적용할 수 있습니다."
+            : caught instanceof ApiError && caught.status === 409
+              ? "이 코드는 현재 사무소에 적용할 수 없습니다. 코드와 적용 기간을 확인해 주세요."
+              : "프로모션을 적용하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+      );
+    },
+  });
+
+  function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
+    setNotice(null);
+    const normalizedCode = code.trim().toUpperCase();
+    if (!/^[A-Z0-9_-]{16,40}$/.test(normalizedCode)) {
+      setError("프로모션 코드는 대문자·숫자·-·_를 사용한 16~40자입니다.");
+      return;
+    }
+    if (!redeem.isPending) redeem.mutate(normalizedCode);
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -17,6 +73,28 @@ export function PromotionPeriodsScreen() {
         title="무료 프로모션 이용내역"
         description="카드 결제 없이 제공된 구독기간과 할인 내역을 확인합니다."
       />
+      {role === "OWNER" && current.data === null && subscription.data?.status === "PRE_PAYMENT" ? (
+        <Card title="프로모션 코드 적용">
+          <p className="mb-4 text-body text-ink-2">
+            승인된 코드를 적용하면 카드 청구 없이 무료 이용기간이 시작됩니다. 무료 종료 뒤에는 별도
+            유료 구매 확인 전까지 자동으로 카드가 청구되지 않습니다.
+          </p>
+          <form className="flex flex-col gap-3 sm:max-w-md" onSubmit={submit}>
+            <TextField
+              label="프로모션 코드"
+              value={code}
+              onValueChange={(value) => setCode(value.toUpperCase())}
+              maxLength={40}
+              autoComplete="off"
+            />
+            {error ? <FormAlert>{error}</FormAlert> : null}
+            {notice ? <FormNotice>{notice}</FormNotice> : null}
+            <Button type="submit" isLoading={redeem.isPending} guardDoubleClick>
+              무료 프로모션 적용하기
+            </Button>
+          </form>
+        </Card>
+      ) : null}
       <QueryGate query={current} loadingLabel="프로모션 상태를 불러오는 중입니다.">
         {(promotion) =>
           promotion ? (
