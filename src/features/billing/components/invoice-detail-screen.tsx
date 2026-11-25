@@ -30,6 +30,25 @@ function maskEmailNote(value: string | null | undefined) {
   return value ?? "-";
 }
 
+function tossReceiptUrl(value: string | null | undefined): string | null {
+  if (!value || value.length > 2048) return null;
+  try {
+    const url = new URL(value);
+    const host = url.hostname.toLowerCase();
+    if (
+      url.protocol !== "https:" ||
+      (host !== "tosspayments.com" && !host.endsWith(".tosspayments.com")) ||
+      url.username ||
+      url.password ||
+      (url.port && url.port !== "443")
+    )
+      return null;
+    return url.href;
+  } catch {
+    return null;
+  }
+}
+
 function RefundDialog({ invoice, onClose }: { invoice: InvoiceDetail; onClose: () => void }) {
   const queryClient = useQueryClient();
   const [reason, setReason] = useState("");
@@ -172,6 +191,16 @@ function InvoiceView({ invoice }: { invoice: InvoiceDetail }) {
                     ? ` · ${FAILURE_CATEGORY[attempt.failureCategory] ?? "기타"}`
                     : ""}
                 </span>
+                {attempt.result === "SUCCESS" && tossReceiptUrl(attempt.receiptUrl) ? (
+                  <a
+                    href={tossReceiptUrl(attempt.receiptUrl) ?? undefined}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-fit text-caption font-semibold text-primary hover:underline"
+                  >
+                    Toss 매출전표 보기
+                  </a>
+                ) : null}
               </li>
             ))}
           </ul>

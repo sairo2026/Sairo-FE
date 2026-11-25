@@ -12,6 +12,11 @@ import {
 } from "@/lib/api/contracts/billing.schema";
 
 export const InvoiceDetailWireSchema = BillingInvoiceDetailResponseSchema.extend({
+  attempts: z.array(
+    BillingInvoiceDetailResponseSchema.shape.attempts.element.extend({
+      receiptUrl: z.string().nullable().optional(),
+    }),
+  ),
   supplier: z
     .object({
       businessName: z.string().nullable().optional(),

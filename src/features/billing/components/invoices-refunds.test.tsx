@@ -87,6 +87,9 @@ describe("청구서 상세와 환불 신청", () => {
     expect(screen.getByText("54,455원")).not.toBeNull();
     expect(screen.getByText("5,445원")).not.toBeNull();
     expect(screen.getByText(/주문 order-501-1 · 성공/)).not.toBeNull();
+    expect(screen.getByRole("link", { name: "Toss 매출전표 보기" }).getAttribute("href")).toBe(
+      "https://dashboard.tosspayments.com/sales-slip?transactionId=mock-only",
+    );
     expect(
       screen.getByText(/세금계산서 발급 대상이 아니거나 아직 발급되지 않았습니다/),
     ).not.toBeNull();
@@ -99,6 +102,35 @@ describe("청구서 상세와 환불 신청", () => {
   it("없는 청구서는 찾을 수 없음 화면을 보여준다", async () => {
     renderOffice(<InvoiceDetailScreen invoiceId={999} />, { role: "OWNER" });
     expect(await screen.findByRole("heading", { name: /찾을 수 없/ })).not.toBeNull();
+  });
+
+  it("안전하지 않은 매출전표 주소는 링크로 표시하지 않는다", async () => {
+    server.use(
+      http.get("/api/billing/invoices/501", () =>
+        HttpResponse.json({
+          ...buildInvoiceItem({}),
+          nextRetryAt: null,
+          attempts: [
+            {
+              pgOrderId: "order-501-1",
+              pgTransactionId: "txn-1",
+              result: "SUCCESS",
+              failureCategory: null,
+              attemptedAt: "2026-09-26T09:00:00+09:00",
+              receiptUrl: "https://dashboard.tosspayments.com.evil.example/sales-slip",
+            },
+          ],
+          supplier: null,
+          supplyAmount: null,
+          vatAmount: null,
+          vatRateBp: null,
+          taxDocuments: [],
+        }),
+      ),
+    );
+    renderOffice(<InvoiceDetailScreen invoiceId={501} />, { role: "OWNER" });
+    expect(await screen.findByText(/주문 order-501-1 · 성공/)).not.toBeNull();
+    expect(screen.queryByRole("link", { name: "Toss 매출전표 보기" })).toBeNull();
   });
 
   it("실패한 결제는 실패 분류와 다음 재시도 시각을 보여준다", async () => {
@@ -128,6 +160,7 @@ describe("청구서 상세와 환불 신청", () => {
     renderOffice(<InvoiceDetailScreen invoiceId={501} />, { role: "OWNER" });
     expect(await screen.findByText(/다음 자동 재시도/)).not.toBeNull();
     expect(screen.getByText(/카드 정지·만료/)).not.toBeNull();
+    expect(screen.queryByRole("link", { name: "Toss 매출전표 보기" })).toBeNull();
     expect(screen.getByRole("button", { name: "환불 신청" }).getAttribute("aria-disabled")).toBe(
       "true",
     );
