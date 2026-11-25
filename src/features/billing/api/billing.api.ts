@@ -31,6 +31,8 @@ import {
   PaymentAttemptWireSchema,
   ExportWireSchema,
   InvoiceDetailWireSchema,
+  PromotionPeriodSchema,
+  CurrentPromotionSchema,
   PublicPricingWireSchema,
   RefundStatusWireSchema,
   SubscriptionWireSchema,
@@ -61,6 +63,18 @@ export function fetchBillingPlans() {
 
 export function fetchSubscription() {
   return apiFetch("/api/subscriptions/current", { schema: SubscriptionWireSchema });
+}
+
+export function fetchPromotionPeriods() {
+  return apiFetch("/api/billing/promotion-periods", {
+    schema: z.array(PromotionPeriodSchema),
+  });
+}
+
+export function fetchCurrentPromotion() {
+  return apiFetch("/api/billing/promotion-periods/current", {
+    schema: CurrentPromotionSchema,
+  });
 }
 
 export function fetchCardNotice() {

@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
 import type { ReactNode } from "react";
-import type { PaymentAttempt, SubscriptionCurrent } from "../api/wire";
+import type { CurrentPromotion, PaymentAttempt, SubscriptionCurrent } from "../api/wire";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import {
   DetailList,
@@ -29,6 +29,7 @@ import {
   billingKeys,
   isPaymentInFlight,
   useConsentPreview,
+  useCurrentPromotion,
   useSubscription,
 } from "../hooks/billing-queries";
 import { SUBSCRIPTION_STATUS, labelOf, PLAN_LABEL } from "../model/labels";
@@ -106,9 +107,11 @@ function RowLink({ href, children }: { href: string; children: ReactNode }) {
 function StatusBody({
   subscription,
   chargeAmount,
+  promotion,
 }: {
   subscription: SubscriptionCurrent;
   chargeAmount: number | null;
+  promotion: CurrentPromotion;
 }) {
   const { status } = subscription;
   const reminder = trialReminder(subscription.trialEndsAt);
@@ -116,6 +119,22 @@ function StatusBody({
   const unusableCard = subscription.latestInvoice?.lastFailureCategory === "CARD_UNUSABLE";
 
   if (status === "TRIAL") {
+    if (promotion) {
+      return (
+        <div className="flex flex-col gap-3 text-body">
+          <p className="font-semibold text-primary">무료 프로모션 이용 중</p>
+          <p>무료 이용 종료: {formatSeoulDateTime(promotion.freeEndsAt)}</p>
+          {promotion.nextFreeRenewalAt ? (
+            <p>다음 0원 갱신: {formatSeoulDateTime(promotion.nextFreeRenewalAt)}</p>
+          ) : null}
+          <p className="text-ink-2">
+            무료 이용 중에는 카드가 청구되지 않습니다. 유료 구독을 원하면 종료 후 결제 조건을 새로
+            확인해 주세요.
+          </p>
+          <TextLink href="/billing/promotion-periods">월별 무료 이용내역 보기</TextLink>
+        </div>
+      );
+    }
     return (
       <div className="flex flex-col gap-3">
         {subscription.trialEndsAt ? (
@@ -145,6 +164,34 @@ function StatusBody({
     );
   }
   if (status === "PRE_PAYMENT") {
+    if (promotion?.conversionStatus === "RECONCILIATION_REQUIRED") {
+      return (
+        <div className="flex flex-col gap-3 text-body">
+          <p className="font-semibold text-primary">무료 이용기간 기록을 확인하고 있습니다.</p>
+          <p>
+            기존 무료 이용내역을 확인한 뒤 다음 단계를 안내해 드립니다. 자동 카드 청구는 진행되지
+            않습니다.
+          </p>
+          <TextLink href="/billing/promotion-periods">무료 이용내역 확인</TextLink>
+        </div>
+      );
+    }
+    if (promotion?.conversionStatus === "CONVERSION_PENDING") {
+      return (
+        <div className="flex flex-col gap-3 text-body">
+          <p className="font-semibold text-primary">무료 프로모션이 종료되었습니다.</p>
+          <p>
+            카드 자동 청구는 시작되지 않았습니다. 유료 구독을 원하면 현재 요금과 결제 조건을
+            확인하고 새로 동의해 주세요.
+          </p>
+          {chargeAmount === null ? null : (
+            <p>현재 요금 기준 예상 금액: {formatKrw(chargeAmount)}</p>
+          )}
+          <ReadinessList subscription={subscription} />
+          <TextLink href="/billing/promotion-periods">무료 이용내역 확인</TextLink>
+        </div>
+      );
+    }
     return (
       <div className="flex flex-col gap-3">
         <p className="text-body text-ink">
@@ -294,9 +341,11 @@ function StatusBody({
 function SubscriptionActions({
   subscription,
   chargeAmount,
+  promotion,
 }: {
   subscription: SubscriptionCurrent;
   chargeAmount: number | null;
+  promotion: CurrentPromotion;
 }) {
   const queryClient = useQueryClient();
   const [dialog, setDialog] = useState<"pay" | "cancel" | "withdraw" | null>(null);
@@ -371,7 +420,7 @@ function SubscriptionActions({
       {isPaying ? <MutedNote>{COPY.payProcessing}</MutedNote> : null}
       {verifying && !isPaying ? <MutedNote>{COPY.payBlockedVerifying}</MutedNote> : null}
       <div className="flex flex-wrap gap-3">
-        {status === "PRE_PAYMENT" ? (
+        {status === "PRE_PAYMENT" && promotion?.conversionStatus !== "RECONCILIATION_REQUIRED" ? (
           <Button
             isLoading={firstPayment.isPending}
             disabled={!isReady || isPaying || verifying}
@@ -457,7 +506,13 @@ function SubscriptionActions({
   );
 }
 
-function SubscriptionView({ subscription }: { subscription: SubscriptionCurrent }) {
+function SubscriptionView({
+  subscription,
+  promotion,
+}: {
+  subscription: SubscriptionCurrent;
+  promotion: CurrentPromotion;
+}) {
   const status = labelOf(SUBSCRIPTION_STATUS, subscription.status);
   const preview = useConsentPreview(undefined, undefined, subscription.status === "PRE_PAYMENT");
   const chargeAmount = subscription.nextChargeAmount ?? preview.data?.totalAmountInclVat ?? null;
@@ -472,9 +527,13 @@ function SubscriptionView({ subscription }: { subscription: SubscriptionCurrent 
             {subscription.priceVersion ? ` · 가격 버전 ${subscription.priceVersion}` : null}
           </span>
         </div>
-        <StatusBody subscription={subscription} chargeAmount={chargeAmount} />
+        <StatusBody subscription={subscription} chargeAmount={chargeAmount} promotion={promotion} />
         <div className="mt-5">
-          <SubscriptionActions subscription={subscription} chargeAmount={chargeAmount} />
+          <SubscriptionActions
+            subscription={subscription}
+            chargeAmount={chargeAmount}
+            promotion={promotion}
+          />
         </div>
       </Card>
       <Card title="결제수단">
@@ -503,6 +562,9 @@ function SubscriptionView({ subscription }: { subscription: SubscriptionCurrent 
           </li>
           <li>
             <RowLink href="/billing/invoices">결제 내역</RowLink>
+          </li>
+          <li>
+            <RowLink href="/billing/promotion-periods">무료 프로모션 이용내역</RowLink>
           </li>
           <li>
             <RowLink href="/billing/refunds">환불 신청 내역</RowLink>
@@ -550,11 +612,20 @@ function SubscriptionView({ subscription }: { subscription: SubscriptionCurrent 
 
 export function SubscriptionScreen() {
   const query = useSubscription();
+  const promotion = useCurrentPromotion();
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title="구독·결제" description="구독 상태와 결제수단, 결제 내역을 확인합니다." />
       <QueryGate query={query} loadingLabel="구독 현황을 불러오는 중입니다.">
-        {(subscription) => <SubscriptionView subscription={subscription} />}
+        {(subscription) =>
+          promotion.isError ? (
+            <SubscriptionView subscription={subscription} promotion={null} />
+          ) : (
+            <QueryGate query={promotion} loadingLabel="프로모션 상태를 불러오는 중입니다.">
+              {(current) => <SubscriptionView subscription={subscription} promotion={current} />}
+            </QueryGate>
+          )
+        }
       </QueryGate>
     </div>
   );

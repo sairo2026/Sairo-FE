@@ -57,3 +57,33 @@ export const SubscriptionWireSchema = SubscriptionCurrentResponseSchema.extend({
     .nullable(),
 });
 export type SubscriptionCurrent = z.infer<typeof SubscriptionWireSchema>;
+
+export const PromotionPeriodSchema = z.object({
+  id: z.number(),
+  periodStart: z.string(),
+  periodEnd: z.string(),
+  listAmount: z.number(),
+  discountAmount: z.number(),
+  chargedAmount: z.number(),
+  priceVersion: z.string(),
+  createdAt: z.string(),
+  campaignName: z.string(),
+  campaignCode: z.string(),
+  officeName: z.string(),
+  plan: z.string(),
+  freeEndsAt: z.string(),
+});
+export type PromotionPeriod = z.infer<typeof PromotionPeriodSchema>;
+
+export const CurrentPromotionSchema = z
+  .object({
+    campaignName: z.string(),
+    campaignCode: z.string(),
+    startsAt: z.string(),
+    freeEndsAt: z.string(),
+    nextFreeRenewalAt: z.string().nullable(),
+    conversionStatus: z.string(),
+    potentialPaidAmount: z.number().nullable(),
+  })
+  .nullable();
+export type CurrentPromotion = z.infer<typeof CurrentPromotionSchema>;
