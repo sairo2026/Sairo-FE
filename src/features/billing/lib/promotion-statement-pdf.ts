@@ -29,7 +29,7 @@ export async function createPromotionStatementPdf(
   const supportedCodePoints = new Set(font.getCharacterSet());
   const safeText = (value: string) =>
     Array.from(value, (character) =>
-      supportedCodePoints.has(character.codePointAt(0)!) ? character : "?",
+      supportedCodePoints.has(character.codePointAt(0) ?? 0) ? character : "?",
     ).join("");
   const page = document.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
   let y = PAGE_HEIGHT - MARGIN;

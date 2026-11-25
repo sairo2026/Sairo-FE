@@ -24,7 +24,7 @@ const period: PromotionPeriod = {
 describe("무료 프로모션 PDF", () => {
   it("한글 글꼴을 포함한 한 페이지 이용내역서를 생성한다", async () => {
     const font = await readFile("public/fonts/Pretendard-Regular.ttf");
-    expect(fontkit.create(font).hasGlyphForCodePoint("한".codePointAt(0)!)).toBe(true);
+    expect(fontkit.create(font).hasGlyphForCodePoint("한".codePointAt(0) ?? 0)).toBe(true);
     const bytes = await createPromotionStatementPdf(period, font);
     expect(new TextDecoder("ascii").decode(bytes.slice(0, 5))).toBe("%PDF-");
     const document = await PDFDocument.load(bytes);
