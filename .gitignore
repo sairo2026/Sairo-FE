@@ -54,3 +54,6 @@ Thumbs.db
 /test-results
 
 /visual-captures
+
+# local browser installability test profiles; never commit browser data
+.tmp-pwa-profile*/
