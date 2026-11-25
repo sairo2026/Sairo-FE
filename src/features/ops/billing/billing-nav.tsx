@@ -6,6 +6,7 @@ const ITEMS = [
   { key: "refunds", label: "환불", href: "/ops/billing/refunds" },
   { key: "reconciliation", label: "대사", href: "/ops/billing/reconciliation" },
   { key: "tax-documents", label: "증빙 발급", href: "/ops/billing/tax-documents" },
+  { key: "promotions", label: "무료 프로모션", href: "/ops/billing/promotions" },
 ] as const;
 
 export type BillingNavKey = (typeof ITEMS)[number]["key"];

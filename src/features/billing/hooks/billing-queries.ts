@@ -13,6 +13,8 @@ import {
   fetchRefundRequest,
   fetchStartCustomerAgreement,
   fetchSubscription,
+  fetchPromotionPeriods,
+  fetchCurrentPromotion,
   fetchTaxRecipient,
   listInvoices,
   listPriceChangeNotices,
@@ -28,6 +30,8 @@ export const billingKeys = {
   companyInfo: ["billing", "company-info"] as const,
   plans: ["billing", "plans"] as const,
   subscription: ["billing", "subscription"] as const,
+  promotionPeriods: ["billing", "promotion-periods"] as const,
+  currentPromotion: ["billing", "current-promotion"] as const,
   cardNotice: ["billing", "card-notice"] as const,
   consentPreview: (plan?: string, noticeId?: number) =>
     ["billing", "consent-preview", plan ?? "", noticeId ?? 0] as const,
@@ -90,6 +94,14 @@ export function useSubscription(enabled = true) {
     enabled,
     refetchInterval: (query) => subscriptionRefetchInterval(query.state.data),
   });
+}
+
+export function usePromotionPeriods() {
+  return useQuery({ queryKey: billingKeys.promotionPeriods, queryFn: fetchPromotionPeriods });
+}
+
+export function useCurrentPromotion() {
+  return useQuery({ queryKey: billingKeys.currentPromotion, queryFn: fetchCurrentPromotion });
 }
 
 export function useCardNotice() {

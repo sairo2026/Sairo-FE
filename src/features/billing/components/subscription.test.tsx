@@ -34,6 +34,52 @@ function show() {
 }
 
 describe("구독 현황", () => {
+  it("무료 프로모션은 카드 청구 예정으로 표시하지 않는다", async () => {
+    server.use(
+      http.get("/api/billing/promotion-periods/current", () =>
+        HttpResponse.json({
+          campaignName: "출시 프로모션",
+          campaignCode: "LAUNCH",
+          startsAt: "2027-01-31T14:30:00+09:00",
+          freeEndsAt: "2027-03-31T14:30:00+09:00",
+          nextFreeRenewalAt: "2027-02-28T14:30:00+09:00",
+          conversionStatus: "CONFIRMATION_REQUIRED",
+          potentialPaidAmount: 49900,
+        }),
+      ),
+    );
+    show();
+    expect(await screen.findByText("무료 프로모션 이용 중")).not.toBeNull();
+    expect(screen.getByText(/무료 이용 중에는 카드가 청구되지 않습니다/)).not.toBeNull();
+    expect(screen.queryByText(/첫 결제 예정/)).toBeNull();
+  });
+  it("기록 대사가 필요하면 자동 청구를 안내하지 않는다", async () => {
+    server.use(
+      http.get("/api/subscriptions/current", () =>
+        HttpResponse.json({ ...buildSubscription(), status: "PRE_PAYMENT" }),
+      ),
+      http.get("/api/billing/promotion-periods/current", () =>
+        HttpResponse.json({
+          campaignName: "출시 프로모션",
+          campaignCode: "LAUNCH",
+          startsAt: "2027-01-31T14:30:00+09:00",
+          freeEndsAt: "2027-03-31T14:30:00+09:00",
+          nextFreeRenewalAt: null,
+          conversionStatus: "RECONCILIATION_REQUIRED",
+          potentialPaidAmount: 49900,
+        }),
+      ),
+    );
+    show();
+    expect(await screen.findByText("무료 이용기간 기록을 확인하고 있습니다.")).not.toBeNull();
+    expect(screen.getByText(/자동 카드 청구는 진행되지 않습니다/)).not.toBeNull();
+    expect(screen.queryByRole("button", { name: "지금 결제" })).toBeNull();
+  });
+  it("프로모션 조회 오류가 기존 구독 화면을 막지 않는다", async () => {
+    server.use(http.get("/api/billing/promotion-periods/current", () => mockErrors.server()));
+    show();
+    expect(await screen.findByText("무료 이용 중")).not.toBeNull();
+  });
   it("불러오는 동안 로딩을 보여준다", () => {
     show();
     expect(document.querySelector('[aria-busy="true"]')).not.toBeNull();
