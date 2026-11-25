@@ -21,4 +21,11 @@ test("사무소 시작 선택과 다음 동작은 좁은 화면에서도 보인�
   await page.screenshot({ path: testInfo.outputPath("office-start.png"), fullPage: true });
   await next.click();
   await expect(page).toHaveURL(/\/office\/join$/);
+
+  if (testInfo.project.name === "mobile") {
+    await page.setViewportSize({ width: 640, height: 740 });
+    await page.goto("/office/start");
+    await settle(page);
+    await expect(page.getByRole("button", { name: "다음" })).toBeInViewport();
+  }
 });
