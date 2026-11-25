@@ -73,7 +73,7 @@ export function OfficeStartScreen() {
             <div
               role="radiogroup"
               aria-label="사무소 시작 방법"
-              className="flex flex-wrap justify-center gap-[52px]"
+              className="flex flex-wrap justify-center gap-4 sm:gap-[52px]"
             >
               {CHOICES.map((item) => {
                 const selected = choice === item.key;
@@ -85,10 +85,10 @@ export function OfficeStartScreen() {
                     isSelected={selected}
                     disabled={isBlocked}
                     onClick={() => setChoice(item.key)}
-                    className="flex h-[312px] w-[260px] flex-col items-center justify-between rounded-card-flat px-4 pt-9 pb-9 text-center"
+                    className="flex min-h-[144px] w-full flex-col items-center justify-center gap-2 rounded-card-flat px-4 py-5 text-center sm:h-[312px] sm:w-[260px] sm:justify-between sm:gap-0 sm:pt-9 sm:pb-9"
                   >
                     <span className="text-h3 font-semibold">{item.title}</span>
-                    <span className="w-[165px] text-body font-medium">{item.description}</span>
+                    <span className="text-body font-medium sm:w-[165px]">{item.description}</span>
                   </SelectableCard>
                 );
               })}
