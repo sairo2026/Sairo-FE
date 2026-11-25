@@ -27,7 +27,7 @@ test("공개 화면에는 nonce 기반 CSP가 강제되고 위반 없이 화면�
   expect(headers["referrer-policy"]).toBe("strict-origin-when-cross-origin");
   expect(headers["permissions-policy"]).toContain("camera=()");
   expect(headers["permissions-policy"]).toContain("geolocation=()");
-  await expect(page.getByRole("link", { name: "이메일로 시작하기" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "이메일로 로그인하기" })).toBeVisible();
   await page.waitForLoadState("networkidle");
   const violations = await page.evaluate(
     () => (window as unknown as { __cspViolations: string[] }).__cspViolations,

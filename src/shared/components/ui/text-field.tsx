@@ -1,6 +1,6 @@
 "use client";
 
-import { useId } from "react";
+import { useId, useState } from "react";
 import type { InputHTMLAttributes, ReactNode } from "react";
 import { cn } from "@/shared/lib/cn";
 import { formatPhone } from "@/shared/lib/format";
@@ -27,6 +27,8 @@ export type TextFieldProps = Omit<
   /** 인증 상태 문구. */
   statusText?: ReactNode;
   required?: boolean;
+  /** 로그인·가입 비밀번호 입력에서만 사용한다. */
+  showPasswordToggle?: boolean;
   /** 인증용 전화번호 형식으로 변환하지 않고 업무 연락처 입력값을 보존한다. */
   allowInternational?: boolean;
 };
@@ -51,6 +53,7 @@ export function TextField({
   timerText,
   statusText,
   required,
+  showPasswordToggle = false,
   allowInternational,
   id,
   className,
@@ -63,6 +66,7 @@ export function TextField({
   const inputId = id ?? generatedId;
   const messageId = `${inputId}-message`;
   const hasMessage = Boolean(error || hint || statusText);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   function handleChange(raw: string) {
     if (kind === "tel") return onValueChange(formatPhone(raw, allowInternational));
@@ -94,7 +98,7 @@ export function TextField({
         <input
           {...rest}
           id={inputId}
-          type={inputTypeByKind[kind]}
+          type={kind === "password" && isPasswordVisible ? "text" : inputTypeByKind[kind]}
           inputMode={kind === "number" ? "numeric" : kind === "tel" ? "tel" : rest.inputMode}
           autoComplete={
             kind === "password" ? (rest.autoComplete ?? "current-password") : rest.autoComplete
@@ -120,6 +124,16 @@ export function TextField({
             className="h-9 min-w-14 shrink-0 rounded-small bg-primary px-3 text-caption font-semibold text-white hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
           >
             {actionLabel}
+          </button>
+        ) : null}
+        {kind === "password" && showPasswordToggle ? (
+          <button
+            type="button"
+            onClick={() => setIsPasswordVisible((current) => !current)}
+            aria-label={`입력값 ${isPasswordVisible ? "숨기기" : "보기"}: ${label}`}
+            className="shrink-0 text-caption font-semibold text-primary hover:text-primary-hover focus-visible:rounded-small focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >
+            {isPasswordVisible ? "숨기기" : "보기"}
           </button>
         ) : null}
       </div>

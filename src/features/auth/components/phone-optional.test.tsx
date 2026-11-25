@@ -76,7 +76,7 @@ describe("휴대폰 번호를 인증 없이 저장할 때 이메일 가입", () 
     await screen.findByRole("heading", { name: "비밀번호 설정" });
     await user.type(screen.getByLabelText(/^비밀번호 설정\*?$/), "abcd1234!");
     await user.type(screen.getByLabelText(/^비밀번호 확인/), "abcd1234!");
-    await user.click(screen.getByRole("button", { name: "가입하기" }));
+    await user.click(screen.getByRole("button", { name: "회원가입하기" }));
     await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/office/start"));
     expect(captured.body?.phone).toBe("010-1234-5678");
     expect(captured.body).not.toHaveProperty("verifiedPhoneTicket");
@@ -103,7 +103,7 @@ describe("휴대폰 번호를 인증 없이 저장할 때 카카오 가입", () 
     expect(screen.queryByRole("button", { name: "인증번호 받기" })).toBeNull();
     await user.type(screen.getByLabelText(/^휴대폰 번호/), "01012345678");
     await user.click(screen.getByLabelText(/이용약관에 동의합니다/));
-    await user.click(screen.getByRole("button", { name: "가입하기" }));
+    await user.click(screen.getByRole("button", { name: "회원가입하기" }));
     await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/office/start"));
     expect(captured.body?.phone).toBe("010-1234-5678");
     expect(captured.body).not.toHaveProperty("verifiedPhoneTicket");

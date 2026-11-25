@@ -408,7 +408,7 @@ describe("이메일 가입 완료", () => {
     await toPasswordStep(user);
     await user.type(screen.getByLabelText(/^비밀번호 설정\*?$/), "abcd1234!");
     await user.type(screen.getByLabelText(/^비밀번호 확인/), "abcd1234!");
-    await user.click(screen.getByRole("button", { name: "가입하기" }));
+    await user.click(screen.getByRole("button", { name: "회원가입하기" }));
     await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/office/start"));
   });
 
@@ -416,11 +416,11 @@ describe("이메일 가입 완료", () => {
     const user = userEvent.setup();
     await toPasswordStep(user);
     await user.type(screen.getByLabelText(/^비밀번호 설정\*?$/), "abc");
-    await user.click(screen.getByRole("button", { name: "가입하기" }));
+    await user.click(screen.getByRole("button", { name: "회원가입하기" }));
     expect(await screen.findByText("8~12자 이내로 설정해 주십시오.")).not.toBeNull();
     await user.clear(screen.getByLabelText(/^비밀번호 설정\*?$/));
     await user.type(screen.getByLabelText(/^비밀번호 설정\*?$/), "abcd1234abcd1");
-    await user.click(screen.getByRole("button", { name: "가입하기" }));
+    await user.click(screen.getByRole("button", { name: "회원가입하기" }));
     expect(await screen.findByText("8~12자 이내로 설정해 주십시오.")).not.toBeNull();
   });
 
@@ -429,7 +429,7 @@ describe("이메일 가입 완료", () => {
     await toPasswordStep(user);
     await user.type(screen.getByLabelText(/^비밀번호 설정\*?$/), "12345678");
     await user.type(screen.getByLabelText(/^비밀번호 확인/), "1234567");
-    await user.click(screen.getByRole("button", { name: "가입하기" }));
+    await user.click(screen.getByRole("button", { name: "회원가입하기" }));
     expect(await screen.findByText(/너무 흔한 비밀번호/)).not.toBeNull();
     expect(screen.getByText("비밀번호가 일치하지 않습니다.")).not.toBeNull();
   });
@@ -449,7 +449,7 @@ describe("이메일 가입 완료", () => {
     await toPasswordStep(user);
     await user.type(screen.getByLabelText(/^비밀번호 설정\*?$/), "weakpass1");
     await user.type(screen.getByLabelText(/^비밀번호 확인/), "weakpass1");
-    await user.click(screen.getByRole("button", { name: "가입하기" }));
+    await user.click(screen.getByRole("button", { name: "회원가입하기" }));
     expect(
       await screen.findByText("너무 흔한 비밀번호입니다. 다른 비밀번호를 입력해 주세요."),
     ).not.toBeNull();
@@ -463,7 +463,7 @@ describe("이메일 가입 완료", () => {
     setMockTermsVersion("1.1");
     await user.type(screen.getByLabelText(/^비밀번호 설정\*?$/), "abcd1234!");
     await user.type(screen.getByLabelText(/^비밀번호 확인/), "abcd1234!");
-    await user.click(screen.getByRole("button", { name: "가입하기" }));
+    await user.click(screen.getByRole("button", { name: "회원가입하기" }));
     const dialog = await screen.findByRole("dialog");
     expect(within(dialog).getByText(/아직 가입되지 않았습니다/)).not.toBeNull();
     expect(within(dialog).getAllByText("바뀜").length).toBeGreaterThan(0);
@@ -479,7 +479,7 @@ describe("이메일 가입 완료", () => {
     expect(screen.queryByText("바뀜")).toBeNull();
     await user.click(screen.getByRole("button", { name: "다음" }));
     await screen.findByRole("heading", { name: "비밀번호 설정" });
-    await user.click(screen.getByRole("button", { name: "가입하기" }));
+    await user.click(screen.getByRole("button", { name: "회원가입하기" }));
     await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/office/start"));
   });
 
@@ -497,7 +497,7 @@ describe("이메일 가입 완료", () => {
     await user.click(screen.getByRole("button", { name: "다음" }));
     await user.type(await screen.findByLabelText(/^비밀번호 설정\*?$/), "abcd1234!");
     await user.type(screen.getByLabelText(/^비밀번호 확인/), "abcd1234!");
-    await user.click(screen.getByRole("button", { name: "가입하기" }));
+    await user.click(screen.getByRole("button", { name: "회원가입하기" }));
     expect(await screen.findByText("이미 가입된 계정이 있습니다.")).not.toBeNull();
     expect(screen.getByRole("link", { name: "이메일로 로그인" })).not.toBeNull();
     expect(screen.getByRole("link", { name: "비밀번호 찾기" })).not.toBeNull();
@@ -520,7 +520,7 @@ describe("이메일 가입 완료", () => {
     await user.click(screen.getByRole("button", { name: "다음" }));
     await user.type(await screen.findByLabelText(/^비밀번호 설정\*?$/), "abcd1234!");
     await user.type(screen.getByLabelText(/^비밀번호 확인/), "abcd1234!");
-    await user.click(screen.getByRole("button", { name: "가입하기" }));
+    await user.click(screen.getByRole("button", { name: "회원가입하기" }));
     expect(await screen.findByRole("button", { name: /다시 시도/ })).not.toBeNull();
   });
 
@@ -534,7 +534,7 @@ describe("이메일 가입 완료", () => {
     await toPasswordStep(user);
     await user.type(screen.getByLabelText(/^비밀번호 설정\*?$/), "abcd1234!");
     await user.type(screen.getByLabelText(/^비밀번호 확인/), "abcd1234!");
-    await user.click(screen.getByRole("button", { name: "가입하기" }));
+    await user.click(screen.getByRole("button", { name: "회원가입하기" }));
     expect(await screen.findByText(/인증 시간이 지났거나/)).not.toBeNull();
     expect(screen.getByRole("heading", { name: "기본 가입 정보 입력" })).not.toBeNull();
   });
@@ -552,7 +552,7 @@ describe("이메일 가입 완료", () => {
     await toPasswordStep(user);
     await user.type(screen.getByLabelText(/^비밀번호 설정\*?$/), "abcd1234!");
     await user.type(screen.getByLabelText(/^비밀번호 확인/), "abcd1234!");
-    await user.click(screen.getByRole("button", { name: "가입하기" }));
+    await user.click(screen.getByRole("button", { name: "회원가입하기" }));
     expect((await screen.findByRole("alert")).textContent).toContain("일시적인 오류");
   });
 
@@ -580,7 +580,7 @@ describe("카카오 가입 보완 입력", () => {
       "disabled",
       true,
     );
-    await user.click(screen.getByRole("button", { name: "가입하기" }));
+    await user.click(screen.getByRole("button", { name: "회원가입하기" }));
     expect(screen.getAllByText(/약관 버전이 갱신되었습니다/).length).toBeGreaterThan(0);
     expect(screen.queryByText("이용약관에 동의해야 가입할 수 있습니다.")).toBeNull();
   });
@@ -618,7 +618,7 @@ describe("카카오 가입 보완 입력", () => {
     const user = userEvent.setup();
     renderWithQuery(<KakaoSignupForm />);
     await screen.findByRole("heading", { name: "카카오로 가입" });
-    await user.click(screen.getByRole("button", { name: "가입하기" }));
+    await user.click(screen.getByRole("button", { name: "회원가입하기" }));
     expect(await screen.findByText("휴대폰 번호 인증을 완료해 주세요.")).not.toBeNull();
     expect(screen.getByText("이용약관에 동의해야 가입할 수 있습니다.")).not.toBeNull();
   });
@@ -628,7 +628,7 @@ describe("카카오 가입 보완 입력", () => {
     renderWithQuery(<KakaoSignupForm />);
     await screen.findByRole("heading", { name: "카카오로 가입" });
     await user.type(screen.getByLabelText(/^참고 이메일/), "nope");
-    await user.click(screen.getByRole("button", { name: "가입하기" }));
+    await user.click(screen.getByRole("button", { name: "회원가입하기" }));
     expect(await screen.findByText("이메일 주소를 올바르게 입력해 주세요.")).not.toBeNull();
   });
 
@@ -639,7 +639,7 @@ describe("카카오 가입 보완 입력", () => {
     await verifyPhone(user);
     await screen.findByText("인증이 완료되었습니다.");
     await user.click(screen.getByLabelText(/이용약관에 동의합니다/));
-    await user.click(screen.getByRole("button", { name: "가입하기" }));
+    await user.click(screen.getByRole("button", { name: "회원가입하기" }));
     await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/office/start"));
   });
 
@@ -651,7 +651,7 @@ describe("카카오 가입 보완 입력", () => {
     await screen.findByText("인증이 완료되었습니다.");
     await user.click(screen.getByLabelText(/이용약관에 동의합니다/));
     setMockTermsVersion("1.1");
-    await user.click(screen.getByRole("button", { name: "가입하기" }));
+    await user.click(screen.getByRole("button", { name: "회원가입하기" }));
     const dialog = await screen.findByRole("dialog");
     expect(within(dialog).getByText(/아직 가입되지 않았습니다/)).not.toBeNull();
     await user.click(within(dialog).getByRole("button", { name: "바뀐 약관 확인" }));
@@ -670,7 +670,7 @@ describe("카카오 가입 보완 입력", () => {
     await user.click(screen.getByRole("button", { name: "확인" }));
     await screen.findByText("인증이 완료되었습니다.");
     await user.click(screen.getByLabelText(/이용약관에 동의합니다/));
-    await user.click(screen.getByRole("button", { name: "가입하기" }));
+    await user.click(screen.getByRole("button", { name: "회원가입하기" }));
     expect(await screen.findByText("이미 가입된 계정이 있습니다.")).not.toBeNull();
     expect(screen.getByRole("link", { name: "카카오로 로그인" })).not.toBeNull();
   });
@@ -683,7 +683,7 @@ describe("카카오 가입 보완 입력", () => {
     await verifyPhone(user);
     await screen.findByText("인증이 완료되었습니다.");
     await user.click(screen.getByLabelText(/이용약관에 동의합니다/));
-    await user.click(screen.getByRole("button", { name: "가입하기" }));
+    await user.click(screen.getByRole("button", { name: "회원가입하기" }));
     expect(
       (await screen.findAllByRole("alert")).some((el) =>
         /1분 뒤에 다시 시도/.test(el.textContent ?? ""),
