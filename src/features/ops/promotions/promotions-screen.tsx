@@ -85,21 +85,27 @@ export function OpsPromotionsScreen() {
       );
       return;
     }
-    await act(
-      () =>
-        actions.create.mutateAsync({
-          name: name.trim(),
-          code,
-          applicationStartsAt: start,
-          applicationEndsAt: end,
-          freeMonths: count,
-          maxOffices: cap,
-          selfRedeemable,
-        }),
-      selfRedeemable
-        ? "직접 적용 초안이 생성되었습니다. 코드는 목록에서 일부만 보입니다. 다른 결제 담당 운영자의 재인증 승인이 있어야 활성화됩니다."
-        : "초안이 생성되었습니다. 다른 결제 담당 운영자의 재인증 승인이 있어야 활성화됩니다.",
-    );
+    setFailure(null);
+    setSuccess(null);
+    try {
+      await actions.create.mutateAsync({
+        name: name.trim(),
+        code,
+        applicationStartsAt: start,
+        applicationEndsAt: end,
+        freeMonths: count,
+        maxOffices: cap,
+        selfRedeemable,
+      });
+      setCode("");
+      setSuccess(
+        selfRedeemable
+          ? "직접 적용 초안이 생성되었습니다. 코드는 목록에서 일부만 보입니다. 다른 결제 담당 운영자의 재인증 승인이 있어야 활성화됩니다."
+          : "초안이 생성되었습니다. 다른 결제 담당 운영자의 재인증 승인이 있어야 활성화됩니다.",
+      );
+    } catch {
+      setFailure("초안을 만들지 못했습니다. 운영자 권한과 입력값을 확인해 주세요.");
+    }
   }
 
   const busy = Object.values(actions).some((action) => action.isPending);
@@ -116,7 +122,12 @@ export function OpsPromotionsScreen() {
       <Card title="캠페인 초안 만들기">
         <div className="grid gap-3 sm:grid-cols-2">
           <TextField label="캠페인 이름" value={name} onValueChange={setName} />
-          <TextField label="코드 (대문자·숫자)" value={code} onValueChange={setCode} />
+          <TextField
+            label="코드 (대문자·숫자)"
+            value={code}
+            onValueChange={(value) => setCode(value.toUpperCase())}
+            autoComplete="off"
+          />
           <label className="flex flex-col gap-1 text-body">
             적용 시작 (한국시간)
             <input
@@ -182,7 +193,8 @@ export function OpsPromotionsScreen() {
             >
               <div>
                 <p className="font-semibold">
-                  {campaign.name} · {campaign.code}
+                  {campaign.name} ·{" "}
+                  {campaign.selfRedeemable ? `****${campaign.code.slice(-4)}` : campaign.code}
                 </p>
                 <p className="text-ink-2">
                   {campaign.status} · {campaign.freeMonths}개월 ·{" "}

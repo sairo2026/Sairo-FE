@@ -7,6 +7,7 @@ import { ApiError } from "@/shared/api/client";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { Button } from "@/shared/components/ui/button";
 import { TextField } from "@/shared/components/ui/text-field";
+import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { redeemPromotionCode } from "../api/billing.api";
 import {
   billingKeys,
@@ -23,6 +24,7 @@ export function PromotionPeriodsScreen() {
   const periods = usePromotionPeriods();
   const current = useCurrentPromotion();
   const subscription = useSubscription();
+  const { role } = useOfficeAccess();
   const queryClient = useQueryClient();
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -44,9 +46,11 @@ export function PromotionPeriodsScreen() {
       setError(
         caught instanceof ApiError && caught.status === 429
           ? "코드 확인 요청이 많습니다. 잠시 후 다시 시도해 주세요."
-          : caught instanceof ApiError && caught.status === 409
-            ? "이 코드는 현재 사무소에 적용할 수 없습니다. 코드와 적용 기간을 확인해 주세요."
-            : "프로모션을 적용하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+          : caught instanceof ApiError && caught.status === 403
+            ? "프로모션 코드는 사무소 대표만 적용할 수 있습니다."
+            : caught instanceof ApiError && caught.status === 409
+              ? "이 코드는 현재 사무소에 적용할 수 없습니다. 코드와 적용 기간을 확인해 주세요."
+              : "프로모션을 적용하지 못했습니다. 잠시 후 다시 시도해 주세요.",
       );
     },
   });
@@ -55,11 +59,12 @@ export function PromotionPeriodsScreen() {
     event.preventDefault();
     setError(null);
     setNotice(null);
-    if (!/^[A-Z0-9_-]{16,40}$/.test(code)) {
+    const normalizedCode = code.trim().toUpperCase();
+    if (!/^[A-Z0-9_-]{16,40}$/.test(normalizedCode)) {
       setError("프로모션 코드는 대문자·숫자·-·_를 사용한 16~40자입니다.");
       return;
     }
-    if (!redeem.isPending) redeem.mutate(code);
+    if (!redeem.isPending) redeem.mutate(normalizedCode);
   }
 
   return (
@@ -68,7 +73,7 @@ export function PromotionPeriodsScreen() {
         title="무료 프로모션 이용내역"
         description="카드 결제 없이 제공된 구독기간과 할인 내역을 확인합니다."
       />
-      {current.data === null && subscription.data?.status === "PRE_PAYMENT" ? (
+      {role === "OWNER" && current.data === null && subscription.data?.status === "PRE_PAYMENT" ? (
         <Card title="프로모션 코드 적용">
           <p className="mb-4 text-body text-ink-2">
             승인된 코드를 적용하면 카드 청구 없이 무료 이용기간이 시작됩니다. 무료 종료 뒤에는 별도

@@ -59,11 +59,24 @@ describe("무료 프로모션 이용내역", () => {
     renderOffice(<PromotionPeriodsScreen />, { role: "OWNER" });
     await user.type(
       await screen.findByRole("textbox", { name: "프로모션 코드" }),
-      "launch2026owner01",
+      " launch2026owner01 ",
     );
     await user.click(screen.getByRole("button", { name: "무료 프로모션 적용하기" }));
     await waitFor(() => expect(submittedCode).toBe("LAUNCH2026OWNER01"));
     expect(await screen.findByText("현재 프로모션")).not.toBeNull();
+    expect(screen.queryByRole("button", { name: "무료 프로모션 적용하기" })).toBeNull();
+  });
+
+  it("결제 전에도 대표가 아니면 코드 입력 폼을 보이지 않는다", async () => {
+    server.use(
+      http.get("/api/subscriptions/current", () =>
+        HttpResponse.json({ ...buildSubscription(), status: "PRE_PAYMENT" }),
+      ),
+      http.get("/api/billing/promotion-periods/current", () => HttpResponse.json(null)),
+      http.get("/api/billing/promotion-periods", () => HttpResponse.json([])),
+    );
+    renderOffice(<PromotionPeriodsScreen />, { role: "AGENT" });
+    expect(await screen.findByText("무료 프로모션 이용내역이 없습니다.")).not.toBeNull();
     expect(screen.queryByRole("button", { name: "무료 프로모션 적용하기" })).toBeNull();
   });
 
