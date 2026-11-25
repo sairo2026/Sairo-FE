@@ -1,14 +1,35 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePromotionPeriods } from "../hooks/billing-queries";
 import { QueryGate } from "@/shared/components/feedback/query-gate";
 import { Button } from "@/shared/components/ui/button";
 import { formatKrw, formatSeoulDateTime } from "@/shared/lib/format";
 import { PLAN_LABEL } from "../model/labels";
+import { isValidFreePromotionPeriod } from "../lib/promotion-statement-guards";
 
 export function PromotionStatementScreen({ id }: { id: number }) {
   const periods = usePromotionPeriods();
+  const [pdfBusy, setPdfBusy] = useState(false);
+  const [pdfError, setPdfError] = useState<string | null>(null);
+  const periodToDownload = periods.data?.find(
+    (item) => item.id === id && isValidFreePromotionPeriod(item),
+  );
+
+  const downloadPdf = async () => {
+    if (!periodToDownload || pdfBusy) return;
+    setPdfBusy(true);
+    setPdfError(null);
+    try {
+      const { downloadPromotionStatementPdf } = await import("../lib/promotion-statement-pdf");
+      await downloadPromotionStatementPdf(periodToDownload);
+    } catch {
+      setPdfError("PDF를 만들지 못했습니다. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      setPdfBusy(false);
+    }
+  };
 
   return (
     <div className="mx-auto min-h-screen max-w-[800px] bg-white px-5 py-8 text-ink sm:px-12 sm:py-12">
@@ -19,14 +40,20 @@ export function PromotionStatementScreen({ id }: { id: number }) {
         >
           이용내역으로 돌아가기
         </Link>
-        <Button
-          type="button"
-          disabled={!periods.isSuccess || !periods.data.some((item) => item.id === id)}
-          onClick={() => window.print()}
-        >
-          인쇄 또는 PDF로 저장
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button type="button" disabled={!periodToDownload || pdfBusy} onClick={downloadPdf}>
+            {pdfBusy ? "PDF 생성 중…" : "PDF 다운로드"}
+          </Button>
+          <Button type="button" disabled={!periodToDownload} onClick={() => window.print()}>
+            인쇄
+          </Button>
+        </div>
       </div>
+      {pdfError && (
+        <p role="alert" className="mb-4 text-body text-danger print:hidden">
+          {pdfError}
+        </p>
+      )}
       <QueryGate query={periods} loadingLabel="이용내역서를 불러오는 중입니다.">
         {(items) => {
           const period = items.find((item) => item.id === id);
@@ -34,6 +61,15 @@ export function PromotionStatementScreen({ id }: { id: number }) {
             return (
               <div role="alert">
                 <h1 className="text-h1 font-bold">이용내역서를 찾을 수 없습니다.</h1>
+              </div>
+            );
+          if (!isValidFreePromotionPeriod(period))
+            return (
+              <div role="alert">
+                <h1 className="text-h1 font-bold">이용내역서의 금액을 확인할 수 없습니다.</h1>
+                <p className="mt-2 text-body text-ink-2">
+                  결제 내역을 확인한 뒤 다시 시도해 주세요.
+                </p>
               </div>
             );
           return (
@@ -77,6 +113,10 @@ export function PromotionStatementScreen({ id }: { id: number }) {
                 <div>
                   <dt className="text-ink-2">프로모션</dt>
                   <dd>{period.campaignName}</dd>
+                </div>
+                <div>
+                  <dt className="text-ink-2">프로모션 코드</dt>
+                  <dd>{period.campaignCode || "없음"}</dd>
                 </div>
                 <div>
                   <dt className="text-ink-2">가격 버전</dt>

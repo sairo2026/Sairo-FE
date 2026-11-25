@@ -406,7 +406,25 @@ export const billingHandlers = [
   http.get("/api/billing/plans", () => HttpResponse.json(plans())),
   http.get("/api/subscriptions/current", () => HttpResponse.json(billingState.subscription)),
   http.get("/api/billing/promotion-periods/current", () => HttpResponse.json(null)),
-  http.get("/api/billing/promotion-periods", () => HttpResponse.json([])),
+  http.get("/api/billing/promotion-periods", () => {
+    return HttpResponse.json([
+      {
+        id: 17,
+        periodStart: "2027-01-31T14:30:00+09:00",
+        periodEnd: "2027-02-28T14:30:00+09:00",
+        listAmount: 49900,
+        discountAmount: 49900,
+        chargedAmount: 0,
+        priceVersion: "2027-01",
+        createdAt: "2027-01-31T14:30:01+09:00",
+        campaignName: "출시 프로모션",
+        campaignCode: "LAUNCH",
+        officeName: "테스트 공인중개사사무소",
+        plan: "SOLO",
+        freeEndsAt: "2027-02-28T14:30:00+09:00",
+      },
+    ]);
+  }),
   http.get("/api/terms", ({ request }) => {
     const context = new URL(request.url).searchParams.get("context");
     if (context !== "CARD_REGISTRATION") return undefined;

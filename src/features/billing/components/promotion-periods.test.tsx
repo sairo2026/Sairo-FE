@@ -18,6 +18,7 @@ afterAll(() => stopServer());
 
 describe("무료 프로모션 이용내역", () => {
   it("거래가 없으면 빈 상태를 표시한다", async () => {
+    server.use(http.get("/api/billing/promotion-periods", () => HttpResponse.json([])));
     renderOffice(<PromotionPeriodsScreen />, { role: "OWNER" });
     expect(await screen.findByText("무료 프로모션 이용내역이 없습니다.")).not.toBeNull();
   });
