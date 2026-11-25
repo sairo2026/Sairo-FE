@@ -79,10 +79,10 @@ export function EmailLoginForm({ next }: { next?: string }) {
 
   return (
     <AuthFrame
-      title="이메일로 로그인"
+      title="다시 만나서 반가워요!"
       width="sm"
       variant="login"
-      tagline="공인중개사의 업무를 돕는 사이로입니다."
+      tagline="사이로 계정으로 로그인해 업무를 이어가세요."
     >
       <form noValidate onSubmit={submit} className="flex flex-col">
         <div className="flex flex-col gap-7">
@@ -108,6 +108,7 @@ export function EmailLoginForm({ next }: { next?: string }) {
               <TextField
                 label="비밀번호"
                 kind="password"
+                showPasswordToggle
                 value={field.value}
                 onValueChange={field.onChange}
                 autoComplete="current-password"
@@ -167,7 +168,7 @@ export function EmailLoginForm({ next }: { next?: string }) {
             뒤로
           </Link>
           <Button type="submit" isLoading={isSubmitting} disabled={isLocked}>
-            로그인
+            로그인하기
           </Button>
         </div>
       </form>

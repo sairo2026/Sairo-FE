@@ -77,7 +77,7 @@ async function submitPasswords(page: Page, password: string, confirm: string): P
   await toPasswordStep(page);
   await page.getByPlaceholder(PASSWORD_PLACEHOLDER).fill(password);
   await page.getByPlaceholder(CONFIRM_PLACEHOLDER).fill(confirm);
-  await page.getByRole("button", { name: "가입하기" }).click();
+  await page.getByRole("button", { name: "회원가입하기" }).click();
 }
 
 export const passwordMismatch = (page: Page) => submitPasswords(page, "abcd1234!x", "different1!");
@@ -86,14 +86,14 @@ export const passwordTooShort = (page: Page) => submitPasswords(page, "abc12", "
 export async function kakaoDuplicate(page: Page): Promise<void> {
   await verifyPhone(page, "010-1111-1111");
   await agreeAllTerms(page);
-  await page.getByRole("button", { name: "가입하기" }).click();
+  await page.getByRole("button", { name: "회원가입하기" }).click();
   await page.getByText("이미 가입된 계정이 있습니다").waitFor();
 }
 
 export async function wrongPasswordLogin(page: Page): Promise<void> {
   await page.getByPlaceholder("이메일 주소를 입력해 주세요.").fill("agent@example.com");
   await page.getByPlaceholder("비밀번호를 입력해 주세요.").fill("wrong-password-1");
-  await page.getByRole("button", { name: "로그인", exact: true }).click();
+  await page.getByRole("button", { name: "로그인하기", exact: true }).click();
   await page.getByText("연속 1회 실패 · 남은 시도 4회").waitFor();
 }
 
@@ -102,7 +102,7 @@ export async function lockedLogin(page: Page): Promise<void> {
   await page.getByPlaceholder("비밀번호를 입력해 주세요.").fill("wrong-password-1");
   for (let attempt = 0; attempt < 6; attempt += 1) {
     const response = page.waitForResponse("**/api/auth/login");
-    await page.getByRole("button", { name: "로그인", exact: true }).click();
+    await page.getByRole("button", { name: "로그인하기", exact: true }).click();
     await response;
   }
   await page.getByRole("timer").waitFor();

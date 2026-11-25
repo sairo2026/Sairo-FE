@@ -65,7 +65,7 @@ export function PasswordResetRequestForm({
       >
         <p className="text-body text-ink-2">{description}</p>
         <TextField
-          label="이메일 인증"
+          label="가입한 이메일 주소"
           value={email}
           onValueChange={(next) => {
             setEmail(next);
@@ -141,7 +141,7 @@ export function PasswordResetForm({ token }: { token: string | null }) {
             href="/login/email"
             className="inline-flex h-12 items-center justify-center rounded-control bg-primary px-10 font-bold text-white hover:bg-primary-hover"
           >
-            로그인
+            로그인하기
           </Link>
         </div>
       </AuthFrame>
@@ -199,6 +199,7 @@ export function PasswordResetForm({ token }: { token: string | null }) {
         <TextField
           label="새 비밀번호"
           kind="password"
+          showPasswordToggle
           value={password}
           onValueChange={(next) => {
             setPassword(next);
@@ -212,6 +213,7 @@ export function PasswordResetForm({ token }: { token: string | null }) {
         <TextField
           label="새 비밀번호 확인"
           kind="password"
+          showPasswordToggle
           value={confirm}
           onValueChange={(next) => {
             setConfirm(next);

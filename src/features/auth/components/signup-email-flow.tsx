@@ -309,7 +309,18 @@ export function SignupEmailFlow({ token }: { token?: string }) {
 
   return (
     <>
-      <AuthFrame variant="form" title={step === "info" ? "기본 가입 정보 입력" : "비밀번호 설정"}>
+      <AuthFrame
+        variant="form"
+        title={step === "info" ? "사이로에 오신 걸 환영해요!" : "비밀번호를 설정해 주세요"}
+      >
+        <h2 className="text-h2 font-semibold text-primary">
+          {step === "info" ? "기본 가입 정보 입력" : "비밀번호 설정"}
+        </h2>
+        <p className="mb-6 mt-2 text-body text-ink-2">
+          {step === "info"
+            ? "계정을 만들고 부동산 업무 관리를 시작하세요. 먼저 가입 정보를 입력해 주세요."
+            : "로그인할 비밀번호를 설정하면 가입이 완료됩니다."}
+        </p>
         {tokenState === "failed" ? (
           <div className="mb-4">
             <FormAlert>{tokenMessage}</FormAlert>
@@ -438,6 +449,7 @@ export function SignupEmailFlow({ token }: { token?: string }) {
             <TextField
               label="비밀번호 설정"
               kind="password"
+              showPasswordToggle
               value={password}
               onValueChange={(next) => {
                 setPassword(next);
@@ -453,6 +465,7 @@ export function SignupEmailFlow({ token }: { token?: string }) {
             <TextField
               label="비밀번호 확인"
               kind="password"
+              showPasswordToggle
               value={confirm}
               onValueChange={(next) => {
                 setConfirm(next);
@@ -469,7 +482,7 @@ export function SignupEmailFlow({ token }: { token?: string }) {
                 이전
               </Button>
               <Button type="submit" isLoading={isBusy}>
-                가입하기
+                회원가입하기
               </Button>
             </div>
           </form>

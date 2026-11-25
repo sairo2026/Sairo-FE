@@ -11,7 +11,7 @@ describe("로그인 처음 화면 규격", () => {
   it("카드는 폭 460에 테두리 없이 그림자만 쓰고 버튼은 모서리 12와 20 글자다", () => {
     render(<AuthEntry mode="login" />);
     const kakao = screen.getByRole("link", { name: "카카오로 시작하기" });
-    const email = screen.getByRole("link", { name: "이메일로 시작하기" });
+    const email = screen.getByRole("link", { name: "이메일로 로그인하기" });
     for (const link of [kakao, email]) {
       expect(link.className).toContain("rounded-xl");
       expect(link.className).toContain("text-h2");
@@ -26,7 +26,7 @@ describe("로그인 처음 화면 규격", () => {
   it("카카오 버튼은 디자인의 노랑이고 이메일 버튼은 연한 브랜드 채움에 본문색 글자이며 높이는 68이다", () => {
     render(<AuthEntry mode="login" />);
     const kakao = screen.getByRole("link", { name: "카카오로 시작하기" });
-    const email = screen.getByRole("link", { name: "이메일로 시작하기" });
+    const email = screen.getByRole("link", { name: "이메일로 로그인하기" });
     expect(kakao.className).toContain("bg-[#ffee52]");
     expect(email.className).toContain("bg-primary-soft");
     expect(email.className).toContain("text-ink");
@@ -52,11 +52,13 @@ describe("로그인 처음 화면 구조", () => {
   it("본문 영역과 화면 제목을 스크린리더에 알린다", () => {
     const { unmount } = render(<AuthEntry mode="login" />);
     expect(screen.getByRole("main")).not.toBeNull();
-    expect(screen.getByRole("heading", { level: 1, name: "로그인" })).not.toBeNull();
+    expect(screen.getByRole("heading", { level: 1, name: "다시 만나서 반가워요!" })).not.toBeNull();
     unmount();
     render(<AuthEntry mode="signup" />);
     expect(screen.getByRole("main")).not.toBeNull();
-    expect(screen.getByRole("heading", { level: 1, name: "회원가입" })).not.toBeNull();
+    expect(
+      screen.getByRole("heading", { level: 1, name: "사이로에 오신 걸 환영해요!" }),
+    ).not.toBeNull();
   });
 });
 
@@ -96,7 +98,7 @@ describe("가입 카드 규격", () => {
     const card = screen.getByRole("heading", { name: "로그인" }).closest("section");
     expect(card?.querySelector("img")).not.toBeNull();
     expect(card?.className).toContain("max-w-[624px]");
-    expect(screen.getByText("소개 문구입니다.").className).toContain("text-primary");
+    expect(screen.getByText("소개 문구입니다.").className).toContain("text-ink-2");
   });
 
   it("기본 카드와 납작한 카드는 테두리를 유지한다", () => {

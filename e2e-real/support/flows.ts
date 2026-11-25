@@ -24,7 +24,7 @@ export function newMember(label: string): Member {
 
 export async function signupViaUi(page: Page, request: APIRequestContext, member: Member) {
   await page.goto("/signup");
-  await page.getByRole("link", { name: "이메일로 시작하기" }).click();
+  await page.getByRole("link", { name: "이메일로 회원가입하기" }).click();
   await page.getByLabel(/^이름/).fill(member.name);
   await page.getByLabel(/^이메일 인증/).fill(member.email);
   await page.getByRole("button", { name: "인증 링크 받기" }).click();
@@ -51,16 +51,16 @@ export async function signupViaUi(page: Page, request: APIRequestContext, member
   await page.getByRole("button", { name: "다음" }).click();
   await page.getByLabel(/^비밀번호 설정/).fill(PASSWORD);
   await page.getByLabel(/^비밀번호 확인/).fill(PASSWORD);
-  await page.getByRole("button", { name: "가입하기" }).click();
+  await page.getByRole("button", { name: "회원가입하기" }).click();
   await expect(page).toHaveURL(/\/office\/start$/, { timeout: 20_000 });
 }
 
 export async function loginViaUi(page: Page, email: string, expectedPath: RegExp = /\/home$/) {
   await page.goto("/login");
-  await page.getByRole("link", { name: "이메일로 시작하기" }).click();
+  await page.getByRole("link", { name: "이메일로 로그인하기" }).click();
   await page.getByLabel(/^이메일/).fill(email);
   await page.getByLabel(/^비밀번호/).fill(PASSWORD);
-  await page.getByRole("button", { name: "로그인", exact: true }).click();
+  await page.getByRole("button", { name: "로그인하기", exact: true }).click();
   await expect(page).toHaveURL(expectedPath);
 }
 

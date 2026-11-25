@@ -16,7 +16,7 @@ export function AuthFrame({
   description?: string;
   children: ReactNode;
   width?: "sm" | "md";
-  /** form은 로고 없이 제목만 둔 가입·비밀번호 카드, login은 로고와 한 줄 소개를 둔 이메일 로그인 카드다. */
+  /** form은 로고 없이 제목만 둔 가입·비밀번호 카드, login은 로고와 제목·소개를 둔 이메일 로그인 카드다. */
   variant?: "default" | "form" | "login";
   tagline?: string;
   /** 기본은 화면의 주 영역(main)이다. 이미 main이 있는 작업 틀 안에서 쓸 때만 div로 바꾼다. */
@@ -26,13 +26,11 @@ export function AuthFrame({
     return (
       <main className="flex flex-1 items-center justify-center bg-surface px-4 py-12 sm:py-16">
         <Card tone="elevated" shadow="login" className="w-full max-w-[624px]">
-          <div className="flex flex-col items-center gap-5">
+          <div className="flex flex-col items-center gap-3 text-center">
             <BrandLogo className="w-[220px]" />
-            {tagline ? (
-              <p className="text-center text-h2 font-semibold text-primary">{tagline}</p>
-            ) : null}
+            <h1 className="pt-2 text-h1 font-bold text-ink">{title}</h1>
+            {tagline ? <p className="text-body text-ink-2">{tagline}</p> : null}
           </div>
-          <h1 className="sr-only">{title}</h1>
           <div className="mt-8 sm:mt-11">{children}</div>
         </Card>
       </main>
