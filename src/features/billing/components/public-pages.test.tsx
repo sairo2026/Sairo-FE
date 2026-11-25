@@ -283,7 +283,7 @@ describe("약관과 환불정책 페이지", () => {
     const toc = screen.getByRole("navigation", { name: "이용약관 목차" });
     expect(within(toc).getAllByRole("link").length).toBeGreaterThanOrEqual(23);
     expect(screen.getByText("시행 버전 1.1 / 시행일 2026년 12월 16일")).not.toBeNull();
-    const previous = screen.getByRole("link", { name: "이전 시행 버전 1.0 보기" });
+    const previous = screen.getByRole("link", { name: "다른 버전 1.0 보기" });
     expect(previous.getAttribute("href")).toBe("/legal/previous/terms/1.0");
   });
 

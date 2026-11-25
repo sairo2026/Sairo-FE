@@ -9,6 +9,7 @@ import {
   findLegalDocument,
   findLegalDocumentByPolicyKind,
   findLegalDocumentByTermsCode,
+  findLegalDocumentByTermsCodeAndVersion,
 } from "./registry";
 
 afterEach(cleanup);
@@ -122,6 +123,15 @@ describe("약관 문서 목록", () => {
     expect(findLegalDocumentByPolicyKind("refund")?.slug).toBe("refund-policy");
     expect(findLegalDocumentByPolicyKind("SUBPROCESSORS")?.slug).toBe("processing-outsourcing");
     expect(findLegalDocument("없는 문서")).toBeUndefined();
+  });
+
+  it("가입 동의에 쓰인 서버 버전과 같은 원문을 선택한다", () => {
+    const previous = findLegalDocumentByTermsCodeAndVersion("TOS", "1.0");
+    const current = findLegalDocumentByTermsCodeAndVersion("TOS", "1.1");
+    expect(previous?.version).toBe("1.0");
+    expect(current?.version).toBe("1.1");
+    expect(previous?.body).not.toBe(current?.body);
+    expect(findLegalDocumentByTermsCodeAndVersion("TOS", "0.9")).toBeUndefined();
   });
 
   it.each(LEGAL_DOCUMENTS.map((document) => [document.title, document] as const))(

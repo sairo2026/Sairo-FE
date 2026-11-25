@@ -102,6 +102,16 @@ export function findLegalDocumentByTermsCode(termsCode: string): LegalDocument |
   return LEGAL_DOCUMENTS.find((document) => document.termsCode === termsCode);
 }
 
+/** 서버가 동의 대상으로 제시한 버전과 같은 본문만 보여준다. */
+export function findLegalDocumentByTermsCodeAndVersion(
+  termsCode: string,
+  version: string,
+): LegalDocument | undefined {
+  const current = findLegalDocumentByTermsCode(termsCode);
+  if (!current) return undefined;
+  return current.version === version ? current : findPreviousLegalDocument(current.slug, version);
+}
+
 const POLICY_KIND_ALIASES: Readonly<Record<string, LegalDocumentSlug>> = {
   SUBPROCESSORS: "processing-outsourcing",
 };
@@ -130,7 +140,7 @@ export function findPreviousLegalDocument(
   if (!current?.previous || current.previous.version !== version) return undefined;
   return {
     ...current,
-    title: `${current.title} 이전 버전`,
+    title: `${current.title} (시행 버전 ${version})`,
     version: current.previous.version,
     body: current.previous.body,
     effectiveDate: undefined,

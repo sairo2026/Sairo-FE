@@ -27,9 +27,9 @@ export function LegalDocumentScreen({
       <div>
         {previousVersion ? (
           <p className="mb-4 rounded-card-flat border border-line bg-surface px-6 py-4 text-body text-ink-2">
-            이 문서는 이전에 시행한 시행 버전 {previousVersion}입니다.{" "}
+            이 문서는 시행 버전 {previousVersion}입니다.{" "}
             <Link href={legalDocumentPath(slug)} className="text-primary underline">
-              현재 시행 버전 {current.version} 보기
+              다른 버전 {current.version} 보기
             </Link>
           </p>
         ) : current.previous ? (
@@ -39,7 +39,7 @@ export function LegalDocumentScreen({
               href={previousLegalDocumentPath(slug, current.previous.version)}
               className="text-primary underline"
             >
-              이전 시행 버전 {current.previous.version} 보기
+              다른 버전 {current.previous.version} 보기
             </Link>
           </p>
         ) : null}

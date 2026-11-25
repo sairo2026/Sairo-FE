@@ -1,7 +1,23 @@
+import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { findLegalDocument, findPreviousLegalDocument } from "./registry";
 
 describe("이용약관과 개인정보처리방침의 사실 정정", () => {
+  it("FE 1.1 원문 해시는 BE V32 카탈로그 해시와 일치한다", () => {
+    const expected = {
+      terms: "2a9fae7a75eef01efdce8b33cc7a195fa74c92bc762c683472152ff480c5ef94",
+      privacy: "371004f23c65f23e841feb1e20ca89251ad32b226e2bae7decf12aa2e6461cd4",
+      "subscription-terms": "011d39a2d4c8a1cf4ca253d0299a0a07ca00f9e72d8820404f3baedd118b7d86",
+    } as const;
+    for (const [slug, hash] of Object.entries(expected)) {
+      const document = findLegalDocument(slug);
+      expect(document?.version).toBe("1.1");
+      if (!document) throw new Error(`${slug} 약관이 없습니다`);
+      expect(
+        createHash("sha256").update(document.body.replaceAll("\r\n", "\n"), "utf8").digest("hex"),
+      ).toBe(hash);
+    }
+  });
   it("두 문서는 새 시행 버전을 쓴다", () => {
     expect(findLegalDocument("terms")?.version).toBe("1.1");
     expect(findLegalDocument("privacy")?.version).toBe("1.1");

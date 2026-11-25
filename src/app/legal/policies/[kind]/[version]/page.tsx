@@ -9,13 +9,19 @@ export default async function Page({
 }: {
   params: Promise<{ kind: string; version: string }>;
 }) {
-  const { kind } = await params;
+  const { kind, version } = await params;
   if (kind.toUpperCase() === "PRICING") redirect("/pricing");
   const document = findLegalDocumentByPolicyKind(kind);
   if (!document) notFound();
+  const previousVersion =
+    document.version === version
+      ? undefined
+      : document.previous?.version === version
+        ? version
+        : notFound();
   return (
     <PublicSiteLayout footer={<PublicBusinessFooterServer />}>
-      <LegalDocumentScreen slug={document.slug} />
+      <LegalDocumentScreen slug={document.slug} previousVersion={previousVersion} />
     </PublicSiteLayout>
   );
 }

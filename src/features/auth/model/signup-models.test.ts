@@ -146,7 +146,7 @@ describe("약관 선택", () => {
   function item(termsCode: string, required: boolean): TermsCatalogItem {
     return {
       termsCode,
-      version: "v1",
+      version: "1.0",
       required,
       title: termsCode,
       documentUrl: "/x",
