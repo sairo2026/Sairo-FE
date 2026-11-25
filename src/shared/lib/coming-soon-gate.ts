@@ -14,7 +14,12 @@ export function isComingSoonMode(env: GateEnv): boolean {
   return false;
 }
 
-const OPEN_PAGE_PATHS: readonly string[] = ["/pricing", "/legal", "/unsubscribe"];
+const OPEN_PAGE_PATHS: readonly string[] = [
+  "/pricing",
+  "/legal",
+  "/unsubscribe",
+  "/manifest.webmanifest",
+];
 const OPEN_PAGE_PREFIXES: readonly string[] = ["/legal/"];
 const OPEN_PUBLIC_API_PATHS: readonly string[] = [
   "/api/public/pricing",
@@ -29,6 +34,7 @@ export function isReviewMode(env: GateEnv): boolean {
 
 const REVIEW_PAGE_ROOTS: readonly string[] = [
   "/home",
+  "/install",
   "/login",
   "/signup",
   "/password",

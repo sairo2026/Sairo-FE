@@ -27,6 +27,7 @@ export const RELEASE_CHECK_GROUPS: readonly ReleaseCheckGroup[] = [
     routes: [
       "/",
       "/home",
+      "/install",
       "/login",
       "/login/email",
       "/signup",
