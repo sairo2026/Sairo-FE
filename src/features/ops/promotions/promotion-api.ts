@@ -12,6 +12,7 @@ const CampaignSchema = z.object({
   status: z.string(),
   maxOffices: z.number().nullable(),
   creatorId: z.number(),
+  selfRedeemable: z.boolean().optional().default(false),
 });
 const GrantSchema = z.object({
   id: z.number(),
@@ -53,6 +54,7 @@ export type CampaignCreate = {
   applicationEndsAt: string;
   freeMonths: number;
   maxOffices: number | null;
+  selfRedeemable: boolean;
 };
 
 export function usePromotionActions() {
