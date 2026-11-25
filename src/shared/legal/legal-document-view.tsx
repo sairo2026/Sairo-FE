@@ -1,10 +1,12 @@
 "use client";
 
 import { useMemo } from "react";
+import Link from "next/link";
 import { Button } from "@/shared/components/ui/button";
 import { Modal } from "@/shared/components/ui/modal";
 import { PageHeader } from "@/shared/components/ui/page-header";
 import { LegalMarkdown, legalTocEntries, prepareLegalBlocks } from "./legal-markdown";
+import { findLegalDocument, legalDocumentPath, previousLegalDocumentPath } from "./registry";
 import type { LegalDocument } from "./registry";
 import { buildLegalValues, useLegalCompanyInfo } from "./use-legal-values";
 
@@ -70,6 +72,11 @@ export function LegalDocumentModal({
   title?: string;
 }) {
   const blocks = useDocumentBlocks(document, effectiveDate);
+  const current = findLegalDocument(document.slug);
+  const fullPath =
+    current?.version === document.version
+      ? legalDocumentPath(document.slug)
+      : previousLegalDocumentPath(document.slug, document.version);
   return (
     <Modal
       isOpen={isOpen}
@@ -78,6 +85,16 @@ export function LegalDocumentModal({
       size="terms"
       footer={<Button onClick={onClose}>닫기</Button>}
     >
+      <p className="mb-4 text-caption text-ink-2">
+        시행 버전 {document.version}
+        {(effectiveDate ?? document.effectiveDate)
+          ? ` · 시행일 ${effectiveDate ?? document.effectiveDate}`
+          : ""}
+        {" · "}
+        <Link href={fullPath} target="_blank" rel="noreferrer" className="text-primary underline">
+          전문 페이지 열기
+        </Link>
+      </p>
       <LegalMarkdown blocks={blocks} isCompact />
     </Modal>
   );

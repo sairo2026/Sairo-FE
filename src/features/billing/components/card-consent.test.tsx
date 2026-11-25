@@ -392,6 +392,16 @@ describe("로그인 직후 카드 등록 안내", () => {
 });
 
 describe("구독 구매 동의", () => {
+  it("서버가 제시한 결제와 해지·환불 조건을 체크 항목에 그대로 표시한다", async () => {
+    renderOffice(<ConsentScreen />, { role: "OWNER" });
+    expect(
+      await screen.findByRole("checkbox", { name: /월 선불 자동결제에 동의합니다/ }),
+    ).not.toBeNull();
+    expect(
+      screen.getByRole("checkbox", { name: /해지와 환불 조건을 확인했습니다/ }),
+    ).not.toBeNull();
+    expect(screen.getByText(/금액이 커지면 다시 동의받기 전에는 결제되지 않습니다/)).not.toBeNull();
+  });
   it("불러오는 동안 로딩을 보여주고 조건 요약을 서버 값 그대로 보여준다", async () => {
     renderOffice(<ConsentScreen />, { role: "OWNER" });
     expect(document.querySelector('[aria-busy="true"]')).not.toBeNull();

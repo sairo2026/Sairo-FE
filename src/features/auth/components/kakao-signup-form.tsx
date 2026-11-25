@@ -22,12 +22,15 @@ import {
   CollectionNoticeTable,
   TermsAgreementSection,
   areRequiredTermsAgreed,
+  hasBlockingTermsVersionMismatch,
+  selectedSignupAgreements,
   visibleTerms,
 } from "./terms-agreement-section";
 import type { TermsSelection } from "./terms-agreement-section";
 import {
   KAKAO_EXTRA_INFO_NOTICE,
   KAKAO_LINK_NOTICE,
+  KAKAO_LINK_SUMMARY,
   PHONE_VERIFICATION_NOTICE,
   SIGNUP_TERMS_COPY,
 } from "../model/legal-copy";
@@ -139,8 +142,12 @@ export function KakaoSignupForm() {
       );
       isValid = false;
     }
-    if (!areRequiredTermsAgreed(terms, selection)) {
-      setTermsError(SIGNUP_TERMS_COPY.requiredError);
+    if (!areRequiredTermsAgreed(terms, selection, false)) {
+      setTermsError(
+        hasBlockingTermsVersionMismatch(terms, false)
+          ? SIGNUP_TERMS_COPY.versionMismatchError
+          : SIGNUP_TERMS_COPY.requiredError,
+      );
       isValid = false;
     }
     if (!isValid || (phoneRequired && !phoneTicket)) return;
@@ -152,9 +159,7 @@ export function KakaoSignupForm() {
         displayName: trimmed,
         ...(phoneRequired ? { verifiedPhoneTicket: phoneTicket ?? undefined } : { phone }),
         kakaoReferenceEmail: referenceEmail.trim() === "" ? null : referenceEmail.trim(),
-        agreedTerms: terms
-          .filter((item) => selection[item.termsCode])
-          .map((item) => ({ termsCode: item.termsCode, version: item.version })),
+        agreedTerms: selectedSignupAgreements(terms, selection, false),
       });
       queryClient.clear();
       router.replace(landingPathFor(result));
@@ -276,9 +281,15 @@ export function KakaoSignupForm() {
           <FormNotice>
             카카오 계정과 같은 이메일이 있어도 기존 이메일 계정과 합쳐지지 않습니다.
           </FormNotice>
-          <p className="whitespace-pre-line text-caption text-ink-2">
-            {breakSentences(KAKAO_LINK_NOTICE)}
-          </p>
+          <p className="text-caption text-ink-2">{KAKAO_LINK_SUMMARY}</p>
+          <details className="rounded-control border border-line bg-surface px-4 py-3">
+            <summary className="cursor-pointer text-body font-medium text-ink">
+              카카오 계정 연결·해제 안내 자세히 보기
+            </summary>
+            <p className="mt-3 whitespace-pre-line text-caption text-ink-2">
+              {breakSentences(KAKAO_LINK_NOTICE)}
+            </p>
+          </details>
           <div className="mt-4 flex justify-center gap-4">
             <Link
               href="/login"

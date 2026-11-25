@@ -34,6 +34,8 @@ import {
   CollectionNoticeTable,
   TermsAgreementSection,
   areRequiredTermsAgreed,
+  hasBlockingTermsVersionMismatch,
+  selectedSignupAgreements,
   visibleTerms,
 } from "./terms-agreement-section";
 import type { TermsSelection } from "./terms-agreement-section";
@@ -212,7 +214,11 @@ export function SignupEmailFlow({ token }: { token?: string }) {
     const isPhoneReady = phoneRequired ? phoneTicket !== null : PHONE_PATTERN.test(phone);
     if (!isPhoneReady) isValid = false;
     if (!areRequiredTermsAgreed(terms, selection)) {
-      setTermsError(SIGNUP_TERMS_COPY.requiredError);
+      setTermsError(
+        hasBlockingTermsVersionMismatch(terms)
+          ? SIGNUP_TERMS_COPY.versionMismatchError
+          : SIGNUP_TERMS_COPY.requiredError,
+      );
       isValid = false;
     } else {
       setTermsError(undefined);
@@ -240,9 +246,7 @@ export function SignupEmailFlow({ token }: { token?: string }) {
     setIsBusy(true);
     setSubmitError(undefined);
     try {
-      const agreedTerms = terms
-        .filter((item) => selection[item.termsCode])
-        .map((item) => ({ termsCode: item.termsCode, version: item.version }));
+      const agreedTerms = selectedSignupAgreements(terms, selection);
       const result = await signupWithEmail({
         verifiedEmailTicket: emailTicket,
         ...(phoneRequired ? { verifiedPhoneTicket: phoneTicket ?? undefined } : { phone }),

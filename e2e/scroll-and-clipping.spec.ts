@@ -24,6 +24,10 @@ for (const [route, tableCount, name = /가로 스크롤$/] of [
     await page.goto(route);
     await settle(page);
 
+    if (route.startsWith("/signup/")) {
+      await page.getByText("개인정보 수집·이용 안내 자세히 보기").click();
+    }
+
     const containers = page.getByRole("group", { name, exact: true });
     await expect(containers).toHaveCount(tableCount);
     for (const container of await containers.all()) {
