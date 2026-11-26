@@ -36,6 +36,7 @@ export type VisitMockState = {
   receivedGrants: MockGrant[];
   conflicts: ScheduleConflictCheckResponse["conflicts"];
   nextId: number;
+  legacyListCustomerFilter: boolean;
 };
 
 export function buildMockCoordination(
@@ -154,6 +155,7 @@ function initialState(): VisitMockState {
     receivedGrants: [],
     conflicts: [],
     nextId: 8100,
+    legacyListCustomerFilter: false,
   };
 }
 
@@ -322,11 +324,14 @@ export const visitHandlers = [
     const filtered = mine.filter(
       (item) =>
         (!status || status.split(",").includes(item.status)) &&
-        (!customerId || item.customerId === Number(customerId)),
+        (state.legacyListCustomerFilter || !customerId || item.customerId === Number(customerId)),
     );
     return HttpResponse.json({
       ...pageOf(filtered.map(toListItem), url),
       statusCounts: counts,
+      ...(state.legacyListCustomerFilter
+        ? {}
+        : { filteredCustomerId: customerId ? Number(customerId) : null }),
     });
   }),
 

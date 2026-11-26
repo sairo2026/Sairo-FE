@@ -79,7 +79,14 @@ export function CoordinationCreateScreen({
     },
     customer !== null,
   );
-  const ongoing = existing.data?.totalElements ?? 0;
+  const ongoing = customer
+    ? existing.data?.filteredCustomerId === customer.customerId
+      ? existing.data.totalElements
+      : (existing.data?.items ?? []).filter(
+          (item) =>
+            item.customerId === customer.customerId && ONGOING_STATUSES.includes(item.status),
+        ).length
+    : 0;
   const candidates = pickedCandidates ?? (preselectedProperty ? [preselectedProperty] : []);
   const [start, setStart] = useState(today);
   const [end, setEnd] = useState(addDays(today, 7));

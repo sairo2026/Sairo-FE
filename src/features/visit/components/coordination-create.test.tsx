@@ -121,6 +121,28 @@ describe("방문 조율 생성", () => {
     expect(await screen.findByRole("link", { name: "기존 조율 보기" })).not.toBeNull();
   });
 
+  it("이전 백엔드가 고객 필터를 무시해도 다른 고객의 전체 건수를 표시하지 않는다", async () => {
+    setMockCustomerState({
+      customers: [
+        buildMockCustomer({ customerId: 301, name: "김수요" }),
+        buildMockCustomer({ customerId: 999, name: "김수요", phone: "010-0000-0999" }),
+      ],
+    });
+    setMockVisitState({
+      legacyListCustomerFilter: true,
+      coordinations: [
+        buildMockCoordination({ coordinationId: 999, customerId: 999, customerName: "김수요" }),
+      ],
+    });
+    const user = userEvent.setup();
+    renderOffice(<CoordinationCreateScreen />, { role: "OWNER" });
+    const sameNameCustomers = await screen.findAllByRole("radio", { name: /김수요/ });
+    await user.click(sameNameCustomers[1] as HTMLElement);
+    expect(await screen.findByRole("link", { name: "기존 조율 보기" })).not.toBeNull();
+    await user.click(sameNameCustomers[0] as HTMLElement);
+    expect(screen.queryByRole("link", { name: "기존 조율 보기" })).toBeNull();
+  });
+
   it("고객과 후보 매물을 고르지 않으면 제출하지 않고 안내한다", async () => {
     const user = userEvent.setup();
     renderOffice(<CoordinationCreateScreen />, { role: "OWNER" });
