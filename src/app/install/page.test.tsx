@@ -101,4 +101,14 @@ describe("PC 설치 화면", () => {
     expect(screen.getByRole("status").textContent).toContain("설치된 사이로 앱");
     expect(document.activeElement).toBe(login);
   });
+
+  it("설치 안내 버튼에 포커스가 있을 때 브라우저 메뉴 설치 완료로 포커스를 옮긴다", async () => {
+    const user = userEvent.setup();
+    render(<InstallPage />);
+    await user.click(screen.getByRole("button", { name: "PC에 설치하기" }));
+
+    act(() => window.dispatchEvent(new Event("appinstalled")));
+
+    expect(document.activeElement).toBe(screen.getByRole("status"));
+  });
 });

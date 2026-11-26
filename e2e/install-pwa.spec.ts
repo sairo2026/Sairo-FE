@@ -62,9 +62,19 @@ test("다른 화면에서 포착한 설치 이벤트를 설치 화면에서 한 
 }) => {
   test.skip(browserName !== "chromium", "Chromium PWA 설치 이벤트 경로");
   await page.goto("/");
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const event = new Event("beforeinstallprompt", { cancelable: true });
+        window.dispatchEvent(event);
+        return event.defaultPrevented;
+      }),
+    )
+    .toBe(true);
   await page.evaluate(() => {
-    const state = window as Window & { __installPromptCalls?: number };
+    const state = window as Window & { __installPromptCalls?: number; __spa?: boolean };
     state.__installPromptCalls = 0;
+    state.__spa = true;
     const event = Object.assign(new Event("beforeinstallprompt", { cancelable: true }), {
       prompt: () => {
         state.__installPromptCalls = (state.__installPromptCalls ?? 0) + 1;
@@ -75,6 +85,7 @@ test("다른 화면에서 포착한 설치 이벤트를 설치 화면에서 한 
     window.dispatchEvent(event);
   });
   await page.locator('a[href="/install"]').first().click();
+  expect(await page.evaluate(() => (window as Window & { __spa?: boolean }).__spa)).toBe(true);
   await page.getByRole("button", { name: "PC에 설치하기" }).click();
 
   expect(

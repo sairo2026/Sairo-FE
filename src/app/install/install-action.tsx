@@ -23,16 +23,18 @@ export function InstallAction() {
   const [accepted, setAccepted] = useState(false);
   const acceptedTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const installedRef = useRef(false);
-  const startedFromPage = useRef(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const focusStatusAfterInstall = useRef(false);
   const statusRef = useRef<HTMLParagraphElement>(null);
   const standalone = useSyncExternalStore(subscribeToDisplayMode, isStandalone, () => false);
 
   useEffect(() => {
-    if (installed && startedFromPage.current) statusRef.current?.focus();
+    if (installed && focusStatusAfterInstall.current) statusRef.current?.focus();
   }, [installed]);
 
   useEffect(() => {
     const onInstalled = () => {
+      focusStatusAfterInstall.current = document.activeElement === buttonRef.current;
       installedRef.current = true;
       if (acceptedTimeout.current) clearTimeout(acceptedTimeout.current);
       setInstalled(true);
@@ -58,6 +60,7 @@ export function InstallAction() {
     <>
       {!installed && (
         <button
+          ref={buttonRef}
           type="button"
           aria-disabled={installing || accepted}
           aria-busy={installing || accepted}
@@ -69,7 +72,6 @@ export function InstallAction() {
               setMessage("Chrome·Edge 주소창의 설치 아이콘이나 메뉴의 앱 설치를 선택해 주세요.");
               return;
             }
-            startedFromPage.current = true;
             setInstalling(true);
             setMessage("");
             try {
