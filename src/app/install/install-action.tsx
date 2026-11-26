@@ -75,7 +75,9 @@ export function InstallAction() {
             if (installing || accepted) return;
             const event = takeInstallPrompt();
             if (!event) {
-              showMessage("Chrome·Edge 주소창의 설치 아이콘이나 메뉴의 앱 설치를 선택해 주세요.");
+              showMessage(
+                "이미 설치했다면 주소창의 ‘앱에서 열기’를 눌러 주세요. 처음 설치한다면 주소창의 설치 아이콘이나 Chrome·Edge 메뉴의 앱 설치를 선택해 주세요.",
+              );
               return;
             }
             setInstalling(true);

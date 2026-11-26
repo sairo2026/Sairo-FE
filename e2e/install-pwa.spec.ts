@@ -14,6 +14,10 @@ test("PC 설치 안내와 설치 가능한 manifest를 제공한다", async ({ p
     "href",
     "/signup",
   );
+  await page.getByRole("button", { name: "PC에 설치하기" }).click();
+  await expect(page.getByRole("status")).toContainText("앱에서 열기");
+  await expect(page.getByRole("status")).toContainText("설치 아이콘");
+  await expect(page.getByRole("status")).toContainText("앱 설치");
 
   const manifestHref = await page.locator('link[rel="manifest"]').getAttribute("href");
   if (!manifestHref) throw new Error("PWA manifest 링크가 없습니다.");
