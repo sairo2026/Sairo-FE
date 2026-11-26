@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type {
   PublicConfirmedVisitResponse,
   PublicVisitLinkResponse,
@@ -21,6 +21,7 @@ import { normalizeLinkToken } from "@/shared/lib/link-token";
 import {
   fetchCustomerConfirmed,
   fetchCustomerLink,
+  previewBrowserReusableCustomerTimes,
   previewReusableCustomerTimes,
   submitCustomerTimes,
 } from "../api/follow.api";
@@ -117,6 +118,43 @@ function TimeForm({ token, link }: { token: string; link: PublicVisitLinkRespons
   const [previousLink, setPreviousLink] = useState("");
   const [reuseInputError, setReuseInputError] = useState<string>();
   const [reuseNotice, setReuseNotice] = useState<string>();
+  const autoApplied = useRef(false);
+  const autoRequested = useRef(false);
+  const userChangedTimes = useRef(false);
+  const userChangedDate = useRef(false);
+  const submissionStarted = useRef(false);
+  const isClosed = !acceptsCustomerResponse(link.coordinationStatus, link.linkExpiresAt);
+  const isResubmit = initial.length > 0;
+  const { mutate: loadBrowserTimes } = useMutation({
+    mutationFn: () => previewBrowserReusableCustomerTimes(token),
+    onSuccess: ({ timeSlots }) => {
+      if (autoApplied.current || userChangedTimes.current || submissionStarted.current) return;
+      autoApplied.current = true;
+      const blocks = safeReusableBlocks(timeSlots);
+      if (Object.keys(blocks).length === 0) return;
+      setSelected((current) => {
+        const merged = { ...current };
+        for (const [date, minutes] of Object.entries(blocks)) {
+          merged[date] = [...new Set([...(current[date] ?? []), ...minutes])].sort(
+            (left, right) => left - right,
+          );
+        }
+        return merged;
+      });
+      const firstReusableDate = Object.keys(blocks).sort()[0];
+      if (firstReusableDate && !userChangedDate.current) setActiveDate(firstReusableDate);
+      setErrors([]);
+      setFormError(undefined);
+      setReuseNotice(
+        "이 브라우저에서 이전에 확인한 유효한 시간을 표시했습니다. 이번 요청에 맞게 확인·수정한 뒤 제출해 주세요.",
+      );
+    },
+  });
+  useEffect(() => {
+    if (isClosed || isResubmit || autoRequested.current) return;
+    autoRequested.current = true;
+    loadBrowserTimes();
+  }, [isClosed, isResubmit, loadBrowserTimes]);
   const reuse = useMutation({
     mutationFn: (previousToken: string) => previewReusableCustomerTimes(token, previousToken),
     onSuccess: ({ timeSlots }) => {
@@ -161,11 +199,10 @@ function TimeForm({ token, link }: { token: string; link: PublicVisitLinkRespons
       }
     },
   });
-  const isClosed = !acceptsCustomerResponse(link.coordinationStatus, link.linkExpiresAt);
-  const isResubmit = initial.length > 0;
   const isWithdrawAll = isResubmit && drafts.length === 0;
 
   function toggle(date: string, minutes: number) {
+    userChangedTimes.current = true;
     setSelected((current) => {
       const set = new Set(current[date] ?? []);
       if (set.has(minutes)) set.delete(minutes);
@@ -185,10 +222,14 @@ function TimeForm({ token, link }: { token: string; link: PublicVisitLinkRespons
       Object.values(result.errors).filter((message): message is string => Boolean(message)),
     );
     setFormError(result.formError);
-    if (!result.formError && Object.keys(result.errors).length === 0) mutation.mutate();
+    if (!result.formError && Object.keys(result.errors).length === 0) {
+      submissionStarted.current = true;
+      mutation.mutate();
+    }
   }
 
   function loadPrevious() {
+    userChangedTimes.current = true;
     const previous = previousCustomerToken(previousLink, window.location.origin);
     if (!previous || previous === token) {
       setReuseInputError("이전 방문 조율 링크를 확인해 주세요.");
@@ -261,7 +302,10 @@ function TimeForm({ token, link }: { token: string; link: PublicVisitLinkRespons
         <CustomerTimeSelect
           dates={dates}
           activeDate={activeDate}
-          onActiveDateChange={setActiveDate}
+          onActiveDateChange={(date) => {
+            userChangedDate.current = true;
+            setActiveDate(date);
+          }}
           selected={selected}
           onToggle={toggle}
           isPast={isPast}
