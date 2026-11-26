@@ -82,6 +82,38 @@ describe("automatic browser reuse", () => {
     expect(screen.getByText(/10:00~11:00/)).not.toBeNull();
     expect(submissions).toBe(0);
   });
+
+  it("clears an empty-selection error when a slow reuse preview arrives", async () => {
+    let releasePreview: () => void = () => undefined;
+    let markRequested: () => void = () => undefined;
+    const requested = new Promise<void>((resolve) => {
+      markRequested = resolve;
+    });
+    const blocked = new Promise<void>((resolve) => {
+      releasePreview = resolve;
+    });
+    server.use(
+      http.get("*/api/public/customer-visit-links/:token/reusable-times", async () => {
+        markRequested();
+        await blocked;
+        return HttpResponse.json({
+          timeSlots: [
+            {
+              startsAt: "2026-11-12T10:00:00+09:00",
+              endsAt: "2026-11-12T11:00:00+09:00",
+            },
+          ],
+        });
+      }),
+    );
+    renderLink();
+    await requested;
+    await userEvent.click(screen.getByRole("button", { name: "가능한 시간 제출" }));
+    expect(screen.getByText("가능한 시간을 한 개 이상 선택해 주세요.")).not.toBeNull();
+    releasePreview();
+    await screen.findByText(/이 브라우저에서 이전에 확인한 유효한 시간을 표시했습니다/);
+    expect(screen.queryByText("가능한 시간을 한 개 이상 선택해 주세요.")).toBeNull();
+  });
 });
 
 const WINDOW = { startDate: "2026-11-11", endDate: "2026-11-20" };

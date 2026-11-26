@@ -141,6 +141,8 @@ function TimeForm({ token, link }: { token: string; link: PublicVisitLinkRespons
       });
       const firstReusableDate = Object.keys(blocks).sort()[0];
       if (firstReusableDate) setActiveDate(firstReusableDate);
+      setErrors([]);
+      setFormError(undefined);
       setReuseNotice(
         "이 브라우저에서 이전에 확인한 유효한 시간을 표시했습니다. 이번 요청에 맞게 확인·수정한 뒤 제출해 주세요.",
       );
