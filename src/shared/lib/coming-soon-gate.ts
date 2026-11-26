@@ -35,6 +35,7 @@ export function isReviewMode(env: GateEnv): boolean {
 const REVIEW_PAGE_ROOTS: readonly string[] = [
   "/home",
   "/install",
+  "/welcome",
   "/login",
   "/signup",
   "/password",
