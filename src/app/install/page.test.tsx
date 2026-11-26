@@ -59,6 +59,19 @@ describe("PC 설치 화면", () => {
     expect(screen.getByRole("status").textContent).toContain("주소창의 설치 아이콘");
   });
 
+  it("같은 설치 안내를 다시 요청해도 상태 메시지를 새로 알린다", async () => {
+    const user = userEvent.setup();
+    render(<InstallPage />);
+    const button = screen.getByRole("button", { name: "PC에 설치하기" });
+
+    await user.click(button);
+    const firstAnnouncement = screen.getByRole("status").firstElementChild;
+    await user.click(button);
+
+    expect(screen.getByRole("status").firstElementChild).not.toBe(firstAnnouncement);
+    expect(screen.getByRole("status").textContent).toContain("주소창의 설치 아이콘");
+  });
+
   it("설치 창을 닫으면 실패로 오해시키지 않는다", async () => {
     const user = userEvent.setup();
     const openPrompt = vi.fn().mockResolvedValue(undefined);

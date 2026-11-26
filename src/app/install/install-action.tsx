@@ -19,6 +19,7 @@ function isStandalone() {
 export function InstallAction() {
   const [installed, setInstalled] = useState(false);
   const [message, setMessage] = useState("");
+  const [messageSequence, setMessageSequence] = useState(0);
   const [installing, setInstalling] = useState(false);
   const [accepted, setAccepted] = useState(false);
   const acceptedTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -27,6 +28,11 @@ export function InstallAction() {
   const focusStatusAfterInstall = useRef(false);
   const statusRef = useRef<HTMLParagraphElement>(null);
   const standalone = useSyncExternalStore(subscribeToDisplayMode, isStandalone, () => false);
+
+  const showMessage = (value: string) => {
+    setMessage(value);
+    setMessageSequence((sequence) => sequence + 1);
+  };
 
   useEffect(() => {
     if (installed && focusStatusAfterInstall.current) statusRef.current?.focus();
@@ -69,7 +75,7 @@ export function InstallAction() {
             if (installing || accepted) return;
             const event = takeInstallPrompt();
             if (!event) {
-              setMessage("Chrome·Edge 주소창의 설치 아이콘이나 메뉴의 앱 설치를 선택해 주세요.");
+              showMessage("Chrome·Edge 주소창의 설치 아이콘이나 메뉴의 앱 설치를 선택해 주세요.");
               return;
             }
             setInstalling(true);
@@ -78,29 +84,29 @@ export function InstallAction() {
               await event.prompt();
               const choice = await event.userChoice;
               if (choice.outcome === "dismissed") {
-                setMessage("나중에 주소창의 설치 아이콘으로 설치할 수 있어요.");
+                showMessage("나중에 주소창의 설치 아이콘으로 설치할 수 있어요.");
               } else {
                 if (!installedRef.current) {
                   setAccepted(true);
-                  setMessage(
+                  showMessage(
                     "설치가 진행 중이에요. 완료되지 않으면 브라우저 메뉴를 확인해 주세요.",
                   );
                   acceptedTimeout.current = setTimeout(() => {
                     setAccepted(false);
-                    setMessage(
+                    showMessage(
                       "설치가 완료되지 않았다면 브라우저 메뉴에서 앱 설치를 확인해 주세요.",
                     );
                   }, 10000);
                 }
               }
             } catch {
-              setMessage("설치 창을 열지 못했어요. Chrome·Edge 메뉴의 앱 설치를 선택해 주세요.");
+              showMessage("설치 창을 열지 못했어요. Chrome·Edge 메뉴의 앱 설치를 선택해 주세요.");
             } finally {
               setInstalling(false);
             }
           }}
         >
-          {installing || accepted ? "설치 진행 중" : "PC에 설치하기"}
+          {installing ? "설치 확인 중" : accepted ? "설치 진행 중" : "PC에 설치하기"}
         </button>
       )}
       <p
@@ -109,7 +115,9 @@ export function InstallAction() {
         tabIndex={installed ? -1 : undefined}
         className={message || installed ? "mt-3 break-keep text-body text-ink-2" : "sr-only"}
       >
-        {installed ? "설치된 사이로 앱에서 이용할 수 있어요." : message}
+        <span key={messageSequence}>
+          {installed ? "설치된 사이로 앱에서 이용할 수 있어요." : message}
+        </span>
       </p>
     </>
   );
