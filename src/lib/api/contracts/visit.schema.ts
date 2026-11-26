@@ -146,6 +146,7 @@ export const VisitCoordinationListResponseSchema = z.object({
   page: z.number(),
   size: z.number(),
   totalElements: z.number(),
+  filteredCustomerId: z.number().nullable().optional(),
 });
 export type VisitCoordinationListResponse = z.infer<typeof VisitCoordinationListResponseSchema>;
 

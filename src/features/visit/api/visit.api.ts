@@ -28,7 +28,7 @@ function ifMatch(version: number) {
   return { "If-Match": String(version) };
 }
 
-export type VisitListParams = { status?: string; page: number; size: number };
+export type VisitListParams = { status?: string; customerId?: number; page: number; size: number };
 
 export function listCoordinations(params: VisitListParams) {
   return apiFetch(withQuery("/api/visit-coordinations", { ...params }), {
