@@ -71,9 +71,9 @@ export function CoordinationCreateScreen({
   const [pickedCandidates, setCandidates] = useState<CandidateChoice[] | null>(null);
   const customer = pickedCustomer ?? preselectedCustomer;
   const existing = useCoordinationList({ page: 0, size: 100 });
-  const ongoingCount = customer
+  const ongoing = customer
     ? (existing.data?.items ?? []).filter(
-        (item) => item.customerName === customer.name && ONGOING_STATUSES.includes(item.status),
+        (item) => item.customerId === customer.customerId && ONGOING_STATUSES.includes(item.status),
       ).length
     : 0;
   const candidates = pickedCandidates ?? (preselectedProperty ? [preselectedProperty] : []);
@@ -169,9 +169,12 @@ export function CoordinationCreateScreen({
           }}
           error={errors.customer}
         />
-        {ongoingCount > 0 ? (
+        {ongoing > 0 ? (
           <FormNotice>
-            {`이 고객 이름으로 진행 중인 조율이 ${ongoingCount}건 있습니다. 같은 고객이면 새로 만들기 전에 방문 조율 목록에서 기존 조율에 후보 매물을 추가할 수 있는지 확인해 주세요.`}
+            {`최근 조율 목록에 이 고객의 진행 중인 조율이 ${ongoing}건 있습니다. 새로 만들기 전에 기존 조율에 후보 매물을 추가할 수 있는지 확인해 주세요.`}{" "}
+            <Link href="/coordinations" className="font-semibold underline underline-offset-2">
+              기존 조율 보기
+            </Link>
           </FormNotice>
         ) : null}
         <CandidatePicker

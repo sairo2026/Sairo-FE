@@ -14,7 +14,12 @@ import {
   resetMockPropertyState,
   setMockPropertyState,
 } from "@/mocks/handlers/property";
-import { getMockVisitState, resetMockVisitState, setMockVisitState } from "@/mocks/handlers/visit";
+import {
+  buildMockCoordination,
+  getMockVisitState,
+  resetMockVisitState,
+  setMockVisitState,
+} from "@/mocks/handlers/visit";
 import { server, startMockServer } from "@/mocks/server";
 import { renderOffice } from "@/shared/testing/office-render";
 import { addDays, todayKst } from "../model/time";
@@ -65,13 +70,27 @@ async function pickBasics(user: ReturnType<typeof userEvent.setup>) {
 }
 
 describe("방문 조율 생성", () => {
-  it("같은 이름의 고객에게 진행 중인 조율이 있으면 만들기 전에 알려준다", async () => {
+  it("같은 고객 ID의 진행 중인 조율을 안내하고 기존 목록으로 이동할 수 있다", async () => {
     const user = userEvent.setup();
     renderOffice(<CoordinationCreateScreen />, { role: "OWNER" });
     await user.click((await screen.findAllByRole("radio", { name: /김수요/ }))[0] as HTMLElement);
-    expect(
-      await screen.findByText(/이 고객 이름으로 진행 중인 조율이 \d+건 있습니다/),
-    ).not.toBeNull();
+    expect(await screen.findByText(/이 고객의 진행 중인 조율이 \d+건 있습니다/)).not.toBeNull();
+    expect(screen.getByRole("link", { name: "기존 조율 보기" }).getAttribute("href")).toBe(
+      "/coordinations",
+    );
+  });
+
+  it("동명이인의 다른 고객 ID에는 기존 조율 안내를 표시하지 않는다", async () => {
+    setMockVisitState({
+      coordinations: [
+        buildMockCoordination({ coordinationId: 999, customerId: 999, customerName: "김수요" }),
+      ],
+    });
+    const user = userEvent.setup();
+    renderOffice(<CoordinationCreateScreen />, { role: "OWNER" });
+    await user.click((await screen.findAllByRole("radio", { name: /김수요/ }))[0] as HTMLElement);
+    await screen.findByRole("checkbox", { name: "국민대 앞 아파트 선택" });
+    expect(screen.queryByRole("link", { name: "기존 조율 보기" })).toBeNull();
   });
 
   it("고객과 후보 매물을 고르지 않으면 제출하지 않고 안내한다", async () => {

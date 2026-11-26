@@ -258,6 +258,7 @@ function candidateFor(
 function toListItem(item: MockCoordination) {
   return {
     coordinationId: item.coordinationId,
+    customerId: item.customerId,
     customerName: item.customerName,
     candidatePropertyCount: item.candidateProperties.length,
     managerName: item.managerName,

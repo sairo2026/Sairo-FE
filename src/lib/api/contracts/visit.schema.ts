@@ -115,6 +115,7 @@ export const VisitCoordinationListResponseSchema = z.object({
   items: z.array(
     z.object({
       coordinationId: z.number(),
+      customerId: z.number().optional(),
       customerName: z.string(),
       candidatePropertyCount: z.number(),
       managerName: z.string(),
