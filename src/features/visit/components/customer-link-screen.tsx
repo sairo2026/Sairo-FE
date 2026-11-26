@@ -121,12 +121,14 @@ function TimeForm({ token, link }: { token: string; link: PublicVisitLinkRespons
   const autoApplied = useRef(false);
   const autoRequested = useRef(false);
   const userChangedTimes = useRef(false);
+  const userChangedDate = useRef(false);
+  const submissionStarted = useRef(false);
   const isClosed = !acceptsCustomerResponse(link.coordinationStatus, link.linkExpiresAt);
   const isResubmit = initial.length > 0;
   const { mutate: loadBrowserTimes } = useMutation({
     mutationFn: () => previewBrowserReusableCustomerTimes(token),
     onSuccess: ({ timeSlots }) => {
-      if (autoApplied.current || userChangedTimes.current) return;
+      if (autoApplied.current || userChangedTimes.current || submissionStarted.current) return;
       autoApplied.current = true;
       const blocks = safeReusableBlocks(timeSlots);
       if (Object.keys(blocks).length === 0) return;
@@ -140,7 +142,7 @@ function TimeForm({ token, link }: { token: string; link: PublicVisitLinkRespons
         return merged;
       });
       const firstReusableDate = Object.keys(blocks).sort()[0];
-      if (firstReusableDate) setActiveDate(firstReusableDate);
+      if (firstReusableDate && !userChangedDate.current) setActiveDate(firstReusableDate);
       setErrors([]);
       setFormError(undefined);
       setReuseNotice(
@@ -220,7 +222,10 @@ function TimeForm({ token, link }: { token: string; link: PublicVisitLinkRespons
       Object.values(result.errors).filter((message): message is string => Boolean(message)),
     );
     setFormError(result.formError);
-    if (!result.formError && Object.keys(result.errors).length === 0) mutation.mutate();
+    if (!result.formError && Object.keys(result.errors).length === 0) {
+      submissionStarted.current = true;
+      mutation.mutate();
+    }
   }
 
   function loadPrevious() {
@@ -297,7 +302,10 @@ function TimeForm({ token, link }: { token: string; link: PublicVisitLinkRespons
         <CustomerTimeSelect
           dates={dates}
           activeDate={activeDate}
-          onActiveDateChange={setActiveDate}
+          onActiveDateChange={(date) => {
+            userChangedDate.current = true;
+            setActiveDate(date);
+          }}
           selected={selected}
           onToggle={toggle}
           isPast={isPast}

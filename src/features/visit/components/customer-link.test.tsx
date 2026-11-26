@@ -108,11 +108,14 @@ describe("automatic browser reuse", () => {
     );
     renderLink();
     await requested;
+    const browsedDate = screen.getByRole("button", { name: /11월 13일/ });
+    await userEvent.click(browsedDate);
     await userEvent.click(screen.getByRole("button", { name: "가능한 시간 제출" }));
     expect(screen.getByText("가능한 시간을 한 개 이상 선택해 주세요.")).not.toBeNull();
     releasePreview();
     await screen.findByText(/이 브라우저에서 이전에 확인한 유효한 시간을 표시했습니다/);
     expect(screen.queryByText("가능한 시간을 한 개 이상 선택해 주세요.")).toBeNull();
+    expect(browsedDate.getAttribute("aria-pressed")).toBe("true");
   });
 });
 
