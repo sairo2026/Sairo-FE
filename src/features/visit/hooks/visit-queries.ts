@@ -22,8 +22,12 @@ export const visitKeys = {
     ["visit", "approver-link", propertyId, approvalId] as const,
 };
 
-export function useCoordinationList(params: VisitListParams) {
-  return useQuery({ queryKey: visitKeys.list(params), queryFn: () => listCoordinations(params) });
+export function useCoordinationList(params: VisitListParams, enabled = true) {
+  return useQuery({
+    queryKey: visitKeys.list(params),
+    queryFn: () => listCoordinations(params),
+    enabled,
+  });
 }
 
 export function useCoordinationDetail(coordinationId: number) {
