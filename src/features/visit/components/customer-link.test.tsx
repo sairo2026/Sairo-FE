@@ -49,6 +49,41 @@ function renderLink(token: string | undefined = MOCK_CUSTOMER_TOKEN) {
   );
 }
 
+describe("automatic browser reuse", () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-11-10T00:00:00+09:00"));
+  });
+
+  afterEach(() => vi.useRealTimers());
+
+  it("shows previously confirmed times for review without submitting the new request", async () => {
+    let submissions = 0;
+    server.use(
+      http.get("*/api/public/customer-visit-links/:token/reusable-times", () =>
+        HttpResponse.json({
+          timeSlots: [
+            {
+              startsAt: "2026-11-12T10:00:00+09:00",
+              endsAt: "2026-11-12T11:00:00+09:00",
+            },
+          ],
+        }),
+      ),
+      http.post("*/api/public/customer-visit-links/:token/available-times", () => {
+        submissions += 1;
+        return HttpResponse.json({});
+      }),
+    );
+    renderLink();
+    expect(
+      await screen.findByText(/이 브라우저에서 이전에 확인한 유효한 시간을 표시했습니다/),
+    ).not.toBeNull();
+    expect(screen.getByText(/10:00~11:00/)).not.toBeNull();
+    expect(submissions).toBe(0);
+  });
+});
+
 const WINDOW = { startDate: "2026-11-11", endDate: "2026-11-20" };
 const NOW = new Date("2026-11-10T00:00:00Z");
 

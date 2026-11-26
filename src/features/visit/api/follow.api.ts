@@ -173,6 +173,13 @@ export function previewReusableCustomerTimes(token: string, previousToken: strin
   });
 }
 
+export function previewBrowserReusableCustomerTimes(token: string) {
+  return apiFetch(`${customerBase(token)}/reusable-times`, {
+    retry: false,
+    schema: ReusableTimesSchema,
+  });
+}
+
 export function submitCustomerTimes(token: string, request: AvailableTimesSubmitRequest) {
   return apiFetch(`${customerBase(token)}/available-times`, {
     method: "POST",
