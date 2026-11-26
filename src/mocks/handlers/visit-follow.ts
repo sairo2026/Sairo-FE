@@ -13,6 +13,7 @@ import type { MockCoordination } from "./visit";
 const NOW = "2026-11-10T09:00:00+09:00";
 
 export const MOCK_CUSTOMER_TOKEN = "customer-token-0000001";
+export const MOCK_PREVIOUS_CUSTOMER_TOKEN = "previous-customer-token-0000001";
 export const MOCK_CUSTOMER_EXPIRED_TOKEN = "customer-expired-0000001";
 export const MOCK_CUSTOMER_NOTICE_VERSION = "visit-customer-v1";
 
@@ -637,6 +638,27 @@ export const visitFollowHandlers = [
       submittedTimeSlots: state.customerSubmitted,
     });
   }),
+
+  http.post(
+    "/api/public/customer-visit-links/:token/reusable-times",
+    async ({ params, request }) => {
+      const body = (await request.json()) as { previousToken?: string };
+      if (
+        params.token !== MOCK_CUSTOMER_TOKEN ||
+        body.previousToken !== MOCK_PREVIOUS_CUSTOMER_TOKEN
+      ) {
+        return errorResponse(404, "PUBLIC_LINK_NOT_FOUND", "링크를 찾을 수 없습니다.");
+      }
+      return HttpResponse.json({
+        timeSlots: [
+          {
+            startsAt: "2026-11-12T10:00:00+09:00",
+            endsAt: "2026-11-12T11:00:00+09:00",
+          },
+        ],
+      });
+    },
+  ),
 
   http.post(
     "/api/public/customer-visit-links/:token/available-times",

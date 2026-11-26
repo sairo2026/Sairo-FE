@@ -18,7 +18,12 @@ import { Tabs } from "@/shared/components/ui/tabs";
 import { cn } from "@/shared/lib/cn";
 import { formatSeoulDateTime } from "@/shared/lib/format";
 import { normalizeLinkToken } from "@/shared/lib/link-token";
-import { fetchCustomerConfirmed, fetchCustomerLink, submitCustomerTimes } from "../api/follow.api";
+import {
+  fetchCustomerConfirmed,
+  fetchCustomerLink,
+  previewReusableCustomerTimes,
+  submitCustomerTimes,
+} from "../api/follow.api";
 import {
   LEGAL_ROLE_LABEL,
   PUBLIC_VISIT_STATE_LABEL,
@@ -41,6 +46,7 @@ import {
 import type { SelectedBlocks } from "../model/customer-times";
 import { toKstIso } from "../model/time";
 import { CustomerTimeSelect } from "./customer-time-select";
+import { previousCustomerToken, safeReusableBlocks } from "../model/reuse-link";
 
 const EMPTY_NOTICE_CONTEXT: LinkNoticeContext = {
   officeName: null,
@@ -108,6 +114,39 @@ function TimeForm({ token, link }: { token: string; link: PublicVisitLinkRespons
   });
   const [errors, setErrors] = useState<string[]>([]);
   const [formError, setFormError] = useState<string>();
+  const [previousLink, setPreviousLink] = useState("");
+  const [reuseInputError, setReuseInputError] = useState<string>();
+  const [reuseNotice, setReuseNotice] = useState<string>();
+  const reuse = useMutation({
+    mutationFn: (previousToken: string) => previewReusableCustomerTimes(token, previousToken),
+    onSuccess: ({ timeSlots }) => {
+      const blocks = safeReusableBlocks(timeSlots);
+      setSelected((current) => {
+        const merged = { ...current };
+        for (const [date, minutes] of Object.entries(blocks)) {
+          merged[date] = [...new Set([...(current[date] ?? []), ...minutes])].sort(
+            (left, right) => left - right,
+          );
+        }
+        return merged;
+      });
+      const firstReusableDate = Object.keys(blocks).sort()[0];
+      if (firstReusableDate) setActiveDate(firstReusableDate);
+      setPreviousLink("");
+      setReuseInputError(undefined);
+      setErrors([]);
+      setFormError(undefined);
+      setReuseNotice(
+        Object.keys(blocks).length > 0
+          ? "표시 가능한 이전 시간을 현재 선택에 추가했습니다. 일부 시간은 단위가 달라 제외될 수 있습니다. 확인·수정한 뒤 제출해 주세요."
+          : "이번 방문 기간에 화면에서 재사용할 수 있는 시간이 없습니다. 새 시간을 선택해 주세요.",
+      );
+    },
+    onError: () => {
+      setPreviousLink("");
+      setReuseNotice(undefined);
+    },
+  });
   const drafts = blocksToDrafts(selected);
   const mutation = useMutation({
     mutationFn: () =>
@@ -149,6 +188,16 @@ function TimeForm({ token, link }: { token: string; link: PublicVisitLinkRespons
     if (!result.formError && Object.keys(result.errors).length === 0) mutation.mutate();
   }
 
+  function loadPrevious() {
+    const previous = previousCustomerToken(previousLink, window.location.origin);
+    if (!previous || previous === token) {
+      setReuseInputError("이전 방문 조율 링크를 확인해 주세요.");
+      return;
+    }
+    setReuseInputError(undefined);
+    reuse.mutate(previous);
+  }
+
   function isPast(date: string, minutes: number): boolean {
     const hour = String(Math.floor(minutes / 60)).padStart(2, "0");
     const minute = String(minutes % 60).padStart(2, "0");
@@ -157,6 +206,51 @@ function TimeForm({ token, link }: { token: string; link: PublicVisitLinkRespons
 
   return (
     <div className="flex flex-col gap-4">
+      {!isClosed && !isResubmit ? (
+        <section
+          aria-labelledby="reuse-time-title"
+          className={cn(SURFACE_CARD, "flex flex-col gap-3")}
+        >
+          <h2 id="reuse-time-title" className="text-body font-semibold text-ink">
+            이전 시간 불러오기
+          </h2>
+          <p className="text-caption text-ink-2">
+            같은 사무소에서 받은 이전 방문 링크가 아직 열려 있다면, 유효한 시간만 추가할 수
+            있습니다. 이번 요청에 제출하기 전에 확인·수정해 주세요.
+          </p>
+          <label htmlFor="previous-visit-link" className="text-caption font-medium text-ink">
+            이전 방문 조율 링크
+          </label>
+          <input
+            id="previous-visit-link"
+            type="password"
+            autoComplete="off"
+            value={previousLink}
+            onChange={(event) => setPreviousLink(event.target.value)}
+            className="w-full rounded-control border border-line bg-white px-3.5 py-3 text-body text-ink"
+            placeholder="이전 링크 붙여넣기"
+          />
+          <Button
+            disabled={!previousLink.trim()}
+            isLoading={reuse.isPending}
+            onClick={loadPrevious}
+          >
+            시간 불러오기
+          </Button>
+          {reuseInputError ? <FormAlert>{reuseInputError}</FormAlert> : null}
+          {reuse.isError ? (
+            <FormAlert>
+              {isApiCode(reuse.error, "PUBLIC_LINK_EXPIRED")
+                ? "현재 또는 이전 링크가 만료됐습니다. 지금 링크도 마감됐다면 사무소에 문의해 주세요."
+                : describeVisitError(
+                    reuse.error,
+                    "이전 링크를 확인할 수 없습니다. 새 시간을 선택해 주세요.",
+                  )}
+            </FormAlert>
+          ) : null}
+          {reuseNotice ? <FormNotice>{reuseNotice}</FormNotice> : null}
+        </section>
+      ) : null}
       <section
         aria-labelledby="customer-time-title"
         className={cn(SURFACE_CARD, "flex flex-col gap-3")}
