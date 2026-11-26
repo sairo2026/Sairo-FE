@@ -60,6 +60,14 @@ test("좁은 PC 창에서도 설치 안내가 잘리지 않는다", async ({ pag
   expect(overflow).toBe(false);
 });
 
+test("설치 화면에서 처음 화면으로 돌아갈 수 있다", async ({ page }) => {
+  await page.goto("/install");
+  await page.getByRole("link", { name: "처음 화면으로 돌아가기" }).click();
+  await expect(page).toHaveURL(/\/welcome$/);
+  await expect(page.getByRole("link", { name: "PC에 설치해 사용하기" })).toBeVisible();
+  await expect(page.locator('link[rel="canonical"]')).toHaveCount(0);
+});
+
 test("다른 화면에서 포착한 설치 이벤트를 설치 화면에서 한 번만 사용한다", async ({
   page,
   browserName,

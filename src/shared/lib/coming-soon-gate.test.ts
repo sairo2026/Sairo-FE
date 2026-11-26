@@ -73,6 +73,7 @@ describe("심사 모드", () => {
   it("심사 모드가 아니면 결제 흐름 경로를 계속 막는다", () => {
     expect(isGateOpenPath("/login", "GET", {})).toBe(false);
     expect(isGateOpenPath("/install", "GET", {})).toBe(false);
+    expect(isGateOpenPath("/welcome", "GET", {})).toBe(false);
     expect(isGateOpenPath("/manifest.webmanifest", "GET", {})).toBe(true);
     expect(isGateOpenPath("/billing/card", "GET", {})).toBe(false);
     expect(isGateOpenPath("/api/auth/login", "POST", {})).toBe(false);
@@ -83,6 +84,7 @@ describe("심사 모드", () => {
     "/login",
     "/login/email",
     "/install",
+    "/welcome",
     "/signup",
     "/signup/email",
     "/office/register",
@@ -118,6 +120,7 @@ describe("첫 화면에서 업무 홈으로 보내는 조건", () => {
     expect(shouldSendToWorkHome("/", true)).toBe(true);
     expect(shouldSendToWorkHome("/", false)).toBe(false);
     expect(shouldSendToWorkHome("/home", true)).toBe(false);
+    expect(shouldSendToWorkHome("/welcome", true)).toBe(false);
     expect(shouldSendToWorkHome("/pricing", true)).toBe(false);
   });
 });

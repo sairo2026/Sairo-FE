@@ -16,6 +16,12 @@ describe("PC 설치 화면", () => {
 
     expect(screen.getByRole("heading", { name: "사이로 시작하기" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "PC에 설치하기" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "처음 화면으로 돌아가기" }).getAttribute("href")).toBe(
+      "/welcome",
+    );
+    expect(screen.getByRole("link", { name: "사이로 첫 화면" }).getAttribute("href")).toBe(
+      "/welcome",
+    );
     expect(screen.getByRole("link", { name: "로그인하러 가기" }).getAttribute("href")).toBe(
       "/login",
     );
