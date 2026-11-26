@@ -5,6 +5,7 @@ import { http } from "msw";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { errorResponse } from "@/mocks/error-responses";
 import {
+  buildMockCustomer,
   getMockCustomerState,
   resetMockCustomerState,
   setMockCustomerState,
@@ -81,6 +82,12 @@ describe("방문 조율 생성", () => {
   });
 
   it("동명이인의 다른 고객 ID에는 기존 조율 안내를 표시하지 않는다", async () => {
+    setMockCustomerState({
+      customers: [
+        buildMockCustomer({ customerId: 301, name: "김수요" }),
+        buildMockCustomer({ customerId: 999, name: "김수요", phone: "010-0000-0999" }),
+      ],
+    });
     setMockVisitState({
       coordinations: [
         buildMockCoordination({ coordinationId: 999, customerId: 999, customerName: "김수요" }),
@@ -88,8 +95,10 @@ describe("방문 조율 생성", () => {
     });
     const user = userEvent.setup();
     renderOffice(<CoordinationCreateScreen />, { role: "OWNER" });
-    await user.click((await screen.findAllByRole("radio", { name: /김수요/ }))[0] as HTMLElement);
-    await screen.findByRole("checkbox", { name: "국민대 앞 아파트 선택" });
+    const sameNameCustomers = await screen.findAllByRole("radio", { name: /김수요/ });
+    await user.click(sameNameCustomers[1] as HTMLElement);
+    expect(await screen.findByRole("link", { name: "기존 조율 보기" })).not.toBeNull();
+    await user.click(sameNameCustomers[0] as HTMLElement);
     expect(screen.queryByRole("link", { name: "기존 조율 보기" })).toBeNull();
   });
 
