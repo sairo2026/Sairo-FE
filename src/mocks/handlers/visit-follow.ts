@@ -639,6 +639,10 @@ export const visitFollowHandlers = [
     });
   }),
 
+  http.get("/api/public/customer-visit-links/:token/reusable-times", () =>
+    HttpResponse.json({ timeSlots: [] }),
+  ),
+
   http.post(
     "/api/public/customer-visit-links/:token/reusable-times",
     async ({ params, request }) => {
