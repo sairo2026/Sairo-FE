@@ -314,11 +314,16 @@ export const visitHandlers = [
   http.get("/api/visit-coordinations", ({ request }) => {
     const url = new URL(request.url);
     const status = url.searchParams.get("status");
+    const customerId = url.searchParams.get("customerId");
     const mine = state.coordinations.filter(visible);
     const counts = Object.fromEntries(
       STATUS_KEYS.map((key) => [key, mine.filter((item) => item.status === key).length]),
     ) as Record<(typeof STATUS_KEYS)[number], number>;
-    const filtered = status ? mine.filter((item) => status.split(",").includes(item.status)) : mine;
+    const filtered = mine.filter(
+      (item) =>
+        (!status || status.split(",").includes(item.status)) &&
+        (!customerId || item.customerId === Number(customerId)),
+    );
     return HttpResponse.json({
       ...pageOf(filtered.map(toListItem), url),
       statusCounts: counts,

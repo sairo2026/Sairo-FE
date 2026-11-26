@@ -70,12 +70,16 @@ export function CoordinationCreateScreen({
   const [pickedCustomer, setCustomer] = useState<{ customerId: number; name: string } | null>(null);
   const [pickedCandidates, setCandidates] = useState<CandidateChoice[] | null>(null);
   const customer = pickedCustomer ?? preselectedCustomer;
-  const existing = useCoordinationList({ page: 0, size: 100 });
-  const ongoing = customer
-    ? (existing.data?.items ?? []).filter(
-        (item) => item.customerId === customer.customerId && ONGOING_STATUSES.includes(item.status),
-      ).length
-    : 0;
+  const existing = useCoordinationList(
+    {
+      page: 0,
+      size: 25,
+      customerId: customer?.customerId,
+      status: ONGOING_STATUSES.join(","),
+    },
+    customer !== null,
+  );
+  const ongoing = existing.data?.totalElements ?? 0;
   const candidates = pickedCandidates ?? (preselectedProperty ? [preselectedProperty] : []);
   const [start, setStart] = useState(today);
   const [end, setEnd] = useState(addDays(today, 7));
@@ -171,7 +175,7 @@ export function CoordinationCreateScreen({
         />
         {ongoing > 0 ? (
           <FormNotice>
-            {`최근 조율 목록에 이 고객의 진행 중인 조율이 ${ongoing}건 있습니다. 새로 만들기 전에 기존 조율에 후보 매물을 추가할 수 있는지 확인해 주세요.`}{" "}
+            {`이 고객의 진행 중인 조율이 ${ongoing}건 있습니다. 새로 만들기 전에 기존 조율에 후보 매물을 추가할 수 있는지 확인해 주세요.`}{" "}
             <Link href="/coordinations" className="font-semibold underline underline-offset-2">
               기존 조율 보기
             </Link>
