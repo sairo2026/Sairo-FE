@@ -2,7 +2,7 @@
 import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { http } from "msw";
+import { http, HttpResponse } from "msw";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { errorResponse, mockErrors } from "@/mocks/error-responses";
 import {
@@ -127,6 +127,39 @@ describe("고객 공개 링크 화면", () => {
 
   afterEach(() => {
     vi.useRealTimers();
+  });
+
+  it("이전 링크의 유효한 시간을 불러와도 고객이 제출하기 전에는 저장하지 않는다", async () => {
+    let submissions = 0;
+    server.use(
+      http.post("*/api/public/customer-visit-links/:token/reusable-times", () =>
+        HttpResponse.json({
+          timeSlots: [
+            {
+              startsAt: "2026-11-12T10:00:00+09:00",
+              endsAt: "2026-11-12T11:00:00+09:00",
+            },
+          ],
+        }),
+      ),
+      http.post("*/api/public/customer-visit-links/:token/available-times", () => {
+        submissions += 1;
+        return HttpResponse.json({
+          coordinationId: 1,
+          responseVersion: 1,
+          respondedAt: "2026-11-10T00:00:00+09:00",
+        });
+      }),
+    );
+    renderLink();
+    const input = await screen.findByLabelText("이전 방문 조율 링크");
+    await userEvent.type(input, "abcdefghijklmnop.qrstuvwxyz");
+    await userEvent.click(screen.getByRole("button", { name: "시간 불러오기" }));
+    expect(
+      await screen.findByText(/표시 가능한 이전 시간을 현재 선택에 추가했습니다/),
+    ).not.toBeNull();
+    expect(submissions).toBe(0);
+    expect(screen.getByText(/10:00~11:00/)).not.toBeNull();
   });
 
   it("불러오는 동안 로딩을 보이고 사무소·담당자·후보 매물·개인정보 안내를 보여준다", async () => {

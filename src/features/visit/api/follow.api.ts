@@ -25,6 +25,11 @@ import type {
   VisitScheduleItemResultRequest,
 } from "@/lib/api/contracts/visit.schema";
 import { apiFetch, withQuery } from "@/shared/api/client";
+import { z } from "zod";
+
+const ReusableTimesSchema = z.object({
+  timeSlots: z.array(z.object({ startsAt: z.string(), endsAt: z.string() })),
+});
 
 /** 결과 기록·재조율·철회 접수·취소는 조율 건 version을 If-Match로 보낸다. */
 function ifMatch(version: number) {
@@ -156,6 +161,15 @@ export function fetchCustomerLink(token: string, signal?: AbortSignal) {
     signal,
     retry: false,
     schema: PublicVisitLinkResponseSchema,
+  });
+}
+
+export function previewReusableCustomerTimes(token: string, previousToken: string) {
+  return apiFetch(`${customerBase(token)}/reusable-times`, {
+    method: "POST",
+    body: { previousToken },
+    retry: false,
+    schema: ReusableTimesSchema,
   });
 }
 
