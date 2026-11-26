@@ -12,9 +12,18 @@ export default function InstallPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-surface px-4 py-8 text-ink">
       <div className="w-full max-w-xl rounded-card border border-line bg-white px-6 py-8 sm:px-10 sm:py-10">
-        <Link href="/" aria-label="사이로 첫 화면">
-          <BrandLogo className="w-28" />
-        </Link>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <Link href="/welcome" aria-label="사이로 첫 화면">
+            <BrandLogo className="w-28" />
+          </Link>
+          <Link
+            href="/welcome"
+            className="inline-flex min-h-11 items-center gap-1 whitespace-nowrap text-caption font-medium text-ink-2 hover:text-primary focus-visible:rounded-control focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >
+            <span aria-hidden="true">←</span>
+            처음 화면으로 돌아가기
+          </Link>
+        </div>
 
         <h1 className="mt-8 break-keep text-h1 font-bold">사이로 시작하기</h1>
         <p className="mt-3 break-keep text-body text-ink-2">

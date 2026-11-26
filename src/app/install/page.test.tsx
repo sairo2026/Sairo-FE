@@ -16,6 +16,12 @@ describe("PC 설치 화면", () => {
 
     expect(screen.getByRole("heading", { name: "사이로 시작하기" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "PC에 설치하기" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "처음 화면으로 돌아가기" }).getAttribute("href")).toBe(
+      "/welcome",
+    );
+    expect(screen.getByRole("link", { name: "사이로 첫 화면" }).getAttribute("href")).toBe(
+      "/welcome",
+    );
     expect(screen.getByRole("link", { name: "로그인하러 가기" }).getAttribute("href")).toBe(
       "/login",
     );
@@ -56,7 +62,9 @@ describe("PC 설치 화면", () => {
 
     await user.click(screen.getByRole("button", { name: "PC에 설치하기" }));
 
-    expect(screen.getByRole("status").textContent).toContain("주소창의 설치 아이콘");
+    expect(screen.getByRole("status").textContent).toContain("앱에서 열기");
+    expect(screen.getByRole("status").textContent).toContain("설치 아이콘");
+    expect(screen.getByRole("status").textContent).toContain("앱 설치");
   });
 
   it("같은 설치 안내를 다시 요청해도 상태 메시지를 새로 알린다", async () => {
@@ -69,7 +77,7 @@ describe("PC 설치 화면", () => {
     await user.click(button);
 
     expect(screen.getByRole("status").firstElementChild).not.toBe(firstAnnouncement);
-    expect(screen.getByRole("status").textContent).toContain("주소창의 설치 아이콘");
+    expect(screen.getByRole("status").textContent).toContain("앱에서 열기");
   });
 
   it("설치 창을 닫으면 실패로 오해시키지 않는다", async () => {

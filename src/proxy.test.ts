@@ -107,6 +107,13 @@ describe("심사 모드 프록시", () => {
 describe("서비스 첫 화면 프록시", () => {
   const sessionCookie = { headers: { cookie: "__Host-sairo_session=opaque" } };
 
+  it("로그인 상태에서도 온보딩 복귀 경로는 홈으로 보내지 않는다", () => {
+    vi.stubEnv("COMING_SOON", "false");
+    const response = proxy(new NextRequest("https://app.sairo.agency/welcome", sessionCookie));
+    expect(response.headers.get("x-middleware-next")).toBe("1");
+    expect(response.headers.get("location")).toBeNull();
+  });
+
   it("출시 준비 모드에서는 첫 화면 경로를 안내 페이지로 연결한다", () => {
     vi.stubEnv("COMING_SOON", "true");
     const response = proxy(new NextRequest("https://app.sairo.agency/", sessionCookie));

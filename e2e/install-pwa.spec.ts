@@ -14,6 +14,10 @@ test("PC 설치 안내와 설치 가능한 manifest를 제공한다", async ({ p
     "href",
     "/signup",
   );
+  await page.getByRole("button", { name: "PC에 설치하기" }).click();
+  await expect(page.getByRole("status")).toContainText("앱에서 열기");
+  await expect(page.getByRole("status")).toContainText("설치 아이콘");
+  await expect(page.getByRole("status")).toContainText("앱 설치");
 
   const manifestHref = await page.locator('link[rel="manifest"]').getAttribute("href");
   if (!manifestHref) throw new Error("PWA manifest 링크가 없습니다.");
@@ -54,6 +58,14 @@ test("좁은 PC 창에서도 설치 안내가 잘리지 않는다", async ({ pag
     () => document.documentElement.scrollWidth > window.innerWidth,
   );
   expect(overflow).toBe(false);
+});
+
+test("설치 화면에서 처음 화면으로 돌아갈 수 있다", async ({ page }) => {
+  await page.goto("/install");
+  await page.getByRole("link", { name: "처음 화면으로 돌아가기" }).click();
+  await expect(page).toHaveURL(/\/welcome$/);
+  await expect(page.getByRole("link", { name: "PC에 설치해 사용하기" })).toBeVisible();
+  await expect(page.locator('link[rel="canonical"]')).toHaveCount(0);
 });
 
 test("다른 화면에서 포착한 설치 이벤트를 설치 화면에서 한 번만 사용한다", async ({
