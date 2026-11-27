@@ -4,8 +4,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { ErrorScreen } from "@/shared/components/feedback/error-screen";
 import { FormAlert } from "@/shared/components/feedback/form-frame";
-import { DetailList, TextLink } from "@/shared/components/feedback/page-parts";
-import { Button } from "@/shared/components/ui/button";
+import { DetailList } from "@/shared/components/feedback/page-parts";
+import { Button, ButtonLink } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import { PageHeader } from "@/shared/components/ui/page-header";
 import { Checkbox, RadioGroup } from "@/shared/components/ui/select-field";
@@ -141,7 +141,7 @@ export function OfficeCloseScreen() {
             <Button isLoading={mutation.isPending || mutation.isSuccess} onClick={submit}>
               {COPY.closeSubmit}
             </Button>
-            <TextLink href="/office">취소</TextLink>
+            <ButtonLink href="/office">취소</ButtonLink>
           </div>
         </div>
       </Card>
