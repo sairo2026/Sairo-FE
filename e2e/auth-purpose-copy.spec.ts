@@ -77,7 +77,9 @@ test("회원가입은 로그인과 다른 안내·이메일 경로·필수 약�
   await kakaoDetails.locator("summary").focus();
   await page.keyboard.press("Enter");
   await expect(kakaoDetails).toHaveJSProperty("open", true);
-  await expect(page.getByText(/카카오 계정으로 가입하면 카카오가 제공하는 회원번호가/)).toBeVisible();
+  await expect(
+    page.getByText(/카카오 계정으로 가입하면 카카오가 제공하는 회원번호가/),
+  ).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath("signup-kakao-details.png"), fullPage: true });
   await page.keyboard.press("Enter");
   await expect(kakaoDetails).toHaveJSProperty("open", false);
