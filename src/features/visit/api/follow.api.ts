@@ -229,6 +229,21 @@ export function fetchCustomerPortalRequests(token: string) {
   });
 }
 
+export function fetchCustomerPortalIndex() {
+  return apiFetch("/api/public/customer-visit-links/portal", {
+    retry: false,
+    schema: CustomerPortalRequestsSchema,
+  });
+}
+
+export function logoutCustomerPortalIndex() {
+  return apiFetch("/api/public/customer-visit-links/portal/logout", {
+    method: "POST",
+    body: {},
+    retry: false,
+  });
+}
+
 export function previewCustomerPortalTimes(token: string) {
   return apiFetch(`${customerBase(token)}/portal/reusable-times`, {
     retry: false,

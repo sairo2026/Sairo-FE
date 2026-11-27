@@ -187,6 +187,9 @@ describe("verified customer request view", () => {
     await user.type(screen.getByLabelText("인증번호"), "123456");
     await user.click(screen.getByRole("button", { name: "내 방문 요청 확인하기" }));
     expect(await screen.findByText(/2026-11-11 ~ 2026-11-20/)).not.toBeNull();
+    expect(screen.getByRole("link", { name: "내 방문 요청 모아보기" }).getAttribute("href")).toBe(
+      "/visit/portal",
+    );
     expect(await screen.findByText(/10:00~11:00/)).not.toBeNull();
     expect(submissions).toBe(0);
     verified = false;
