@@ -80,7 +80,7 @@ export type OfficeLayoutProps = LayoutProps & {
   headerActions?: ReactNode;
   /** 역할별 메뉴. 생략하면 기본 6개 메뉴를 보여준다. */
   navItems?: readonly OfficeNavItem[];
-  /** board는 홈처럼 흰 카드를 올리는 화면의 연한 바탕이다. */
+  /** board는 홈처럼 흰 바탕에 요약 카드를 배치하는 화면의 여백과 메뉴 색을 쓴다. */
   tone?: "white" | "board";
 };
 
@@ -98,10 +98,7 @@ export function OfficeLayout({
     <ToastProvider>
       <div
         data-workspace
-        className={cn(
-          "work-density min-h-dvh text-ink lg:grid lg:grid-cols-[220px_minmax(0,1fr)]",
-          tone === "board" ? "bg-surface" : "bg-white",
-        )}
+        className="work-density min-h-dvh bg-white text-ink lg:grid lg:grid-cols-[220px_minmax(0,1fr)]"
       >
         <aside
           className={cn(
@@ -137,10 +134,7 @@ export function OfficeLayout({
             {children}
           </main>
         </div>
-        <WindowScrollHint
-          tone={tone === "board" ? "surface" : "white"}
-          className="lg:left-[220px]"
-        />
+        <WindowScrollHint tone="white" className="lg:left-[220px]" />
       </div>
     </ToastProvider>
   );
