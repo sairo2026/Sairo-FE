@@ -50,9 +50,9 @@ describe("인증된 고객의 확정 방문", () => {
     renderScreen();
     expect(await screen.findByText("서울시 테스트 매물", { exact: false })).not.toBeNull();
     expect(screen.getByText("확정된 방문 1건을 확인할 수 있습니다.")).not.toBeNull();
-    expect(
-      screen.getByRole("link", { name: "내 방문 요청으로 돌아가기" }).getAttribute("href"),
-    ).toBe("/visit/portal");
+    expect(screen.getByRole("link", { name: "이전 화면으로 돌아가기" }).getAttribute("href")).toBe(
+      "/visit/portal",
+    );
   });
 
   it("다음 방문이 다른 날이면 이동 안내를 표시하지 않는다", async () => {

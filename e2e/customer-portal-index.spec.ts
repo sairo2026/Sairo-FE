@@ -105,6 +105,10 @@ test("verified customer opens a confirmed visit and returns to the index", async
   await expect(page).toHaveURL(/\/visit\/portal\/72\/confirmed$/);
   await expect(page.getByText("확정된 방문 1건을 확인할 수 있습니다.")).toBeVisible();
   await expect(page.getByText(/서울시 테스트 매물/)).toBeVisible();
-  await page.getByRole("link", { name: "내 방문 요청으로 돌아가기" }).click();
+  await page.screenshot({
+    path: `test-results/customer-portal-confirmed-${test.info().project.name}.png`,
+    fullPage: true,
+  });
+  await page.getByRole("link", { name: "이전 화면으로 돌아가기" }).click();
   await expect(page.getByText("방문 요청 #72")).toBeVisible();
 });

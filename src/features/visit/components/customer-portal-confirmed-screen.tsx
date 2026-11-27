@@ -1,12 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { ApiError } from "@/shared/api/client";
 import { toErrorScreenKind } from "@/shared/api/error-kind";
 import { EmptyState } from "@/shared/components/feedback/empty-state";
 import { ErrorScreen } from "@/shared/components/feedback/error-screen";
 import { PageSkeleton } from "@/shared/components/feedback/skeleton";
+import { ButtonLink } from "@/shared/components/ui/button";
 import { formatSeoulDateTime } from "@/shared/lib/format";
 import { fetchCustomerPortalConfirmed } from "../api/follow.api";
 import { kstParts } from "../model/time";
@@ -67,12 +67,9 @@ export function CustomerPortalConfirmedScreen({ coordinationId }: { coordination
   } as const;
   return (
     <section className="space-y-6" aria-labelledby="customer-confirmed-title">
-      <Link
-        href="/visit/portal"
-        className="inline-flex min-h-11 items-center text-caption font-semibold text-primary clickable-link"
-      >
-        내 방문 요청으로 돌아가기
-      </Link>
+      <ButtonLink href="/visit/portal" variant="cancel">
+        이전 화면으로 돌아가기
+      </ButtonLink>
       <div className="space-y-2">
         <h1 id="customer-confirmed-title" className="text-h1 font-bold text-ink">
           확정 방문 일정
