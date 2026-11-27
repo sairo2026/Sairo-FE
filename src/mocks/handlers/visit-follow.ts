@@ -630,6 +630,19 @@ export const visitFollowHandlers = [
     HttpResponse.json({ available: false, verified: false, items: [] }),
   ),
 
+  http.get("/api/public/customer-visit-links/portal/requests/:coordinationId", () =>
+    errorResponse(404, "PUBLIC_LINK_NOT_FOUND", "본인 확인이 필요합니다."),
+  ),
+
+  http.get("/api/public/customer-visit-links/portal/requests/:coordinationId/reusable-times", () =>
+    errorResponse(404, "PUBLIC_LINK_NOT_FOUND", "본인 확인이 필요합니다."),
+  ),
+
+  http.post(
+    "/api/public/customer-visit-links/portal/requests/:coordinationId/available-times",
+    () => errorResponse(404, "PUBLIC_LINK_NOT_FOUND", "본인 확인이 필요합니다."),
+  ),
+
   http.post(
     "/api/public/customer-visit-links/portal/logout",
     () => new HttpResponse(null, { status: 204 }),
