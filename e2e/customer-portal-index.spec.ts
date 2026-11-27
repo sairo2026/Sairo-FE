@@ -47,3 +47,64 @@ test("verified customer can return to the request index and end the session", as
   await expect(page.getByText(/이메일 인증을 완료하면/)).toBeVisible();
   await expect(page.getByText("방문 요청 #71")).toHaveCount(0);
 });
+
+test("verified customer opens a confirmed visit and returns to the index", async ({ page }) => {
+  await page.addInitScript(() => {
+    const originalFetch = window.fetch.bind(window);
+    window.fetch = (input, init) => {
+      const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+      if (url.endsWith("/api/public/customer-visit-links/portal")) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              available: true,
+              verified: true,
+              items: [
+                {
+                  coordinationId: 72,
+                  status: "CONFIRMED",
+                  periodStartDate: "2026-12-01",
+                  periodEndDate: "2026-12-01",
+                  canRespond: false,
+                  canViewSchedule: true,
+                },
+              ],
+            }),
+            { status: 200, headers: { "Content-Type": "application/json" } },
+          ),
+        );
+      }
+      if (url.endsWith("/api/public/customer-visit-links/portal/requests/72/confirmed")) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              state: "VALID",
+              scheduleVersion: 1,
+              managerDisplayName: "담당자",
+              managerLegalRole: "REPRESENTATIVE_AGENT",
+              officeContactPhone: "02-000-0000",
+              items: [
+                {
+                  sortOrder: 1,
+                  scheduledStartAt: "2026-12-01T17:00:00+09:00",
+                  scheduledEndAt: "2026-12-01T17:30:00+09:00",
+                  propertyAddress: "서울시 테스트 매물",
+                  travelDurationMinutes: null,
+                },
+              ],
+            }),
+            { status: 200, headers: { "Content-Type": "application/json" } },
+          ),
+        );
+      }
+      return originalFetch(input, init);
+    };
+  });
+  await page.goto("/visit/portal");
+  await page.getByRole("link", { name: "확정 일정 확인" }).click();
+  await expect(page).toHaveURL(/\/visit\/portal\/72\/confirmed$/);
+  await expect(page.getByText("확정된 방문 1건을 확인할 수 있습니다.")).toBeVisible();
+  await expect(page.getByText(/서울시 테스트 매물/)).toBeVisible();
+  await page.getByRole("link", { name: "내 방문 요청으로 돌아가기" }).click();
+  await expect(page.getByText("방문 요청 #72")).toBeVisible();
+});

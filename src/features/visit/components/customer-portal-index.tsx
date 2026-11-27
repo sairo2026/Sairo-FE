@@ -98,6 +98,14 @@ export function CustomerPortalIndex() {
                           가능한 시간 확인·수정
                         </Link>
                       ) : null}
+                      {item.canViewSchedule ? (
+                        <Link
+                          href={`/visit/portal/${item.coordinationId}/confirmed`}
+                          className="inline-flex min-h-11 items-center rounded-control border border-primary px-3.5 text-caption font-semibold text-primary clickable-link"
+                        >
+                          확정 일정 확인
+                        </Link>
+                      ) : null}
                     </div>
                   </li>
                 ))}
