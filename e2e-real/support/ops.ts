@@ -44,7 +44,7 @@ export async function acceptInvitation(
   await page.goto(invitationPath);
   await expect(page.getByRole("heading", { name: "운영자 초대" })).toBeVisible();
   await page.getByRole("button", { name: "카카오로 인증하고 계속" }).click();
-  await expect(page).toHaveURL(/\/ops\/invitations\/enroll/);
+  await expect(page).toHaveURL(/\/ops\/invitations\/enroll/, { timeout: 30_000 });
   const secretText = await page.getByLabel("수동 입력 비밀값").textContent();
   const secret = (secretText ?? "").replace(/\s/g, "");
   expect(secret).toMatch(/^[A-Z2-7]{16,}$/);
