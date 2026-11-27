@@ -13,16 +13,10 @@ import { TextField } from "@/shared/components/ui/text-field";
 import { login } from "../api/account.api";
 import { formatClock, useCountdown } from "../hooks/use-countdown";
 import { describeAuthError } from "@/shared/lib/api-messages";
-import {
-  LOGIN_LOCK_NOTICE,
-  LOGIN_LOCKED_LEAD,
-  LOGIN_MISMATCH_COPY,
-  describeLoginMismatch,
-} from "../model/login-lock";
+import { LOGIN_LOCKED_LEAD, LOGIN_MISMATCH_COPY, describeLoginMismatch } from "../model/login-lock";
 import type { LoginMismatchView } from "../model/login-lock";
 import { landingPathFor, safeNextPath } from "../model/landing";
 import { AuthFrame } from "@/shared/components/feedback/form-frame";
-import { cn } from "@/shared/lib/cn";
 
 const loginSchema = z.object({
   email: z
@@ -79,7 +73,7 @@ export function EmailLoginForm({ next }: { next?: string }) {
 
   return (
     <AuthFrame
-      title="다시 만나서 반가워요!"
+      title="로그인"
       width="sm"
       variant="login"
       tagline="사이로 계정으로 로그인해 업무를 이어가세요."
@@ -121,23 +115,10 @@ export function EmailLoginForm({ next }: { next?: string }) {
         {mismatch && !isLocked ? (
           <div
             role="alert"
-            className={cn(
-              "mt-5 flex flex-col gap-2 rounded-control border px-5 py-4 text-left text-danger",
-              mismatch.tone === "critical"
-                ? "border-danger bg-danger/10"
-                : "border-danger/30 bg-danger/5",
-            )}
+            className="mt-5 flex flex-col gap-1 rounded-control border border-danger bg-white px-5 py-4 text-left text-danger"
           >
-            <p className="text-caption font-bold">{mismatch.lead}</p>
-            <p
-              className={cn(
-                "font-semibold",
-                mismatch.tone === "critical" ? "text-body" : "text-caption",
-              )}
-            >
-              {mismatch.count}
-            </p>
-            <p className="text-caption font-normal text-muted">{mismatch.notice}</p>
+            <p className="text-caption font-semibold">{mismatch.lead}</p>
+            <p className="text-caption">{mismatch.count}</p>
           </div>
         ) : null}
         {isLocked ? (
@@ -149,7 +130,6 @@ export function EmailLoginForm({ next }: { next?: string }) {
             <p className="text-body font-semibold">
               <span role="timer">{formatClock(lock.remaining)}</span> 뒤에 다시 시도해 주세요.
             </p>
-            <p className="text-caption font-normal text-muted">{LOGIN_LOCK_NOTICE}</p>
           </div>
         ) : null}
         <div className="mt-8 flex justify-center gap-8 text-caption underline">

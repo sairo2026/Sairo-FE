@@ -14,8 +14,8 @@ const ToastContext = createContext<ToastApi | null>(null);
 const AUTO_DISMISS_MS = 5000;
 
 const toneClass: Record<ToastTone, string> = {
-  info: "border-primary-line bg-primary-soft text-primary",
-  success: "border-tag-green bg-tag-green text-tag-green-ink",
+  info: "border-primary bg-primary text-white",
+  success: "border-primary bg-primary text-white",
   error: "border-tag-red bg-tag-red text-tag-red-ink",
 };
 

@@ -48,7 +48,7 @@ export function KakaoStepUpCallback({ error }: { error: string | null }) {
           </Button>
         ) : (
           <Button variant="outlined" fullWidth onClick={() => router.replace(takeStepUpReturn())}>
-            하던 화면으로 돌아가기
+            이전 화면으로 돌아가기
           </Button>
         )}
       </div>

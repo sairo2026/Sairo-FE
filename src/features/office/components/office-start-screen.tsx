@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { Button } from "@/shared/components/ui/button";
 import { SelectableCard } from "@/shared/components/ui/selectable-card";
-import { ButtonRow, FlowFrame, MutedNote, TextLink } from "@/shared/components/feedback/page-parts";
+import { ButtonRow, FlowFrame, TextLink } from "@/shared/components/feedback/page-parts";
 
 type Choice = "create" | "join";
 
@@ -93,8 +93,6 @@ export function OfficeStartScreen() {
                 );
               })}
             </div>
-
-            <MutedNote>사무소 대표 자격은 다음 단계에서 자격증 사본으로 확인합니다.</MutedNote>
 
             <ButtonRow>
               <Button variant="cancel" onClick={() => router.push("/access")}>

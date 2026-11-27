@@ -18,11 +18,8 @@ export const LOGIN_LOCKED_LEAD = `로그인에 ${LOGIN_FAILURE_LIMIT}회 실패�
 
 export type LoginMismatchView = {
   lead: string;
-  /** 예: "연속 2회 실패 · 남은 시도 3회" */
+  /** 예: "남은 시도 3회" */
   count: string;
-  notice: string;
-  /** 남은 횟수가 적을수록 강조를 높인다. 1~2회는 critical, 그보다 많으면 normal이다. */
-  tone: "normal" | "critical";
 };
 
 type LoginMismatchDetails = {
@@ -34,14 +31,10 @@ type LoginMismatchDetails = {
 
 /** 서버의 횟수 필드로 불일치 안내를 만든다. 필수 필드가 없으면 null이라 한 줄 문구로 대체한다. */
 export function describeLoginMismatch(details: LoginMismatchDetails): LoginMismatchView | null {
-  const { failedAttempts, remainingAttempts } = details;
+  const { failedAttempts, remainingAttempts, maxAttempts, lockMinutes } = details;
   if (!Number.isInteger(failedAttempts) || !Number.isInteger(remainingAttempts)) return null;
-  const limit = details.maxAttempts ?? LOGIN_FAILURE_LIMIT;
-  const minutes = details.lockMinutes ?? LOGIN_LOCK_MINUTES;
   return {
-    lead: LOGIN_MISMATCH_LEAD,
-    count: `연속 ${failedAttempts}회 실패 · 남은 시도 ${remainingAttempts}회`,
-    notice: loginLockNotice(limit, minutes),
-    tone: (remainingAttempts as number) <= 2 ? "critical" : "normal",
+    lead: `${LOGIN_MISMATCH_LEAD} ${loginLockNotice(maxAttempts ?? LOGIN_FAILURE_LIMIT, lockMinutes ?? LOGIN_LOCK_MINUTES)}`,
+    count: `남은 시도 ${remainingAttempts}회`,
   };
 }

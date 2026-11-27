@@ -37,10 +37,8 @@ export function AuthEntry({
         <div className="flex flex-col items-center gap-8">
           <BrandLogo variant="vertical" className="w-48" />
           <div className="text-center">
-            <h1 className="text-h1 font-bold text-ink">
-              {isLogin ? "다시 만나서 반가워요!" : "사이로에 오신 걸 환영해요!"}
-            </h1>
-            <p className="mt-2 text-body text-ink-2">
+            <h1 className="text-h1 font-bold text-ink">{isLogin ? "로그인" : "회원가입"}</h1>
+            <p className="mt-4 text-body text-ink-2">
               {isLogin
                 ? "사이로 계정으로 로그인해 업무를 이어가세요."
                 : "계정을 만들고 부동산 업무 관리를 시작하세요."}
@@ -51,18 +49,18 @@ export function AuthEntry({
             {noticeMessage && !errorMessage ? <FormNotice>{noticeMessage}</FormNotice> : null}
             <a
               href="/api/auth/kakao/start"
-              className="flex h-[68px] w-full items-center justify-center rounded-xl bg-[#ffee52] text-h2 font-semibold text-ink transition hover:brightness-95 active:brightness-90"
+              className="flex h-12 w-full items-center justify-center rounded-control bg-[#ffee52] px-10 text-body font-semibold text-ink transition hover:brightness-95 active:brightness-90"
             >
               카카오로 시작하기
             </a>
             <p className="text-center text-caption text-ink-2">
               {isLogin
-                ? "처음 이용한다면 카카오 인증 후 가입 단계로 안내합니다."
+                ? "처음 이용하는 카카오 계정은 회원가입으로 안내합니다."
                 : "이미 가입한 카카오 계정은 로그인됩니다."}
             </p>
             <Link
               href={emailHref}
-              className="flex h-[68px] w-full items-center justify-center rounded-xl bg-primary-soft text-h2 font-semibold text-ink transition-colors hover:bg-primary-line active:bg-primary-line"
+              className="flex h-12 w-full items-center justify-center rounded-control bg-primary-soft px-10 text-body font-semibold text-ink transition-colors hover:bg-primary-line active:bg-primary-line"
             >
               {isLogin ? "이메일로 로그인하기" : "이메일로 회원가입하기"}
             </Link>
