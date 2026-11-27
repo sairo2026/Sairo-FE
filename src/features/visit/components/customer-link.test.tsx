@@ -119,6 +119,93 @@ describe("automatic browser reuse", () => {
   });
 });
 
+describe("verified customer request view", () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-11-10T00:00:00+09:00"));
+  });
+
+  afterEach(() => vi.useRealTimers());
+
+  it("uses an email code to show the same customer's requests and proposes valid times without submitting", async () => {
+    let verified = false;
+    let submissions = 0;
+    server.use(
+      http.get("*/api/public/customer-visit-links/:token/portal", () =>
+        verified
+          ? HttpResponse.json({
+              available: true,
+              verified: true,
+              items: [
+                {
+                  coordinationId: 71,
+                  status: "TIME_COLLECTING",
+                  periodStartDate: "2026-11-11",
+                  periodEndDate: "2026-11-20",
+                },
+              ],
+            })
+          : HttpResponse.json({ available: true, verified: false, items: [] }),
+      ),
+      http.post("*/api/public/customer-visit-links/:token/portal/otp", () =>
+        HttpResponse.json({
+          accepted: true,
+          maskedEmail: "p***@example.test",
+          expiresInSeconds: 300,
+        }),
+      ),
+      http.post("*/api/public/customer-visit-links/:token/portal/verify", async ({ request }) => {
+        const body = (await request.json()) as { code: string };
+        if (body.code !== "123456") return errorResponse(422, "TOKEN_INVALID", "invalid code");
+        verified = true;
+        return HttpResponse.json({ verified: true, expiresInSeconds: 2592000 });
+      }),
+      http.get("*/api/public/customer-visit-links/:token/portal/reusable-times", () =>
+        HttpResponse.json({
+          timeSlots: [
+            {
+              startsAt: "2026-11-12T10:00:00+09:00",
+              endsAt: "2026-11-12T11:00:00+09:00",
+            },
+          ],
+        }),
+      ),
+      http.post("*/api/public/customer-visit-links/:token/available-times", () => {
+        submissions += 1;
+        return HttpResponse.json({});
+      }),
+    );
+    const user = userEvent.setup();
+    const portalClient = createQueryClient();
+    render(
+      <QueryClientProvider client={portalClient}>
+        <CustomerLinkScreen token={MOCK_CUSTOMER_TOKEN} />
+      </QueryClientProvider>,
+    );
+    await user.click(await screen.findByRole("button", { name: "인증번호 받기" }));
+    expect(await screen.findByText(/p\*\*\*@example.test로 보낸 6자리/)).not.toBeNull();
+    await user.type(screen.getByLabelText("인증번호"), "123456");
+    await user.click(screen.getByRole("button", { name: "내 방문 요청 확인하기" }));
+    expect(await screen.findByText(/2026-11-11 ~ 2026-11-20/)).not.toBeNull();
+    expect(await screen.findByText(/10:00~11:00/)).not.toBeNull();
+    expect(submissions).toBe(0);
+    verified = false;
+    await portalClient.invalidateQueries({ queryKey: ["customer-visit-portal", MOCK_CUSTOMER_TOKEN] });
+    await waitFor(() => expect(screen.queryByText(/2026-11-11 ~ 2026-11-20/)).toBeNull());
+  });
+
+  it("keeps the existing guest link flow when a customer has no saved email", async () => {
+    server.use(
+      http.get("*/api/public/customer-visit-links/:token/portal", () =>
+        HttpResponse.json({ available: false, verified: false, items: [] }),
+      ),
+    );
+    renderLink();
+    expect(await screen.findByLabelText("이전 방문 조율 링크")).not.toBeNull();
+    expect(screen.queryByRole("button", { name: "인증번호 받기" })).toBeNull();
+  });
+});
+
 const WINDOW = { startDate: "2026-11-11", endDate: "2026-11-20" };
 const NOW = new Date("2026-11-10T00:00:00Z");
 
