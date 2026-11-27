@@ -3,7 +3,9 @@ import { settle, useMockOfficeRole } from "../support/app";
 
 // 개발플로우 4장 시나리오 1: 이메일 회원가입 → 사무소 등록 신청 → 운영자 승인 → 로그인
 test.describe("시나리오 1 이메일 가입부터 사무소 승인 뒤 로그인까지", () => {
-  test("가입하고 사무소 등록 신청과 증빙을 내면 심사 중 화면에 머문다", async ({ page }) => {
+  test("가입하고 사무소 등록 신청과 증빙을 내면 심사 중 화면에 머문다", async ({
+    page,
+  }, testInfo) => {
     await useMockOfficeRole(page, "OWNER");
     await test.step("/signup/email에서 이름과 이메일을 넣고 인증 링크를 받는다", async () => {
       await page.goto("/signup");
@@ -67,6 +69,13 @@ test.describe("시나리오 1 이메일 가입부터 사무소 승인 뒤 로그
       await expect(page).toHaveURL(/\/office\/review/);
       await expect(page.getByText("신규 사무소 등록 심사 진행 중입니다.")).toBeVisible();
       await expect(page.getByText(/^서류를 확인하고 있습니다\./)).toBeVisible();
+      const notice = page.getByText(/^서류를 확인하고 있습니다\./);
+      const confirm = page.getByRole("button", { name: "확인", exact: true });
+      const noticeBox = await notice.boundingBox();
+      const confirmBox = await confirm.boundingBox();
+      if (!noticeBox || !confirmBox) throw new Error("심사 안내 또는 확인 버튼이 보이지 않습니다.");
+      expect(noticeBox.y + noticeBox.height).toBeLessThan(confirmBox.y);
+      await page.screenshot({ path: testInfo.outputPath("office-review-pending.png") });
     });
   });
 

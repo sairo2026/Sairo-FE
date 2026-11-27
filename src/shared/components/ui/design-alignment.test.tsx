@@ -171,7 +171,7 @@ describe("모달과 사이드 메뉴 규격", () => {
     expect(screen.getByRole("link", { name: "나" }).className).toContain("text-h2");
   });
 
-  it("사무소 레이아웃은 사이드바 폭 220을 쓰고 홈은 board 바탕을 쓴다", () => {
+  it("사무소 레이아웃은 사이드바 폭 220을 쓰고 홈 본문은 흰 바탕을 쓴다", () => {
     const { container, rerender } = render(
       <OfficeLayout activeKey="home">
         <p>본문</p>
@@ -186,7 +186,8 @@ describe("모달과 사이드 메뉴 규격", () => {
         <p>본문</p>
       </OfficeLayout>,
     );
-    expect((container.firstElementChild as HTMLElement).className).toContain("bg-surface");
+    expect((container.firstElementChild as HTMLElement).className).toContain("bg-white");
+    expect(container.querySelector("aside")?.className).toContain("bg-white");
   });
 
   it("운영 콘솔 메뉴는 기존 크기를 유지한다", () => {
