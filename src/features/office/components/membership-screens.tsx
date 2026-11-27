@@ -229,11 +229,6 @@ export function OfficeSearchScreen() {
           </ButtonRow>
         </form>
 
-        <MutedNote>
-          인증이 끝난 사무소만 검색됩니다. 사업자등록번호는 검색 조건으로만 쓰이고 결과에는 표시되지
-          않습니다. 대표의 개인 연락처와 직원 목록은 공개하지 않습니다.
-        </MutedNote>
-
         {isBlocked ? (
           <FormNotice>
             이미 소속되어 있거나 진행 중인 신청·참여 요청이 있어 새로 참여를 신청할 수 없습니다.
@@ -587,10 +582,6 @@ export function MembershipRequestForm({ officeId }: { officeId: number }) {
           }}
         />
         <MutedNote>{MEMBERSHIP_NOTICE_COPY.join}</MutedNote>
-        <MutedNote>
-          대표자 이름과 연락처는 보여드리지 않습니다. 역할과 자격 정보를 입력하면 대표가 확인한 뒤
-          승인합니다.
-        </MutedNote>
         {formError ? (
           <div className="flex flex-col gap-2">
             <FormAlert>{formError}</FormAlert>
@@ -660,9 +651,16 @@ export function MembershipStatusScreen() {
       <QueryGate query={query} loadingLabel="참여 요청 상태를 불러오는 중입니다.">
         {(membership) =>
           membership === null ? (
-            <div className="flex flex-col gap-4">
-              <p className="text-body text-ink-2">진행 중인 참여 요청이나 초대가 없습니다.</p>
-              <TextLink href="/office/start">사무소 생성/참여 선택으로 이동</TextLink>
+            <div className="flex flex-col items-start gap-6">
+              <h2 className="text-h4 font-medium text-ink">
+                진행 중인 참여 요청이나 초대가 없습니다.
+              </h2>
+              <Link
+                href="/office/start"
+                className="inline-flex h-12 min-w-[120px] items-center justify-center rounded-control bg-primary px-10 text-body font-bold text-white transition-colors hover:bg-primary-hover active:bg-primary-pressed"
+              >
+                사무소 생성·참여
+              </Link>
             </div>
           ) : (
             <MembershipStatusBody

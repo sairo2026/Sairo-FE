@@ -309,18 +309,7 @@ export function SignupEmailFlow({ token }: { token?: string }) {
 
   return (
     <>
-      <AuthFrame
-        variant="form"
-        title={step === "info" ? "사이로에 오신 걸 환영해요!" : "비밀번호를 설정해 주세요"}
-      >
-        <h2 className="text-h2 font-semibold text-primary">
-          {step === "info" ? "기본 가입 정보 입력" : "비밀번호 설정"}
-        </h2>
-        <p className="mb-6 mt-2 text-body text-ink-2">
-          {step === "info"
-            ? "계정을 만들고 부동산 업무 관리를 시작하세요. 먼저 가입 정보를 입력해 주세요."
-            : "로그인할 비밀번호를 설정하면 가입이 완료됩니다."}
-        </p>
+      <AuthFrame variant="form" title={step === "info" ? "기본 가입 정보 입력" : "비밀번호 설정"}>
         {tokenState === "failed" ? (
           <div className="mb-4">
             <FormAlert>{tokenMessage}</FormAlert>
@@ -369,6 +358,24 @@ export function SignupEmailFlow({ token }: { token?: string }) {
                     : undefined
                 }
                 error={emailError}
+                errorAction={
+                  isEmailRegistered ? (
+                    <span className="flex flex-wrap items-center gap-4 whitespace-nowrap">
+                      <Link
+                        href="/login/email"
+                        className="font-semibold text-primary hover:underline"
+                      >
+                        이메일로 로그인
+                      </Link>
+                      <Link
+                        href="/password/forgot"
+                        className="font-semibold text-primary hover:underline"
+                      >
+                        비밀번호 찾기
+                      </Link>
+                    </span>
+                  ) : undefined
+                }
                 statusText={
                   emailTicket
                     ? "인증이 완료되었습니다."
@@ -381,20 +388,6 @@ export function SignupEmailFlow({ token }: { token?: string }) {
                 hint="링크는 30분 동안 한 번만 사용할 수 있고, 다시 보내면 이전 링크는 사라집니다."
                 required
               />
-              {isEmailRegistered ? (
-                <p className="text-caption text-ink-2">
-                  <Link href="/login/email" className="font-semibold text-primary hover:underline">
-                    이메일로 로그인
-                  </Link>
-                  {" 또는 "}
-                  <Link
-                    href="/password/forgot"
-                    className="font-semibold text-primary hover:underline"
-                  >
-                    비밀번호 찾기
-                  </Link>
-                </p>
-              ) : null}
             </div>
             <PhoneVerificationField
               verificationRequired={phoneRequired}
@@ -459,7 +452,7 @@ export function SignupEmailFlow({ token }: { token?: string }) {
               placeholder="8~12자 이내의 비밀번호를 입력해 주세요."
               error={passwordError}
               statusText={password ? `강도 ${PASSWORD_STRENGTH_LABEL[strength]}` : undefined}
-              hint="8자 이상 12자 이하로 만들어 주세요. 공백도 사용할 수 있습니다."
+              hint="8자 이상 12자 이하로 입력해 주세요."
               required
             />
             <TextField

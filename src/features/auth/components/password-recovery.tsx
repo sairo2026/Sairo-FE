@@ -131,12 +131,15 @@ export function PasswordResetForm({ token }: { token: string | null }) {
 
   if (isDone) {
     return (
-      <AuthFrame title="비밀번호를 바꿨습니다" variant="form">
-        <div className="flex flex-col gap-4">
-          <FormNotice>
+      <AuthFrame title="비밀번호 변경 완료" variant="form">
+        <div className="flex flex-col gap-8">
+          <p
+            role="status"
+            className="rounded-control bg-primary-soft px-4 py-4 text-center text-caption text-ink"
+          >
             보안을 위해 이전에 로그인한 모든 기기에서 로그아웃되었습니다. 새 비밀번호로 다시
             로그인해 주세요.
-          </FormNotice>
+          </p>
           <Link
             href="/login/email"
             className="inline-flex h-12 items-center justify-center rounded-control bg-primary px-10 font-bold text-white hover:bg-primary-hover"
@@ -232,7 +235,7 @@ export function PasswordResetForm({ token }: { token: string | null }) {
             뒤로
           </Link>
           <Button type="submit" isLoading={isBusy}>
-            비밀번호 바꾸기
+            비밀번호 변경
           </Button>
         </div>
       </form>

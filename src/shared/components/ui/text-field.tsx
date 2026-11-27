@@ -4,7 +4,7 @@ import { useId, useState } from "react";
 import type { InputHTMLAttributes, ReactNode } from "react";
 import { cn } from "@/shared/lib/cn";
 import { formatPhone } from "@/shared/lib/format";
-import { FieldLabel, useFieldGapClass, useIsOfficeField } from "./field-label";
+import { FieldLabel, useFieldGapClass } from "./field-label";
 
 export type TextFieldKind = "text" | "number" | "tel" | "password";
 
@@ -17,6 +17,8 @@ export type TextFieldProps = Omit<
   value: string;
   onValueChange: (value: string) => void;
   error?: string;
+  /** 오류 메시지 오른쪽의 복구 동작. 오류 텍스트와 같은 줄에 둔다. */
+  errorAction?: ReactNode;
   hint?: string;
   /** 입력창 오른쪽의 작은 버튼(전송·인증·검색 등). */
   actionLabel?: string;
@@ -46,6 +48,7 @@ export function TextField({
   value,
   onValueChange,
   error,
+  errorAction,
   hint,
   actionLabel,
   onAction,
@@ -61,7 +64,6 @@ export function TextField({
   ...rest
 }: TextFieldProps) {
   const fieldGapClass = useFieldGapClass();
-  const isOffice = useIsOfficeField();
   const generatedId = useId();
   const inputId = id ?? generatedId;
   const messageId = `${inputId}-message`;
@@ -76,20 +78,9 @@ export function TextField({
 
   return (
     <div className={cn("flex min-w-0 flex-col", fieldGapClass, className)}>
-      {isOffice && maxLength && !error ? (
-        <div className="flex items-baseline justify-between gap-3">
-          <FieldLabel htmlFor={inputId} required={required}>
-            {label}
-          </FieldLabel>
-          <span className="text-caption text-muted" aria-hidden="true">
-            {Array.from(value).length}/{maxLength}
-          </span>
-        </div>
-      ) : (
-        <FieldLabel htmlFor={inputId} required={required}>
-          {label}
-        </FieldLabel>
-      )}
+      <FieldLabel htmlFor={inputId} required={required}>
+        {label}
+      </FieldLabel>
       <div
         className={cn(
           "flex h-[58px] items-center gap-4 rounded-control border border-line bg-surface px-5 focus-within:border-primary focus-within:bg-white",
@@ -137,7 +128,14 @@ export function TextField({
           </button>
         ) : null}
       </div>
-      {hasMessage ? (
+      {error && errorAction ? (
+        <div className="-mt-2 flex flex-wrap items-center justify-between gap-2 text-caption">
+          <p id={messageId} role="alert" className="text-danger">
+            {error}
+          </p>
+          {errorAction}
+        </div>
+      ) : hasMessage ? (
         <p
           id={messageId}
           role={error ? "alert" : undefined}
@@ -147,11 +145,6 @@ export function TextField({
           )}
         >
           {error ?? statusText ?? hint}
-        </p>
-      ) : null}
-      {maxLength && !error && !isOffice ? (
-        <p className="text-right text-caption text-muted" aria-hidden="true">
-          {Array.from(value).length}/{maxLength}
         </p>
       ) : null}
     </div>

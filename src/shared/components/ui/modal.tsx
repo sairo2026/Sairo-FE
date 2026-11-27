@@ -13,10 +13,19 @@ export type ModalProps = {
   children: ReactNode;
   footer?: ReactNode;
   size?: "default" | "wide" | "terms" | "notice" | "form";
+  compactTitleGap?: boolean;
 };
 
 /** 포커스를 가두고 ESC로 닫으며 닫을 때 열기 전 요소로 포커스를 돌려주는 대화상자. */
-export function Modal({ isOpen, title, onClose, children, footer, size = "default" }: ModalProps) {
+export function Modal({
+  isOpen,
+  title,
+  onClose,
+  children,
+  footer,
+  size = "default",
+  compactTitleGap = false,
+}: ModalProps) {
   const titleId = useId();
   const closeRef = useRef(onClose);
   useEffect(() => {
@@ -48,7 +57,7 @@ export function Modal({ isOpen, title, onClose, children, footer, size = "defaul
         </h2>
         <div
           className={cn(
-            "mt-8 text-body text-ink-2",
+            compactTitleGap ? "mt-4 text-body text-ink-2" : "mt-8 text-body text-ink-2",
             (size === "wide" || size === "form") && "scroll-area min-h-0 flex-1 overflow-y-auto",
             size === "terms" &&
               "scroll-area-slim h-[400px] min-h-0 flex-1 overflow-y-auto rounded-xl border border-line bg-surface py-6 pl-6 pr-8",

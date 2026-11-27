@@ -86,8 +86,8 @@ describe("비밀번호 규칙", () => {
   });
 
   it("흔한 비밀번호는 거부한다", () => {
-    expect(validatePasswordInput("12345678")).toContain("너무 흔한");
-    expect(validatePasswordInput("PASSWORD1")).toContain("너무 흔한");
+    expect(validatePasswordInput("12345678")).toContain("안전성이 낮은");
+    expect(validatePasswordInput("PASSWORD1")).toContain("안전성이 낮은");
   });
 
   it("강도를 세 단계로 나눈다", () => {

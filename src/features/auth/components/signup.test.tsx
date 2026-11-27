@@ -424,13 +424,13 @@ describe("이메일 가입 완료", () => {
     expect(await screen.findByText("8~12자 이내로 설정해 주십시오.")).not.toBeNull();
   });
 
-  it("너무 흔한 비밀번호는 막고 두 칸이 다르면 안내한다", async () => {
+  it("안전성이 낮은 비밀번호는 막고 두 칸이 다르면 안내한다", async () => {
     const user = userEvent.setup();
     await toPasswordStep(user);
     await user.type(screen.getByLabelText(/^비밀번호 설정\*?$/), "12345678");
     await user.type(screen.getByLabelText(/^비밀번호 확인/), "1234567");
     await user.click(screen.getByRole("button", { name: "회원가입하기" }));
-    expect(await screen.findByText(/너무 흔한 비밀번호/)).not.toBeNull();
+    expect(await screen.findByText(/안전성이 낮은 비밀번호/)).not.toBeNull();
     expect(screen.getByText("비밀번호가 일치하지 않습니다.")).not.toBeNull();
   });
 
@@ -451,7 +451,7 @@ describe("이메일 가입 완료", () => {
     await user.type(screen.getByLabelText(/^비밀번호 확인/), "weakpass1");
     await user.click(screen.getByRole("button", { name: "회원가입하기" }));
     expect(
-      await screen.findByText("너무 흔한 비밀번호입니다. 다른 비밀번호를 입력해 주세요."),
+      await screen.findByText("안전성이 낮은 비밀번호입니다. 다른 비밀번호를 입력해 주세요."),
     ).not.toBeNull();
     expect(screen.queryByText(/유출된 적/)).toBeNull();
     expect(navigation.replace).not.toHaveBeenCalled();
@@ -575,7 +575,7 @@ describe("카카오 가입 보완 입력", () => {
     setMockTermsVersion("9.9");
     const user = userEvent.setup();
     renderWithQuery(<KakaoSignupForm />);
-    await screen.findByRole("heading", { name: "카카오로 가입" });
+    await screen.findByRole("heading", { name: "카카오 회원가입" });
     expect(screen.getByRole("checkbox", { name: "필수 약관 전체 동의" })).toHaveProperty(
       "disabled",
       true,
@@ -617,7 +617,7 @@ describe("카카오 가입 보완 입력", () => {
   it("휴대폰 인증과 필수 약관 없이는 가입하지 않는다", async () => {
     const user = userEvent.setup();
     renderWithQuery(<KakaoSignupForm />);
-    await screen.findByRole("heading", { name: "카카오로 가입" });
+    await screen.findByRole("heading", { name: "카카오 회원가입" });
     await user.click(screen.getByRole("button", { name: "회원가입하기" }));
     expect(await screen.findByText("휴대폰 번호 인증을 완료해 주세요.")).not.toBeNull();
     expect(screen.getByText("이용약관에 동의해야 가입할 수 있습니다.")).not.toBeNull();
@@ -626,7 +626,7 @@ describe("카카오 가입 보완 입력", () => {
   it("참고 이메일 형식이 틀리면 안내한다", async () => {
     const user = userEvent.setup();
     renderWithQuery(<KakaoSignupForm />);
-    await screen.findByRole("heading", { name: "카카오로 가입" });
+    await screen.findByRole("heading", { name: "카카오 회원가입" });
     await user.type(screen.getByLabelText(/^참고 이메일/), "nope");
     await user.click(screen.getByRole("button", { name: "회원가입하기" }));
     expect(await screen.findByText("이메일 주소를 올바르게 입력해 주세요.")).not.toBeNull();
@@ -635,7 +635,7 @@ describe("카카오 가입 보완 입력", () => {
   it("이름과 인증과 약관을 마치면 가입한다", async () => {
     const user = userEvent.setup();
     renderWithQuery(<KakaoSignupForm />);
-    await screen.findByRole("heading", { name: "카카오로 가입" });
+    await screen.findByRole("heading", { name: "카카오 회원가입" });
     await verifyPhone(user);
     await screen.findByText("인증이 완료되었습니다.");
     await user.click(screen.getByLabelText(/이용약관에 동의합니다/));
@@ -646,7 +646,7 @@ describe("카카오 가입 보완 입력", () => {
   it("약관이 바뀌면 안내를 띄우고 바뀐 항목을 다시 동의받는다", async () => {
     const user = userEvent.setup();
     renderWithQuery(<KakaoSignupForm />);
-    await screen.findByRole("heading", { name: "카카오로 가입" });
+    await screen.findByRole("heading", { name: "카카오 회원가입" });
     await verifyPhone(user);
     await screen.findByText("인증이 완료되었습니다.");
     await user.click(screen.getByLabelText(/이용약관에 동의합니다/));
@@ -663,7 +663,7 @@ describe("카카오 가입 보완 입력", () => {
   it("이미 가입된 휴대폰이면 기존 계정 안내로 보낸다", async () => {
     const user = userEvent.setup();
     renderWithQuery(<KakaoSignupForm />);
-    await screen.findByRole("heading", { name: "카카오로 가입" });
+    await screen.findByRole("heading", { name: "카카오 회원가입" });
     await user.type(screen.getByLabelText(/^휴대폰 번호/), "01011111111");
     await user.click(screen.getByRole("button", { name: "인증번호 받기" }));
     await user.type(await screen.findByLabelText(/^인증번호/), "123456");
@@ -679,7 +679,7 @@ describe("카카오 가입 보완 입력", () => {
     server.use(http.post("/api/auth/signup/kakao", () => mockErrors.rateLimited(60)));
     const user = userEvent.setup();
     renderWithQuery(<KakaoSignupForm />);
-    await screen.findByRole("heading", { name: "카카오로 가입" });
+    await screen.findByRole("heading", { name: "카카오 회원가입" });
     await verifyPhone(user);
     await screen.findByText("인증이 완료되었습니다.");
     await user.click(screen.getByLabelText(/이용약관에 동의합니다/));

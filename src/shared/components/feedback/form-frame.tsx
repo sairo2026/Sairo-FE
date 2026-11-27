@@ -26,7 +26,7 @@ export function AuthFrame({
     return (
       <main className="flex flex-1 items-center justify-center bg-surface px-4 py-12 sm:py-16">
         <Card tone="elevated" shadow="login" className="w-full max-w-[624px]">
-          <div className="flex flex-col items-center gap-3 text-center">
+          <div className="flex flex-col items-center gap-4 text-center">
             <BrandLogo className="w-[220px]" />
             <h1 className="pt-2 text-h1 font-bold text-ink">{title}</h1>
             {tagline ? <p className="text-body text-ink-2">{tagline}</p> : null}
@@ -46,16 +46,8 @@ export function AuthFrame({
       >
         {isForm ? null : <BrandLogo className="mb-6 w-28" />}
         <h1 className="whitespace-pre-line text-h1 font-bold text-ink">{title}</h1>
-        {description ? (
-          <p
-            className={
-              isForm ? "mt-6 text-h2 font-semibold text-ink-2" : "mt-3 text-body text-ink-2"
-            }
-          >
-            {description}
-          </p>
-        ) : null}
-        <div className="mt-8 sm:mt-11">{children}</div>
+        {description ? <p className="mt-4 text-body text-ink-2">{description}</p> : null}
+        <div className={isForm && description ? "mt-14" : "mt-8 sm:mt-11"}>{children}</div>
       </Card>
     </Root>
   );
@@ -63,7 +55,10 @@ export function AuthFrame({
 
 export function FormAlert({ children }: { children: ReactNode }) {
   return (
-    <p role="alert" className="rounded-control bg-tag-red px-4 py-3 text-caption text-tag-red-ink">
+    <p
+      role="alert"
+      className="rounded-control border border-danger bg-danger/5 px-5 py-4 text-caption text-danger"
+    >
       {children}
     </p>
   );

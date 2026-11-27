@@ -182,6 +182,20 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
           }
         />
       </div>
+      {needsCard && !isEmptyOffice ? (
+        <div
+          role="status"
+          className="rounded-control bg-primary-soft px-5 py-4 text-caption text-ink-2"
+        >
+          결제 카드가 등록되지 않았습니다.{" "}
+          <Link
+            href="/billing/card-guide"
+            className="font-semibold text-primary underline clickable-link"
+          >
+            카드 등록 안내
+          </Link>
+        </div>
+      ) : null}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-[repeat(3,minmax(0,292px))]">
         <StatCard
           href="/coordinations"
@@ -208,18 +222,6 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
         )}
       </div>
       {isEmptyOffice ? <FirstUseGuide isOwner={isOwner} needsCard={needsCard} /> : null}
-      {needsCard && !isEmptyOffice ? (
-        <p className="text-caption text-ink-2">
-          결제 카드를 아직 등록하지 않았습니다.{" "}
-          <Link
-            href="/billing/card-guide"
-            className="font-semibold text-primary underline clickable-link"
-          >
-            카드 등록 안내
-          </Link>
-          를 확인해 주세요.
-        </p>
-      ) : null}
       <section aria-labelledby="home-visit-requests" className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 id="home-visit-requests" className="text-h2 font-semibold text-ink">

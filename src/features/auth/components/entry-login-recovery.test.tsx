@@ -12,6 +12,7 @@ import { EmailLoginForm } from "./email-login-form";
 import { MarketingUnsubscribe } from "./marketing-unsubscribe";
 import { PasswordResetForm, PasswordResetRequestForm } from "./password-recovery";
 import { renderWithQuery } from "./test-utils";
+import { describeLoginMismatch } from "../model/login-lock";
 
 const navigation = vi.hoisted(() => ({ replace: vi.fn(), push: vi.fn() }));
 
@@ -43,23 +44,19 @@ beforeEach(() => {
 describe("진입 화면", () => {
   it("로그인과 가입의 제목·설명·이메일 동작을 구분하고 카카오는 실제 공통 시작 경로를 쓴다", () => {
     const { unmount } = render(<AuthEntry mode="login" />);
-    expect(screen.getByRole("heading", { name: "다시 만나서 반가워요!" })).not.toBeNull();
+    expect(screen.getByRole("heading", { name: "로그인" })).not.toBeNull();
     expect(screen.getByText("사이로 계정으로 로그인해 업무를 이어가세요.")).not.toBeNull();
     expect(screen.getByRole("link", { name: "이메일로 로그인하기" }).getAttribute("href")).toBe(
       "/login/email",
     );
-    expect(
-      screen.getByText("처음 이용한다면 카카오 인증 후 가입 단계로 안내합니다."),
-    ).not.toBeNull();
     unmount();
 
     render(<AuthEntry mode="signup" />);
-    expect(screen.getByRole("heading", { name: "사이로에 오신 걸 환영해요!" })).not.toBeNull();
+    expect(screen.getByRole("heading", { name: "회원가입" })).not.toBeNull();
     expect(screen.getByText("계정을 만들고 부동산 업무 관리를 시작하세요.")).not.toBeNull();
     expect(screen.getByRole("link", { name: "이메일로 회원가입하기" }).getAttribute("href")).toBe(
       "/signup/email",
     );
-    expect(screen.getByText("이미 가입한 카카오 계정은 로그인됩니다.")).not.toBeNull();
     expect(screen.getByRole("link", { name: "카카오로 시작하기" }).getAttribute("href")).toBe(
       "/api/auth/kakao/start",
     );
@@ -201,26 +198,39 @@ describe("이메일 로그인", () => {
     const alert = await screen.findByRole("alert");
     const lines = Array.from(alert.querySelectorAll("p")).map((line) => line.textContent);
     expect(lines).toEqual([
-      "이메일 또는 비밀번호가 맞지 않습니다.",
-      "연속 1회 실패 · 남은 시도 4회",
-      "5회 불일치 시 15분 뒤 다시 시도할 수 있습니다.",
+      "이메일 또는 비밀번호가 맞지 않습니다. 5회 불일치 시 15분 뒤 다시 시도할 수 있습니다.",
+      "남은 시도 4회",
     ]);
     expect(alert.className).toContain("text-danger");
     expect(navigation.replace).not.toHaveBeenCalled();
   });
 
-  it("실패가 쌓이면 연속 횟수와 남은 횟수가 갱신되고 남은 횟수가 적으면 더 강조한다", async () => {
+  it("서버가 잠금 정책 값을 변경하면 안내에도 실제 값을 사용한다", () => {
+    expect(
+      describeLoginMismatch({
+        failedAttempts: 1,
+        remainingAttempts: 6,
+        maxAttempts: 7,
+        lockMinutes: 20,
+      }),
+    ).toEqual({
+      lead: "이메일 또는 비밀번호가 맞지 않습니다. 7회 불일치 시 20분 뒤 다시 시도할 수 있습니다.",
+      count: "남은 시도 6회",
+    });
+  });
+
+  it("실패가 쌓이면 남은 횟수를 갱신한다", async () => {
     const user = userEvent.setup();
     renderWithQuery(<EmailLoginForm />);
     await user.type(screen.getByLabelText("이메일 주소"), "nobody@example.com");
     await user.type(screen.getByLabelText("비밀번호"), "wrong-password");
     await user.click(screen.getByRole("button", { name: "로그인하기" }));
-    expect((await screen.findByRole("alert")).className).toContain("border-danger/30");
+    expect((await screen.findByRole("alert")).className).toContain("border-danger");
     await user.click(screen.getByRole("button", { name: "로그인하기" }));
-    await screen.findByText("연속 2회 실패 · 남은 시도 3회");
+    await screen.findByText("남은 시도 3회");
     await user.click(screen.getByRole("button", { name: "로그인하기" }));
-    await screen.findByText("연속 3회 실패 · 남은 시도 2회");
-    expect(screen.getByRole("alert").className).toContain("bg-danger/10");
+    await screen.findByText("남은 시도 2회");
+    expect(screen.getByRole("alert").className).toContain("bg-white");
   });
 
   it("서버가 횟수를 내려주지 않으면 기존 한 줄 문구로 안내한다", async () => {
@@ -246,7 +256,6 @@ describe("이메일 로그인", () => {
     expect(timer.textContent).toBe("15:00");
     const notice = screen.getByRole("alert");
     expect(notice.textContent).toContain("로그인에 5회 실패해 잠시 막았습니다.");
-    expect(notice.textContent).toContain("5회 불일치 시 15분 뒤 다시 시도할 수 있습니다.");
     expect(notice.className).toContain("text-danger");
     expect(screen.getByRole("button", { name: "로그인하기" }).getAttribute("aria-disabled")).toBe(
       "true",
@@ -316,7 +325,7 @@ describe("비밀번호 찾기와 재설정", () => {
     render(<PasswordResetForm token="valid-token-0000000000" />);
     await user.type(screen.getByLabelText("새 비밀번호"), "short");
     await user.type(screen.getByLabelText("새 비밀번호 확인"), "short");
-    await user.click(screen.getByRole("button", { name: "비밀번호 바꾸기" }));
+    await user.click(screen.getByRole("button", { name: "비밀번호 변경" }));
     expect(await screen.findByText("8~12자 이내로 설정해 주십시오.")).not.toBeNull();
   });
 
@@ -325,7 +334,7 @@ describe("비밀번호 찾기와 재설정", () => {
     render(<PasswordResetForm token="valid-token-0000000000" />);
     await user.type(screen.getByLabelText("새 비밀번호"), "abcd1234!");
     await user.type(screen.getByLabelText("새 비밀번호 확인"), "abcd12345");
-    await user.click(screen.getByRole("button", { name: "비밀번호 바꾸기" }));
+    await user.click(screen.getByRole("button", { name: "비밀번호 변경" }));
     expect(await screen.findByText("비밀번호가 일치하지 않습니다.")).not.toBeNull();
   });
 
@@ -336,8 +345,8 @@ describe("비밀번호 찾기와 재설정", () => {
     expect(window.location.search).toBe("");
     await user.type(screen.getByLabelText("새 비밀번호"), "abcd1234!");
     await user.type(screen.getByLabelText("새 비밀번호 확인"), "abcd1234!");
-    await user.click(screen.getByRole("button", { name: "비밀번호 바꾸기" }));
-    expect(await screen.findByText("비밀번호를 바꿨습니다")).not.toBeNull();
+    await user.click(screen.getByRole("button", { name: "비밀번호 변경" }));
+    expect(await screen.findByText("비밀번호 변경 완료")).not.toBeNull();
     expect(screen.getByRole("status").textContent).toContain("모든 기기에서 로그아웃");
   });
 
@@ -346,7 +355,7 @@ describe("비밀번호 찾기와 재설정", () => {
     render(<PasswordResetForm token="expired-token-000000" />);
     await user.type(screen.getByLabelText("새 비밀번호"), "abcd1234!");
     await user.type(screen.getByLabelText("새 비밀번호 확인"), "abcd1234!");
-    await user.click(screen.getByRole("button", { name: "비밀번호 바꾸기" }));
+    await user.click(screen.getByRole("button", { name: "비밀번호 변경" }));
     expect(await screen.findByText("링크를 사용할 수 없습니다")).not.toBeNull();
     expect(screen.getByLabelText("가입한 이메일 주소")).not.toBeNull();
   });
@@ -372,9 +381,9 @@ describe("비밀번호 찾기와 재설정", () => {
     render(<PasswordResetForm token="valid-token-0000000000" />);
     await user.type(screen.getByLabelText("새 비밀번호"), "abcd1234!");
     await user.type(screen.getByLabelText("새 비밀번호 확인"), "abcd1234!");
-    await user.click(screen.getByRole("button", { name: "비밀번호 바꾸기" }));
+    await user.click(screen.getByRole("button", { name: "비밀번호 변경" }));
     expect(
-      await screen.findByText("너무 흔한 비밀번호입니다. 다른 비밀번호를 입력해 주세요."),
+      await screen.findByText("안전성이 낮은 비밀번호입니다. 다른 비밀번호를 입력해 주세요."),
     ).not.toBeNull();
     expect(screen.queryByText(/서버 문장/)).toBeNull();
   });

@@ -122,9 +122,10 @@ describe("TextField", () => {
     expect(onAction).toHaveBeenCalled();
   });
 
-  it("최대 글자 수를 표시한다", () => {
+  it("최대 글자 수는 입력 제한에만 사용하고 화면에 표시하지 않는다", () => {
     render(<TextField label="제목" value="가나" maxLength={100} onValueChange={() => {}} />);
-    expect(screen.getByText("2/100")).toBeTruthy();
+    expect(screen.queryByText("2/100")).toBeNull();
+    expect(screen.getByRole("textbox", { name: "제목" }).getAttribute("maxLength")).toBe("100");
   });
 });
 
