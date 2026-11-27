@@ -3,6 +3,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { AuthFrame } from "@/shared/components/feedback/form-frame";
 import { Card } from "@/shared/components/ui/card";
+import { KAKAO_LINK_NOTICE, KAKAO_LINK_SUMMARY } from "../model/legal-copy";
 import { AuthEntry } from "./auth-entry";
 
 afterEach(cleanup);
@@ -45,6 +46,20 @@ describe("로그인 처음 화면 안내", () => {
   it("알 수 없는 안내 코드는 아무것도 보이지 않는다", () => {
     render(<AuthEntry mode="login" noticeCode="unknown" />);
     expect(screen.queryByRole("status")).toBeNull();
+  });
+});
+
+describe("회원가입 카카오 연결 안내", () => {
+  it("짧은 안내를 먼저 보여주고 기존 상세 문구는 키보드로 펼칠 수 있다", () => {
+    render(<AuthEntry mode="signup" />);
+    expect(screen.getByText(KAKAO_LINK_SUMMARY)).not.toBeNull();
+    const summary = screen.getByText("카카오 계정 연결·해제 안내 자세히 보기");
+    const details = summary.closest("details");
+    expect(details?.open).toBe(false);
+    expect(details?.textContent?.replace(/\s+/g, " ")).toContain(KAKAO_LINK_NOTICE);
+    summary.click();
+    expect(details?.open).toBe(true);
+    expect(summary.closest("details")?.querySelector("summary")).toBe(summary);
   });
 });
 
