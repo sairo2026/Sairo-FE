@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import type { ButtonHTMLAttributes } from "react";
+import type { ButtonHTMLAttributes, ReactNode } from "react";
+import Link from "next/link";
 import { cn } from "@/shared/lib/cn";
 
 export type ButtonVariant = "submit" | "cancel" | "outlined" | "ghost";
@@ -26,7 +27,37 @@ const variantClass: Record<ButtonVariant, string> = {
   ghost: "bg-white text-ink-2 border border-line font-medium clickable-control",
 };
 
+const buttonBaseClass =
+  "inline-flex items-center justify-center rounded-control text-body transition-[color,background-color,border-color,box-shadow] duration-150";
+const buttonSizeClass = {
+  md: "h-12 min-w-[120px] gap-2 px-10",
+  sm: "h-9 gap-1.5 px-3.5 text-caption",
+} as const;
+
 const DOUBLE_CLICK_GUARD_MS = 300;
+
+export function ButtonLink({
+  href,
+  children,
+  variant = "cancel",
+  size = "md",
+  className,
+}: {
+  href: string;
+  children: ReactNode;
+  variant?: ButtonVariant;
+  size?: "md" | "sm";
+  className?: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className={cn(buttonBaseClass, buttonSizeClass[size], variantClass[variant], className)}
+    >
+      {children}
+    </Link>
+  );
+}
 
 export function Button({
   variant = "submit",
@@ -74,8 +105,8 @@ export function Button({
         onClick?.(event);
       }}
       className={cn(
-        "inline-flex items-center justify-center rounded-control text-body transition-[color,background-color,border-color,box-shadow] duration-150",
-        size === "md" ? "h-12 min-w-[120px] gap-2 px-10" : "h-9 gap-1.5 px-3.5 text-caption",
+        buttonBaseClass,
+        buttonSizeClass[size],
         fullWidth && "w-full",
         isWide && !fullWidth && "w-[230px]",
         !disabled && variantClass[variant],
