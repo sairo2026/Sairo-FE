@@ -275,6 +275,8 @@ describe("승인 대기와 초대 수락", () => {
     setMockOfficeState({ myMembership: membership() });
     renderOffice(<MembershipStatusScreen />);
     expect(await screen.findByText("대표의 승인을 기다리고 있습니다.")).not.toBeNull();
+    const requestCard = screen.getByText("내가 보낸 참여 요청").parentElement;
+    expect(requestCard?.textContent).toBe("내가 보낸 참여 요청땡땡사무소소속공인중개사");
     expect(screen.getByText(/참여 요청은 요청 후 30일까지 유효합니다/)).not.toBeNull();
     expect(screen.getByText(/승인 기한: \d+일/)).not.toBeNull();
   });

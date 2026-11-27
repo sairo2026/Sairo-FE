@@ -744,11 +744,13 @@ function MembershipStatusBody({ membership }: { membership: MembershipStatus }) 
       </div>
 
       <div className="rounded-control bg-surface px-4 py-3">
-        <p className="text-body font-semibold text-ink">{membership.officeName}</p>
         <p className="text-caption text-ink-2">
-          {isInvite ? "대표가 보낸 초대" : "내가 보낸 참여 요청"} ·{" "}
-          {labelOf(ROLE_LABEL, membership.role)}
+          {isInvite ? "대표가 보낸 초대" : "내가 보낸 참여 요청"}
         </p>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+          <p className="text-body font-semibold text-ink">{membership.officeName}</p>
+          <p className="text-caption text-ink-2">{labelOf(ROLE_LABEL, membership.role)}</p>
+        </div>
       </div>
 
       {isPending && !expired ? (
