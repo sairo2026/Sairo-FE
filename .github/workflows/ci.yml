@@ -37,6 +37,8 @@ jobs:
   e2e:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
+    container:
+      image: mcr.microsoft.com/playwright:v1.65.0-noble
 
     steps:
       - name: Checkout
@@ -51,9 +53,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install browser
-        run: npx playwright install --with-deps chromium
-
       - name: Build with mock API
         run: npm run build
         env:
@@ -64,6 +63,8 @@ jobs:
 
       - name: Run browser tests
         run: npm run e2e -- --project=desktop --project=mobile
+        env:
+          HOME: /root
 
       - name: Upload report
         if: failure()

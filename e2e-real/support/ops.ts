@@ -14,6 +14,21 @@ export type OperatorSession = {
   secret: string;
 };
 
+const lastTotpStep = new Map<string, number>();
+
+async function freshTotpCode(secret: string): Promise<string> {
+  while (true) {
+    const now = Date.now();
+    const step = Math.floor(now / 30_000);
+    const remainingMs = 30_000 - (now % 30_000);
+    if (remainingMs >= 10_000 && lastTotpStep.get(secret) !== step) {
+      lastTotpStep.set(secret, step);
+      return totpCode(secret, 0, now);
+    }
+    await new Promise((resolve) => setTimeout(resolve, remainingMs + 1_000));
+  }
+}
+
 export function bootstrapInvitationPath(): string {
   const file = readFileSync(requireEnv("E2E_BOOTSTRAP_INVITATION_FILE"), "utf-8");
   const link = file.match(/http:\/\/\S+\/ops\/invitations\/accept\?token=\S+/)?.[0];
@@ -48,9 +63,12 @@ export async function acceptInvitation(
   const secretText = await page.getByLabel("수동 입력 비밀값").textContent();
   const secret = (secretText ?? "").replace(/\s/g, "");
   expect(secret).toMatch(/^[A-Z2-7]{16,}$/);
-  await page.getByLabel(/^확인 코드/).fill(totpCode(secret));
+  const codeInput = page.getByLabel(/^확인 코드/);
+  await codeInput.fill(await freshTotpCode(secret));
+  await expect(codeInput).toHaveValue(/^\d{6}$/);
+  await codeInput.blur();
   await page.getByRole("button", { name: "등록 완료" }).click();
-  await expect(page).toHaveURL(/\/ops$/);
+  await expect(page).toHaveURL(/\/ops$/, { timeout: 15_000 });
   return { context, page, kakaoUserId, secret };
 }
 
@@ -64,9 +82,12 @@ export async function loginOperator(
   await page.goto("/ops/login");
   await page.getByRole("link", { name: "카카오로 시작" }).click();
   await expect(page).toHaveURL(/\/ops\/mfa/);
-  await page.getByLabel(/^확인 코드/).fill(totpCode(secret));
+  const codeInput = page.getByLabel(/^확인 코드/);
+  await codeInput.fill(await freshTotpCode(secret));
+  await expect(codeInput).toHaveValue(/^\d{6}$/);
+  await codeInput.blur();
   await page.getByRole("button", { name: "확인", exact: true }).click();
-  await expect(page).toHaveURL(/\/ops$/);
+  await expect(page).toHaveURL(/\/ops$/, { timeout: 15_000 });
   return { context, page, kakaoUserId, secret };
 }
 
@@ -116,7 +137,7 @@ export async function xsrfHeaders(context: BrowserContext): Promise<Record<strin
 export async function operatorStepUp(session: OperatorSession) {
   const response = await session.context.request.post(`${FRONT_ORIGIN}/api/ops/auth/step-up`, {
     maxRedirects: 0,
-    data: { otpCode: totpCode(session.secret) },
+    data: { otpCode: await freshTotpCode(session.secret) },
     headers: await xsrfHeaders(session.context),
   });
   expect(response.status()).toBeLessThan(300);
