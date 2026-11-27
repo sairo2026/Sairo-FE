@@ -76,7 +76,7 @@ function LinkProblem() {
   );
 }
 
-function ManagerLine({ name, role }: { name: string; role: keyof typeof LEGAL_ROLE_LABEL }) {
+export function ManagerLine({ name, role }: { name: string; role: keyof typeof LEGAL_ROLE_LABEL }) {
   return (
     <>
       <p className="text-caption text-ink-2">
@@ -154,6 +154,8 @@ function CustomerPortalPanel({
         verified: false,
         items: [],
       });
+      queryClient.removeQueries({ queryKey: ["customer-portal-request"] });
+      queryClient.removeQueries({ queryKey: ["customer-visit-portal-index"] });
       setCode("");
     },
   });
@@ -394,6 +396,16 @@ export function TimeForm({
               ? ["visit-public", token]
               : ["customer-portal-request", portalCoordinationId],
         });
+      }
+      if (
+        portalCoordinationId !== undefined &&
+        error instanceof ApiError &&
+        [404, 410].includes(error.status)
+      ) {
+        void queryClient.invalidateQueries({
+          queryKey: ["customer-portal-request", portalCoordinationId],
+        });
+        void queryClient.invalidateQueries({ queryKey: ["customer-visit-portal-index"] });
       }
     },
   });

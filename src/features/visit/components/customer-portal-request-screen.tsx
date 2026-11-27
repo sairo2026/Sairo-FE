@@ -8,7 +8,7 @@ import { ErrorScreen } from "@/shared/components/feedback/error-screen";
 import { PageSkeleton } from "@/shared/components/feedback/skeleton";
 import { formatSeoulDateTime } from "@/shared/lib/format";
 import { fetchCustomerPortalRequest } from "../api/follow.api";
-import { CandidateSummary, TimeForm } from "./customer-link-screen";
+import { CandidateSummary, ManagerLine, TimeForm } from "./customer-link-screen";
 import { CustomerLinkPrivacyNotice, LinkCommonNotices } from "./link-legal-notices";
 
 export function CustomerPortalRequestScreen({ coordinationId }: { coordinationId: number }) {
@@ -17,6 +17,8 @@ export function CustomerPortalRequestScreen({ coordinationId }: { coordinationId
     queryFn: ({ signal }) => fetchCustomerPortalRequest(coordinationId, signal),
     enabled: Number.isSafeInteger(coordinationId) && coordinationId > 0,
     retry: false,
+    staleTime: 0,
+    gcTime: 0,
   });
 
   if (!Number.isSafeInteger(coordinationId) || coordinationId <= 0)
@@ -28,7 +30,7 @@ export function CustomerPortalRequestScreen({ coordinationId }: { coordinationId
         <ErrorScreen
           kind="not-found"
           title="요청을 열 수 없습니다"
-          description="본인 확인이 끝났거나 응답 기간이 지났습니다. 사무소에서 받은 방문 요청 링크로 다시 확인해 주세요."
+          description="본인 확인이 만료됐거나 응답 기간이 지났습니다. 사무소에서 받은 방문 요청 링크로 다시 확인해 주세요."
         />
       );
     }
@@ -42,7 +44,7 @@ export function CustomerPortalRequestScreen({ coordinationId }: { coordinationId
     <div className="flex flex-col gap-4">
       <Link
         href="/visit/portal"
-        className="self-start text-caption font-semibold text-primary clickable-link"
+        className="inline-flex min-h-11 items-center self-start text-caption font-semibold text-primary clickable-link"
       >
         ← 내 방문 요청으로 돌아가기
       </Link>
@@ -55,7 +57,7 @@ export function CustomerPortalRequestScreen({ coordinationId }: { coordinationId
       </header>
       <section className="rounded-card-flat border border-line bg-white p-5 text-caption text-ink-2">
         <p className="font-semibold text-ink">{data.officeName}</p>
-        <p>담당 {data.managerDisplayName}</p>
+        <ManagerLine name={data.managerDisplayName} role={data.managerLegalRole} />
         <p>응답 마감 {formatSeoulDateTime(data.linkExpiresAt)}</p>
         <p>
           문의{" "}
@@ -68,7 +70,7 @@ export function CustomerPortalRequestScreen({ coordinationId }: { coordinationId
         </p>
       </section>
       <CandidateSummary link={data} />
-      <TimeForm portalCoordinationId={coordinationId} link={data} />
+      <TimeForm key={coordinationId} portalCoordinationId={coordinationId} link={data} />
       <CustomerLinkPrivacyNotice
         officeName={data.officeName}
         officeContactPhone={data.officeContactPhone}
@@ -76,6 +78,14 @@ export function CustomerPortalRequestScreen({ coordinationId }: { coordinationId
       />
       <LinkCommonNotices
         audience="customer"
+        rightsFallback={
+          <a
+            href={`tel:${data.officeContactPhone}`}
+            className="font-semibold text-primary underline clickable-link"
+          >
+            사무소에 전화해 요청하기
+          </a>
+        }
         officeName={data.officeName}
         officeContactPhone={data.officeContactPhone}
         retentionDays={data.privacyNotice.retentionDays}

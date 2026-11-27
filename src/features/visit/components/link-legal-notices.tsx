@@ -1,5 +1,7 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 import { useLegalCompanyInfo } from "@/shared/legal/use-legal-values";
 import {
   ACCESS_LOG_NOTICE,
@@ -71,8 +73,13 @@ export function CustomerLinkPrivacyNotice(props: LinkNoticeInput) {
 export function LinkCommonNotices({
   audience,
   rightsTarget,
+  rightsFallback,
   ...input
-}: LinkNoticeInput & { audience: "approver" | "customer"; rightsTarget?: GuestRightsTarget }) {
+}: LinkNoticeInput & {
+  audience: "approver" | "customer";
+  rightsTarget?: GuestRightsTarget;
+  rightsFallback?: ReactNode;
+}) {
   const context = useLinkNoticeContext(input);
   return (
     <section aria-label="링크 이용 안내" className="flex flex-col gap-2 text-caption text-ink-2">
@@ -84,6 +91,8 @@ export function LinkCommonNotices({
         {linkRightsFooter(context)}{" "}
         {rightsTarget ? (
           <GuestRightsRequestButton target={rightsTarget} context={context} />
+        ) : rightsFallback ? (
+          rightsFallback
         ) : (
           <>[{LINK_COMMON_COPY.rightsRequestLabel}]</>
         )}

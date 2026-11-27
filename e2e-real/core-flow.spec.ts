@@ -1,4 +1,4 @@
-﻿import { expect, test } from "./support/test";
+import { expect, test } from "./support/test";
 import { PNG_BYTES } from "./support/files";
 import { capturedMessage } from "./support/messages";
 import {
