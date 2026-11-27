@@ -626,6 +626,15 @@ export const visitFollowHandlers = [
     return HttpResponse.json(pageOf(rows, new URL(request.url)));
   }),
 
+  http.get("/api/public/customer-visit-links/portal", () =>
+    HttpResponse.json({ available: false, verified: false, items: [] }),
+  ),
+
+  http.post(
+    "/api/public/customer-visit-links/portal/logout",
+    () => new HttpResponse(null, { status: 204 }),
+  ),
+
   http.get("/api/public/customer-visit-links/:token/portal", () =>
     errorResponse(404, "PUBLIC_LINK_NOT_FOUND", "본인 확인이 필요합니다."),
   ),

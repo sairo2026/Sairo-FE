@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import type {
@@ -165,6 +166,12 @@ function CustomerPortalPanel({
       </p>
       {items ? (
         <>
+          <Link
+            href="/visit/portal"
+            className="mt-3 block text-caption font-semibold text-primary underline clickable-link"
+          >
+            내 방문 요청 모아보기
+          </Link>
           <ul className="mt-3 space-y-1 text-caption text-ink-2" aria-label="내 방문 요청">
             {items.map((item) => (
               <li key={item.coordinationId}>

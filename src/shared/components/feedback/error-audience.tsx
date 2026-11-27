@@ -10,7 +10,12 @@ const ErrorAudienceContext = createContext<ErrorAudience | null>(null);
 
 export function audienceForPath(pathname: string | null): ErrorAudience {
   if (pathname === "/ops" || pathname?.startsWith("/ops/")) return "ops";
-  if (pathname?.startsWith("/approver/") || pathname?.startsWith("/visit-responses/")) {
+  if (
+    pathname?.startsWith("/approver/") ||
+    pathname?.startsWith("/visit-responses/") ||
+    pathname === "/visit/portal" ||
+    pathname?.startsWith("/visit/portal/")
+  ) {
     return "guest";
   }
   return "office";
