@@ -31,6 +31,30 @@ const ReusableTimesSchema = z.object({
   timeSlots: z.array(z.object({ startsAt: z.string(), endsAt: z.string() })),
 });
 
+const CustomerPortalSendSchema = z.object({
+  accepted: z.boolean(),
+  maskedEmail: z.string(),
+  expiresInSeconds: z.number(),
+});
+
+const CustomerPortalVerifySchema = z.object({
+  verified: z.boolean(),
+  expiresInSeconds: z.number(),
+});
+
+const CustomerPortalRequestsSchema = z.object({
+  available: z.boolean(),
+  verified: z.boolean(),
+  items: z.array(
+    z.object({
+      coordinationId: z.number(),
+      status: z.string(),
+      periodStartDate: z.string(),
+      periodEndDate: z.string(),
+    }),
+  ),
+});
+
 /** 결과 기록·재조율·철회 접수·취소는 조율 건 version을 If-Match로 보낸다. */
 function ifMatch(version: number) {
   return { "If-Match": String(version) };
@@ -177,6 +201,46 @@ export function previewBrowserReusableCustomerTimes(token: string) {
   return apiFetch(`${customerBase(token)}/reusable-times`, {
     retry: false,
     schema: ReusableTimesSchema,
+  });
+}
+
+export function sendCustomerPortalCode(token: string) {
+  return apiFetch(`${customerBase(token)}/portal/otp`, {
+    method: "POST",
+    body: {},
+    retry: false,
+    schema: CustomerPortalSendSchema,
+  });
+}
+
+export function verifyCustomerPortalCode(token: string, code: string) {
+  return apiFetch(`${customerBase(token)}/portal/verify`, {
+    method: "POST",
+    body: { code },
+    retry: false,
+    schema: CustomerPortalVerifySchema,
+  });
+}
+
+export function fetchCustomerPortalRequests(token: string) {
+  return apiFetch(`${customerBase(token)}/portal`, {
+    retry: false,
+    schema: CustomerPortalRequestsSchema,
+  });
+}
+
+export function previewCustomerPortalTimes(token: string) {
+  return apiFetch(`${customerBase(token)}/portal/reusable-times`, {
+    retry: false,
+    schema: ReusableTimesSchema,
+  });
+}
+
+export function logoutCustomerPortal(token: string) {
+  return apiFetch(`${customerBase(token)}/portal/logout`, {
+    method: "POST",
+    body: {},
+    retry: false,
   });
 }
 

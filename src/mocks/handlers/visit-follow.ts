@@ -626,6 +626,10 @@ export const visitFollowHandlers = [
     return HttpResponse.json(pageOf(rows, new URL(request.url)));
   }),
 
+  http.get("/api/public/customer-visit-links/:token/portal", () =>
+    errorResponse(404, "PUBLIC_LINK_NOT_FOUND", "본인 확인이 필요합니다."),
+  ),
+
   http.get("/api/public/customer-visit-links/:token", ({ params }) => {
     if (params.token === MOCK_CUSTOMER_EXPIRED_TOKEN) {
       return errorResponse(404, "PUBLIC_LINK_EXPIRED", "링크가 만료되었습니다.");
