@@ -190,7 +190,9 @@ describe("verified customer request view", () => {
     expect(await screen.findByText(/10:00~11:00/)).not.toBeNull();
     expect(submissions).toBe(0);
     verified = false;
-    await portalClient.invalidateQueries({ queryKey: ["customer-visit-portal", MOCK_CUSTOMER_TOKEN] });
+    await portalClient.invalidateQueries({
+      queryKey: ["customer-visit-portal", MOCK_CUSTOMER_TOKEN],
+    });
     await waitFor(() => expect(screen.queryByText(/2026-11-11 ~ 2026-11-20/)).toBeNull());
   });
 
