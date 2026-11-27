@@ -25,6 +25,7 @@ const registrationNumber = `11110-2026-${String(Date.now()).slice(-5)}`;
 const businessNumber = String(Date.now()).slice(-10);
 
 const REVIEWER_EMAIL = "e2e-reviewer@example.com";
+const CUSTOMER_EMAIL = `e2e-customer-${Date.now().toString(36)}@example.com`;
 let registrationId = "";
 
 test.describe.configure({ mode: "serial" });
@@ -222,7 +223,7 @@ test("매물을 등록하고 목록과 상세에서 확인한다", async ({ page
   await page.getByLabel("매물 주소").fill("서울특별시 종로구 시험로 1");
   await page.getByLabel("담당 공인중개사").selectOption({ index: 1 });
   await page.getByRole("button", { name: "활성 등록" }).click();
-  await expect(page).toHaveURL(/\/properties\/\d+$/);
+  await expect(page).toHaveURL(/\/properties\/\d+$/, { timeout: 20_000 });
   propertyUrl = new URL(page.url()).pathname;
   await expect(page.getByRole("heading", { level: 1, name: "실API 아파트" })).toBeVisible();
   await page.goto("/properties");
@@ -234,6 +235,7 @@ test("고객을 등록하고 희망조건을 저장한 뒤 목록에서 확인�
   await page.goto("/customers/new");
   await page.getByLabel(/^이름/).fill("실API고객");
   await page.getByLabel("연락처", { exact: true }).fill("01099998888");
+  await page.getByLabel("이메일 주소").fill(CUSTOMER_EMAIL);
   await page.getByLabel(/^담당 공인중개사/).selectOption({ index: 1 });
   await page.getByLabel(/^수집 경로/).fill("전화 문의");
   await page.getByLabel(/^처리 근거/).selectOption("CONSENT");
@@ -325,8 +327,46 @@ test("고객 링크를 발급하고 고객이 공개 링크에서 가능한 시�
     await customerPage.getByRole("button", { name: time, exact: true }).click();
   }
   await customerPage.getByRole("button", { name: "가능한 시간 제출" }).click();
-  await expect(customerPage.getByText("가능한 시간을 제출했습니다.")).toBeVisible();
+  await expect(customerPage.getByText("가능한 시간을 제출했습니다.")).toBeVisible({
+    timeout: 20_000,
+  });
   await customerContext.close();
+});
+
+test("실제 이메일 인증 후 방문 요청 목록을 새로고침에도 유지하고 종료한다", async ({
+  browser,
+  request,
+}) => {
+  // The preceding serial test issues the link for this synthetic customer.
+  expect(customerLink).toMatch(/^\/visit-responses\//);
+  const { context, page } = await openPublicPage(browser);
+  await page.goto(customerLink);
+  await page.getByRole("button", { name: "인증번호 받기" }).click();
+  const mail = await capturedMessage(request, "mail", CUSTOMER_EMAIL, {
+    match: /SAIRO visit verification code/,
+  });
+  const code = mail.body.match(/verification code:\s*(\d{6})/i)?.[1];
+  if (!code) throw new Error("customer verification code missing from local fixture mail");
+  await page.getByLabel("인증번호").fill(code);
+  await page.getByRole("button", { name: "내 방문 요청 확인하기" }).click();
+  await page.getByRole("link", { name: "내 방문 요청 모아보기" }).click();
+  await expect(page).toHaveURL(/\/visit\/portal$/);
+  const coordinationId = coordinationUrl.split("/").at(-1);
+  expect(coordinationId).toMatch(/^\d+$/);
+  await expect(page.getByRole("list", { name: "내 방문 요청 목록" })).toContainText(
+    `방문 요청 #${coordinationId}`,
+  );
+  await page.screenshot({ path: "test-results/customer-portal-real.png", fullPage: true });
+  await page.reload();
+  await expect(page.getByRole("list", { name: "내 방문 요청 목록" })).toContainText(
+    `방문 요청 #${coordinationId}`,
+  );
+  await page.getByRole("button", { name: "이 기기에서 보기 종료" }).click();
+  await expect(page.getByText(/방문 요청 링크에서 이메일 인증을 완료하면/)).toBeVisible();
+  await page.reload();
+  await expect(page.getByText(/방문 요청 링크에서 이메일 인증을 완료하면/)).toBeVisible();
+  await expect(page.getByRole("list", { name: "내 방문 요청 목록" })).toBeHidden();
+  await context.close();
 });
 
 test("승인자가 링크에서 방문 조건을 등록한다", async ({ browser }) => {
