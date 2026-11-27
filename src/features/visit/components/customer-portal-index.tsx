@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FormAlert } from "@/shared/components/feedback/form-frame";
 import { PageSkeleton } from "@/shared/components/feedback/skeleton";
@@ -10,7 +11,7 @@ import { statusLabel, statusTone } from "../model/labels";
 
 const QUERY_KEY = ["customer-visit-portal-index"] as const;
 
-/** A bookmarked overview; responses are still submitted on their individual secure links. */
+/** A verified customer's bookmarked overview of requests in the same office. */
 export function CustomerPortalIndex() {
   const queryClient = useQueryClient();
   const requests = useQuery({
@@ -24,12 +25,14 @@ export function CustomerPortalIndex() {
       await Promise.all([
         queryClient.cancelQueries({ queryKey: QUERY_KEY }),
         queryClient.cancelQueries({ queryKey: ["customer-visit-portal"] }),
+        queryClient.cancelQueries({ queryKey: ["customer-portal-request"] }),
       ]);
       queryClient.setQueryData(QUERY_KEY, { available: false, verified: false, items: [] });
       queryClient.setQueriesData(
         { queryKey: ["customer-visit-portal"] },
         { available: true, verified: false, items: [] },
       );
+      queryClient.removeQueries({ queryKey: ["customer-portal-request"] });
     },
   });
 
@@ -80,16 +83,30 @@ export function CustomerPortalIndex() {
                         {item.periodStartDate} ~ {item.periodEndDate}
                       </p>
                     </div>
-                    <Badge tone={statusTone(item.status)} className="h-8 min-w-0 px-3 text-caption">
-                      {statusLabel(item.status)}
-                    </Badge>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge
+                        tone={statusTone(item.status)}
+                        className="h-8 min-w-0 px-3 text-caption"
+                      >
+                        {statusLabel(item.status)}
+                      </Badge>
+                      {item.canRespond ? (
+                        <Link
+                          href={`/visit/portal/${item.coordinationId}`}
+                          className="rounded-control bg-primary px-3.5 py-2 text-caption font-semibold text-white clickable-link"
+                        >
+                          가능한 시간 확인·수정
+                        </Link>
+                      ) : null}
+                    </div>
                   </li>
                 ))}
               </ul>
             )}
           </div>
           <p className="text-caption text-ink-2">
-            새 방문 요청의 시간 확인·수정은 사무소에서 전달한 해당 요청 링크에서 진행해 주세요.
+            진행 중인 요청은 여기서 가능한 시간을 확인·수정할 수 있습니다. 응답 마감 뒤에는 사무소에
+            문의해 주세요.
           </p>
           <Button
             variant="ghost"

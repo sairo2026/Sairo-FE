@@ -51,6 +51,7 @@ const CustomerPortalRequestsSchema = z.object({
       status: z.string(),
       periodStartDate: z.string(),
       periodEndDate: z.string(),
+      canRespond: z.boolean().optional(),
     }),
   ),
 });
@@ -234,6 +235,36 @@ export function fetchCustomerPortalIndex() {
     retry: false,
     schema: CustomerPortalRequestsSchema,
   });
+}
+
+export function fetchCustomerPortalRequest(coordinationId: number, signal?: AbortSignal) {
+  return apiFetch(`/api/public/customer-visit-links/portal/requests/${coordinationId}`, {
+    signal,
+    retry: false,
+    schema: PublicVisitLinkResponseSchema,
+  });
+}
+
+export function previewCustomerPortalRequestTimes(coordinationId: number) {
+  return apiFetch(
+    `/api/public/customer-visit-links/portal/requests/${coordinationId}/reusable-times`,
+    { retry: false, schema: ReusableTimesSchema },
+  );
+}
+
+export function submitCustomerPortalTimes(
+  coordinationId: number,
+  request: AvailableTimesSubmitRequest,
+) {
+  return apiFetch(
+    `/api/public/customer-visit-links/portal/requests/${coordinationId}/available-times`,
+    {
+      method: "POST",
+      body: request,
+      retry: false,
+      schema: CustomerAvailableTimesResponseSchema,
+    },
+  );
 }
 
 export function logoutCustomerPortalIndex() {

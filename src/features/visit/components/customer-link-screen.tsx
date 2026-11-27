@@ -26,8 +26,10 @@ import {
   logoutCustomerPortal,
   previewBrowserReusableCustomerTimes,
   previewCustomerPortalTimes,
+  previewCustomerPortalRequestTimes,
   previewReusableCustomerTimes,
   sendCustomerPortalCode,
+  submitCustomerPortalTimes,
   submitCustomerTimes,
   verifyCustomerPortalCode,
 } from "../api/follow.api";
@@ -74,7 +76,7 @@ function LinkProblem() {
   );
 }
 
-function ManagerLine({ name, role }: { name: string; role: keyof typeof LEGAL_ROLE_LABEL }) {
+export function ManagerLine({ name, role }: { name: string; role: keyof typeof LEGAL_ROLE_LABEL }) {
   return (
     <>
       <p className="text-caption text-ink-2">
@@ -152,6 +154,8 @@ function CustomerPortalPanel({
         verified: false,
         items: [],
       });
+      queryClient.removeQueries({ queryKey: ["customer-portal-request"] });
+      queryClient.removeQueries({ queryKey: ["customer-visit-portal-index"] });
       setCode("");
     },
   });
@@ -249,7 +253,15 @@ function CustomerPortalPanel({
   );
 }
 
-function TimeForm({ token, link }: { token: string; link: PublicVisitLinkResponse }) {
+export function TimeForm({
+  token,
+  portalCoordinationId,
+  link,
+}: {
+  token?: string;
+  portalCoordinationId?: number;
+  link: PublicVisitLinkResponse;
+}) {
   const queryClient = useQueryClient();
   const initial = parseSubmittedSlots(link.submittedTimeSlots);
   const dates = listWindowDates(link.candidateWindow);
@@ -272,7 +284,7 @@ function TimeForm({ token, link }: { token: string; link: PublicVisitLinkRespons
   const isClosed = !acceptsCustomerResponse(link.coordinationStatus, link.linkExpiresAt);
   const isResubmit = initial.length > 0;
   const { mutate: loadBrowserTimes } = useMutation({
-    mutationFn: () => previewBrowserReusableCustomerTimes(token),
+    mutationFn: () => previewBrowserReusableCustomerTimes(token ?? ""),
     onSuccess: ({ timeSlots }) => {
       if (autoApplied.current || userChangedTimes.current || submissionStarted.current) return;
       autoApplied.current = true;
@@ -296,13 +308,37 @@ function TimeForm({ token, link }: { token: string; link: PublicVisitLinkRespons
       );
     },
   });
+  const { mutate: loadPortalTimes } = useMutation({
+    mutationFn: () => previewCustomerPortalRequestTimes(portalCoordinationId ?? 0),
+    onSuccess: ({ timeSlots }) => {
+      if (autoApplied.current || userChangedTimes.current || submissionStarted.current) return;
+      autoApplied.current = true;
+      const blocks = safeReusableBlocks(timeSlots);
+      if (Object.keys(blocks).length === 0) return;
+      setSelected((current) => {
+        const merged = { ...current };
+        for (const [date, minutes] of Object.entries(blocks)) {
+          merged[date] = [...new Set([...(current[date] ?? []), ...minutes])].sort(
+            (left, right) => left - right,
+          );
+        }
+        return merged;
+      });
+      const firstReusableDate = Object.keys(blocks).sort()[0];
+      if (firstReusableDate && !userChangedDate.current) setActiveDate(firstReusableDate);
+      setReuseNotice(
+        "이전에 확인한 유효한 시간을 표시했습니다. 이번 요청에 맞게 확인·수정한 뒤 제출해 주세요.",
+      );
+    },
+  });
   useEffect(() => {
     if (isClosed || isResubmit || autoRequested.current) return;
     autoRequested.current = true;
-    loadBrowserTimes();
-  }, [isClosed, isResubmit, loadBrowserTimes]);
+    if (portalCoordinationId !== undefined) loadPortalTimes();
+    else if (token) loadBrowserTimes();
+  }, [isClosed, isResubmit, loadBrowserTimes, loadPortalTimes, portalCoordinationId, token]);
   const reuse = useMutation({
-    mutationFn: (previousToken: string) => previewReusableCustomerTimes(token, previousToken),
+    mutationFn: (previousToken: string) => previewReusableCustomerTimes(token ?? "", previousToken),
     onSuccess: ({ timeSlots }) => {
       const blocks = safeReusableBlocks(timeSlots);
       setSelected((current) => {
@@ -333,15 +369,43 @@ function TimeForm({ token, link }: { token: string; link: PublicVisitLinkRespons
   });
   const drafts = blocksToDrafts(selected);
   const mutation = useMutation({
-    mutationFn: () =>
-      submitCustomerTimes(token, {
+    mutationFn: () => {
+      const request = {
         timeSlots: toSubmitSlots(drafts),
         acknowledgedNoticeVersion: link.privacyNotice.noticeVersion,
-      }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["visit-public", token] }),
+      };
+      return portalCoordinationId === undefined
+        ? submitCustomerTimes(token ?? "", request)
+        : submitCustomerPortalTimes(portalCoordinationId, request);
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey:
+          portalCoordinationId === undefined
+            ? ["visit-public", token]
+            : ["customer-portal-request", portalCoordinationId],
+      });
+      if (portalCoordinationId !== undefined)
+        await queryClient.invalidateQueries({ queryKey: ["customer-visit-portal-index"] });
+    },
     onError: (error) => {
       if (isApiCode(error, "NOTICE_VERSION_CHANGED")) {
-        void queryClient.invalidateQueries({ queryKey: ["visit-public", token] });
+        void queryClient.invalidateQueries({
+          queryKey:
+            portalCoordinationId === undefined
+              ? ["visit-public", token]
+              : ["customer-portal-request", portalCoordinationId],
+        });
+      }
+      if (
+        portalCoordinationId !== undefined &&
+        error instanceof ApiError &&
+        [404, 410].includes(error.status)
+      ) {
+        void queryClient.invalidateQueries({
+          queryKey: ["customer-portal-request", portalCoordinationId],
+        });
+        void queryClient.invalidateQueries({ queryKey: ["customer-visit-portal-index"] });
       }
     },
   });
@@ -412,10 +476,10 @@ function TimeForm({ token, link }: { token: string; link: PublicVisitLinkRespons
 
   return (
     <div className="flex flex-col gap-4">
-      {!isClosed && isResubmit ? (
+      {!isClosed && isResubmit && token ? (
         <CustomerPortalPanel token={token} onReuse={reuseVerifiedTimes} />
       ) : null}
-      {!isClosed && !isResubmit ? (
+      {!isClosed && !isResubmit && token ? (
         <section
           aria-labelledby="reuse-time-title"
           className={cn(SURFACE_CARD, "flex flex-col gap-3")}
@@ -486,6 +550,9 @@ function TimeForm({ token, link }: { token: string; link: PublicVisitLinkRespons
         <FormAlert key={message}>{message}</FormAlert>
       ))}
       {formError ? <FormAlert>{formError}</FormAlert> : null}
+      {portalCoordinationId !== undefined && reuseNotice ? (
+        <FormNotice>{reuseNotice}</FormNotice>
+      ) : null}
       {mutation.isError ? (
         <FormAlert>
           {isApiCode(mutation.error, "NOTICE_VERSION_CHANGED")
@@ -507,7 +574,8 @@ function TimeForm({ token, link }: { token: string; link: PublicVisitLinkRespons
       <div className="sticky bottom-0 -mx-4 flex flex-col gap-2 border-t border-line bg-white px-5 pb-6 pt-3.5 sm:-mx-6">
         <p className="text-center text-caption text-ink-2">{LINK_COMMON_COPY.aboveSubmit}</p>
         <p className="text-center text-caption text-ink-2">
-          링크 만료 {formatSeoulDateTime(link.linkExpiresAt)}
+          {portalCoordinationId === undefined ? "링크 만료" : "응답 마감"}{" "}
+          {formatSeoulDateTime(link.linkExpiresAt)}
         </p>
         <Button fullWidth isLoading={mutation.isPending} disabled={isClosed} onClick={submit}>
           {isWithdrawAll
@@ -532,7 +600,7 @@ function InfoCell({ label, value, isAlert }: { label: string; value: string; isA
   );
 }
 
-function CandidateSummary({ link }: { link: PublicVisitLinkResponse }) {
+export function CandidateSummary({ link }: { link: PublicVisitLinkResponse }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const properties = link.candidateProperties ?? [];
   const visible = isExpanded ? properties : properties.slice(0, 3);
