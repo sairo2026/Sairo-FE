@@ -137,11 +137,17 @@ export function OfficeCloseScreen() {
             ) : null}
           </div>
           {error ? <FormAlert>{error}</FormAlert> : null}
-          <div className="flex gap-3">
-            <Button isLoading={mutation.isPending || mutation.isSuccess} onClick={submit}>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Button
+              className="w-full whitespace-nowrap sm:w-auto"
+              isLoading={mutation.isPending || mutation.isSuccess}
+              onClick={submit}
+            >
               {COPY.closeSubmit}
             </Button>
-            <ButtonLink href="/office">취소</ButtonLink>
+            <ButtonLink href="/office" className="w-full whitespace-nowrap sm:w-auto">
+              취소
+            </ButtonLink>
           </div>
         </div>
       </Card>
