@@ -3,7 +3,7 @@ import { BrandLogo } from "@/shared/components/ui/brand-logo";
 import { Card } from "@/shared/components/ui/card";
 import { FormAlert, FormNotice } from "@/shared/components/feedback/form-frame";
 import { CookieNotice } from "@/shared/legal/cookie-notice";
-import { KAKAO_LINK_NOTICE } from "../model/legal-copy";
+import { KAKAO_LINK_NOTICE, KAKAO_LINK_SUMMARY } from "../model/legal-copy";
 import { breakSentences } from "@/shared/lib/sentences";
 
 const ENTRY_ERRORS: Record<string, string> = {
@@ -65,9 +65,17 @@ export function AuthEntry({
               {isLogin ? "이메일로 로그인하기" : "이메일로 회원가입하기"}
             </Link>
             {isLogin ? null : (
-              <p className="mt-1 whitespace-pre-line text-caption text-ink-2">
-                {breakSentences(KAKAO_LINK_NOTICE)}
-              </p>
+              <div className="mt-1 space-y-3">
+                <p className="text-caption text-ink-2">{KAKAO_LINK_SUMMARY}</p>
+                <details className="rounded-control border border-line bg-surface px-4 py-3">
+                  <summary className="cursor-pointer text-body font-medium text-ink">
+                    카카오 계정 연결·해제 안내 자세히 보기
+                  </summary>
+                  <p className="mt-3 whitespace-pre-line text-caption text-ink-2">
+                    {breakSentences(KAKAO_LINK_NOTICE)}
+                  </p>
+                </details>
+              </div>
             )}
           </div>
           <p className="text-caption text-ink-2">
