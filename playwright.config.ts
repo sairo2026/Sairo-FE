@@ -35,19 +35,19 @@ export default defineConfig({
     {
       name: "firefox-smoke",
       testMatch:
-        /(report-only-csp|ops-refund-reprocess|office-start-mobile|auth-purpose-copy|install-pwa|customer-time-reuse)\.spec\.ts/,
+        /(report-only-csp|ops-refund-reprocess|office-start-mobile|auth-purpose-copy|install-pwa|customer-time-reuse|customer-portal-index)\.spec\.ts/,
       use: { ...devices["Desktop Firefox"] },
     },
     {
       name: "webkit-smoke",
       testMatch:
-        /(report-only-csp|ops-refund-reprocess|office-start-mobile|auth-purpose-copy|install-pwa|customer-time-reuse)\.spec\.ts/,
+        /(report-only-csp|ops-refund-reprocess|office-start-mobile|auth-purpose-copy|install-pwa|customer-time-reuse|customer-portal-index)\.spec\.ts/,
       use: { ...devices["Desktop Safari"] },
     },
     {
       name: "mobile-webkit-smoke",
       testMatch:
-        /(report-only-csp|ops-refund-reprocess|office-start-mobile|auth-purpose-copy|install-pwa|customer-time-reuse)\.spec\.ts/,
+        /(report-only-csp|ops-refund-reprocess|office-start-mobile|auth-purpose-copy|install-pwa|customer-time-reuse|customer-portal-index)\.spec\.ts/,
       use: { ...devices["iPhone 13"] },
     },
   ],
