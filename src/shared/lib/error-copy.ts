@@ -332,11 +332,11 @@ export const FIELD_ERROR_OVERRIDES: Record<string, string> = {
   "password.REQUIRED": "비밀번호를 입력해 주세요.",
   "password.TOO_SHORT": "비밀번호는 8자 이상이어야 합니다.",
   "password.TOO_LONG": "비밀번호는 12자 이하여야 합니다.",
-  "password.NOT_ALLOWED": "너무 흔한 비밀번호입니다. 다른 비밀번호를 입력해 주세요.",
+  "password.NOT_ALLOWED": "안전성이 낮은 비밀번호입니다. 다른 비밀번호를 입력해 주세요.",
   "newPassword.REQUIRED": "비밀번호를 입력해 주세요.",
   "newPassword.TOO_SHORT": "비밀번호는 8자 이상이어야 합니다.",
   "newPassword.TOO_LONG": "비밀번호는 12자 이하여야 합니다.",
-  "newPassword.NOT_ALLOWED": "너무 흔한 비밀번호입니다. 다른 비밀번호를 입력해 주세요.",
+  "newPassword.NOT_ALLOWED": "안전성이 낮은 비밀번호입니다. 다른 비밀번호를 입력해 주세요.",
 };
 
 /** 필드 오류 하나를 입력 칸 아래에 보일 문구로 바꾼다. 서버가 준 문장은 쓰지 않는다. */

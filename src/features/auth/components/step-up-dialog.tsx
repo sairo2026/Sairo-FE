@@ -54,12 +54,11 @@ export function StepUpDialog({
   });
 
   return (
-    <Modal isOpen title="본인 확인이 필요합니다" onClose={onCancel}>
+    <Modal isOpen title="본인 확인이 필요합니다" onClose={onCancel} size="form" compactTitleGap>
       <form onSubmit={submit} noValidate className="flex flex-col gap-4">
         <p>
-          중요한 작업이라 비밀번호를 다시 확인합니다. 카카오로 가입했다면 카카오로 확인해 주세요.
-          카카오로 확인하면 카카오 화면을 거쳐 이 화면으로 돌아오며 하던 작업은 돌아온 뒤 다시
-          진행합니다.
+          이메일 계정은 비밀번호로, 카카오 계정은 카카오로 본인 확인해 주세요. 카카오 인증 후 이
+          화면으로 돌아오면 하던 작업을 다시 진행할 수 있습니다.
         </p>
         <Controller
           name="password"
@@ -75,7 +74,7 @@ export function StepUpDialog({
             />
           )}
         />
-        <div className="flex flex-wrap justify-end gap-2">
+        <div className="mt-6 flex flex-wrap justify-center gap-4">
           <Button variant="cancel" onClick={onCancel}>
             취소
           </Button>
@@ -89,7 +88,7 @@ export function StepUpDialog({
             카카오로 확인
           </Button>
           <Button type="submit" isLoading={isSubmitting}>
-            확인
+            비밀번호로 확인
           </Button>
         </div>
       </form>

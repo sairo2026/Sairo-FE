@@ -99,7 +99,7 @@ describe("휴대폰 번호를 인증 없이 저장할 때 카카오 가입", () 
     const user = userEvent.setup();
     const captured = captureBody("/api/auth/signup/kakao");
     renderWithQuery(<KakaoSignupForm />);
-    await screen.findByRole("heading", { name: "카카오로 가입" });
+    await screen.findByRole("heading", { name: "카카오 회원가입" });
     expect(screen.queryByRole("button", { name: "인증번호 받기" })).toBeNull();
     await user.type(screen.getByLabelText(/^휴대폰 번호/), "01012345678");
     await user.click(screen.getByLabelText(/이용약관에 동의합니다/));

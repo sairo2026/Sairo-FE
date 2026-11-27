@@ -97,7 +97,7 @@ export function AuthEventsProvider({ children }: { children: ReactNode }) {
       {hasStepUpNotice ? (
         <div
           role="status"
-          className="fixed right-4 bottom-4 left-4 z-[60] flex items-center justify-between gap-3 rounded-control border border-tag-green bg-tag-green px-4 py-3 text-caption font-medium text-tag-green-ink shadow-popup sm:left-auto"
+          className="fixed right-4 bottom-4 left-4 z-[60] flex items-center justify-between gap-3 rounded-control border border-primary bg-primary px-4 py-3 text-caption font-medium text-white shadow-popup sm:left-auto"
         >
           <span>카카오로 본인 확인을 마쳤습니다. 10분 안에 하던 작업을 다시 진행해 주세요.</span>
           <button

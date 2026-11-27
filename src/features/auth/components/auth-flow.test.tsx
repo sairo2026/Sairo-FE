@@ -612,7 +612,7 @@ describe("AuthEventsProvider", () => {
       expect(screen.getByRole("dialog", { name: "본인 확인이 필요합니다" })).not.toBeNull(),
     );
     await userEvent.type(screen.getByLabelText("비밀번호"), "mock-password-1");
-    await userEvent.click(screen.getByRole("button", { name: "확인" }));
+    await userEvent.click(screen.getByRole("button", { name: "비밀번호로 확인" }));
     await expect(request).resolves.toEqual({ changed: true });
     expect(screen.queryByRole("dialog")).toBeNull();
     expect(calls).toBe(2);
@@ -635,7 +635,7 @@ describe("AuthEventsProvider", () => {
       (error: unknown) => error,
     );
     await waitFor(() => expect(screen.getByRole("dialog")).not.toBeNull());
-    await userEvent.click(screen.getByRole("button", { name: "확인" }));
+    await userEvent.click(screen.getByRole("button", { name: "비밀번호로 확인" }));
     expect(await screen.findByText("비밀번호를 입력해 주세요.")).not.toBeNull();
     expect(calls).toBe(1);
     await userEvent.click(screen.getByRole("button", { name: "취소" }));
@@ -651,7 +651,7 @@ describe("AuthEventsProvider", () => {
       expect(screen.getByRole("dialog", { name: "본인 확인이 필요합니다" })).not.toBeNull(),
     );
     await userEvent.type(screen.getByLabelText("비밀번호"), "wrong");
-    await userEvent.click(screen.getByRole("button", { name: "확인" }));
+    await userEvent.click(screen.getByRole("button", { name: "비밀번호로 확인" }));
     await waitFor(() => expect(screen.getByText("비밀번호가 맞지 않습니다.")).not.toBeNull());
     await userEvent.click(screen.getByRole("button", { name: "취소" }));
     await expect(settled).resolves.toMatchObject({ code: "STEP_UP_REQUIRED" });
