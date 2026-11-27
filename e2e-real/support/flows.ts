@@ -116,13 +116,5 @@ export async function openPublicPage(browser: Browser) {
   });
   await protectLocalContext(context);
   const page = await context.newPage();
-  page.on("response", async (response) => {
-    const url = new URL(response.url());
-    if (!url.pathname.startsWith("/api/")) return;
-    const text = await response.text().catch(() => "");
-    console.log(
-      `${response.request().method()} ${url.pathname} ${response.status()} ${text.slice(0, 300)}`,
-    );
-  });
   return { context, page };
 }
