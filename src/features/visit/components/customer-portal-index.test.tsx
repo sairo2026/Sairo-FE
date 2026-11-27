@@ -53,6 +53,7 @@ describe("고객 방문 요청 모아보기", () => {
                     status: "TIME_COLLECTING",
                     periodStartDate: "2026-11-11",
                     periodEndDate: "2026-11-20",
+                    canRespond: true,
                   },
                 ],
               }
@@ -71,8 +72,12 @@ describe("고객 방문 요청 모아보기", () => {
       verified: true,
       items: [{ coordinationId: 71 }],
     });
+    queryClient.setQueryData(["customer-portal-request", 71], { officeName: "test office" });
     expect(await screen.findByText("방문 요청 #71")).not.toBeNull();
     expect(screen.getByText("2026-11-11 ~ 2026-11-20")).not.toBeNull();
+    expect(screen.getByRole("link", { name: "가능한 시간 확인·수정" }).getAttribute("href")).toBe(
+      "/visit/portal/71",
+    );
     await user.click(screen.getByRole("button", { name: "이 기기에서 보기 종료" }));
     expect(await screen.findByText(/방문 요청 링크에서 이메일 인증을 완료하면/)).not.toBeNull();
     expect(screen.queryByText("방문 요청 #71")).toBeNull();
@@ -81,5 +86,6 @@ describe("고객 방문 요청 모아보기", () => {
       verified: false,
       items: [],
     });
+    expect(queryClient.getQueryData(["customer-portal-request", 71])).toBeUndefined();
   });
 });
