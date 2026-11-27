@@ -88,6 +88,24 @@ describe("인증된 고객의 확정 방문", () => {
     expect(screen.queryByText(/다음 방문까지 이동/)).toBeNull();
   });
 
+  it("담당자가 중개보조원이면 법적 신분 안내를 표시한다", async () => {
+    server.use(
+      http.get("*/api/public/customer-visit-links/portal/requests/72/confirmed", () =>
+        HttpResponse.json({
+          state: "VALID",
+          scheduleVersion: 1,
+          managerDisplayName: "김담당",
+          managerLegalRole: "ASSISTANT",
+          officeContactPhone: "02-000-0000",
+          items: [],
+        }),
+      ),
+    );
+    renderScreen();
+    expect(await screen.findByText("중개보조원 신분 안내")).not.toBeNull();
+    expect(screen.getByText(/중개보조원은 공인중개사가 아니며/)).not.toBeNull();
+  });
+
   it("열람 기한이 지난 일정은 비공개 상태로 안내한다", async () => {
     server.use(
       http.get("*/api/public/customer-visit-links/portal/requests/72/confirmed", () =>
@@ -96,6 +114,7 @@ describe("인증된 고객의 확정 방문", () => {
     );
     renderScreen();
     expect(await screen.findByText("일정 열람 기간이 지났습니다")).not.toBeNull();
+    expect(screen.getByRole("link", { name: "이전 화면으로 돌아가기" })).not.toBeNull();
   });
 
   it("다른 고객의 일정은 이메일 확인 안내만 표시한다", async () => {
@@ -106,6 +125,7 @@ describe("인증된 고객의 확정 방문", () => {
     );
     renderScreen();
     expect(await screen.findByText("고객 확인이 필요합니다")).not.toBeNull();
+    expect(screen.getByRole("link", { name: "이전 화면으로 돌아가기" })).not.toBeNull();
   });
 
   it.each([
