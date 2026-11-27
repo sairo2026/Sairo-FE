@@ -117,6 +117,20 @@ describe("링크 화면 공통 문구", () => {
     );
   });
 
+  it("포털은 작동하지 않는 권리 요청 문구 대신 사무소 전화 경로를 보여준다", () => {
+    renderWithQuery(
+      <LinkCommonNotices
+        audience="customer"
+        officeContactPhone="010-1234-5678"
+        rightsFallback={<a href="tel:010-1234-5678">사무소에 전화해 요청하기</a>}
+      />,
+    );
+    expect(
+      screen.getByRole("link", { name: "사무소에 전화해 요청하기" }).getAttribute("href"),
+    ).toBe("tel:010-1234-5678");
+    expect(screen.queryByText("[내 정보 요청하기]")).toBeNull();
+  });
+
   it("내 정보 요청하기 접수 완료 문구와 오류 문구를 그대로 가진다", () => {
     expect(GUEST_RIGHTS_REQUEST_COPY.received("2026-11-10 10:00", "2026-11-20")).toBe(
       "요청을 접수했습니다. 2026-11-10 10:00에 접수되었고 2026-11-20까지 결과를 알려 드립니다. 접수 번호는 따로 드리지 않습니다.",

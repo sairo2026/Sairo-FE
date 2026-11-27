@@ -336,6 +336,7 @@ test("고객 링크를 발급하고 고객이 공개 링크에서 가능한 시�
 test("실제 이메일 인증 후 방문 요청 목록을 새로고침에도 유지하고 종료한다", async ({
   browser,
   request,
+  page: staffPage,
 }) => {
   // The preceding serial test issues the link for this synthetic customer.
   expect(customerLink).toMatch(/^\/visit-responses\//);
@@ -361,11 +362,57 @@ test("실제 이메일 인증 후 방문 요청 목록을 새로고침에도 유
   await expect(page.getByRole("list", { name: "내 방문 요청 목록" })).toContainText(
     `방문 요청 #${coordinationId}`,
   );
+  await loginViaUi(staffPage, owner.email, /\/(home|billing)$/);
+  await staffPage.goto("/properties/new");
+  await staffPage.getByLabel(/^매물명/).fill("실API 추가 아파트");
+  await staffPage
+    .getByRole("combobox", { name: "건물 카테고리" })
+    .selectOption({ label: "아파트" });
+  await staffPage.getByLabel("매물 주소").fill("서울특별시 종로구 시험로 2");
+  await staffPage.getByLabel("담당 공인중개사").selectOption({ index: 1 });
+  await staffPage.getByRole("button", { name: "활성 등록" }).click();
+  await expect(staffPage).toHaveURL(/\/properties\/\d+$/);
+  await staffPage.goto("/coordinations/new");
+  await staffPage
+    .getByRole("radio", { name: /실API고객/ })
+    .first()
+    .check({ force: true });
+  await staffPage.getByRole("checkbox", { name: "실API 추가 아파트 선택" }).check({ force: true });
+  await staffPage.getByRole("button", { name: "조율 만들기" }).click();
+  await expect(staffPage).toHaveURL(/\/coordinations\/\d+$/);
+  const secondCoordinationUrl = new URL(staffPage.url()).pathname;
+  const secondId = secondCoordinationUrl.split("/").at(-1);
+  expect(secondId).toMatch(/^\d+$/);
+  await staffPage.getByRole("button", { name: "고객 링크 발급" }).click();
+  await expect(staffPage.getByLabel("발급된 링크")).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByRole("list", { name: "내 방문 요청 목록" })).toContainText(
+    `방문 요청 #${secondId}`,
+  );
+  await page.getByRole("link", { name: "가능한 시간 확인·수정" }).first().click();
+  await expect(page).toHaveURL(new RegExp(`/visit/portal/${secondId}$`));
+  await expect(page.getByText(/이전에 확인한 유효한 시간을 표시했습니다/)).toBeVisible();
+  await expect(page.getByRole("button", { name: "10:00", exact: true })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await page.getByRole("button", { name: "가능한 시간 제출" }).click();
+  await expect(page.getByText("가능한 시간을 제출했습니다.")).toBeVisible();
+  await page.screenshot({ path: "test-results/customer-portal-second-real.png", fullPage: true });
+  await page.reload();
+  await expect(page.getByRole("button", { name: "가능한 시간 수정 제출" })).toBeVisible();
+  await staffPage.goto(secondCoordinationUrl);
+  await expect(staffPage.getByText("조율 가능").first()).toBeVisible();
+  await page.getByRole("link", { name: /내 방문 요청으로 돌아가기/ }).click();
+  await expect(page).toHaveURL(/\/visit\/portal$/);
   await page.getByRole("button", { name: "이 기기에서 보기 종료" }).click();
   await expect(page.getByText(/방문 요청 링크에서 이메일 인증을 완료하면/)).toBeVisible();
   await page.reload();
   await expect(page.getByText(/방문 요청 링크에서 이메일 인증을 완료하면/)).toBeVisible();
   await expect(page.getByRole("list", { name: "내 방문 요청 목록" })).toBeHidden();
+  await page.goto(`/visit/portal/${secondId}`);
+  await expect(page.getByRole("heading", { name: "요청을 열 수 없습니다" })).toBeVisible();
   await context.close();
 });
 
