@@ -100,7 +100,7 @@ test.describe("시나리오 1 이메일 가입부터 사무소 승인 뒤 로그
   test("승인 뒤 이메일로 로그인하면 업무 홈으로 들어간다", async ({ page }) => {
     await page.goto("/login");
     await page.getByRole("link", { name: "이메일로 로그인하기" }).click();
-    await expect(page.getByRole("heading", { name: "다시 만나서 반가워요!" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: "로그인" })).toBeVisible();
     await page.getByLabel(/^이메일/).fill("agent@example.com");
     await page.getByLabel(/^비밀번호/).fill("mock-password-1");
     await page.getByRole("button", { name: "로그인하기", exact: true }).click();
