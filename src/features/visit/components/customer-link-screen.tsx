@@ -21,14 +21,20 @@ import { normalizeLinkToken } from "@/shared/lib/link-token";
 import {
   fetchCustomerConfirmed,
   fetchCustomerLink,
+  fetchCustomerPortalRequests,
+  logoutCustomerPortal,
   previewBrowserReusableCustomerTimes,
+  previewCustomerPortalTimes,
   previewReusableCustomerTimes,
+  sendCustomerPortalCode,
   submitCustomerTimes,
+  verifyCustomerPortalCode,
 } from "../api/follow.api";
 import {
   LEGAL_ROLE_LABEL,
   PUBLIC_VISIT_STATE_LABEL,
   PUBLIC_VISIT_STATE_TONE,
+  statusLabel,
 } from "../model/labels";
 import { LINK_COMMON_COPY, linkExpiredNotice } from "../model/legal-copy";
 import type { LinkNoticeContext } from "../model/legal-copy";
@@ -100,6 +106,139 @@ function initialBlocks(link: PublicVisitLinkResponse): SelectedBlocks {
       const end = kstParts(slot.endsAt);
       return { date: start.date, start: start.time, end: end.time };
     }),
+  );
+}
+
+type ReusableSlot = { startsAt: string; endsAt: string };
+
+function CustomerPortalPanel({
+  token,
+  onReuse,
+}: {
+  token: string;
+  onReuse: (slots: ReusableSlot[]) => void;
+}) {
+  const queryClient = useQueryClient();
+  const [code, setCode] = useState("");
+  const existing = useQuery({
+    queryKey: ["customer-visit-portal", token],
+    queryFn: () => fetchCustomerPortalRequests(token),
+    retry: false,
+  });
+  const send = useMutation({ mutationFn: () => sendCustomerPortalCode(token) });
+  const loadTimes = useMutation({
+    mutationFn: () => previewCustomerPortalTimes(token),
+    onSuccess: (result) => onReuse(result.timeSlots),
+  });
+  const verify = useMutation({
+    mutationFn: async () => {
+      await verifyCustomerPortalCode(token, code);
+      const requests = await fetchCustomerPortalRequests(token);
+      const reusable = await previewCustomerPortalTimes(token).catch(() => ({ timeSlots: [] }));
+      return { requests, reusable };
+    },
+    onSuccess: ({ requests, reusable }) => {
+      queryClient.setQueryData(["customer-visit-portal", token], requests);
+      onReuse(reusable.timeSlots);
+      setCode("");
+    },
+  });
+  const leave = useMutation({
+    mutationFn: () => logoutCustomerPortal(token),
+    onSuccess: () => {
+      queryClient.setQueryData(["customer-visit-portal", token], {
+        available: true,
+        verified: false,
+        items: [],
+      });
+      setCode("");
+    },
+  });
+  const items = existing.data?.verified ? existing.data.items : undefined;
+  if (!existing.data?.available) return null;
+  return (
+    <div className="rounded-control border border-line bg-surface px-3.5 py-3">
+      <h3 className="text-body font-semibold text-ink">내 방문 요청 확인</h3>
+      <p className="mt-1 text-caption text-ink-2">
+        이전 링크가 없어도 등록된 이메일로 본인을 확인하면 같은 사무소의 방문 요청과 유효한 시간을
+        볼 수 있습니다. 시간을 확인하고 고친 뒤 이번 요청에 직접 제출해 주세요.
+      </p>
+      {items ? (
+        <>
+          <ul className="mt-3 space-y-1 text-caption text-ink-2" aria-label="내 방문 요청">
+            {items.map((item) => (
+              <li key={item.coordinationId}>
+                {item.periodStartDate} ~ {item.periodEndDate} · {statusLabel(item.status)}
+              </li>
+            ))}
+          </ul>
+          <Button
+            size="sm"
+            variant="outlined"
+            isLoading={loadTimes.isPending}
+            onClick={() => loadTimes.mutate()}
+          >
+            유효한 이전 시간 불러오기
+          </Button>
+          {loadTimes.isError ? (
+            <FormAlert>이전 시간을 불러오지 못했습니다. 다시 시도해 주세요.</FormAlert>
+          ) : null}
+          <Button
+            size="sm"
+            variant="outlined"
+            isLoading={leave.isPending}
+            onClick={() => leave.mutate()}
+          >
+            이 기기에서 방문 요청 보기 종료
+          </Button>
+        </>
+      ) : (
+        <div className="mt-3 flex flex-col gap-2">
+          <Button
+            size="sm"
+            variant="outlined"
+            isLoading={send.isPending}
+            onClick={() => send.mutate()}
+          >
+            인증번호 받기
+          </Button>
+          {send.data ? (
+            <>
+              <p className="text-caption text-ink-2">
+                {send.data.maskedEmail}로 보낸 6자리 인증번호를 입력해 주세요.
+              </p>
+              <label htmlFor="customer-portal-code" className="text-caption font-medium text-ink">
+                인증번호
+              </label>
+              <input
+                id="customer-portal-code"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={6}
+                value={code}
+                onChange={(event) => setCode(event.target.value.replace(/\D/g, ""))}
+                className="w-full rounded-control border border-line bg-white px-3.5 py-3 text-body text-ink"
+              />
+              <Button
+                disabled={!/^\d{6}$/.test(code)}
+                isLoading={verify.isPending}
+                onClick={() => verify.mutate()}
+              >
+                내 방문 요청 확인하기
+              </Button>
+            </>
+          ) : null}
+          {send.isError ? (
+            <FormAlert>
+              인증번호를 보내지 못했습니다. 잠시 후 다시 시도하거나 사무소에 문의해 주세요.
+            </FormAlert>
+          ) : null}
+          {verify.isError ? (
+            <FormAlert>인증번호를 확인하지 못했습니다. 번호와 유효시간을 확인해 주세요.</FormAlert>
+          ) : null}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -239,6 +378,25 @@ function TimeForm({ token, link }: { token: string; link: PublicVisitLinkRespons
     reuse.mutate(previous);
   }
 
+  function reuseVerifiedTimes(timeSlots: ReusableSlot[]) {
+    if (submissionStarted.current) return;
+    autoApplied.current = true;
+    const blocks = safeReusableBlocks(timeSlots);
+    setSelected((current) => {
+      const merged = { ...current };
+      for (const [date, minutes] of Object.entries(blocks)) {
+        merged[date] = [...new Set([...(current[date] ?? []), ...minutes])].sort((a, b) => a - b);
+      }
+      return merged;
+    });
+    const firstDate = Object.keys(blocks).sort()[0];
+    if (firstDate && !userChangedDate.current) setActiveDate(firstDate);
+    if (firstDate)
+      setReuseNotice(
+        "본인 확인이 완료됐습니다. 유효한 이전 시간을 확인하고 이번 요청에 제출해 주세요.",
+      );
+  }
+
   function isPast(date: string, minutes: number): boolean {
     const hour = String(Math.floor(minutes / 60)).padStart(2, "0");
     const minute = String(minutes % 60).padStart(2, "0");
@@ -247,6 +405,9 @@ function TimeForm({ token, link }: { token: string; link: PublicVisitLinkRespons
 
   return (
     <div className="flex flex-col gap-4">
+      {!isClosed && isResubmit ? (
+        <CustomerPortalPanel token={token} onReuse={reuseVerifiedTimes} />
+      ) : null}
       {!isClosed && !isResubmit ? (
         <section
           aria-labelledby="reuse-time-title"
@@ -255,6 +416,7 @@ function TimeForm({ token, link }: { token: string; link: PublicVisitLinkRespons
           <h2 id="reuse-time-title" className="text-body font-semibold text-ink">
             이전 시간 불러오기
           </h2>
+          <CustomerPortalPanel token={token} onReuse={reuseVerifiedTimes} />
           <p className="text-caption text-ink-2">
             같은 사무소에서 받은 이전 방문 링크가 아직 열려 있다면, 유효한 시간만 추가할 수
             있습니다. 이번 요청에 제출하기 전에 확인·수정해 주세요.
