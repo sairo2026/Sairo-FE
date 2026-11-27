@@ -235,7 +235,7 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
             읽지 않은 방문 신청 알림 {summary.unreadVisitRequestNoticeCount}건
           </Link>
         </div>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-[repeat(3,minmax(0,292px))]">
           <StatCard
             href={coordinationListPath()}
             title="신청 대기"

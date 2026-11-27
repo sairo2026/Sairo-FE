@@ -114,11 +114,8 @@ function StatusBody({ registration }: { registration: OfficeRegistrationStatusRe
 
   if (status === "PENDING_REVIEW") {
     return (
-      <div className="flex flex-col gap-11">
-        <ButtonRow>
-          <Button onClick={() => router.push("/access")}>확인</Button>
-        </ButtonRow>
-        <div className="flex flex-col items-center gap-3 text-center">
+      <div className="flex flex-col items-start gap-8">
+        <div className="flex flex-col gap-3 text-left">
           <MutedNote>{REVIEW_TARGET_NOTE}</MutedNote>
           <MutedNote>{REREVIEW_NOTE}</MutedNote>
           {notice ? <FormNotice>{notice}</FormNotice> : null}
@@ -127,6 +124,9 @@ function StatusBody({ registration }: { registration: OfficeRegistrationStatusRe
             신청 철회
           </Button>
         </div>
+        <ButtonRow>
+          <Button onClick={() => router.push("/access")}>확인</Button>
+        </ButtonRow>
         {cancelDialog}
       </div>
     );

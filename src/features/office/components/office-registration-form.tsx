@@ -193,9 +193,9 @@ export function OfficeRegistrationForm() {
             {existingOffice ? (
               <div
                 role="alert"
-                className="flex flex-col gap-2 rounded-control bg-tag-yellow px-4 py-3"
+                className="flex flex-col gap-2 rounded-control bg-primary-soft px-4 py-3"
               >
-                <p className="text-caption text-tag-yellow-ink">
+                <p className="text-caption text-ink">
                   이미 등록된 사무소입니다. 새로 등록하지 않고 기존 사무소에 참여를 신청해 주세요.
                 </p>
                 <TextLink href="/office/join">기존 사무소 참여하기</TextLink>
