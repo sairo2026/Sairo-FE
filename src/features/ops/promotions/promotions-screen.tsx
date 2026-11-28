@@ -10,6 +10,7 @@ import { formatSeoulDateTime } from "@/shared/lib/format";
 import { fetchOfficeDetail } from "../offices/api/ops-offices-api";
 import { BillingNav } from "../billing/billing-nav";
 import { OpsScreen } from "../components/common/ops-screen";
+import { OpsQueryFailure } from "../components/common/ops-query-failure";
 import { FailureNotice, SuccessNotice } from "../content-common/notice-banner";
 import { usePromotionActions, usePromotionCampaigns, usePromotionGrants } from "./promotion-api";
 
@@ -181,7 +182,9 @@ export function OpsPromotionsScreen() {
       </Card>
       <Card title="캠페인 (최근 100건)">
         {campaigns.isPending ? <p>캠페인을 불러오는 중입니다.</p> : null}
-        {campaigns.isError ? <p role="alert">캠페인을 불러오지 못했습니다.</p> : null}
+        {campaigns.isError ? (
+          <OpsQueryFailure error={campaigns.error} fallback="캠페인을 불러오지 못했습니다." />
+        ) : null}
         {campaigns.data?.length === 0 ? (
           <p className="text-body text-ink-2">등록된 캠페인이 없습니다.</p>
         ) : null}
@@ -272,9 +275,11 @@ export function OpsPromotionsScreen() {
           />
           {office.isPending && officeId ? <p className="mt-2">사무소 확인 중입니다.</p> : null}
           {office.isError ? (
-            <p role="alert" className="mt-2 text-danger">
-              사무소를 확인할 수 없습니다.
-            </p>
+            <OpsQueryFailure
+              error={office.error}
+              fallback="사무소를 확인할 수 없습니다."
+              className="mt-2 text-danger"
+            />
           ) : null}
           {office.data ? (
             <p className="mt-2 font-semibold">
@@ -371,7 +376,9 @@ export function OpsPromotionsScreen() {
       ) : null}
       <Card title="지급 내역 (최근 100건)">
         {grants.isPending ? <p>지급 내역을 불러오는 중입니다.</p> : null}
-        {grants.isError ? <p role="alert">지급 내역을 불러오지 못했습니다.</p> : null}
+        {grants.isError ? (
+          <OpsQueryFailure error={grants.error} fallback="지급 내역을 불러오지 못했습니다." />
+        ) : null}
         {grants.data?.length === 0 ? (
           <p className="text-body text-ink-2">지급 내역이 없습니다.</p>
         ) : null}

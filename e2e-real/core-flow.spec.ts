@@ -21,6 +21,7 @@ import {
 import { API_ORIGIN, FRONT_ORIGIN, requireEnv } from "./support/env";
 
 const owner = newMember("실API대표");
+const competingBroker = newMember("실API경쟁중개사");
 const registrationNumber = `11110-2026-${String(Date.now()).slice(-5)}`;
 const businessNumber = String(Date.now()).slice(-10);
 
@@ -201,6 +202,42 @@ test("카드를 등록하고 첫 결제를 확인하면 업무 화면이 열린�
   await expect(page.getByLabel(/^매물명/)).toBeVisible();
 });
 
+test("두 번째 중개사가 사무소 초대를 수락하고 대표가 승인한다", async ({
+  page,
+  browser,
+  request,
+}) => {
+  await signupViaUi(page, request, competingBroker);
+  await expect(page).toHaveURL(/\/office\/start$/);
+
+  const { context: ownerContext, page: ownerPage } = await openPublicPage(browser);
+  try {
+    await loginViaUi(ownerPage, owner.email, /\/(home|billing)$/);
+    await ownerPage.goto("/members/requests");
+    await ownerPage.getByLabel("초대할 이메일").fill(competingBroker.email);
+    await ownerPage.getByLabel("역할", { exact: true }).selectOption("AGENT");
+    await ownerPage.getByRole("button", { name: "초대 보내기" }).click();
+    await expect(ownerPage.getByText(/초대를 보냈습니다/)).toBeVisible();
+
+    await page.goto("/office/membership");
+    const acceptance = page.getByRole("form", { name: "초대 수락" });
+    await expect(acceptance).toBeVisible();
+    await acceptance.getByLabel("자격증 번호").fill("E2E-AGENT-1128");
+    await acceptance.getByLabel("고용신고를 확인했습니다").check();
+    await acceptance.getByLabel("필요한 교육을 이수했습니다").check();
+    await acceptance.getByRole("button", { name: "초대 수락" }).click();
+    await expect(page.getByText(/초대를 수락했습니다/)).toBeVisible();
+
+    await ownerPage.reload();
+    await ownerPage.getByRole("button", { name: `${competingBroker.name} 승인` }).click();
+    await expect(ownerPage.getByText("참여를 승인했습니다.")).toBeVisible();
+    await page.reload();
+    await expect(page).toHaveURL(/\/(home|billing)$/);
+  } finally {
+    await ownerContext.close();
+  }
+});
+
 function seoulDateChipName(offsetDays: number): string {
   const [year = 0, month = 1, day = 1] = seoulDate(offsetDays).split("-").map(Number);
   const weekday = ["일", "월", "화", "수", "목", "금", "토"][
@@ -223,7 +260,7 @@ test("매물을 등록하고 목록과 상세에서 확인한다", async ({ page
   await page.getByLabel(/^매물명/).fill("실API 아파트");
   await page.getByRole("combobox", { name: "건물 카테고리" }).selectOption({ label: "아파트" });
   await page.getByLabel("매물 주소").fill("서울특별시 종로구 시험로 1");
-  await page.getByLabel("담당 공인중개사").selectOption({ index: 1 });
+  await page.getByLabel("담당 공인중개사").selectOption({ label: owner.name });
   await page.getByRole("button", { name: "활성 등록" }).click();
   await expect(page).toHaveURL(/\/properties\/\d+$/, { timeout: 20_000 });
   propertyUrl = new URL(page.url()).pathname;
@@ -238,7 +275,7 @@ test("고객을 등록하고 희망조건을 저장한 뒤 목록에서 확인�
   await page.getByLabel(/^이름/).fill("실API고객");
   await page.getByLabel("연락처", { exact: true }).fill("01099998888");
   await page.getByLabel("이메일 주소").fill(CUSTOMER_EMAIL);
-  await page.getByLabel(/^담당 공인중개사/).selectOption({ index: 1 });
+  await page.getByLabel(/^담당 공인중개사/).selectOption({ label: owner.name });
   await page.getByLabel(/^수집 경로/).fill("전화 문의");
   await page.getByLabel(/^처리 근거/).selectOption("CONSENT");
   await page.getByLabel(/^수집 목적/).fill("매물 상담");
@@ -373,7 +410,7 @@ test("실제 이메일 인증 후 방문 요청 목록을 새로고침에도 유
     .getByRole("combobox", { name: "건물 카테고리" })
     .selectOption({ label: "아파트" });
   await staffPage.getByLabel("매물 주소").fill("서울특별시 종로구 시험로 2");
-  await staffPage.getByLabel("담당 공인중개사").selectOption({ index: 1 });
+  await staffPage.getByLabel("담당 공인중개사").selectOption({ label: owner.name });
   await staffPage.getByRole("button", { name: "활성 등록" }).click();
   await expect(staffPage).toHaveURL(/\/properties\/\d+$/);
   await staffPage.goto("/coordinations/new");
@@ -452,24 +489,93 @@ test("중개사가 일정을 구성하고 방문을 신청한다", async ({ page
   await expect(page.getByText("신청 대기").first()).toBeVisible();
 });
 
+let competingCoordinationUrl = "";
+
+test("서로 다른 중개사와 고객의 신청이 같은 매물 승인 대기에 함께 남는다", async ({
+  page,
+  browser,
+}) => {
+  await loginViaUi(page, competingBroker.email, /\/(home|billing)$/);
+  await page.goto("/customers/new");
+  await page.getByLabel(/^이름/).fill("실API경쟁고객");
+  await page.getByLabel("연락처", { exact: true }).fill("01099997777");
+  await page.getByLabel("이메일 주소").fill(`e2e-competing-${Date.now().toString(36)}@example.com`);
+  await page.getByLabel(/^담당 공인중개사/).selectOption({ label: competingBroker.name });
+  await page.getByLabel(/^수집 경로/).fill("전화 문의");
+  await page.getByLabel(/^처리 근거/).selectOption("CONSENT");
+  await page.getByLabel(/^수집 목적/).fill("매물 상담");
+  await page.getByLabel(/^보유 기한/).fill("2029-11-10");
+  await page.getByRole("button", { name: "등록", exact: true }).click();
+  await expect(page).toHaveURL(/\/customers\/\d+$/);
+
+  await page.goto("/coordinations/new");
+  await page.getByRole("radio", { name: /실API경쟁고객/ }).check({ force: true });
+  await page.getByRole("checkbox", { name: "실API 아파트 선택" }).check({ force: true });
+  await page.getByRole("button", { name: "조율 만들기" }).click();
+  await expect(page).toHaveURL(/\/coordinations\/\d+$/);
+  competingCoordinationUrl = new URL(page.url()).pathname;
+  await page.getByRole("button", { name: "고객 링크 발급" }).click();
+  const competingCustomerLink = new URL(await page.getByLabel("발급된 링크").inputValue()).pathname;
+
+  const { context: customerContext, page: customerPage } = await openPublicPage(browser);
+  try {
+    await customerPage.goto(competingCustomerLink);
+    await customerPage.getByRole("button", { name: seoulDateChipName(2) }).click();
+    for (let minutes = 10 * 60; minutes < 18 * 60; minutes += 30) {
+      const time = `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
+      await customerPage.getByRole("button", { name: time, exact: true }).click();
+    }
+    await customerPage.getByRole("button", { name: "가능한 시간 제출" }).click();
+    await expect(customerPage.getByText("가능한 시간을 제출했습니다.")).toBeVisible();
+  } finally {
+    await customerContext.close();
+  }
+
+  await page.goto(competingCoordinationUrl);
+  await expect(page.getByText("조율 가능").first()).toBeVisible();
+  await page.getByRole("button", { name: "일정 저장" }).click();
+  await expect(page.getByText(/일정 구성을 저장했습니다/)).toBeVisible();
+  await page.getByRole("button", { name: "방문 신청", exact: true }).first().click();
+  const form = page.locator("form").filter({ hasText: "신청 가능 구간" });
+  // Both customers offered the same time range, so their first computed slot overlaps.
+  await form.getByRole("button", { name: / ~ / }).first().click();
+  await form.getByRole("button", { name: "방문 신청 제출" }).click();
+  await expect(page.getByText(/방문 신청을 제출했습니다/)).toBeVisible();
+
+  const { context: approverContext, page: approverPage } = await openPublicPage(browser);
+  try {
+    await approverPage.goto(approverLink);
+    await approverPage.getByRole("tab", { name: "신청 비교·선택" }).click();
+    await expect(approverPage.getByRole("button", { name: /신청 선택/ })).toHaveCount(2);
+    await expect(
+      approverPage.getByRole("button", { name: `${owner.name} 신청 선택` }),
+    ).toBeVisible();
+    await expect(
+      approverPage.getByRole("button", { name: `${competingBroker.name} 신청 선택` }),
+    ).toBeVisible();
+  } finally {
+    await approverContext.close();
+  }
+});
+
 test("승인자가 신청을 비교해 선택하면 조율이 확정된다", async ({ browser, page }) => {
   const { context, page: approver } = await openPublicPage(browser);
   await approver.goto(approverLink);
   await approver.getByRole("tab", { name: "신청 비교·선택" }).click();
   await expect(approver.getByText(/실API공인중개사사무소/).first()).toBeVisible();
-  await approver
-    .getByRole("button", { name: /신청 선택/ })
-    .first()
-    .click();
+  await approver.getByRole("button", { name: `${owner.name} 신청 선택` }).click();
   await approver
     .getByRole("dialog", { name: "이 신청을 선택할까요" })
     .getByRole("button", { name: "선택하기" })
     .click();
   await expect(approver.getByText(/선택한 신청이 확정되었습니다/)).toBeVisible();
+  await expect(approver.getByText(/다른 신청 1건은 시간 마감되었습니다/)).toBeVisible();
   await context.close();
   await loginViaUi(page, owner.email, /\/(home|billing)$/);
   await page.goto(coordinationUrl);
   await expect(page.getByText("확정 완료").first()).toBeVisible();
+  await page.goto(competingCoordinationUrl);
+  await expect(page.getByText("시간 마감").first()).toBeVisible();
 });
 
 test("이메일 확인 고객이 확정 일정을 열고 새로고침 뒤에도 같은 일정을 확인한다", async ({
