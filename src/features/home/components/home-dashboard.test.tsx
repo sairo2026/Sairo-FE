@@ -231,6 +231,7 @@ describe("홈 대시보드", () => {
     });
     renderOffice(<HomeDashboard />, { role: "AGENT" });
     const overdue = await screen.findByRole("list", { name: "기한이 지난 업무" });
+    expect(screen.getByText("할 일 제목")).not.toBeNull();
     expect(within(overdue).getByText("지난 업무")).not.toBeNull();
     const today = screen.getByRole("list", { name: "오늘 예정 업무" });
     expect(within(today).getByText("오늘 업무")).not.toBeNull();
@@ -274,6 +275,7 @@ describe("홈 대시보드", () => {
     renderOffice(<HomeDashboard />, { role: "OWNER" });
     expect(await screen.findByText("오늘 확정된 방문이 없습니다.")).not.toBeNull();
     expect(screen.getByText("오늘 할 업무가 없습니다.")).not.toBeNull();
+    expect(screen.queryByText("할 일 제목")).toBeNull();
     expect(screen.getByText("제출할 후속업무가 없습니다.")).not.toBeNull();
   });
 

@@ -305,7 +305,7 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
             )}
           </div>
           <div className="flex flex-col gap-3">
-            <TaskColumnHeader />
+              {overdue.length > 0 || upcoming.length > 0 ? <TaskColumnHeader /> : null}
             {overdue.length > 0 ? (
               <div className="flex flex-col gap-2">
                 <h3 className="text-body font-semibold text-tag-red-ink">기한이 지난 업무</h3>
