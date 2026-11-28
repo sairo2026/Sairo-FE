@@ -214,7 +214,9 @@ export function CustomerPortalPreferences() {
       </div>
       <p className="text-caption text-ink-2">
         {preference.data?.preferenceDisclosureText.split("\n").map((line) => (
-          <span key={line} className="block">{line}</span>
+          <span key={line} className="block">
+            {line}
+          </span>
         ))}
         방문 링크의 일반 개인정보 처리{" "}
         <Link

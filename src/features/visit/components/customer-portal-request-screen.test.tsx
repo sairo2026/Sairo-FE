@@ -55,8 +55,8 @@ describe("고객 포털 방문 요청", () => {
           retentionUntil: "2026-12-31",
           noticeVersion: "1.0",
           preferenceDisclosureVersion: "1.0",
-      preferenceDisclosureText: "수집 항목: 선호 요일과 선호 시간대.",
-      sessionBinding: "test-session-binding",
+          preferenceDisclosureText: "수집 항목: 선호 요일과 선호 시간대.",
+          sessionBinding: "test-session-binding",
         }),
       ),
       http.get("*/api/public/customer-visit-links/portal/requests/:id/reusable-times", async () => {
