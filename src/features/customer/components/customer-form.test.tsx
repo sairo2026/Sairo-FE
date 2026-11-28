@@ -62,7 +62,7 @@ describe("고객 등록", () => {
     expect(screen.getByText(/이 고객 정보를 얼마 동안 보관할지 선택해 주세요/)).not.toBeNull();
     expect(
       screen.getByText(
-        /업무 메모에 건강, 종교, 정치 성향 같은 민감한 정보와 전체 계좌번호를 입력하지 마세요/,
+        /업무 메모에 건강, 종교, 정치 성향 같은 민감한 정보와 전체 계좌번호를 입력하지 말아 주세요/,
       ),
     ).not.toBeNull();
     expect(screen.getByLabelText(/수집 경로/)).not.toBeNull();
