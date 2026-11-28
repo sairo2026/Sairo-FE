@@ -25,6 +25,19 @@ describe("Badge 계열", () => {
     expect(badge.getAttribute("data-tone")).toBe("green");
   });
 
+  it.each([
+    ["신청 대기", "progress"],
+    ["확정", "success"],
+    ["재조율 필요", "warning"],
+    ["재검증 실패", "danger"],
+    ["취소", "neutral"],
+  ])("%s 상태는 %s 의미 그룹 색을 쓴다", (label, group) => {
+    render(<Badge tone="red">{label}</Badge>);
+    const badge = screen.getByText(label);
+    expect(badge.getAttribute("data-status-group")).toBe(group);
+    expect(badge.className).toContain(`bg-status-${group}-bg`);
+  });
+
   it("거래유형 태그를 표시한다", () => {
     render(<TradeTypeTag type="jeonse" />);
     expect(screen.getByText("전세")).toBeTruthy();

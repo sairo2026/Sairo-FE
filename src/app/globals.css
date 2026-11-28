@@ -42,6 +42,18 @@
   --color-required: var(--required);
   --color-brand-border: #8586ee;
 
+  /* 디자인시스템 Status의 다섯 의미 그룹. 표시 문자열과 별개로 상태의 뜻을 유지한다. */
+  --color-status-progress-bg: #eeeefb;
+  --color-status-progress-text: #3335a6;
+  --color-status-success-bg: #ecfdf3;
+  --color-status-success-text: #15803d;
+  --color-status-warning-bg: #fff7e6;
+  --color-status-warning-text: #b45309;
+  --color-status-danger-bg: #fef2f2;
+  --color-status-danger-text: #c81e1e;
+  --color-status-neutral-bg: #f3f4f6;
+  --color-status-neutral-text: #3d4959;
+
   /* 상태 태그 채움색과 글자색 */
   --color-tag-blue: #cee3ff;
   --color-tag-blue-ink: #002c89;

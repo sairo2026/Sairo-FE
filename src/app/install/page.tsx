@@ -35,7 +35,7 @@ export default function InstallPage() {
             PC에 설치하기
           </h2>
           <p className="mt-4 break-keep text-body text-ink-2">
-            Chrome·Edge에서 설치하면 앱 창으로 열립니다.
+            Chrome·Edge에서 앱 창으로 열립니다.
           </p>
           <div className="mt-5">
             <InstallAction />

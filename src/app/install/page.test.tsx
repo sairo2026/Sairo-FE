@@ -28,7 +28,7 @@ describe("PC 설치 화면", () => {
     expect(screen.getByRole("link", { name: "회원가입하러 가기" }).getAttribute("href")).toBe(
       "/signup",
     );
-    expect(screen.getByText(/Chrome·Edge에서 설치하면 앱 창으로 열립니다/)).toBeTruthy();
+    expect(screen.getByText(/Chrome·Edge에서 앱 창으로 열립니다/)).toBeTruthy();
   });
 
   it("브라우저 설치 이벤트가 있으면 버튼 한 번으로 설치 창을 연다", async () => {
