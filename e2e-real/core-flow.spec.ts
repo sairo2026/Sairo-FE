@@ -1,3 +1,6 @@
+import type { Page } from "@playwright/test";
+import type { VisitCoordinationDetailResponse } from "../src/lib/api/contracts/visit.schema";
+import type { HomeSummaryResponse } from "../src/lib/api/contracts/work.schema";
 import { expect, test } from "./support/test";
 import { PNG_BYTES } from "./support/files";
 import { capturedMessage } from "./support/messages";
@@ -254,17 +257,21 @@ function seoulDate(offsetDays: number): string {
 let propertyUrl = "";
 let coordinationUrl = "";
 
-test("매물을 등록하고 목록과 상세에서 확인한다", async ({ page }) => {
-  await loginViaUi(page, owner.email, /\/(home|billing)$/);
+async function createApartment(page: Page, name: string, address: string) {
   await page.goto("/properties/new");
-  await page.getByLabel(/^매물명/).fill("실API 아파트");
+  await page.getByLabel(/^매물명/).fill(name);
   await page.getByRole("combobox", { name: "건물 카테고리" }).selectOption({ label: "아파트" });
-  await page.getByLabel("매물 주소").fill("서울특별시 종로구 시험로 1");
+  await page.getByLabel("매물 주소").fill(address);
   await page.getByLabel("담당 공인중개사").selectOption({ label: owner.name });
   await page.getByRole("button", { name: "활성 등록" }).click();
   await expect(page).toHaveURL(/\/properties\/\d+$/, { timeout: 20_000 });
-  propertyUrl = new URL(page.url()).pathname;
-  await expect(page.getByRole("heading", { level: 1, name: "실API 아파트" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name })).toBeVisible();
+  return new URL(page.url()).pathname;
+}
+
+test("매물을 등록하고 목록과 상세에서 확인한다", async ({ page }) => {
+  await loginViaUi(page, owner.email, /\/(home|billing)$/);
+  propertyUrl = await createApartment(page, "실API 아파트", "서울특별시 종로구 시험로 1");
   await page.goto("/properties");
   await expect(page.getByText("실API 아파트").first()).toBeVisible();
 });
@@ -310,24 +317,33 @@ test("탈퇴 미리보기가 보유 데이터와 안내를 보여준다", async 
 const APPROVER_PHONE = `010-${String(Date.now()).slice(-8, -4)}-${String(Date.now()).slice(-4)}`;
 let approverLink = "";
 
-test("매물에 출입승인을 등록하고 승인자 링크를 발급한다", async ({ page }) => {
-  await loginViaUi(page, owner.email, /\/(home|billing)$/);
-  await page.goto(`${propertyUrl}/access-approvals`);
+async function issueApprovalLink(
+  page: Page,
+  propertyPath: string,
+  name: string,
+  phone = APPROVER_PHONE,
+) {
+  await page.goto(`${propertyPath}/access-approvals`);
   await page.getByRole("button", { name: "+ 출입승인 등록" }).click();
   const dialog = page.getByRole("dialog", { name: "출입승인 등록" });
-  await dialog.getByLabel("승인자 이름").fill("실API승인자");
-  await dialog.getByLabel("승인자 연락처").fill(APPROVER_PHONE.replaceAll("-", ""));
+  await dialog.getByLabel("승인자 이름").fill(name);
+  await dialog.getByLabel("승인자 연락처").fill(phone.replaceAll("-", ""));
   await dialog.getByLabel("승인 시작일").fill(seoulDate(-1));
   await dialog.getByLabel("승인 종료일").fill("2099-12-31");
   await dialog.getByRole("button", { name: "등록", exact: true }).click();
   await expect(dialog).toBeHidden();
-  await expect(page.getByText("실API승인자").first()).toBeVisible();
+  await expect(page.getByText(name).first()).toBeVisible();
   await page.getByRole("button", { name: "링크 발급" }).click();
   const linkDialog = page.getByRole("dialog", { name: "승인자 링크" });
   const value = await linkDialog.getByLabel("발급된 링크").inputValue();
   expect(value).toMatch(/\/approver\//);
-  approverLink = new URL(value).pathname;
   await linkDialog.getByRole("button", { name: "닫기" }).first().click();
+  return new URL(value).pathname;
+}
+
+test("매물에 출입승인을 등록하고 승인자 링크를 발급한다", async ({ page }) => {
+  await loginViaUi(page, owner.email, /\/(home|billing)$/);
+  approverLink = await issueApprovalLink(page, propertyUrl, "실API승인자");
 });
 
 test("조율을 만든다", async ({ page }) => {
@@ -659,6 +675,226 @@ test("예정 시각 전에는 취소만 방문 결과로 기록할 수 있다", 
   await expect(outcomes).toHaveText(["취소"]);
   await expect(dialog.getByRole("status")).toContainText("시작 전에는 취소만 기록할 수 있습니다.");
   await expect(dialog.getByLabel("취소 사유")).toBeVisible();
+});
+
+test("가운데 방문만 재승인하고 양쪽 확정 방문과 홈 캘린더를 유지한다", async ({
+  page,
+  browser,
+}) => {
+  test.setTimeout(300_000);
+  const day = seoulDate(1);
+  const dayChip = seoulDateChipName(1);
+  const visibleInHomeCalendar = day.slice(0, 7) === seoulDate(0).slice(0, 7);
+  const visits = [
+    { name: "재조율 P1", start: "10:00", end: "10:30" },
+    { name: "재조율 P2", start: "11:00", end: "11:30" },
+    { name: "재조율 P3", start: "12:00", end: "12:30" },
+  ] as const;
+  const dateTime = (time: string) => `${day}T${time}:00+09:00`;
+  await loginViaUi(page, owner.email, /\/(home|billing)$/);
+
+  async function homeVisitCount() {
+    const { status, body } = await pageApi<HomeSummaryResponse>(page, "GET", "/api/home");
+    expect(status).toBe(200);
+    return body.calendarDays.find((entry) => entry.date === day)?.visitCount ?? 0;
+  }
+
+  const initialCalendarCount = await homeVisitCount();
+  const { context, page: approver } = await openPublicPage(browser);
+  try {
+    const approvalLinks = new Map<string, string>();
+    for (const [index, visit] of visits.entries()) {
+      const propertyPath = await createApartment(
+        page,
+        visit.name,
+        `서울특별시 종로구 시험로 ${21 + index}`,
+      );
+      const link = await issueApprovalLink(
+        page,
+        propertyPath,
+        `${visit.name} 승인자`,
+        `0107777112${index}`,
+      );
+      approvalLinks.set(visit.name, link);
+      await approver.goto(link);
+      await approver.getByRole("button", { name: "날짜 예외 추가" }).click();
+      await approver.getByLabel("날짜 예외 1 날짜").fill(day);
+      await approver.getByLabel("날짜 예외 1 시작").fill("09:00");
+      await approver.getByLabel("날짜 예외 1 종료").fill("16:00");
+      await approver.getByRole("button", { name: "조건 저장" }).click();
+      await expect(approver.getByText(/조건 \d+번 버전으로 저장했습니다/)).toBeVisible();
+    }
+
+    await page.goto("/coordinations/new");
+    await page
+      .getByRole("radio", { name: /실API고객/ })
+      .first()
+      .check({ force: true });
+    for (const visit of visits) {
+      await page.getByRole("checkbox", { name: `${visit.name} 선택` }).check({ force: true });
+    }
+    await page.getByRole("button", { name: "조율 만들기" }).click();
+    await expect(page).toHaveURL(/\/coordinations\/\d+$/);
+    const path = new URL(page.url()).pathname;
+    const apiPath = `/api/visit-coordinations/${path.split("/").at(-1)}`;
+    await page.getByRole("button", { name: "고객 링크 발급" }).click();
+    const linkField = page.getByLabel("발급된 링크");
+    await expect(linkField).toBeVisible();
+    const publicLink = new URL(await linkField.inputValue()).pathname;
+    const { context: customerContext, page: customer } = await openPublicPage(browser);
+    try {
+      await customer.goto(publicLink);
+      await customer.getByRole("button", { name: dayChip }).click();
+      for (const hour of [9, 10, 11, 12, 13, 14, 15]) {
+        for (const minute of ["00", "30"]) {
+          const label = `${String(hour).padStart(2, "0")}:${minute}`;
+          await customer.getByRole("button", { name: label, exact: true }).click();
+        }
+      }
+      await customer.getByRole("button", { name: "가능한 시간 제출" }).click();
+      await expect(customer.getByText("가능한 시간을 제출했습니다.")).toBeVisible();
+    } finally {
+      await customerContext.close();
+    }
+
+    await page.goto(path);
+    const scheduleRows = page.getByRole("listitem").filter({ has: page.getByLabel("방문 순서") });
+    for (const [index, visit] of visits.entries()) {
+      const row = scheduleRows.filter({ hasText: visit.name });
+      await row.getByLabel("방문 순서").fill(String(index + 1));
+      await row.getByLabel("방문 소요시간 (분)").fill("30");
+      await row.getByLabel("다음 매물까지 이동시간 (분)").fill(index === 2 ? "0" : "15");
+    }
+    await page.getByRole("button", { name: "일정 저장" }).click();
+    await expect(page.getByText(/일정 구성을 저장했습니다/)).toBeVisible();
+
+    async function detail() {
+      const { status, body } = await pageApi<VisitCoordinationDetailResponse>(page, "GET", apiPath);
+      expect(status).toBe(200);
+      return body;
+    }
+
+    async function chooseRequest() {
+      await approver.getByRole("button", { name: `${owner.name} 신청 선택` }).click();
+      await approver
+        .getByRole("dialog", { name: "이 신청을 선택할까요" })
+        .getByRole("button", { name: "선택하기" })
+        .click();
+      await expect(approver.getByText(/선택한 신청이 확정되었습니다/)).toBeVisible();
+    }
+
+    const candidates = (await detail()).candidateProperties;
+    const candidateId = (name: string) => {
+      const candidate = candidates.find((entry) => entry.propertyName === name);
+      if (!candidate) throw new Error(`Missing candidate ${name}`);
+      return candidate.candidatePropertyId;
+    };
+    for (const visit of visits) {
+      const result = await pageApi<{ status: string }>(page, "POST", `${apiPath}/visit-requests`, {
+        candidatePropertyId: candidateId(visit.name),
+        requestedStartAt: dateTime(visit.start),
+        requestedEndAt: dateTime(visit.end),
+        expectedDurationMinutes: 30,
+      });
+      expect(result.status).toBe(201);
+      expect(result.body.status).toBe("PENDING");
+    }
+    for (const link of approvalLinks.values()) {
+      await approver.goto(link);
+      await approver.getByRole("tab", { name: "신청 비교·선택" }).click();
+      await chooseRequest();
+    }
+
+    const confirmed = await detail();
+    expect(confirmed.status).toBe("CONFIRMED");
+    const activeVisit = (current: VisitCoordinationDetailResponse, name: string) => {
+      const item = current.scheduleItems?.find(
+        (entry) => entry.candidatePropertyId === candidateId(name) && entry.result === "SCHEDULED",
+      );
+      if (!item) throw new Error(`Missing scheduled visit ${name}`);
+      return item;
+    };
+    const middle = visits[1].name;
+    const originalMiddle = activeVisit(confirmed, middle);
+    const middleApproval = approvalLinks.get(middle);
+    if (!middleApproval) throw new Error("Missing middle approval link");
+    await approver.goto(middleApproval);
+    await approver.getByLabel("날짜 예외 1 시작").fill("11:15");
+    await approver.getByLabel("날짜 예외 1 종료").fill("11:45");
+    await approver.getByRole("button", { name: "조건 저장" }).click();
+    const impact = approver.getByRole("dialog", { name: "확정된 방문에 영향이 있습니다" });
+    await expect(impact.getByRole("listitem")).toHaveCount(1);
+    await impact.getByLabel("영향을 확인했습니다").click();
+    await impact.getByRole("button", { name: "영향을 확인하고 저장" }).click();
+    await expect(impact).toBeHidden();
+
+    await page.goto(path);
+    const changes = page.getByRole("region", { name: "확정 방문 변경과 재승인" });
+    const middleRow = changes.getByRole("listitem").filter({ hasText: middle });
+    await expect(middleRow.getByText("변경 필요", { exact: true })).toBeVisible();
+    await expect(changes.getByText("영향 없이 고정", { exact: true })).toHaveCount(2);
+    await middleRow
+      .getByRole("listitem")
+      .filter({ hasText: `변경안 ${day} 11:15` })
+      .getByRole("button", { name: "이 변경안으로 재승인 요청" })
+      .click();
+    await expect(middleRow.getByText(/변경 신청을 올렸습니다/)).toBeVisible();
+    const pending = await detail();
+    expect(pending.status).toBe("RESCHEDULE_REQUIRED");
+    expect(activeVisit(pending, middle)).toMatchObject({
+      itemId: originalMiddle.itemId,
+      scheduledStartAt: originalMiddle.scheduledStartAt,
+      scheduledEndAt: originalMiddle.scheduledEndAt,
+    });
+
+    await approver.reload();
+    await approver.getByRole("tab", { name: "확정 일정" }).click();
+    await chooseRequest();
+    const revised = await detail();
+    expect(revised.status).toBe("CONFIRMED");
+    await page.reload();
+    for (const visit of [visits[0], visits[2]]) {
+      const original = activeVisit(confirmed, visit.name);
+      expect(activeVisit(revised, visit.name)).toMatchObject({
+        itemId: original.itemId,
+        scheduledStartAt: original.scheduledStartAt,
+        scheduledEndAt: original.scheduledEndAt,
+      });
+      const fixedRow = changes.getByRole("listitem").filter({ hasText: visit.name });
+      await expect(fixedRow).toContainText(`${day} ${visit.start}`);
+    }
+    const revisedMiddle = activeVisit(revised, middle);
+    expect(revisedMiddle.itemId).not.toBe(originalMiddle.itemId);
+    expect(Date.parse(revisedMiddle.scheduledStartAt ?? "")).toBe(Date.parse(dateTime("11:15")));
+    expect(Date.parse(revisedMiddle.scheduledEndAt ?? "")).toBe(Date.parse(dateTime("11:45")));
+    await expect(middleRow.filter({ hasText: `${day} 11:15` })).toBeVisible();
+    await expect(approver.getByRole("region", { name: "확정된 방문" })).toContainText(
+      `${day} 11:15`,
+    );
+
+    await page.goto("/home");
+    const calendar = page.getByRole("grid", { name: "이번 달 일정" });
+    await expect(calendar).toBeVisible();
+    const month = Number(day.slice(5, 7));
+    const date = Number(day.slice(8));
+    if (visibleInHomeCalendar) {
+      expect(await homeVisitCount()).toBe(initialCalendarCount + 3);
+      await expect(
+        calendar.getByRole("gridcell", {
+          name: new RegExp(`^${month}월 ${date}일 방문 ${initialCalendarCount + 3}건`),
+        }),
+      ).toBeVisible();
+    } else {
+      // The home calendar only renders the current month. At month-end the
+      // broker and approver schedule checks above still verify tomorrow's visit.
+      expect(await homeVisitCount()).toBe(0);
+      await expect(
+        calendar.getByRole("gridcell", { name: new RegExp(`^${month}월 ${date}일`) }),
+      ).toHaveCount(0);
+    }
+  } finally {
+    await context.close();
+  }
 });
 
 test("격리 DB의 실패 환불을 운영 화면에서 재처리하고 수동 완료한다", async ({

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, screen, waitFor } from "@testing-library/react";
+import { cleanup, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http } from "msw";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
@@ -414,17 +414,34 @@ describe("확정 방문 변경과 재승인", () => {
           status: "RESCHEDULE_REQUIRED",
           candidateProperties: [
             buildMockCandidate({
+              candidatePropertyId: 8013,
+              propertyId: 503,
+              propertyName: "첫 번째 매물",
+            }),
+            buildMockCandidate({
               candidatePropertyId: 8011,
               propertyId: 501,
+              propertyName: "가운데 매물",
               applicableSlots: [SLOT],
             }),
             buildMockCandidate({
               candidatePropertyId: 8012,
               propertyId: 502,
-              propertyName: "정릉 상가",
+              propertyName: "마지막 매물",
             }),
           ],
           scheduleItems: [
+            {
+              itemId: 5003,
+              candidatePropertyId: 8013,
+              result: "SCHEDULED",
+              state: "VALID",
+              scheduledStartAt: "2026-11-13T09:00:00+09:00",
+              scheduledEndAt: "2026-11-13T09:30:00+09:00",
+              resultRecordedAt: null,
+              correctionCount: 0,
+              travelFeasibleToNext: true,
+            },
             {
               itemId: 5001,
               candidatePropertyId: 8011,
@@ -474,7 +491,7 @@ describe("확정 방문 변경과 재승인", () => {
     confirmed(true);
     renderOffice(<CoordinationDetailScreen coordinationId={801} />, { role: "AGENT" });
     expect(await screen.findByText("변경 필요")).not.toBeNull();
-    expect(screen.getByText("영향 없이 고정")).not.toBeNull();
+    expect(screen.getAllByText("영향 없이 고정")).toHaveLength(2);
     expect(screen.getByText("다음 방문까지 이동이 어렵습니다.")).not.toBeNull();
     expect(screen.getByText(/재승인을 받기 전에는 기존 확정이 유지/)).not.toBeNull();
   });
@@ -486,12 +503,19 @@ describe("확정 방문 변경과 재승인", () => {
     expect(screen.queryByText(/PASSED/)).toBeNull();
   });
 
-  it("변경안을 고르면 변경 신청이 올라가고 조율 상태는 그대로다", async () => {
+  it("가운데 방문을 변경 신청해도 재승인 전에는 세 방문의 기존 시각을 표시한다", async () => {
     confirmed(true);
     const user = userEvent.setup();
     renderOffice(<CoordinationDetailScreen coordinationId={801} />, { role: "AGENT" });
-    await user.click(await screen.findByRole("button", { name: "이 변경안으로 재승인 요청" }));
-    expect(await screen.findByText(/변경 신청을 올렸습니다/)).not.toBeNull();
+    const section = await screen.findByRole("region", { name: "확정 방문 변경과 재승인" });
+    const visitRow = (name: string) =>
+      required(within(section).getByText(name, { exact: true }).closest("li") ?? undefined);
+    const middle = within(visitRow("가운데 매물"));
+    await user.click(middle.getByRole("button", { name: "이 변경안으로 재승인 요청" }));
+    expect(await middle.findByText(/변경 신청을 올렸습니다/)).not.toBeNull();
+    expect(visitRow("첫 번째 매물").textContent).toContain("2026-11-13 09:00");
+    expect(visitRow("가운데 매물").textContent).toContain("2026-11-13 10:00");
+    expect(visitRow("마지막 매물").textContent).toContain("2026-11-13 11:00");
     const created = getMockVisitRequestState().requests[0];
     expect(created?.requestKind).toBe("CHANGE");
     expect(created?.replacesScheduleItemId).toBe(5001);
@@ -511,8 +535,11 @@ describe("확정 방문 변경과 재승인", () => {
     confirmed(false);
     const user = userEvent.setup();
     renderOffice(<CoordinationDetailScreen coordinationId={801} />, { role: "AGENT" });
-    const buttons = await screen.findAllByRole("button", { name: "직접 구간 골라 변경 신청" });
-    await user.click(required(buttons[0]));
+    const section = await screen.findByRole("region", { name: "확정 방문 변경과 재승인" });
+    const middle = required(
+      within(section).getByText("가운데 매물", { exact: true }).closest("li") ?? undefined,
+    );
+    await user.click(within(middle).getByRole("button", { name: "직접 구간 골라 변경 신청" }));
     await user.click(await screen.findByRole("button", { name: /2026-11-12 10:00/ }));
     await user.click(screen.getByRole("button", { name: "변경 신청 제출" }));
     expect(await screen.findByText(/변경 신청을 올렸습니다/)).not.toBeNull();
