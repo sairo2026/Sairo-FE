@@ -38,7 +38,7 @@ export const IMPORT_GUIDE_COLUMNS: Record<GuideTarget, readonly GuideColumn[]> =
       header: "메모",
       required: false,
       description:
-        "참고 내용입니다. 주민등록번호·카드번호 같은 민감 번호는 쓰지 마세요. 감지되면 그 줄은 이전되지 않습니다.",
+        "참고 내용입니다. 주민등록번호·카드번호 같은 민감 번호는 쓰지 말아 주세요. 감지되면 그 줄은 이전되지 않습니다.",
       example: "전세 문의",
     },
   ],
@@ -66,7 +66,7 @@ export const IMPORT_GUIDE_COLUMNS: Record<GuideTarget, readonly GuideColumn[]> =
     {
       header: "전용면적(㎡)",
       required: false,
-      description: "숫자만 씁니다. 평으로 쓰려면 열 이름에 평을 넣거나 값 뒤에 평을 붙이세요.",
+      description: "숫자만 씁니다. 평으로 쓰려면 열 이름에 평을 넣거나 값 뒤에 평을 붙여 주세요.",
       example: "84.5",
     },
     {
@@ -78,7 +78,7 @@ export const IMPORT_GUIDE_COLUMNS: Record<GuideTarget, readonly GuideColumn[]> =
     {
       header: "관리비(원)",
       required: false,
-      description: "숫자만 씁니다. 만원 단위로 쓰려면 열 이름에 만원을 넣으세요.",
+      description: "숫자만 씁니다. 만원 단위로 쓰려면 열 이름에 만원을 넣어 주세요.",
       example: "50000",
     },
     {

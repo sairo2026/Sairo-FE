@@ -522,8 +522,8 @@ export function PropertyListScreen() {
           applied.archived
             ? "보관된 매물이 없습니다."
             : hasActiveFilter(applied)
-              ? "조건에 맞는 매물이 없습니다. 검색어나 조건을 바꾸거나 초기화해 보세요."
-              : "등록된 매물이 없습니다. 매물 등록 버튼으로 첫 매물을 등록해 보세요."
+              ? "조건에 맞는 매물이 없습니다. 검색어나 조건을 바꾸거나 초기화해 주세요."
+              : "등록된 매물이 없습니다. 매물 등록 버튼으로 첫 매물을 등록해 주세요."
         }
       />
       {isArchiveOpen ? (

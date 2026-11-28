@@ -156,9 +156,9 @@ function FormBody({
   const propertyTotal = properties.data?.totalElements ?? 0;
   const propertyHint =
     propertyTerm !== "" && properties.data && propertyOptions.length === 0
-      ? "검색어에 맞는 매물이 없습니다. 이름이나 주소를 바꿔 찾아 보세요."
+      ? "검색어에 맞는 매물이 없습니다. 이름이나 주소를 바꿔 찾아 주세요."
       : propertyTotal > propertyOptions.length
-        ? `매물이 ${propertyTotal}건이라 앞의 ${properties.data?.items.length ?? 0}건만 보입니다. 이름이나 주소로 찾아 보세요.`
+        ? `매물이 ${propertyTotal}건이라 앞의 ${properties.data?.items.length ?? 0}건만 보입니다. 이름이나 주소로 찾아 주세요.`
         : undefined;
 
   return (

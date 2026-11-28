@@ -76,7 +76,7 @@ export function EmailLoginForm({ next }: { next?: string }) {
       title="로그인"
       width="sm"
       variant="login"
-      tagline="사이로 계정으로 로그인해 업무를 이어가세요."
+      tagline="사이로 계정으로 로그인해 업무를 이어갈 수 있습니다."
     >
       <form noValidate onSubmit={submit} className="flex flex-col">
         <div className="flex flex-col gap-7">

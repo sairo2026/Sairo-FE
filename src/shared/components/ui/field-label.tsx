@@ -67,7 +67,7 @@ export function FieldLabel({
   ) : null;
   if (as === "legend") {
     return (
-      <legend className={cn(labelClass, isOffice ? "mb-2" : "mb-3", className)}>
+      <legend className={cn(labelClass, "text-h3", isOffice ? "mb-2" : "mb-3", className)}>
         {withOptionalMark(children)}
         {star}
       </legend>

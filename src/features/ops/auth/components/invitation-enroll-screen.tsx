@@ -215,7 +215,7 @@ export function InvitationEnrollScreen() {
         ) : null}
         <p className="mt-2 text-caption text-ink-2">
           이 비밀값은 이 화면에서만 볼 수 있고 다시 확인할 수 없습니다. 다른 곳에 저장하거나
-          공유하지 마세요.
+          공유하지 말아 주세요.
         </p>
       </div>
       {message ? <OpsNotice tone="error">{message}</OpsNotice> : null}

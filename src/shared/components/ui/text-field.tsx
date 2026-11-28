@@ -83,7 +83,7 @@ export function TextField({
       </FieldLabel>
       <div
         className={cn(
-          "flex h-[58px] items-center gap-4 rounded-control border border-line bg-white px-5 focus-within:border-primary",
+          "flex h-[58px] items-center gap-4 rounded-control border border-control bg-white px-5 focus-within:border-primary",
         )}
       >
         <input

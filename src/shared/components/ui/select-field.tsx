@@ -92,9 +92,9 @@ export function SelectField({
           className={cn(
             "w-full min-w-0 max-w-full appearance-none text-body font-medium text-ink focus:border-primary disabled:cursor-not-allowed disabled:text-ink-3",
             isBlock
-              ? "h-[58px] rounded-control border bg-surface pl-5 pr-12 focus:bg-white"
+              ? "h-[58px] rounded-control border bg-white pl-5 pr-12"
               : "h-[42px] rounded-small border bg-white pl-[10px] pr-10",
-            error ? "border-danger" : isBlock ? "border-line" : "border-[#9ca3af]",
+            error ? "border-danger" : isBlock ? "border-control" : "border-[#9ca3af]",
           )}
         >
           {placeholder ? (

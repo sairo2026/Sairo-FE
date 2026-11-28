@@ -135,7 +135,7 @@ function GeneralNotifications() {
                             <Badge
                               tone={item.read ? "gray" : notificationTypeTone(item.type)}
                               statusGroup={item.read ? null : undefined}
-                              className="h-7 min-w-0 px-3 text-caption"
+                              className="min-w-0"
                             >
                               {notificationTypeLabel(item.type)}
                             </Badge>
@@ -252,7 +252,7 @@ function VisitRequestNotices() {
                       <Badge
                         tone={item.readAt ? "gray" : (NOTICE_TYPE_TONE[item.noticeType] ?? "blue")}
                         statusGroup={item.readAt ? null : undefined}
-                        className="h-7 w-fit min-w-0 px-3 text-caption"
+                        className="w-fit min-w-0"
                       >
                         {NOTICE_TYPE_LABEL[item.noticeType] ?? "방문 신청"}
                       </Badge>

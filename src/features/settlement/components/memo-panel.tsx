@@ -123,7 +123,8 @@ function MemoEditor({ yearMonth, memo }: { yearMonth: string; memo: MonthlyMemoR
           className="rounded-card-flat border border-primary p-4 outline-none"
         >
           <p id={conflictMessageId} className="mb-3 font-semibold text-ink">
-            저장하는 동안 다른 사람이 먼저 메모를 고쳤습니다. 내 입력과 최신 메모를 비교해 고르세요.
+            저장하는 동안 다른 사람이 먼저 메모를 고쳤습니다. 내 입력과 최신 메모를 비교해 골라
+            주세요.
           </p>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
