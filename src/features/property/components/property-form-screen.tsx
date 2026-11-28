@@ -619,7 +619,7 @@ export function PropertyForm(props: FormProps) {
             </button>
           }
         />
-        <div className="text-caption text-ink-2">
+        <div className="rounded-control bg-primary-soft px-4 py-3 text-caption text-ink-2">
           <p>{PROPERTY_ENTRY_COPY.responsibilitySummary}</p>
           <details className="mt-2">
             <summary className="w-fit cursor-pointer rounded-sm font-semibold text-primary clickable-link focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
