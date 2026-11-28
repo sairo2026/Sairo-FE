@@ -358,7 +358,7 @@ describe("로그인 직후 카드 등록 안내", () => {
   it("카드가 없으면 안내를 보여주고 청구가 아니라고 알린다", async () => {
     const user = userEvent.setup();
     renderOffice(<CardGuideScreen />, { role: "OWNER" });
-    expect(await screen.findByRole("heading", { name: "카드를 등록해 두세요" })).not.toBeNull();
+    expect(await screen.findByRole("heading", { name: "카드 등록" })).not.toBeNull();
     expect(screen.getByText(/카드 등록은 결제 준비이며 청구가 아닙니다/)).not.toBeNull();
     await user.click(screen.getByRole("button", { name: "카드 등록하기" }));
     expect(router.push).toHaveBeenCalledWith("/billing/card");
