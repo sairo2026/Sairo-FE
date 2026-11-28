@@ -7,6 +7,7 @@ import { Badge, DDayTag, TradeTypeTag } from "./badge";
 import { Card } from "./card";
 import { DataTable } from "./data-table";
 import type { DataTableColumn, PageSize, SortState } from "./data-table";
+import { FieldLabel } from "./field-label";
 import { ConfirmDialog, Modal } from "./modal";
 import { PageHeader } from "./page-header";
 import { Tabs } from "./tabs";
@@ -64,6 +65,7 @@ describe("Card와 PageHeader", () => {
           actions={<button type="button">등록</button>}
         />
         <Card title="요약">내용</Card>
+        <FieldLabel htmlFor="sample">입력 라벨</FieldLabel>
       </>,
     );
     expect(screen.getByRole("heading", { level: 1, name: "매물 관리" })).toBeTruthy();
@@ -73,7 +75,8 @@ describe("Card와 PageHeader", () => {
     expect(screen.getByRole("button", { name: "등록" }).parentElement?.className).toContain(
       "gap-3",
     );
-    expect(screen.getByRole("heading", { level: 2, name: "요약" })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 2, name: "요약" }).className).toContain("text-h3");
+    expect(screen.getByText("입력 라벨").className).toContain("text-body");
     expect(screen.getByRole("button", { name: "등록" })).toBeTruthy();
   });
 });

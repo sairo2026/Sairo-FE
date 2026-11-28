@@ -8,7 +8,7 @@ export type SideNavItemProps = {
   href: string;
   label: string;
   isActive?: boolean;
-  /** 사무소 메뉴는 H3(24), 운영 콘솔처럼 좁은 메뉴는 md(20)를 쓴다. */
+  /** 사무소 메뉴는 20px, 운영 콘솔처럼 좁은 메뉴는 본문 크기를 쓴다. */
   size?: "lg" | "md";
 };
 
@@ -26,7 +26,7 @@ export function SideNavItem({ href, label, isActive = false, size = "lg" }: Side
       aria-current={isActive ? "page" : undefined}
       className={cn(
         "inline-block w-fit shrink-0 whitespace-nowrap lg:shrink lg:whitespace-normal border-b-2 py-2 font-semibold transition-colors active:text-primary-pressed",
-        size === "lg" ? "text-body lg:text-h3" : "text-body lg:text-h2",
+        size === "lg" ? "text-body lg:text-h3" : "text-body",
         isActive
           ? "border-primary text-primary"
           : "border-transparent text-ink hover:border-primary-line hover:bg-primary-soft hover:text-primary",

@@ -5,14 +5,14 @@ import type { ReactNode } from "react";
 import { cn } from "@/shared/lib/cn";
 
 export const FIELD_GAP_CLASS = "gap-5";
-export const FIELD_LABEL_CLASS = "text-h2 font-semibold text-ink";
+export const FIELD_LABEL_CLASS = "text-body font-semibold text-ink";
 
-export const OFFICE_FIELD_GAP_CLASS = "gap-2";
+export const OFFICE_FIELD_GAP_CLASS = "gap-5";
 export const OFFICE_FIELD_LABEL_CLASS = "text-body font-bold text-ink";
 
 const OfficeFieldContext = createContext(false);
 
-/** 사무소 업무 폼 안에서 라벨을 14 Bold, 라벨과 입력창 간격을 8px로 바꾼다. 인증 화면은 감싸지 않으므로 20 SemiBold, 간격 20px 그대로다. */
+/** 사무소 업무 폼에서도 입력 라벨과 컨트롤의 간격을 전역 20px 규칙에 맞춘다. */
 export function OfficeFieldScope({ children }: { children: ReactNode }) {
   return <OfficeFieldContext.Provider value>{children}</OfficeFieldContext.Provider>;
 }
@@ -50,7 +50,7 @@ export type FieldLabelProps = {
   children: ReactNode;
 };
 
-/** 폼 항목 라벨. 글자 20 SemiBold이고 필수 별표는 장식이라 스크린리더가 읽지 않는다. */
+/** 폼 항목 라벨. 입력값보다 크지 않은 16px이고 필수 별표는 장식이라 스크린리더가 읽지 않는다. */
 export function FieldLabel({
   htmlFor,
   required,

@@ -184,7 +184,7 @@ function ReplyForm({
         void submit();
       }}
     >
-      <h3 className="text-h2 font-semibold text-ink">공개 답변 작성</h3>
+      <h3 className="text-h3 font-semibold text-ink">공개 답변 작성</h3>
       <p className="text-caption text-ink-2">
         여기에 쓴 내용은 고객에게 공개되고 알림으로 전달됩니다. 이전 공개 답변은 수정하거나 삭제하지
         않고 이력으로 남습니다.
@@ -258,7 +258,7 @@ function NoteForm({
         void submit();
       }}
     >
-      <h3 className="text-h2 font-semibold">내부 메모 작성</h3>
+      <h3 className="text-h3 font-semibold">내부 메모 작성</h3>
       <p className="text-caption">
         내부 메모는 운영자에게만 보이며 고객 화면과 알림에 포함되지 않습니다.
       </p>

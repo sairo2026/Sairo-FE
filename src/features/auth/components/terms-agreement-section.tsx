@@ -146,7 +146,7 @@ export function TermsAgreementSection({
 
   return (
     <fieldset className="min-w-0 flex flex-col gap-3">
-      <legend className="mb-5 text-h2 font-semibold text-black">
+      <legend className="mb-5 text-h3 font-semibold text-black">
         {SIGNUP_TERMS_COPY.sectionTitle}
       </legend>
       <div className="flex flex-col">

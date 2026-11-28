@@ -36,7 +36,7 @@ export function Card({
         className,
       )}
     >
-      {title ? <h2 className="mb-4 text-h2 font-semibold text-ink">{title}</h2> : null}
+      {title ? <h2 className="mb-4 text-h3 font-semibold text-ink">{title}</h2> : null}
       {children}
     </section>
   );

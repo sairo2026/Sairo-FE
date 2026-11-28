@@ -94,7 +94,7 @@ const DETAIL_SECTION_ID = "property-detail-fields";
 function Section({ id, title, children }: { id?: string; title: string; children: ReactNode }) {
   return (
     <section id={id} className="flex flex-col gap-5 pt-4">
-      <h2 className="text-h2 font-semibold text-ink">{title}</h2>
+      <h2 className="text-h3 font-semibold text-ink">{title}</h2>
       {children}
     </section>
   );

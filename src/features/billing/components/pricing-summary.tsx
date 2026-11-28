@@ -73,7 +73,7 @@ export function PricingSummary({ initialData }: { initialData?: PublicPricing })
             key={`${tier.planCode}-${tier.minMembers}`}
             className="flex flex-col gap-2 rounded-card-flat border border-line bg-white px-6 py-5"
           >
-            <h3 className="text-h2 font-semibold text-ink">{tierRange(tier)}</h3>
+            <h3 className="text-h3 font-semibold text-ink">{tierRange(tier)}</h3>
             <p className="text-body text-ink-2">{tierFormula(tier)}</p>
             <p className="text-caption text-ink-2">
               {PRICING_COPY.planFooter(formatKrw(tier.baseAmount))}

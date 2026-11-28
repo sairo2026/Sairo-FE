@@ -96,7 +96,7 @@ export function NotificationPanel({ onClose, onNavigate }: NotificationPanelProp
             </svg>
           </button>
         </div>
-        <h2 className="text-h2 font-semibold text-ink">알림</h2>
+        <h2 className="text-h3 font-semibold text-ink">알림</h2>
       </div>
       {query.isPending ? (
         <p role="status" className="text-caption text-ink-2">

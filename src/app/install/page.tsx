@@ -31,7 +31,7 @@ export default function InstallPage() {
           className="mt-8 rounded-card-flat border border-line bg-surface p-5 sm:p-6"
           aria-labelledby="install-title"
         >
-          <h2 id="install-title" className="text-h2 font-semibold">
+          <h2 id="install-title" className="text-h3 font-semibold">
             PC에 설치하기
           </h2>
           <p className="mt-4 break-keep text-body text-ink-2">
