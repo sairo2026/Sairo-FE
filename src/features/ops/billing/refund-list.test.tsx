@@ -107,6 +107,18 @@ describe("환불 신청 목록", () => {
     expect(await findRefund(2)).toBeTruthy();
   });
 
+  it("운영자 세션이 만료되면 재시도 대신 로그인 경로를 안내한다", async () => {
+    server.use(http.get("/api/ops/refund-requests", () => mockErrors.unauthenticated()));
+    renderList();
+    expect(
+      await screen.findByText("로그인이 필요합니다. 로그인한 뒤 다시 시도해 주세요."),
+    ).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "다시 시도" })).toBeNull();
+    expect(screen.getByRole("link", { name: "운영자 로그인" }).getAttribute("href")).toBe(
+      "/ops/login",
+    );
+  });
+
   it("403과 429를 안내한다", async () => {
     server.use(http.get("/api/ops/refund-requests", () => mockErrors.forbidden()));
     renderList();
