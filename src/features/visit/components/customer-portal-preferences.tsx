@@ -239,7 +239,14 @@ export function CustomerPortalPreferences() {
         </FormAlert>
       ) : (
         <PreferenceForm
-          key={`${preference.data.version}-${preference.data.confirmedAt ?? "empty"}`}
+          key={JSON.stringify([
+            preference.data.sessionBinding,
+            preference.data.noticeVersion,
+            preference.data.preferenceDisclosureVersion,
+            preference.data.preferenceDisclosureText,
+            preference.data.version,
+            preference.data.confirmedAt,
+          ])}
           preference={preference.data}
           onSaved={(value) => {
             queryClient.setQueriesData({ queryKey: CUSTOMER_PREFERENCE_QUERY_KEY }, value);

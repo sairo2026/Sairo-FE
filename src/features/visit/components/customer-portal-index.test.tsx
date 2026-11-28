@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { http, HttpResponse } from "msw";
@@ -258,5 +258,47 @@ describe("고객 방문 요청 모아보기", () => {
         }
       ).exists,
     ).toBe(false);
+  });
+
+  it("인증 세션이나 저장 안내가 바뀌면 이전 선호 초안과 확인을 버린다", async () => {
+    server.use(
+      http.get("*/api/public/customer-visit-links/portal", () =>
+        HttpResponse.json({
+          available: true,
+          verified: true,
+          items: [],
+        }),
+      ),
+    );
+    const user = userEvent.setup();
+    const queryClient = renderIndex();
+    const preferenceKey = ["customer-visit-preference"];
+    const acknowledgment = () =>
+      screen.getByRole("checkbox", {
+        name: "기본 방문 선호 저장 안내를 확인했습니다. (필수)",
+      }) as HTMLInputElement;
+    const monday = () => screen.getByRole("checkbox", { name: "월요일" }) as HTMLInputElement;
+
+    await user.click(await screen.findByRole("checkbox", { name: "월요일" }));
+    await user.click(acknowledgment());
+    expect(monday().checked).toBe(true);
+    expect(acknowledgment().checked).toBe(true);
+
+    queryClient.setQueryData(preferenceKey, (previous: Record<string, unknown>) => ({
+      ...previous,
+      sessionBinding: "another-verified-session",
+    }));
+    await waitFor(() => expect(monday().checked).toBe(false));
+    expect(acknowledgment().checked).toBe(false);
+
+    await user.click(monday());
+    await user.click(acknowledgment());
+    queryClient.setQueryData(preferenceKey, (previous: Record<string, unknown>) => ({
+      ...previous,
+      noticeVersion: "2.0",
+      preferenceDisclosureText: "변경된 저장 안내입니다.",
+    }));
+    await waitFor(() => expect(monday().checked).toBe(false));
+    expect(acknowledgment().checked).toBe(false);
   });
 });
