@@ -102,13 +102,16 @@ export type BadgeProps = {
   tone: BadgeTone;
   children: ReactNode;
   className?: string;
-  statusGroup?: SemanticStatus;
+  /** null keeps a deliberately muted badge, such as a read notification, neutral. */
+  statusGroup?: SemanticStatus | null;
 };
 
 /** 상태 표시 배지. 색만으로 뜻을 전하지 않도록 항상 글자를 함께 쓴다. */
 export function Badge({ tone, children, className, statusGroup }: BadgeProps) {
   const status =
-    statusGroup ?? (typeof children === "string" ? semanticStatus(children.trim()) : null);
+    statusGroup === null
+      ? null
+      : (statusGroup ?? (typeof children === "string" ? semanticStatus(children.trim()) : null));
   return (
     <span
       data-tone={tone}

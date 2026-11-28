@@ -38,6 +38,18 @@ describe("Badge 계열", () => {
     expect(badge.className).toContain(`bg-status-${group}-bg`);
   });
 
+  it("읽은 알림은 상태 이름과 관계없이 의도한 중립색으로 표시한다", () => {
+    render(
+      <Badge tone="gray" statusGroup={null}>
+        재조율 필요
+      </Badge>,
+    );
+    const badge = screen.getByText("재조율 필요");
+    expect(badge.getAttribute("data-status-group")).toBeNull();
+    expect(badge.className).toContain("bg-white");
+    expect(badge.className).not.toContain("bg-status-warning-bg");
+  });
+
   it("상태 코드를 지정한 타일은 표시 문구가 달라도 의미 그룹을 유지한다", () => {
     render(<ScheduleTag tone="red" label="일부 확정" count={2} statusGroup="progress" />);
     const tile = screen.getByText("일부 확정").parentElement;

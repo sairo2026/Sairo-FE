@@ -403,6 +403,11 @@ a:focus-visible > .clickable-tile {
   --tile-hover: #9d4747;
   --tile-active: #924242;
 }
+/* 상태 색의 글자 대비를 유지한다. 기존 tone별 진한 호버 배경은 상태 칩에 적용하지 않는다. */
+.clickable-tile[data-status-group] {
+  --tile-hover: var(--surface);
+  --tile-active: var(--surface);
+}
 a:hover > .clickable-tile,
 a:focus-visible > .clickable-tile {
   background-color: var(--tile-hover);
