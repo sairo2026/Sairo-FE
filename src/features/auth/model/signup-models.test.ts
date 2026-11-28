@@ -74,12 +74,16 @@ describe("돌아갈 주소", () => {
 });
 
 describe("비밀번호 규칙", () => {
-  it("코드 포인트 기준 8자 이상 12자 이하를 허용하고 공백도 센다", () => {
+  it("코드 포인트 기준 8자 이상 12자 이하를 허용하고 공백을 거절한다", () => {
     expect(validatePasswordInput("")).toBe("비밀번호를 입력해 주세요.");
     expect(validatePasswordInput("        ")).toBe("비밀번호를 입력해 주세요.");
     expect(validatePasswordInput("a".repeat(7))).toBe("8~12자 이내로 설정해 주십시오.");
     expect(validatePasswordInput("a".repeat(13))).toBe("8~12자 이내로 설정해 주십시오.");
-    expect(validatePasswordInput("ab cd ef1")).toBeNull();
+    expect(validatePasswordInput("ab cd ef1")).toBe("비밀번호에 공백을 사용할 수 없습니다.");
+    expect(validatePasswordInput("Abcd1234\u00a0")).toBe("비밀번호에 공백을 사용할 수 없습니다.");
+    expect(validatePasswordInput("Abcd1234\uFEFF")).toBe("비밀번호에 공백을 사용할 수 없습니다.");
+    expect(validatePasswordInput("Abcd1234\u001C")).toBe("비밀번호에 공백을 사용할 수 없습니다.");
+    expect(validatePasswordInput("\u001C".repeat(8))).toBe("비밀번호를 입력해 주세요.");
     expect(validatePasswordInput("가나다라마바사아")).toBeNull();
     expect(validatePasswordInput("😀".repeat(8))).toBeNull();
     expect(validatePasswordInput("😀".repeat(13))).toBe("8~12자 이내로 설정해 주십시오.");

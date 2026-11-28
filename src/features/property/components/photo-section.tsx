@@ -71,7 +71,15 @@ function PhotoPicker({
       <p className="text-caption text-ink-2">
         JPG, PNG, WebP, 한 장당 10MB 이하, 최대 {PHOTO_MAX_COUNT}장까지 올릴 수 있습니다.
       </p>
-      <p className="text-caption text-ink-2">{PROPERTY_ENTRY_COPY.photoNotice}</p>
+      <div className="text-caption text-ink-2">
+        <p>{PROPERTY_ENTRY_COPY.photoNoticeSummary}</p>
+        <details className="mt-2">
+          <summary className="w-fit cursor-pointer rounded-sm font-semibold text-primary clickable-link focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+            사진 업로드 안내 자세히 보기
+          </summary>
+          <p className="mt-3">{PROPERTY_ENTRY_COPY.photoNoticeDetails}</p>
+        </details>
+      </div>
     </div>
   );
 }

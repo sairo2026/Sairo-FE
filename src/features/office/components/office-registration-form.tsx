@@ -352,7 +352,15 @@ export function OfficeRegistrationForm() {
         <div className="flex flex-col gap-2">
           <MutedNote>대표 자격은 다음 단계에서 자격증 사본으로 확인합니다.</MutedNote>
           <MutedNote>{REGISTRATION_NOTICE_COPY.intro}</MutedNote>
-          <MutedNote>{REGISTRATION_NOTICE_COPY.scope}</MutedNote>
+          <div className="text-caption text-ink-2">
+            <p>{REGISTRATION_NOTICE_COPY.scopeSummary}</p>
+            <details className="mt-2">
+              <summary className="w-fit cursor-pointer rounded-sm font-semibold text-primary clickable-link focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+                사무소 인증 안내 자세히 보기
+              </summary>
+              <p className="mt-3">{REGISTRATION_NOTICE_COPY.scope}</p>
+            </details>
+          </div>
           <MutedNote>
             제출하면 작성 중 상태의 신청이 만들어지고 증빙 업로드 화면으로 이동합니다.
           </MutedNote>
