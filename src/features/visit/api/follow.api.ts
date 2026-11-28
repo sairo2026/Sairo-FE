@@ -52,6 +52,7 @@ const CustomerPortalRequestsSchema = z.object({
       periodStartDate: z.string(),
       periodEndDate: z.string(),
       canRespond: z.boolean().optional(),
+      canViewSchedule: z.boolean().optional(),
     }),
   ),
 });
@@ -242,6 +243,14 @@ export function fetchCustomerPortalRequest(coordinationId: number, signal?: Abor
     signal,
     retry: false,
     schema: PublicVisitLinkResponseSchema,
+  });
+}
+
+export function fetchCustomerPortalConfirmed(coordinationId: number, signal?: AbortSignal) {
+  return apiFetch(`/api/public/customer-visit-links/portal/requests/${coordinationId}/confirmed`, {
+    signal,
+    retry: false,
+    schema: PublicConfirmedVisitResponseSchema,
   });
 }
 

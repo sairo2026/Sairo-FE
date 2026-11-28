@@ -88,4 +88,48 @@ describe("고객 방문 요청 모아보기", () => {
     });
     expect(queryClient.getQueryData(["customer-portal-request", 71])).toBeUndefined();
   });
+
+  it("확정된 방문에는 일정 확인 경로를 제공하고 수집 중인 방문에는 제공하지 않는다", async () => {
+    server.use(
+      http.get("*/api/public/customer-visit-links/portal", () =>
+        HttpResponse.json({
+          available: true,
+          verified: true,
+          items: [
+            {
+              coordinationId: 71,
+              status: "TIME_COLLECTING",
+              periodStartDate: "2026-11-11",
+              periodEndDate: "2026-11-20",
+              canRespond: true,
+              canViewSchedule: false,
+            },
+            {
+              coordinationId: 72,
+              status: "APPLYING",
+              periodStartDate: "2026-11-11",
+              periodEndDate: "2026-11-20",
+              canRespond: false,
+              canViewSchedule: true,
+            },
+            {
+              coordinationId: 73,
+              status: "CANCELLED",
+              periodStartDate: "2026-11-11",
+              periodEndDate: "2026-11-20",
+              canRespond: false,
+              canViewSchedule: true,
+            },
+          ],
+        }),
+      ),
+    );
+    renderIndex();
+    const links = await screen.findAllByRole("link", { name: "확정 일정 확인" });
+    expect(links.map((link) => link.getAttribute("href"))).toEqual([
+      "/visit/portal/72/confirmed",
+      "/visit/portal/73/confirmed",
+    ]);
+    expect(screen.getAllByRole("link", { name: "가능한 시간 확인·수정" })).toHaveLength(1);
+  });
 });
