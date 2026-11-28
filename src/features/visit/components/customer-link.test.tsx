@@ -458,12 +458,18 @@ describe("고객 공개 링크 화면", () => {
   });
 
   it("고객 응답을 받지 않는 조율 상태면 제출할 수 없다", async () => {
+    server.use(
+      http.get("/api/public/customer-visit-links/:token/portal", () =>
+        HttpResponse.json({ available: true, verified: false, items: [] }),
+      ),
+    );
     setMockVisitFollowState({
       customerLink: { ...getMockVisitFollowState().customerLink, coordinationStatus: "CONFIRMED" },
     });
     const user = userEvent.setup();
     renderLink();
     expect(await screen.findByText("방문 일정이 확정되었습니다")).not.toBeNull();
+    expect(await screen.findByRole("button", { name: "인증번호 받기" })).not.toBeNull();
     await user.click(screen.getByRole("tab", { name: "가능한 시간" }));
     const button = await screen.findByRole("button", { name: "가능한 시간 제출" });
     expect((button as HTMLButtonElement).disabled).toBe(true);

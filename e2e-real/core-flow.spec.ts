@@ -26,6 +26,8 @@ const businessNumber = String(Date.now()).slice(-10);
 
 const REVIEWER_EMAIL = "e2e-reviewer@example.com";
 const CUSTOMER_EMAIL = `e2e-customer-${Date.now().toString(36)}@example.com`;
+let customerPortalCodeSentAt = 0;
+let customerPortalPreviousMailBody = "";
 let registrationId = "";
 
 test.describe.configure({ mode: "serial" });
@@ -343,9 +345,11 @@ test("실제 이메일 인증 후 방문 요청 목록을 새로고침에도 유
   const { context, page } = await openPublicPage(browser);
   await page.goto(customerLink);
   await page.getByRole("button", { name: "인증번호 받기" }).click();
+  customerPortalCodeSentAt = Date.now();
   const mail = await capturedMessage(request, "mail", CUSTOMER_EMAIL, {
     match: /SAIRO visit verification code/,
   });
+  customerPortalPreviousMailBody = mail.body;
   const code = mail.body.match(/verification code:\s*(\d{6})/i)?.[1];
   if (!code) throw new Error("customer verification code missing from local fixture mail");
   await page.getByLabel("인증번호").fill(code);
@@ -466,6 +470,58 @@ test("승인자가 신청을 비교해 선택하면 조율이 확정된다", asy
   await loginViaUi(page, owner.email, /\/(home|billing)$/);
   await page.goto(coordinationUrl);
   await expect(page.getByText("확정 완료").first()).toBeVisible();
+});
+
+test("이메일 확인 고객이 확정 일정을 열고 새로고침 뒤에도 같은 일정을 확인한다", async ({
+  browser,
+  request,
+}, testInfo) => {
+  test.setTimeout(150_000);
+  const { context, page } = await openPublicPage(browser);
+  try {
+    await page.goto(customerLink);
+    const retryAfterMs = customerPortalCodeSentAt + 61_000 - Date.now();
+    if (retryAfterMs > 0) await page.waitForTimeout(retryAfterMs);
+    await page.getByRole("button", { name: "인증번호 받기" }).click();
+    const mail = await capturedMessage(request, "mail", CUSTOMER_EMAIL, {
+      match: /SAIRO visit verification code/,
+      excludeBody: customerPortalPreviousMailBody,
+    });
+    const code = mail.body.match(/verification code:\s*(\d{6})/i)?.[1];
+    if (!code) throw new Error("customer verification code missing from local fixture mail");
+    await page.getByLabel("인증번호").fill(code);
+    await page.getByRole("button", { name: "내 방문 요청 확인하기" }).click();
+    await page.getByRole("link", { name: "내 방문 요청 모아보기" }).click();
+    await page.screenshot({
+      path: testInfo.outputPath("customer-portal-requests.png"),
+      fullPage: true,
+    });
+
+    const coordinationId = coordinationUrl.split("/").at(-1);
+    expect(coordinationId).toMatch(/^\d+$/);
+    const requestCard = page
+      .getByRole("listitem")
+      .filter({ hasText: `방문 요청 #${coordinationId}` });
+    await expect(requestCard.getByRole("link", { name: "확정 일정 확인" })).toBeVisible();
+    await requestCard.getByRole("link", { name: "확정 일정 확인" }).click();
+    await expect(page).toHaveURL(new RegExp(`/visit/portal/${coordinationId}/confirmed$`));
+    await expect(page.getByRole("heading", { name: "확정 방문 일정" })).toBeVisible();
+    await expect(page.getByRole("list", { name: "확정된 방문 목록" })).toContainText(
+      "서울특별시 종로구 시험로 1",
+    );
+    await page.reload();
+    await expect(page.getByRole("list", { name: "확정된 방문 목록" })).toContainText(
+      "서울특별시 종로구 시험로 1",
+    );
+    await page.screenshot({
+      path: testInfo.outputPath("customer-confirmed-schedule.png"),
+      fullPage: true,
+    });
+    await page.getByRole("link", { name: "이전 화면으로 돌아가기" }).click();
+    await expect(requestCard).toContainText(`방문 요청 #${coordinationId}`);
+  } finally {
+    await context.close();
+  }
 });
 
 test("예정 시각 전에는 취소만 방문 결과로 기록할 수 있다", async ({ page }) => {

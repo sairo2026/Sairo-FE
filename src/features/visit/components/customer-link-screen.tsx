@@ -119,7 +119,7 @@ function CustomerPortalPanel({
   onReuse,
 }: {
   token: string;
-  onReuse: (slots: ReusableSlot[]) => void;
+  onReuse?: (slots: ReusableSlot[]) => void;
 }) {
   const queryClient = useQueryClient();
   const [code, setCode] = useState("");
@@ -131,18 +131,20 @@ function CustomerPortalPanel({
   const send = useMutation({ mutationFn: () => sendCustomerPortalCode(token) });
   const loadTimes = useMutation({
     mutationFn: () => previewCustomerPortalTimes(token),
-    onSuccess: (result) => onReuse(result.timeSlots),
+    onSuccess: (result) => onReuse?.(result.timeSlots),
   });
   const verify = useMutation({
     mutationFn: async () => {
       await verifyCustomerPortalCode(token, code);
       const requests = await fetchCustomerPortalRequests(token);
-      const reusable = await previewCustomerPortalTimes(token).catch(() => ({ timeSlots: [] }));
+      const reusable = onReuse
+        ? await previewCustomerPortalTimes(token).catch(() => ({ timeSlots: [] }))
+        : { timeSlots: [] };
       return { requests, reusable };
     },
     onSuccess: ({ requests, reusable }) => {
       queryClient.setQueryData(["customer-visit-portal", token], requests);
-      onReuse(reusable.timeSlots);
+      onReuse?.(reusable.timeSlots);
       setCode("");
     },
   });
@@ -165,8 +167,9 @@ function CustomerPortalPanel({
     <div className="rounded-control border border-line bg-surface px-3.5 py-3">
       <h3 className="text-body font-semibold text-ink">내 방문 요청 확인</h3>
       <p className="mt-1 text-caption text-ink-2">
-        이전 링크가 없어도 등록된 이메일로 본인을 확인하면 같은 사무소의 방문 요청과 유효한 시간을
-        볼 수 있습니다. 시간을 확인하고 고친 뒤 이번 요청에 직접 제출해 주세요.
+        {onReuse
+          ? "이전 링크가 없어도 등록된 이메일로 본인을 확인하면 같은 사무소의 방문 요청과 유효한 시간을 볼 수 있습니다. 시간을 확인하고 고친 뒤 이번 요청에 직접 제출해 주세요."
+          : "등록된 이메일로 본인을 확인하면 같은 사무소의 방문 요청과 확정 일정을 한곳에서 볼 수 있습니다."}
       </p>
       {items ? (
         <>
@@ -183,16 +186,20 @@ function CustomerPortalPanel({
               </li>
             ))}
           </ul>
-          <Button
-            size="sm"
-            variant="outlined"
-            isLoading={loadTimes.isPending}
-            onClick={() => loadTimes.mutate()}
-          >
-            유효한 이전 시간 불러오기
-          </Button>
-          {loadTimes.isError ? (
-            <FormAlert>이전 시간을 불러오지 못했습니다. 다시 시도해 주세요.</FormAlert>
+          {onReuse ? (
+            <>
+              <Button
+                size="sm"
+                variant="outlined"
+                isLoading={loadTimes.isPending}
+                onClick={() => loadTimes.mutate()}
+              >
+                유효한 이전 시간 불러오기
+              </Button>
+              {loadTimes.isError ? (
+                <FormAlert>이전 시간을 불러오지 못했습니다. 다시 시도해 주세요.</FormAlert>
+              ) : null}
+            </>
           ) : null}
           <Button
             size="sm"
@@ -872,6 +879,7 @@ export function CustomerLinkScreen({ token }: { token: string | undefined }) {
           },
         ]}
       />
+      {isConfirmed || isArranging ? <CustomerPortalPanel token={normalized} /> : null}
       <CustomerLinkPrivacyNotice
         officeName={link.officeName}
         officeContactPhone={link.officeContactPhone}
