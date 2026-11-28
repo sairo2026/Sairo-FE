@@ -182,20 +182,6 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
           }
         />
       </div>
-      {needsCard && !isEmptyOffice ? (
-        <div
-          role="status"
-          className="rounded-control bg-primary-soft px-5 py-4 text-caption text-ink-2"
-        >
-          결제 카드가 등록되지 않았습니다.{" "}
-          <Link
-            href="/billing/card-guide"
-            className="font-semibold text-primary underline clickable-link"
-          >
-            카드 등록 안내
-          </Link>
-        </div>
-      ) : null}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-[repeat(3,minmax(0,292px))]">
         <StatCard
           href="/coordinations"

@@ -161,12 +161,12 @@ describe("평가 이의 제기", () => {
     expect(getMockVisitReviewState().received[0]?.dispute).toBeNull();
   });
 
-  it("500자를 넘으면 글자 수와 오류를 보여준다", async () => {
+  it("500자를 넘으면 오류를 보여준다", async () => {
     const user = userEvent.setup();
     await openDispute(user);
     await user.selectOptions(screen.getByLabelText("이의 사유"), "OTHER");
     fireEvent.change(screen.getByLabelText("사유 설명"), { target: { value: "가".repeat(501) } });
-    expect(screen.getByText(/501\/500자/)).not.toBeNull();
+    expect(screen.queryByText(/501\/500자/)).toBeNull();
     await user.click(screen.getByRole("button", { name: "이의 제기" }));
     expect(await screen.findByText("500자 이내로 입력해 주세요.")).not.toBeNull();
   });

@@ -3,10 +3,12 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
+import { useSubscription } from "@/features/billing/hooks/billing-queries";
 import { formatSeoulDateTime } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/cn";
+import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { markNotificationRead } from "../api/home.api";
-import { homeKeys, useNotifications } from "../hooks/home-queries";
+import { homeKeys, useIsEmptyOffice, useNotifications } from "../hooks/home-queries";
 import { notificationLink, notificationTypeLabel } from "../model/labels";
 
 export type NotificationPanelProps = { onClose: () => void; onNavigate: () => void };
@@ -36,6 +38,11 @@ function Chevron() {
 export function NotificationPanel({ onClose, onNavigate }: NotificationPanelProps) {
   const queryClient = useQueryClient();
   const closeRef = useRef<HTMLButtonElement>(null);
+  const { role, isReadOnly } = useOfficeAccess();
+  const isOwner = role === "OWNER";
+  const isEmptyOffice = useIsEmptyOffice(isOwner && !isReadOnly);
+  const subscription = useSubscription(isOwner);
+  const needsCard = isOwner && subscription.data?.readiness.hasBillingKey === false;
   const query = useNotifications({ unreadOnly: false, page: 0, size: 25 });
   const read = useMutation({
     mutationFn: (notificationId: number) => markNotificationRead(notificationId),
@@ -98,6 +105,21 @@ export function NotificationPanel({ onClose, onNavigate }: NotificationPanelProp
         </div>
         <h2 className="text-h3 font-semibold text-ink">알림</h2>
       </div>
+      {needsCard && !isEmptyOffice ? (
+        <div
+          role="status"
+          className="rounded-control bg-primary-soft px-5 py-4 text-caption text-ink-2"
+        >
+          결제 카드가 등록되지 않았습니다.{" "}
+          <Link
+            href="/billing/card-guide"
+            onClick={onNavigate}
+            className="font-semibold text-primary underline clickable-link"
+          >
+            카드 등록 안내
+          </Link>
+        </div>
+      ) : null}
       {query.isPending ? (
         <p role="status" className="text-caption text-ink-2">
           알림을 불러오는 중입니다.

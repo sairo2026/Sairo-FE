@@ -96,15 +96,14 @@ describe("홈 대시보드", () => {
     expect((button as HTMLButtonElement).disabled).toBe(true);
   });
 
-  it("대표 홈에는 카드 등록 안내 링크가 있고 직원 홈에는 없다", async () => {
-    renderOffice(<HomeDashboard />, { role: "OWNER" });
-    expect((await screen.findByRole("link", { name: "카드 등록 안내" })).getAttribute("href")).toBe(
-      "/billing/card-guide",
-    );
+  it("카드 미등록 알림은 대표 홈 본문과 직원 홈에 표시하지 않는다", async () => {
+    const owner = renderOffice(<HomeDashboard />, { role: "OWNER" });
+    await waitFor(() => expect(owner.queryClient.isFetching()).toBe(0));
+    expect(screen.queryByText("결제 카드가 등록되지 않았습니다.")).toBeNull();
     cleanup();
     renderOffice(<HomeDashboard />, { role: "AGENT" });
     await screen.findByRole("link", { name: "신청 대기 0건" });
-    expect(screen.queryByRole("link", { name: "카드 등록 안내" })).toBeNull();
+    expect(screen.queryByText("결제 카드가 등록되지 않았습니다.")).toBeNull();
   });
 
   it("매물과 고객이 모두 없으면 대표에게 첫 사용 안내 카드를 보여준다", async () => {

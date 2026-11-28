@@ -124,10 +124,10 @@ export function EmailLoginForm({ next }: { next?: string }) {
         {isLocked ? (
           <div
             role="alert"
-            className="mt-5 flex flex-col gap-2 rounded-control border border-danger bg-danger/10 px-5 py-4 text-left text-danger"
+            className="mt-5 flex flex-col gap-1 rounded-control border border-danger bg-white px-5 py-4 text-left text-danger"
           >
-            <p className="text-caption font-bold">{LOGIN_LOCKED_LEAD}</p>
-            <p className="text-body font-semibold">
+            <p className="text-caption font-semibold">{LOGIN_LOCKED_LEAD}</p>
+            <p className="text-caption">
               <span role="timer">{formatClock(lock.remaining)}</span> 뒤에 다시 시도해 주세요.
             </p>
           </div>

@@ -66,7 +66,7 @@ describe("내 정보 요청하기", () => {
     await user.click(screen.getByRole("button", { name: "내 정보 요청하기" }));
     const dialog = screen.getByRole("dialog", { name: "내 정보 요청하기" });
     expect(
-      within(dialog).getByText(/주민등록번호, 계좌번호, 카드번호는 입력하지 마세요/),
+      within(dialog).getByText(/주민등록번호, 계좌번호, 카드번호는 입력하지 말아 주세요/),
     ).not.toBeNull();
     expect(
       within(dialog).getByText(
