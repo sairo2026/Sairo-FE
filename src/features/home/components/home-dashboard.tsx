@@ -48,7 +48,7 @@ function StatCard({
     <Link
       href={href}
       aria-label={`${title} ${value}${label}`}
-      className={`group flex flex-col rounded-card border border-line bg-white px-6 py-6 clickable-card ${icon ? "gap-10 lg:h-[214px]" : "gap-8"}`}
+      className={`group flex flex-col rounded-card border border-line bg-white px-6 py-6 clickable-card ${icon ? "gap-10 lg:min-h-[214px]" : "gap-8"}`}
     >
       <span className="flex flex-col gap-3">
         {icon ? (
