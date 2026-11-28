@@ -452,6 +452,69 @@ test("중개사가 일정을 구성하고 방문을 신청한다", async ({ page
   await expect(page.getByText("신청 대기").first()).toBeVisible();
 });
 
+let competingCoordinationUrl = "";
+
+test("같은 중개사의 다른 고객 신청도 같은 매물의 승인 대기에 함께 남는다", async ({
+  page,
+  browser,
+}) => {
+  await loginViaUi(page, owner.email, /\/(home|billing)$/);
+  await page.goto("/customers/new");
+  await page.getByLabel(/^이름/).fill("실API경쟁고객");
+  await page.getByLabel("연락처", { exact: true }).fill("01099997777");
+  await page.getByLabel("이메일 주소").fill(`e2e-competing-${Date.now().toString(36)}@example.com`);
+  await page.getByLabel(/^담당 공인중개사/).selectOption({ index: 1 });
+  await page.getByLabel(/^수집 경로/).fill("전화 문의");
+  await page.getByLabel(/^처리 근거/).selectOption("CONSENT");
+  await page.getByLabel(/^수집 목적/).fill("매물 상담");
+  await page.getByLabel(/^보유 기한/).fill("2029-11-10");
+  await page.getByRole("button", { name: "등록", exact: true }).click();
+  await expect(page).toHaveURL(/\/customers\/\d+$/);
+
+  await page.goto("/coordinations/new");
+  await page.getByRole("radio", { name: /실API경쟁고객/ }).check({ force: true });
+  await page.getByRole("checkbox", { name: "실API 아파트 선택" }).check({ force: true });
+  await page.getByRole("button", { name: "조율 만들기" }).click();
+  await expect(page).toHaveURL(/\/coordinations\/\d+$/);
+  competingCoordinationUrl = new URL(page.url()).pathname;
+  await page.getByRole("button", { name: "고객 링크 발급" }).click();
+  const competingCustomerLink = new URL(await page.getByLabel("발급된 링크").inputValue()).pathname;
+
+  const { context: customerContext, page: customerPage } = await openPublicPage(browser);
+  try {
+    await customerPage.goto(competingCustomerLink);
+    await customerPage.getByRole("button", { name: seoulDateChipName(2) }).click();
+    for (let minutes = 10 * 60; minutes < 18 * 60; minutes += 30) {
+      const time = `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
+      await customerPage.getByRole("button", { name: time, exact: true }).click();
+    }
+    await customerPage.getByRole("button", { name: "가능한 시간 제출" }).click();
+    await expect(customerPage.getByText("가능한 시간을 제출했습니다.")).toBeVisible();
+  } finally {
+    await customerContext.close();
+  }
+
+  await page.goto(competingCoordinationUrl);
+  await expect(page.getByText("조율 가능").first()).toBeVisible();
+  await page.getByRole("button", { name: "일정 저장" }).click();
+  await expect(page.getByText(/일정 구성을 저장했습니다/)).toBeVisible();
+  await page.getByRole("button", { name: "방문 신청", exact: true }).first().click();
+  const form = page.locator("form").filter({ hasText: "신청 가능 구간" });
+  // Both customers offered the same time range, so their first computed slot overlaps.
+  await form.getByRole("button", { name: / ~ / }).first().click();
+  await form.getByRole("button", { name: "방문 신청 제출" }).click();
+  await expect(page.getByText(/방문 신청을 제출했습니다/)).toBeVisible();
+
+  const { context: approverContext, page: approverPage } = await openPublicPage(browser);
+  try {
+    await approverPage.goto(approverLink);
+    await approverPage.getByRole("tab", { name: "신청 비교·선택" }).click();
+    await expect(approverPage.getByRole("button", { name: /신청 선택/ })).toHaveCount(2);
+  } finally {
+    await approverContext.close();
+  }
+});
+
 test("승인자가 신청을 비교해 선택하면 조율이 확정된다", async ({ browser, page }) => {
   const { context, page: approver } = await openPublicPage(browser);
   await approver.goto(approverLink);
@@ -466,10 +529,13 @@ test("승인자가 신청을 비교해 선택하면 조율이 확정된다", asy
     .getByRole("button", { name: "선택하기" })
     .click();
   await expect(approver.getByText(/선택한 신청이 확정되었습니다/)).toBeVisible();
+  await expect(approver.getByText(/다른 신청 1건은 시간 마감되었습니다/)).toBeVisible();
   await context.close();
   await loginViaUi(page, owner.email, /\/(home|billing)$/);
   await page.goto(coordinationUrl);
   await expect(page.getByText("확정 완료").first()).toBeVisible();
+  await page.goto(competingCoordinationUrl);
+  await expect(page.getByText("시간 마감").first()).toBeVisible();
 });
 
 test("이메일 확인 고객이 확정 일정을 열고 새로고침 뒤에도 같은 일정을 확인한다", async ({
