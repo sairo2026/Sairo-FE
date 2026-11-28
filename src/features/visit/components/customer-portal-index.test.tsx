@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { http, HttpResponse } from "msw";
-import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { server, startMockServer } from "@/mocks/server";
 import { createQueryClient } from "@/shared/api/query-client";
 import { CustomerPortalIndex } from "./customer-portal-index";
@@ -12,6 +12,26 @@ let stopServer: () => void;
 
 beforeAll(() => {
   stopServer = startMockServer();
+});
+
+beforeEach(() => {
+  server.use(
+    http.get("*/api/public/customer-visit-links/portal/preferences", () =>
+      HttpResponse.json({
+        exists: false,
+        version: 0,
+        preferredWeekdays: [],
+        preferredStartTime: null,
+        preferredEndTime: null,
+        confirmedAt: null,
+        retentionUntil: "2026-12-31",
+        noticeVersion: "1.0",
+        preferenceDisclosureVersion: "1.0",
+        preferenceDisclosureText: "수집 항목: 선호 요일과 선호 시간대.",
+        sessionBinding: "test-session-binding",
+      }),
+    ),
+  );
 });
 
 afterEach(() => {
@@ -73,6 +93,19 @@ describe("고객 방문 요청 모아보기", () => {
       items: [{ coordinationId: 71 }],
     });
     queryClient.setQueryData(["customer-portal-request", 71], { officeName: "test office" });
+    queryClient.setQueryData(["customer-visit-preference"], {
+      exists: true,
+      version: 1,
+      preferredWeekdays: [],
+      preferredStartTime: null,
+      preferredEndTime: null,
+      confirmedAt: null,
+      retentionUntil: "2026-12-31",
+      noticeVersion: "1.0",
+      preferenceDisclosureVersion: "1.0",
+      preferenceDisclosureText: "수집 항목: 선호 요일과 선호 시간대.",
+      sessionBinding: "test-session-binding",
+    });
     expect(await screen.findByText("방문 요청 #71")).not.toBeNull();
     expect(screen.getByText("2026-11-11 ~ 2026-11-20")).not.toBeNull();
     expect(screen.getByRole("link", { name: "가능한 시간 확인·수정" }).getAttribute("href")).toBe(
@@ -87,6 +120,7 @@ describe("고객 방문 요청 모아보기", () => {
       items: [],
     });
     expect(queryClient.getQueryData(["customer-portal-request", 71])).toBeUndefined();
+    expect(queryClient.getQueryData(["customer-visit-preference"])).toBeUndefined();
   });
 
   it("확정된 방문에는 일정 확인 경로를 제공하고 수집 중인 방문에는 제공하지 않는다", async () => {
@@ -131,5 +165,140 @@ describe("고객 방문 요청 모아보기", () => {
       "/visit/portal/73/confirmed",
     ]);
     expect(screen.getAllByRole("link", { name: "가능한 시간 확인·수정" })).toHaveLength(1);
+  });
+
+  it("인증된 고객이 기본 선호를 저장하고 삭제해도 방문 요청은 유지한다", async () => {
+    const savedBodies: unknown[] = [];
+    server.use(
+      http.get("*/api/public/customer-visit-links/portal", () =>
+        HttpResponse.json({
+          available: true,
+          verified: true,
+          items: [
+            {
+              coordinationId: 71,
+              status: "TIME_COLLECTING",
+              periodStartDate: "2026-11-11",
+              periodEndDate: "2026-11-20",
+              canRespond: true,
+            },
+          ],
+        }),
+      ),
+      http.put("*/api/public/customer-visit-links/portal/preferences", async ({ request }) => {
+        const body = await request.json();
+        savedBodies.push(body);
+        return HttpResponse.json({
+          exists: true,
+          version: 1,
+          preferredWeekdays: ["MONDAY"],
+          preferredStartTime: "10:00:00",
+          preferredEndTime: "18:00:00",
+          confirmedAt: "2026-11-28T14:00:00Z",
+          retentionUntil: "2026-12-31",
+          noticeVersion: "1.0",
+          preferenceDisclosureVersion: "1.0",
+          preferenceDisclosureText: "수집 항목: 선호 요일과 선호 시간대.",
+          sessionBinding: "test-session-binding",
+        });
+      }),
+      http.delete("*/api/public/customer-visit-links/portal/preferences", () =>
+        HttpResponse.json({
+          exists: false,
+          version: 2,
+          preferredWeekdays: [],
+          preferredStartTime: null,
+          preferredEndTime: null,
+          confirmedAt: null,
+          retentionUntil: "2026-12-31",
+          noticeVersion: "1.0",
+          preferenceDisclosureVersion: "1.0",
+          preferenceDisclosureText: "수집 항목: 선호 요일과 선호 시간대.",
+          sessionBinding: "test-session-binding",
+        }),
+      ),
+    );
+    const user = userEvent.setup();
+    const queryClient = renderIndex();
+    expect(await screen.findByText("기본 방문 선호")).not.toBeNull();
+    await user.click(await screen.findByRole("checkbox", { name: "월요일" }));
+    fireEvent.change(screen.getByLabelText("선호 시작 시간"), { target: { value: "10:00" } });
+    fireEvent.change(screen.getByLabelText("선호 종료 시간"), { target: { value: "18:00" } });
+    await user.click(
+      screen.getByRole("checkbox", { name: "기본 방문 선호 저장 안내를 확인했습니다. (필수)" }),
+    );
+    await user.click(screen.getByRole("button", { name: "선호 저장" }));
+    expect(await screen.findByText("기본 선호를 저장했습니다.")).not.toBeNull();
+    expect(savedBodies).toEqual([
+      {
+        expectedVersion: 0,
+        acknowledgedNoticeVersion: "1.0",
+        acknowledgedPreferenceDisclosureVersion: "1.0",
+        sessionBinding: "test-session-binding",
+        preferredWeekdays: ["MONDAY"],
+        preferredStartTime: "10:00:00",
+        preferredEndTime: "18:00:00",
+      },
+    ]);
+    queryClient.setQueryData(
+      ["customer-visit-preference", "linked-token"],
+      queryClient.getQueryData(["customer-visit-preference"]),
+    );
+    await user.click(screen.getByRole("button", { name: "저장한 선호 삭제" }));
+    await user.click(screen.getByRole("button", { name: "삭제하기" }));
+    expect(await screen.findByText("기본 선호를 삭제했습니다.")).not.toBeNull();
+    expect((screen.getByRole("checkbox", { name: "월요일" }) as HTMLInputElement).checked).toBe(
+      false,
+    );
+    expect(screen.getByText("방문 요청 #71")).not.toBeNull();
+    expect(
+      (
+        queryClient.getQueryData(["customer-visit-preference", "linked-token"]) as {
+          exists: boolean;
+        }
+      ).exists,
+    ).toBe(false);
+  });
+
+  it("인증 세션이나 저장 안내가 바뀌면 이전 선호 초안과 확인을 버린다", async () => {
+    server.use(
+      http.get("*/api/public/customer-visit-links/portal", () =>
+        HttpResponse.json({
+          available: true,
+          verified: true,
+          items: [],
+        }),
+      ),
+    );
+    const user = userEvent.setup();
+    const queryClient = renderIndex();
+    const preferenceKey = ["customer-visit-preference"];
+    const acknowledgment = () =>
+      screen.getByRole("checkbox", {
+        name: "기본 방문 선호 저장 안내를 확인했습니다. (필수)",
+      }) as HTMLInputElement;
+    const monday = () => screen.getByRole("checkbox", { name: "월요일" }) as HTMLInputElement;
+
+    await user.click(await screen.findByRole("checkbox", { name: "월요일" }));
+    await user.click(acknowledgment());
+    expect(monday().checked).toBe(true);
+    expect(acknowledgment().checked).toBe(true);
+
+    queryClient.setQueryData(preferenceKey, (previous: Record<string, unknown>) => ({
+      ...previous,
+      sessionBinding: "another-verified-session",
+    }));
+    await waitFor(() => expect(monday().checked).toBe(false));
+    expect(acknowledgment().checked).toBe(false);
+
+    await user.click(monday());
+    await user.click(acknowledgment());
+    queryClient.setQueryData(preferenceKey, (previous: Record<string, unknown>) => ({
+      ...previous,
+      noticeVersion: "2.0",
+      preferenceDisclosureText: "변경된 저장 안내입니다.",
+    }));
+    await waitFor(() => expect(monday().checked).toBe(false));
+    expect(acknowledgment().checked).toBe(false);
   });
 });
