@@ -1,6 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const PORT = Number(process.env.E2E_PORT ?? 3000);
+const visualCaptureIgnore = process.env.VISUAL_CAPTURE ? [] : ["**/visual/**"];
 
 export default defineConfig({
   testDir: "./e2e",
@@ -19,12 +20,13 @@ export default defineConfig({
   projects: [
     {
       name: "desktop",
+      testIgnore: visualCaptureIgnore,
       use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 800 } },
     },
     {
       name: "mobile",
-      // 시나리오와 역할 순회 시험은 화면 흐름을 확인하므로 데스크톱 폭에서만 돈다.
-      testIgnore: /(scenarios|roles)\//,
+      // 시나리오, 역할 순회, 랜드마크 구조는 데스크톱에서 검사한다.
+      testIgnore: [...visualCaptureIgnore, /(scenarios|roles)\//, "**/landmarks.spec.ts"],
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 360, height: 740 },
