@@ -5,13 +5,19 @@ export async function protectLocalContext(context: BrowserContext) {
   const allowed = new Set([API_ORIGIN, FRONT_ORIGIN]);
   // Register before the Kakao stub, so its explicitly mocked requests take precedence.
   await context.route("**/*", async (route) => {
-    const url = new URL(route.request().url());
+    const request = route.request();
+    const url = new URL(request.url());
     if (!allowed.has(url.origin)) {
       await route.abort("blockedbyclient");
       return;
     }
     try {
-      const response = await route.fetch({ maxRedirects: 0 });
+      // A local Next server can reset a static asset connection during navigation.
+      const isStaticAsset =
+        request.method() === "GET" &&
+        url.origin === FRONT_ORIGIN &&
+        url.pathname.startsWith("/_next/static/");
+      const response = await route.fetch({ maxRedirects: 0, maxRetries: isStaticAsset ? 2 : 0 });
       const location = response.headers()["location"];
       if (response.status() >= 300 && response.status() < 400 && location) {
         const target = new URL(location, url);

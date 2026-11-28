@@ -680,15 +680,15 @@ test("예정 시각 전에는 취소만 방문 결과로 기록할 수 있다", 
 test("가운데 방문만 재승인하고 양쪽 확정 방문과 홈 캘린더를 유지한다", async ({
   page,
   browser,
-}) => {
+}, testInfo) => {
   test.setTimeout(300_000);
   const day = seoulDate(1);
   const dayChip = seoulDateChipName(1);
   const visibleInHomeCalendar = day.slice(0, 7) === seoulDate(0).slice(0, 7);
   const visits = [
-    { name: "재조율 P1", start: "10:00", end: "10:30" },
-    { name: "재조율 P2", start: "11:00", end: "11:30" },
-    { name: "재조율 P3", start: "12:00", end: "12:30" },
+    { name: "저녁 재조율 P1", start: "17:00", end: "17:30" },
+    { name: "저녁 재조율 P2", start: "18:00", end: "18:30" },
+    { name: "저녁 재조율 P3", start: "19:00", end: "19:30" },
   ] as const;
   const dateTime = (time: string) => `${day}T${time}:00+09:00`;
   await loginViaUi(page, owner.email, /\/(home|billing)$/);
@@ -707,7 +707,7 @@ test("가운데 방문만 재승인하고 양쪽 확정 방문과 홈 캘린더�
       const propertyPath = await createApartment(
         page,
         visit.name,
-        `서울특별시 종로구 시험로 ${21 + index}`,
+        `서울특별시 종로구 시험로 ${31 + index}`,
       );
       const link = await issueApprovalLink(
         page,
@@ -719,8 +719,8 @@ test("가운데 방문만 재승인하고 양쪽 확정 방문과 홈 캘린더�
       await approver.goto(link);
       await approver.getByRole("button", { name: "날짜 예외 추가" }).click();
       await approver.getByLabel("날짜 예외 1 날짜").fill(day);
-      await approver.getByLabel("날짜 예외 1 시작").fill("09:00");
-      await approver.getByLabel("날짜 예외 1 종료").fill("16:00");
+      await approver.getByLabel("날짜 예외 1 시작").fill("16:00");
+      await approver.getByLabel("날짜 예외 1 종료").fill("20:00");
       await approver.getByRole("button", { name: "조건 저장" }).click();
       await expect(approver.getByText(/조건 \d+번 버전으로 저장했습니다/)).toBeVisible();
     }
@@ -745,7 +745,7 @@ test("가운데 방문만 재승인하고 양쪽 확정 방문과 홈 캘린더�
     try {
       await customer.goto(publicLink);
       await customer.getByRole("button", { name: dayChip }).click();
-      for (const hour of [9, 10, 11, 12, 13, 14, 15]) {
+      for (const hour of [16, 17, 18, 19]) {
         for (const minute of ["00", "30"]) {
           const label = `${String(hour).padStart(2, "0")}:${minute}`;
           await customer.getByRole("button", { name: label, exact: true }).click();
@@ -818,15 +818,20 @@ test("가운데 방문만 재승인하고 양쪽 확정 방문과 홈 캘린더�
     const originalMiddle = activeVisit(confirmed, middle);
     const middleApproval = approvalLinks.get(middle);
     if (!middleApproval) throw new Error("Missing middle approval link");
-    await approver.goto(middleApproval);
-    await approver.getByLabel("날짜 예외 1 시작").fill("11:15");
-    await approver.getByLabel("날짜 예외 1 종료").fill("11:45");
-    await approver.getByRole("button", { name: "조건 저장" }).click();
-    const impact = approver.getByRole("dialog", { name: "확정된 방문에 영향이 있습니다" });
-    await expect(impact.getByRole("listitem")).toHaveCount(1);
-    await impact.getByLabel("영향을 확인했습니다").click();
-    await impact.getByRole("button", { name: "영향을 확인하고 저장" }).click();
-    await expect(impact).toBeHidden();
+
+    async function applyMiddleCondition(link: string, start: string, end: string) {
+      await approver.goto(link);
+      await approver.getByLabel("날짜 예외 1 시작").fill(start);
+      await approver.getByLabel("날짜 예외 1 종료").fill(end);
+      await approver.getByRole("button", { name: "조건 저장" }).click();
+      const impact = approver.getByRole("dialog", { name: "확정된 방문에 영향이 있습니다" });
+      await expect(impact.getByRole("listitem")).toHaveCount(1);
+      await impact.getByLabel("영향을 확인했습니다").click();
+      await impact.getByRole("button", { name: "영향을 확인하고 저장" }).click();
+      await expect(impact).toBeHidden();
+    }
+
+    await applyMiddleCondition(middleApproval, "18:15", "18:45");
 
     await page.goto(path);
     const changes = page.getByRole("region", { name: "확정 방문 변경과 재승인" });
@@ -835,7 +840,7 @@ test("가운데 방문만 재승인하고 양쪽 확정 방문과 홈 캘린더�
     await expect(changes.getByText("영향 없이 고정", { exact: true })).toHaveCount(2);
     await middleRow
       .getByRole("listitem")
-      .filter({ hasText: `변경안 ${day} 11:15` })
+      .filter({ hasText: `변경안 ${day} 18:15` })
       .getByRole("button", { name: "이 변경안으로 재승인 요청" })
       .click();
     await expect(middleRow.getByText(/변경 신청을 올렸습니다/)).toBeVisible();
@@ -862,15 +867,58 @@ test("가운데 방문만 재승인하고 양쪽 확정 방문과 홈 캘린더�
       });
       const fixedRow = changes.getByRole("listitem").filter({ hasText: visit.name });
       await expect(fixedRow).toContainText(`${day} ${visit.start}`);
+      await expect(fixedRow.getByText("영향 없이 고정", { exact: true })).toBeVisible();
     }
     const revisedMiddle = activeVisit(revised, middle);
     expect(revisedMiddle.itemId).not.toBe(originalMiddle.itemId);
-    expect(Date.parse(revisedMiddle.scheduledStartAt ?? "")).toBe(Date.parse(dateTime("11:15")));
-    expect(Date.parse(revisedMiddle.scheduledEndAt ?? "")).toBe(Date.parse(dateTime("11:45")));
-    await expect(middleRow.filter({ hasText: `${day} 11:15` })).toBeVisible();
+    expect(Date.parse(revisedMiddle.scheduledStartAt ?? "")).toBe(Date.parse(dateTime("18:15")));
+    expect(Date.parse(revisedMiddle.scheduledEndAt ?? "")).toBe(Date.parse(dateTime("18:45")));
+    await expect(middleRow.filter({ hasText: `${day} 18:15` })).toBeVisible();
     await expect(approver.getByRole("region", { name: "확정된 방문" })).toContainText(
-      `${day} 11:15`,
+      `${day} 18:15`,
     );
+    for (const visit of [visits[0], visits[2]]) {
+      const link = approvalLinks.get(visit.name);
+      if (!link) throw new Error(`Missing approval link for ${visit.name}`);
+      await approver.goto(link);
+      await approver.getByRole("tab", { name: "확정 일정" }).click();
+      await expect(approver.getByRole("region", { name: "확정된 방문" })).toContainText(
+        `${day} ${visit.start} ~ ${day} ${visit.end}`,
+      );
+    }
+
+    await applyMiddleCondition(middleApproval, "18:30", "19:00");
+    await page.reload();
+    const affectedRow = middleRow.filter({ hasText: `${day} 18:15` });
+    await expect(affectedRow.getByText("변경 필요", { exact: true })).toBeVisible();
+    await expect(affectedRow.getByText(/대안이 없어 변경이 필요/)).toBeVisible();
+    await affectedRow.getByRole("button", { name: "직접 구간 골라 변경 신청" }).click();
+    await expect(affectedRow.getByText("지금 신청할 수 있는 구간이 없습니다.")).toBeVisible();
+    await expect(affectedRow.getByRole("button", { name: "변경 신청 제출" })).toHaveCount(0);
+
+    const rejection = await pageApi<{ code: string; violatedRules: string[] }>(
+      page,
+      "POST",
+      `/api/visit-schedule-items/${revisedMiddle.itemId}/change-requests`,
+      {
+        requestedStartAt: dateTime("18:30"),
+        requestedEndAt: dateTime("19:00"),
+        expectedDurationMinutes: 30,
+      },
+    );
+    expect(rejection.status).toBe(422);
+    expect(rejection.body.code).toBe("APPROVER_CONDITION_VIOLATED");
+    expect(rejection.body.violatedRules).toContain("TRAVEL_CONFLICT");
+    const afterRejection = await detail();
+    expect(afterRejection.status).toBe("RESCHEDULE_REQUIRED");
+    for (const visit of visits) {
+      const preserved = activeVisit(revised, visit.name);
+      expect(activeVisit(afterRejection, visit.name)).toMatchObject({
+        itemId: preserved.itemId,
+        scheduledStartAt: preserved.scheduledStartAt,
+        scheduledEndAt: preserved.scheduledEndAt,
+      });
+    }
 
     await page.goto("/home");
     const calendar = page.getByRole("grid", { name: "이번 달 일정" });
@@ -885,9 +933,11 @@ test("가운데 방문만 재승인하고 양쪽 확정 방문과 홈 캘린더�
         }),
       ).toBeVisible();
     } else {
-      // The home calendar only renders the current month. At month-end the
-      // broker and approver schedule checks above still verify tomorrow's visit.
-      expect(await homeVisitCount()).toBe(0);
+      testInfo.annotations.push({
+        type: "coverage",
+        description: "방문일이 다음 달입니다. 이번 달 홈 캘린더에 잘못 표시되지 않는지 확인합니다.",
+      });
+      expect(await homeVisitCount()).toBe(initialCalendarCount);
       await expect(
         calendar.getByRole("gridcell", { name: new RegExp(`^${month}월 ${date}일`) }),
       ).toHaveCount(0);
