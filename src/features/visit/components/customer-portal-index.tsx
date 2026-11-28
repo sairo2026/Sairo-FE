@@ -1,11 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FormAlert } from "@/shared/components/feedback/form-frame";
 import { PageSkeleton } from "@/shared/components/feedback/skeleton";
 import { Badge } from "@/shared/components/ui/badge";
-import { Button } from "@/shared/components/ui/button";
+import { Button, ButtonLink } from "@/shared/components/ui/button";
 import { fetchCustomerPortalIndex, logoutCustomerPortalIndex } from "../api/follow.api";
 import { statusLabel, statusTone } from "../model/labels";
 
@@ -91,12 +90,17 @@ export function CustomerPortalIndex() {
                         {statusLabel(item.status)}
                       </Badge>
                       {item.canRespond ? (
-                        <Link
-                          href={`/visit/portal/${item.coordinationId}`}
-                          className="rounded-control bg-primary px-3.5 py-2 text-caption font-semibold text-white clickable-link"
-                        >
+                        <ButtonLink href={`/visit/portal/${item.coordinationId}`} variant="submit">
                           가능한 시간 확인·수정
-                        </Link>
+                        </ButtonLink>
+                      ) : null}
+                      {item.canViewSchedule ? (
+                        <ButtonLink
+                          href={`/visit/portal/${item.coordinationId}/confirmed`}
+                          variant="outlined"
+                        >
+                          확정 일정 확인
+                        </ButtonLink>
                       ) : null}
                     </div>
                   </li>

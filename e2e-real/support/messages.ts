@@ -7,7 +7,7 @@ export async function capturedMessage(
   request: APIRequestContext,
   type: "mail" | "sms",
   recipient: string,
-  options: { match?: RegExp } = {},
+  options: { match?: RegExp; excludeBody?: string } = {},
 ): Promise<Captured> {
   const token = requireEnv("E2E_FIXTURE_TOKEN");
   const parameter = type === "mail" ? "to" : "toPhone";
@@ -23,6 +23,7 @@ export async function capturedMessage(
         if (response.status() !== 200) return false;
         const message = (await response.json()) as Captured;
         if (options.match && !options.match.test(message.body)) return false;
+        if (options.excludeBody === message.body) return false;
         found = message;
         return true;
       },
