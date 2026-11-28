@@ -22,7 +22,7 @@ export function EntityLoadError({
   if (kind === "unauthenticated") {
     return (
       <div role="alert">
-        <p className="mb-4 text-red-600">로그인이 필요합니다.</p>
+        <p className="mb-4 text-danger">로그인이 필요합니다.</p>
         <Link href="/login" className="font-semibold text-primary hover:underline">
           로그인하러 가기
         </Link>
@@ -32,7 +32,7 @@ export function EntityLoadError({
   if (kind === "forbidden" || kind === "not-found") {
     return (
       <div role="alert">
-        <p className="mb-4 text-red-600">
+        <p className="mb-4 text-danger">
           {kind === "forbidden" ? forbiddenMessage : notFoundMessage}
         </p>
         <Link href={backHref} className="font-semibold text-primary hover:underline">
@@ -43,7 +43,7 @@ export function EntityLoadError({
   }
   return (
     <div role="alert">
-      <p className="mb-4 text-red-600">정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.</p>
+      <p className="mb-4 text-danger">정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.</p>
       <button
         type="button"
         onClick={onRetry}

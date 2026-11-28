@@ -289,7 +289,7 @@ export function ApproverAccountScreen() {
       {error ? <FormAlert>{error}</FormAlert> : null}
       {proposals.length > 0 ? (
         <section aria-label="연결 제안" className="flex flex-col gap-3">
-          <h2 className="text-h2 font-semibold text-ink">연결 제안</h2>
+          <h2 className="text-h3 font-semibold text-ink">연결 제안</h2>
           <ul className="flex flex-col gap-2">
             {proposals.map((item) => (
               <li
@@ -328,7 +328,7 @@ export function ApproverAccountScreen() {
       ) : null}
       <section aria-label="연결된 매물" className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-h2 font-semibold text-ink">연결된 매물 {linked.length}개</h2>
+          <h2 className="text-h3 font-semibold text-ink">연결된 매물 {linked.length}개</h2>
           {selected.length > 0 ? (
             <Link
               href={`/approver/account/bulk?ids=${selected.join(",")}`}

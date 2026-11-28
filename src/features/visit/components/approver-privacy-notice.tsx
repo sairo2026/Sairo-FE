@@ -15,7 +15,7 @@ export function ApproverPrivacyNotice({ retentionDays }: { retentionDays?: numbe
       </p>
       <p>
         열람, 정정, 삭제, 처리정지는 방문을 조율하는 사무소의 문의처로 요청할 수 있습니다. 이 링크는
-        다른 사람에게 공유하지 마세요.
+        다른 사람에게 공유하지 말아 주세요.
       </p>
     </section>
   );

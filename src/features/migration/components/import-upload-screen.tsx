@@ -76,7 +76,7 @@ function UploadForm({ remaining }: { remaining: number }) {
 
   return (
     <section aria-labelledby="import-upload-title" className="flex max-w-[1075px] flex-col gap-6">
-      <h2 id="import-upload-title" className="text-h2 font-semibold text-ink">
+      <h2 id="import-upload-title" className="text-h3 font-semibold text-ink">
         파일 올리기
       </h2>
       {remaining <= 0 ? <FormNotice>{IMPORT_COPY.quotaExhausted}</FormNotice> : null}
@@ -189,7 +189,7 @@ export function ImportUploadScreen() {
           <>
             <UploadForm remaining={data.remainingThisMonth} />
             <section aria-labelledby="import-history-title" className="flex flex-col gap-4">
-              <h2 id="import-history-title" className="text-h2 font-semibold text-ink">
+              <h2 id="import-history-title" className="text-h3 font-semibold text-ink">
                 {IMPORT_COPY.historyTitle}
               </h2>
               <History items={data.items} />

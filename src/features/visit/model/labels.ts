@@ -1,4 +1,4 @@
-import type { BadgeTone } from "@/shared/components/ui/badge";
+import type { BadgeTone, SemanticStatus } from "@/shared/components/ui/badge";
 
 export const COORDINATION_STATUSES = [
   "TIME_COLLECTING",
@@ -35,6 +35,18 @@ export const COORDINATION_STATUS_TONE: Record<CoordinationStatus, BadgeTone> = {
   VISIT_COMPLETED: "gray",
   VISIT_INCOMPLETE: "silver",
   CANCELLED: "crimson",
+};
+
+export const COORDINATION_STATUS_GROUP: Record<CoordinationStatus, SemanticStatus> = {
+  TIME_COLLECTING: "progress",
+  COORDINATABLE: "progress",
+  FINAL_CONFIRMATION_REQUIRED: "progress",
+  APPLYING: "progress",
+  CONFIRMED: "success",
+  RESCHEDULE_REQUIRED: "warning",
+  VISIT_COMPLETED: "success",
+  VISIT_INCOMPLETE: "neutral",
+  CANCELLED: "neutral",
 };
 
 export function isCoordinationStatus(value: string): value is CoordinationStatus {

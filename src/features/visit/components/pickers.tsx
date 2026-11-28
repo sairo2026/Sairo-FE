@@ -76,7 +76,7 @@ export function CustomerPicker({
       <FieldLabel as="legend">고객 선택</FieldLabel>
       <SearchField
         label="고객 검색"
-        placeholder="고객 이름이나 연락처로 검색하세요."
+        placeholder="고객 이름이나 연락처를 입력해 주세요."
         value={draft}
         onValueChange={setDraft}
         onSearch={() => setKeyword(draft)}
@@ -186,7 +186,7 @@ export function CandidatePicker({
       </p>
       <SearchField
         label="매물 검색"
-        placeholder="매물 이름이나 주소로 검색하세요."
+        placeholder="매물 이름이나 주소를 입력해 주세요."
         value={draft}
         onValueChange={setDraft}
         onSearch={() => setKeyword(draft)}

@@ -89,7 +89,7 @@ export function ReceivedGrantsScreen() {
           </FormNotice>
           <SearchField
             label="허용받은 매물 검색"
-            placeholder="매물명이나 사무소 이름으로 검색하세요."
+            placeholder="매물명이나 사무소 이름을 입력해 주세요."
             value={draft}
             onValueChange={setDraft}
             onSearch={() => setKeyword(draft.trim())}

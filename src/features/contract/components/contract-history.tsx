@@ -71,7 +71,7 @@ export function RevisionSection({ contractId }: { contractId: number }) {
   const query = useRevisions(contractId);
   return (
     <section aria-labelledby="revision-title" className="flex flex-col gap-3">
-      <h2 id="revision-title" className="text-h2 font-semibold text-ink">
+      <h2 id="revision-title" className="text-h3 font-semibold text-ink">
         버전 이력
       </h2>
       <QueryGate query={query} loadingLabel="버전 이력을 불러오는 중입니다.">
@@ -127,7 +127,7 @@ export function StatusHistorySection({ contractId }: { contractId: number }) {
   const query = useStatusHistory(contractId, page, size);
   return (
     <section aria-labelledby="history-title" className="flex flex-col gap-3">
-      <h2 id="history-title" className="text-h2 font-semibold text-ink">
+      <h2 id="history-title" className="text-h3 font-semibold text-ink">
         상태 변경 이력
       </h2>
       <QueryGate query={query} loadingLabel="상태 이력을 불러오는 중입니다.">

@@ -54,7 +54,7 @@ const FORM_GRID_CLASS =
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="flex max-w-[1065px] flex-col gap-5 pt-4">
-      <h2 className="text-h2 font-semibold text-ink">{title}</h2>
+      <h2 className="text-h3 font-semibold text-ink">{title}</h2>
       {children}
     </section>
   );

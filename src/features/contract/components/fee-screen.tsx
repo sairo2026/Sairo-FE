@@ -513,7 +513,7 @@ function FeeBody({ detail }: { detail: ContractDetailResponse }) {
         {(data) => (
           <>
             <section aria-labelledby="payer-title" className="flex flex-col gap-3">
-              <h2 id="payer-title" className="text-h2 font-semibold text-ink">
+              <h2 id="payer-title" className="text-h3 font-semibold text-ink">
                 지급의무자별 미수금·초과수납
               </h2>
               {data.payers.length === 0 ? (

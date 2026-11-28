@@ -164,7 +164,7 @@ export const FAQ_COPY: { title: string; items: readonly FaqItem[] } = {
 };
 
 export const CLOSING_COPY = {
-  title: "사무소 업무를 사이로에서 이어 보세요",
+  title: "사무소 업무를 사이로에서 이어갈 수 있습니다",
   body: "가입한 뒤 사무소 인증을 마치면 사용할 수 있습니다.",
 } as const;
 

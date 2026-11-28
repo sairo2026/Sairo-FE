@@ -94,7 +94,7 @@ function useRefresh() {
 
 function SectionTitle({ id, children }: { id?: string; children: string }) {
   return (
-    <h2 id={id} className="text-h2 font-semibold text-ink">
+    <h2 id={id} className="text-h3 font-semibold text-ink">
       {children}
     </h2>
   );

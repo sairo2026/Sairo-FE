@@ -218,7 +218,7 @@ function DetailBody({ detail }: { detail: ContractDetailResponse }) {
         />
       </ul>
       <section aria-labelledby="values-title" className="flex flex-col gap-4">
-        <h2 id="values-title" className="text-h2 font-semibold text-ink">
+        <h2 id="values-title" className="text-h3 font-semibold text-ink">
           현재 계약 정보
         </h2>
         <DetailList
@@ -281,7 +281,7 @@ function DetailBody({ detail }: { detail: ContractDetailResponse }) {
         ) : null}
       </section>
       <section aria-labelledby="documents-title" className="flex flex-col gap-3">
-        <h2 id="documents-title" className="text-h2 font-semibold text-ink">
+        <h2 id="documents-title" className="text-h3 font-semibold text-ink">
           첨부 서류
         </h2>
         {detail.documents.length === 0 ? (

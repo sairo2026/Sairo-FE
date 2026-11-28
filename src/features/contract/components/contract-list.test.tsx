@@ -154,7 +154,7 @@ describe("계약 목록", () => {
     renderOffice(<ContractListScreen />, { role: "OWNER" });
     expect(
       await screen.findByText(
-        "표시할 계약이 없습니다. 계약 등록 버튼으로 첫 계약을 등록해 보세요.",
+        "표시할 계약이 없습니다. 계약 등록 버튼으로 첫 계약을 등록해 주세요.",
       ),
     ).not.toBeNull();
   });

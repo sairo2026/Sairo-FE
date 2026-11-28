@@ -16,7 +16,7 @@ const AUTO_DISMISS_MS = 5000;
 const toneClass: Record<ToastTone, string> = {
   info: "border-primary bg-primary text-white",
   success: "border-primary bg-primary text-white",
-  error: "border-tag-red bg-tag-red text-tag-red-ink",
+  error: "border-primary bg-primary text-white",
 };
 
 /** 오류 토스트만으로 중요한 오류를 끝내지 않는다. 해당 폼·영역에도 오류를 함께 표시한다. */
@@ -48,7 +48,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             key={item.id}
             role={item.tone === "error" ? "alert" : "status"}
             className={cn(
-              "pointer-events-auto flex items-center gap-3 rounded-control border px-4 py-3 text-caption font-medium shadow-popup",
+              "pointer-events-auto flex items-center gap-2 rounded-control border px-5 py-2 text-caption font-medium shadow-popup",
               toneClass[item.tone],
             )}
           >

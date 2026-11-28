@@ -249,7 +249,7 @@ export function ResultSection({ detail }: { detail: Detail }) {
     detail.candidateProperties.find((entry) => entry.candidatePropertyId === id);
   return (
     <section className="flex flex-col gap-3" aria-labelledby="result-title" id="results">
-      <h2 id="result-title" className="text-h2 font-semibold text-ink">
+      <h2 id="result-title" className="text-h3 font-semibold text-ink">
         방문 결과 기록
       </h2>
       <p className="text-caption text-ink-2">

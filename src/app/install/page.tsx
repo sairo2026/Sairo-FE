@@ -5,7 +5,7 @@ import { InstallAction } from "./install-action";
 
 export const metadata: Metadata = {
   title: "사이로 시작하기",
-  description: "사이로를 PC에 설치하거나 웹에서 바로 이용하세요.",
+  description: "사이로를 PC에 설치하거나 웹에서 바로 이용할 수 있습니다.",
 };
 
 export default function InstallPage() {
@@ -26,19 +26,16 @@ export default function InstallPage() {
         </div>
 
         <h1 className="mt-8 break-keep text-h1 font-bold">사이로 시작하기</h1>
-        <p className="mt-3 break-keep text-body text-ink-2">
-          PC에 앱으로 설치하거나, 설치 없이 웹에서 바로 이용하세요.
-        </p>
 
         <section
           className="mt-8 rounded-card-flat border border-line bg-surface p-5 sm:p-6"
           aria-labelledby="install-title"
         >
-          <h2 id="install-title" className="text-h2 font-semibold">
+          <h2 id="install-title" className="text-h3 font-semibold">
             PC에 설치하기
           </h2>
-          <p className="mt-2 break-keep text-body text-ink-2">
-            설치 파일 없이 Chrome·Edge에서 앱 창으로 이용해요.
+          <p className="mt-4 break-keep text-body text-ink-2">
+            Chrome·Edge에서 앱 창으로 열립니다.
           </p>
           <div className="mt-5">
             <InstallAction />

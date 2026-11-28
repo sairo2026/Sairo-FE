@@ -165,7 +165,7 @@ export function ConfirmationSection({ detail }: { detail: Detail }) {
   const crossCandidates = detail.candidateProperties.filter((entry) => entry.crossOffice);
   return (
     <section className="flex flex-col gap-3" aria-labelledby="confirm-title" id="confirmation">
-      <h2 id="confirm-title" className="text-h2 font-semibold text-ink">
+      <h2 id="confirm-title" className="text-h3 font-semibold text-ink">
         확정 안내
       </h2>
       <p className="text-caption text-ink-2">

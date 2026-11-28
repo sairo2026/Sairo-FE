@@ -59,7 +59,7 @@ function Summary({ summary }: { summary: ImportPreview["summary"] }) {
       {items.map((item) => (
         <div key={item.label} className="rounded-control border border-line bg-surface px-4 py-3">
           <dt className="text-caption text-ink-2">{item.label}</dt>
-          <dd className="text-h2 font-bold text-ink">{item.value}</dd>
+          <dd className="text-h3 font-bold text-ink">{item.value}</dd>
         </div>
       ))}
     </dl>

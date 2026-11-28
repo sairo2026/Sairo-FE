@@ -42,7 +42,7 @@ function NoticePanel({ requestIds }: { requestIds: number[] }) {
   });
   return (
     <section className="flex flex-col gap-3" aria-labelledby="notices-title">
-      <h2 id="notices-title" className="text-h2 font-semibold text-ink">
+      <h2 id="notices-title" className="text-h3 font-semibold text-ink">
         마감·선택 결과 알림
       </h2>
       <p className="text-caption text-ink-2">

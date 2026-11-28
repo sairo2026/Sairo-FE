@@ -64,7 +64,7 @@ describe("승인자 링크 화면 조건 등록", () => {
     ).not.toBeNull();
     expect(screen.getByText(/고객의 이름과 연락처는 보이지 않습니다/)).not.toBeNull();
     expect(
-      screen.getByText("이 링크는 받으신 분만 사용해 주세요. 다른 사람에게 전달하지 마세요."),
+      screen.getByText("이 링크는 받으신 분만 사용해 주세요. 다른 사람에게 전달하지 말아 주세요."),
     ).not.toBeNull();
     expect(
       screen.getByText(

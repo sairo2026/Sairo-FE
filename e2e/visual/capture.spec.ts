@@ -1,4 +1,4 @@
-import { test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { settle, useMockOfficeRole, type MockOfficeRole } from "../support/app";
 import { fixMockClock } from "../support/scenario";
 import * as step from "./capture-steps";
@@ -255,8 +255,11 @@ test.describe("화면 캡처(디자인 비교용)", () => {
       }
       await page.goto(shot.path);
       await settle(page);
+      if (shot.role !== null) {
+        await expect(page).not.toHaveURL(/\/login(?:\?|$)/);
+      }
       if (shot.act) {
-        await shot.act(page).catch(() => undefined);
+        await shot.act(page);
         await page.waitForTimeout(400);
       }
       await page.screenshot({

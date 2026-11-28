@@ -98,7 +98,7 @@ export function OfficeLayout({
     <ToastProvider>
       <div
         data-workspace
-        className="work-density min-h-dvh bg-white text-ink lg:grid lg:grid-cols-[220px_minmax(0,1fr)]"
+        className="min-h-dvh bg-white text-ink lg:grid lg:grid-cols-[220px_minmax(0,1fr)]"
       >
         <aside
           className={cn(
@@ -122,7 +122,7 @@ export function OfficeLayout({
         </aside>
         <div className="min-w-0">
           <header className="sticky top-0 z-20 flex min-h-[76px] flex-wrap items-center justify-between gap-x-6 gap-y-3 border-b border-line bg-white px-8 py-4 text-caption font-semibold text-ink-2">
-            <span className="text-h2 font-bold text-ink">{officeName ?? "사무소"}</span>
+            <span className="text-h3 font-bold text-ink">{officeName ?? "사무소"}</span>
             {headerActions}
           </header>
           <main

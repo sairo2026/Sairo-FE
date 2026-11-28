@@ -19,6 +19,7 @@ import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { CoordinationStatusBadge } from "./coordination-status-badge";
 import { useCoordinationList } from "../hooks/visit-queries";
 import {
+  COORDINATION_STATUS_GROUP,
   COORDINATION_STATUSES,
   NEXT_ACTION_HASH,
   isCoordinationStatus,
@@ -93,6 +94,7 @@ export function CoordinationListScreen({ initialStatus }: { initialStatus?: stri
             >
               <ScheduleTag
                 tone={statusTone(key)}
+                statusGroup={COORDINATION_STATUS_GROUP[key]}
                 label={statusLabel(key)}
                 count={counts ? counts[key] : 0}
                 isInteractive

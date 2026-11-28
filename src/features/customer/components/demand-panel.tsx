@@ -254,7 +254,7 @@ function DemandForm({
         />
         <TextField
           label="희망 지역"
-          hint="쉼표로 여러 지역을 구분해 입력하세요."
+          hint="쉼표로 여러 지역을 구분해 입력해 주세요."
           value={values.regions}
           onValueChange={(value) => set("regions", value)}
           error={errors.regions}

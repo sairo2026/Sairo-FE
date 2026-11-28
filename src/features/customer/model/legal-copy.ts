@@ -8,7 +8,7 @@ export const CUSTOMER_COLLECTION_COPY = {
   retentionMissing:
     "보관 기한을 선택해 주세요. 기한을 정하지 않으면 고객 정보를 저장할 수 없습니다.",
   memoGuide:
-    "업무 메모에 건강, 종교, 정치 성향 같은 민감한 정보와 전체 계좌번호를 입력하지 마세요.",
+    "업무 메모에 건강, 종교, 정치 성향 같은 민감한 정보와 전체 계좌번호를 입력하지 말아 주세요.",
   destroyNotice: (date: string) =>
     `다음 고객 정보가 보관 기한 만료로 ${date}에 파기될 예정입니다. 계속 보관해야 하는 이유가 있다면 기한을 연장해 주세요.`,
 } as const;

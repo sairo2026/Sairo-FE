@@ -3,10 +3,11 @@ import { act, cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { Badge, DDayTag, TradeTypeTag } from "./badge";
+import { Badge, DDayTag, ScheduleTag, TradeTypeTag } from "./badge";
 import { Card } from "./card";
 import { DataTable } from "./data-table";
 import type { DataTableColumn, PageSize, SortState } from "./data-table";
+import { FieldLabel } from "./field-label";
 import { ConfirmDialog, Modal } from "./modal";
 import { PageHeader } from "./page-header";
 import { Tabs } from "./tabs";
@@ -22,6 +23,38 @@ describe("Badge 계열", () => {
     render(<Badge tone="green">계약 중</Badge>);
     const badge = screen.getByText("계약 중");
     expect(badge.getAttribute("data-tone")).toBe("green");
+  });
+
+  it.each([
+    ["신청 대기", "progress"],
+    ["확정", "success"],
+    ["재조율 필요", "warning"],
+    ["재검증 실패", "danger"],
+    ["취소", "neutral"],
+  ])("%s 상태는 %s 의미 그룹 색을 쓴다", (label, group) => {
+    render(<Badge tone="red">{label}</Badge>);
+    const badge = screen.getByText(label);
+    expect(badge.getAttribute("data-status-group")).toBe(group);
+    expect(badge.className).toContain(`bg-status-${group}-bg`);
+  });
+
+  it("읽은 알림은 상태 이름과 관계없이 의도한 중립색으로 표시한다", () => {
+    render(
+      <Badge tone="gray" statusGroup={null}>
+        재조율 필요
+      </Badge>,
+    );
+    const badge = screen.getByText("재조율 필요");
+    expect(badge.getAttribute("data-status-group")).toBeNull();
+    expect(badge.className).toContain("bg-white");
+    expect(badge.className).not.toContain("bg-status-warning-bg");
+  });
+
+  it("상태 코드를 지정한 타일은 표시 문구가 달라도 의미 그룹을 유지한다", () => {
+    render(<ScheduleTag tone="red" label="일부 확정" count={2} statusGroup="progress" />);
+    const tile = screen.getByText("일부 확정").parentElement;
+    expect(tile?.getAttribute("data-status-group")).toBe("progress");
+    expect(tile?.className).toContain("bg-status-progress-bg");
   });
 
   it("거래유형 태그를 표시한다", () => {
@@ -64,10 +97,20 @@ describe("Card와 PageHeader", () => {
           actions={<button type="button">등록</button>}
         />
         <Card title="요약">내용</Card>
+        <FieldLabel htmlFor="sample">입력 라벨</FieldLabel>
       </>,
     );
     expect(screen.getByRole("heading", { level: 1, name: "매물 관리" })).toBeTruthy();
-    expect(screen.getByRole("heading", { level: 2, name: "요약" })).toBeTruthy();
+    expect(screen.getByText("설명").parentElement?.className).toContain("gap-4");
+    expect(screen.getByText("설명").className).toContain("text-body");
+    expect(screen.getByRole("button", { name: "등록" }).parentElement?.className).toContain(
+      "min-h-12",
+    );
+    expect(screen.getByRole("button", { name: "등록" }).parentElement?.className).toContain(
+      "gap-3",
+    );
+    expect(screen.getByRole("heading", { level: 2, name: "요약" }).className).toContain("text-h3");
+    expect(screen.getByText("입력 라벨").className).toContain("text-body");
     expect(screen.getByRole("button", { name: "등록" })).toBeTruthy();
   });
 });
@@ -255,9 +298,14 @@ describe("Toast", () => {
   function ToastHarness() {
     const { showToast } = useToast();
     return (
-      <button type="button" onClick={() => showToast("저장했습니다.", "success")}>
-        저장
-      </button>
+      <>
+        <button type="button" onClick={() => showToast("저장했습니다.", "success")}>
+          저장
+        </button>
+        <button type="button" onClick={() => showToast("저장하지 못했습니다.", "error")}>
+          오류 표시
+        </button>
+      </>
     );
   }
 
@@ -270,6 +318,7 @@ describe("Toast", () => {
     );
     await userEvent.click(screen.getByRole("button", { name: "저장" }));
     expect(screen.getByRole("status").textContent).toContain("저장했습니다.");
+    expect(screen.getByRole("status").className).toContain("bg-primary text-white");
     await userEvent.click(screen.getByRole("button", { name: "알림 닫기" }));
     expect(screen.queryByRole("status")).toBeNull();
     await userEvent.click(screen.getByRole("button", { name: "저장" }));
@@ -278,5 +327,17 @@ describe("Toast", () => {
       vi.advanceTimersByTime(5100);
     });
     expect(screen.queryByRole("status")).toBeNull();
+  });
+
+  it("오류 토스트도 전역 브랜드 색을 사용하고 경고 역할을 유지한다", async () => {
+    render(
+      <ToastProvider>
+        <ToastHarness />
+      </ToastProvider>,
+    );
+    await userEvent.click(screen.getByRole("button", { name: "오류 표시" }));
+    const alert = screen.getByRole("alert");
+    expect(alert.className).toContain("bg-primary text-white");
+    expect(alert.textContent).toContain("저장하지 못했습니다.");
   });
 });

@@ -157,6 +157,18 @@ test.describe("화면 맨 아래 요소가 잘리지 않는다", () => {
     await expect(hint).toHaveAttribute("data-visible", "false");
   });
 
+  test("홈: 1024px 폭에서 만기 카드의 수치가 카드 안에 남는다", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "데스크톱 1024px 레이아웃 확인");
+    await page.setViewportSize({ width: 1024, height: 768 });
+    await page.goto("/home");
+    await settle(page);
+    const card = page.getByRole("link", { name: /계약 만기 D-90/ });
+    const cardBox = await card.boundingBox();
+    const valueBox = await card.locator("span.text-primary").last().boundingBox();
+    if (!cardBox || !valueBox) throw new Error("계약 만기 카드와 수치를 확인할 수 없습니다");
+    expect(valueBox.y + valueBox.height).toBeLessThanOrEqual(cardBox.y + cardBox.height - 16);
+  });
+
   test("방문 조율 목록: 스크롤 끝에서 페이지 이동 줄 전체가 보인다", async ({ page }) => {
     await page.goto("/coordinations");
     await settle(page);

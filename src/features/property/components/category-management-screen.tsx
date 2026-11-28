@@ -413,7 +413,7 @@ export function CategoryManagementScreen() {
               ) : (
                 <Card tone="flat" title="입력 항목">
                   <p className="text-caption text-ink-2">
-                    카테고리 이름을 눌러 입력 항목을 확인하고 관리하세요.
+                    카테고리 이름을 눌러 입력 항목을 확인하고 관리해 주세요.
                   </p>
                 </Card>
               )}

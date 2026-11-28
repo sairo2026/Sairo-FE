@@ -134,7 +134,8 @@ function GeneralNotifications() {
                           <span className="flex items-center gap-2">
                             <Badge
                               tone={item.read ? "gray" : notificationTypeTone(item.type)}
-                              className="h-7 min-w-0 px-3 text-caption"
+                              statusGroup={item.read ? null : undefined}
+                              className="min-w-0"
                             >
                               {notificationTypeLabel(item.type)}
                             </Badge>
@@ -250,7 +251,8 @@ function VisitRequestNotices() {
                     <span className="flex flex-col gap-1">
                       <Badge
                         tone={item.readAt ? "gray" : (NOTICE_TYPE_TONE[item.noticeType] ?? "blue")}
-                        className="h-7 w-fit min-w-0 px-3 text-caption"
+                        statusGroup={item.readAt ? null : undefined}
+                        className="w-fit min-w-0"
                       >
                         {NOTICE_TYPE_LABEL[item.noticeType] ?? "방문 신청"}
                       </Badge>

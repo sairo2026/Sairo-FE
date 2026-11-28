@@ -200,7 +200,7 @@ export function ConditionForm({
         <p className="text-caption text-ink-2">
           날짜 예외는 그 날짜에 한해 요일별 가능 시간을 대체합니다. 제외할 시간대는 같은 날짜의
           가능한 시간대에서 빼는 용도라서, 가능한 시간대 없이 제외할 시간대만 넣으면 그날 전체가
-          방문 불가로 처리됩니다. 방문할 수 없는 날은 하루 종일 방문 불가로 입력하세요.
+          방문 불가로 처리됩니다. 방문할 수 없는 날은 하루 종일 방문 불가로 입력해 주세요.
         </p>
         {wholeDayBlockedDates.map((date) => (
           <p
