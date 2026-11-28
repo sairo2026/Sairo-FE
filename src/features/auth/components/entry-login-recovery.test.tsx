@@ -306,6 +306,7 @@ describe("비밀번호 찾기와 재설정", () => {
     await user.type(screen.getByLabelText("가입한 이메일 주소"), "someone@example.com");
     await user.click(screen.getByRole("button", { name: "재설정 링크 받기" }));
     expect((await screen.findByRole("status")).textContent).toContain("가입한 계정이 있다면");
+    expect(screen.queryByText("입력한 주소로 안내를 보냈습니다.")).toBeNull();
     expect(screen.getByRole("timer").textContent).toMatch(/^\d:\d{2}$/);
     const resend = screen.getByRole("button", { name: "재발송" }) as HTMLButtonElement;
     expect(resend.disabled).toBe(true);

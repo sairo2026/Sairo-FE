@@ -79,7 +79,6 @@ export function PasswordResetRequestForm({
           actionLabel={isSent ? "재발송" : undefined}
           onAction={() => void submit()}
           isActionDisabled={isBusy || cooldown.remaining > 0}
-          statusText={isSent && !error ? "입력한 주소로 안내를 보냈습니다." : undefined}
         />
         {isSent ? (
           <FormNotice variant="inline">
