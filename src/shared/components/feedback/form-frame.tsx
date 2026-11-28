@@ -71,7 +71,7 @@ export function FormAlert({ children }: { children: ReactNode }) {
   return (
     <p
       role="alert"
-      className="rounded-control border border-danger bg-danger/5 px-5 py-4 text-caption text-danger"
+      className="rounded-control border border-status-error bg-status-danger-bg px-5 py-4 text-caption text-status-danger-text"
     >
       {children}
     </p>

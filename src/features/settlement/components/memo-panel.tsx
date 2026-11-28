@@ -173,7 +173,7 @@ export function MemoPanel({ yearMonth }: { yearMonth: string }) {
   return (
     <section
       aria-labelledby="memo-title"
-      className="rounded-card border border-line bg-white px-7 py-6"
+      className="rounded-card border border-line bg-white px-5 py-6"
     >
       <h2 id="memo-title" className="mb-4 text-h3 font-semibold text-ink">
         월간 메모

@@ -185,18 +185,19 @@ export function PasswordResetForm({ token }: { token: string | null }) {
   const strength = passwordStrength(password);
 
   return (
-    <AuthFrame title="새 비밀번호 설정" variant="form">
+    <AuthFrame
+      title="새 비밀번호 설정"
+      description="링크는 30분 동안 한 번만 사용할 수 있습니다. 8자 이상 12자 이하로 만들어 주세요."
+      variant="form"
+    >
       <form
         noValidate
-        className="flex flex-col gap-7"
+        className="flex flex-col gap-8"
         onSubmit={(event) => {
           event.preventDefault();
           void submit();
         }}
       >
-        <p className="text-body text-ink-2">
-          링크는 30분 동안 한 번만 사용할 수 있습니다. 8자 이상 12자 이하로 만들어 주세요.
-        </p>
         <TextField
           label="새 비밀번호"
           kind="password"
@@ -225,7 +226,7 @@ export function PasswordResetForm({ token }: { token: string | null }) {
           error={confirmError}
         />
         {formError ? <FormAlert>{formError}</FormAlert> : null}
-        <div className="mt-4 flex justify-center gap-4">
+        <div className="mt-2 flex justify-center gap-4">
           <Link
             href="/login"
             className="inline-flex h-12 min-w-[120px] items-center justify-center rounded-control bg-primary-soft px-10 font-medium text-ink-2 hover:bg-primary-line"

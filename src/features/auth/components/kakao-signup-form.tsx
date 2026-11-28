@@ -206,18 +206,19 @@ export function KakaoSignupForm() {
 
   return (
     <>
-      <AuthFrame variant="form" title="카카오 회원가입">
+      <AuthFrame
+        variant="form"
+        title="카카오 회원가입"
+        description="카카오 인증을 마쳤습니다. 가입 정보와 약관을 확인해 주세요."
+      >
         <form
           noValidate
-          className="flex flex-col gap-7"
+          className="flex flex-col gap-8"
           onSubmit={(event) => {
             event.preventDefault();
             void submit();
           }}
         >
-          <p className="text-body text-ink-2">
-            카카오 인증을 마쳤습니다. 가입 정보와 약관을 확인해 주세요.
-          </p>
           <p className="text-caption text-ink-2">{KAKAO_EXTRA_INFO_NOTICE}</p>
           <TextField
             label="이름"
@@ -293,7 +294,7 @@ export function KakaoSignupForm() {
               {breakSentences(KAKAO_LINK_NOTICE)}
             </p>
           </details>
-          <div className="mt-4 flex justify-center gap-4">
+          <div className="mt-2 flex justify-center gap-4">
             <Link
               href="/login"
               className="inline-flex h-12 min-w-[120px] items-center justify-center rounded-control bg-primary-soft px-10 font-medium text-ink-2 hover:bg-primary-line"
