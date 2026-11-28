@@ -127,6 +127,78 @@ describe("verified customer request view", () => {
 
   afterEach(() => vi.useRealTimers());
 
+  it("사무소 B 인증 뒤 사무소 A의 캐시와 선호를 보여주지 않는다", async () => {
+    const secondToken = "customer-office-b-token-000001";
+    let verifiedOffice = "A";
+    const preferenceFor = (day: string) => ({
+      exists: true,
+      version: 1,
+      preferredWeekdays: [day],
+      preferredStartTime: "10:00:00",
+      preferredEndTime: "12:00:00",
+      confirmedAt: "2026-11-10T00:00:00Z",
+      retentionUntil: "2026-12-31",
+      noticeVersion: "1.0",
+      preferenceDisclosureVersion: "1.0",
+      preferenceDisclosureText: "수집 항목: 선호 요일과 선호 시간대.",
+      sessionBinding: "test-session-binding",
+    });
+    server.use(
+      http.get("*/api/public/customer-visit-links/:token", () =>
+        HttpResponse.json(getMockVisitFollowState().customerLink),
+      ),
+      http.get("*/api/public/customer-visit-links/:token/portal", ({ params }) => {
+        const office = params.token === secondToken ? "B" : "A";
+        return HttpResponse.json({
+          available: true,
+          verified: verifiedOffice === office,
+          items: [],
+        });
+      }),
+      http.get("*/api/public/customer-visit-links/:token/portal/preferences", ({ params }) => {
+        const office = params.token === secondToken ? "B" : "A";
+        return verifiedOffice === office
+          ? HttpResponse.json(preferenceFor(office === "A" ? "MONDAY" : "FRIDAY"))
+          : errorResponse(404, "PUBLIC_LINK_NOT_FOUND", "not found");
+      }),
+      http.post("*/api/public/customer-visit-links/:token/portal/otp", () =>
+        HttpResponse.json({
+          accepted: true,
+          maskedEmail: "b***@example.test",
+          expiresInSeconds: 300,
+        }),
+      ),
+      http.post("*/api/public/customer-visit-links/:token/portal/verify", () => {
+        verifiedOffice = "B";
+        return HttpResponse.json({ verified: true, expiresInSeconds: 2592000 });
+      }),
+      http.get("*/api/public/customer-visit-links/:token/portal/reusable-times", () =>
+        HttpResponse.json({ timeSlots: [] }),
+      ),
+    );
+    const client = createQueryClient();
+    const user = userEvent.setup();
+    const renderWithClient = (token: string) =>
+      render(
+        <QueryClientProvider client={client}>
+          <CustomerLinkScreen token={token} />
+        </QueryClientProvider>,
+      );
+    renderWithClient(MOCK_CUSTOMER_TOKEN);
+    expect(await screen.findByText(/저장한 기본 선호: 월/)).not.toBeNull();
+    cleanup();
+    renderWithClient(secondToken);
+    await user.click(await screen.findByRole("button", { name: "인증번호 받기" }));
+    await user.type(screen.getByLabelText("인증번호"), "123456");
+    await user.click(screen.getByRole("button", { name: "내 방문 요청 확인하기" }));
+    await screen.findByText(/저장한 기본 선호: 금/);
+    expect(client.getQueryData(["customer-visit-portal", MOCK_CUSTOMER_TOKEN])).toBeUndefined();
+    cleanup();
+    renderWithClient(MOCK_CUSTOMER_TOKEN);
+    await waitFor(() => expect(screen.queryByText(/저장한 기본 선호: 금/)).toBeNull());
+    expect(screen.queryByRole("button", { name: "기본 선호를 이번 요청에 표시하기" })).toBeNull();
+  });
+
   it("uses an email code to show the same customer's requests and proposes valid times without submitting", async () => {
     let verified = false;
     let submissions = 0;
@@ -170,6 +242,21 @@ describe("verified customer request view", () => {
           ],
         }),
       ),
+      http.get("*/api/public/customer-visit-links/:token/portal/preferences", () =>
+        HttpResponse.json({
+          exists: true,
+          version: 1,
+          preferredWeekdays: ["MONDAY"],
+          preferredStartTime: "10:00:00",
+          preferredEndTime: "12:00:00",
+          confirmedAt: "2026-11-10T00:00:00Z",
+          retentionUntil: "2026-12-31",
+          noticeVersion: "1.0",
+          preferenceDisclosureVersion: "1.0",
+      preferenceDisclosureText: "수집 항목: 선호 요일과 선호 시간대.",
+      sessionBinding: "test-session-binding",
+        }),
+      ),
       http.post("*/api/public/customer-visit-links/:token/available-times", () => {
         submissions += 1;
         return HttpResponse.json({});
@@ -191,6 +278,11 @@ describe("verified customer request view", () => {
       "/visit/portal",
     );
     expect(await screen.findByText(/10:00~11:00/)).not.toBeNull();
+    await user.click(
+      await screen.findByRole("button", { name: "기본 선호를 이번 요청에 표시하기" }),
+    );
+    expect(await screen.findByText(/기본 선호에 맞는 가까운 날짜/)).not.toBeNull();
+    expect(screen.getByText(/11월 16일 10:00~12:00/)).not.toBeNull();
     expect(submissions).toBe(0);
     verified = false;
     await portalClient.invalidateQueries({

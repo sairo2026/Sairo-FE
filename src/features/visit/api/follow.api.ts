@@ -57,6 +57,33 @@ const CustomerPortalRequestsSchema = z.object({
   ),
 });
 
+const CustomerPreferenceSchema = z.object({
+  exists: z.boolean(),
+  version: z.number(),
+  preferredWeekdays: z.array(
+    z.enum(["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"]),
+  ),
+  preferredStartTime: z.string().nullable(),
+  preferredEndTime: z.string().nullable(),
+  confirmedAt: z.string().nullable(),
+  retentionUntil: z.string().nullable(),
+  noticeVersion: z.string(),
+  preferenceDisclosureVersion: z.string(),
+  preferenceDisclosureText: z.string(),
+  sessionBinding: z.string(),
+});
+
+export type CustomerPreference = z.infer<typeof CustomerPreferenceSchema>;
+export type CustomerPreferenceInput = Pick<
+  CustomerPreference,
+  "preferredWeekdays" | "preferredStartTime" | "preferredEndTime"
+> & {
+  expectedVersion: number;
+  acknowledgedNoticeVersion: string;
+  acknowledgedPreferenceDisclosureVersion: string;
+  sessionBinding: string;
+};
+
 /** 결과 기록·재조율·철회 접수·취소는 조율 건 version을 If-Match로 보낸다. */
 function ifMatch(version: number) {
   return { "If-Match": String(version) };
@@ -236,6 +263,44 @@ export function fetchCustomerPortalIndex() {
     retry: false,
     schema: CustomerPortalRequestsSchema,
   });
+}
+
+export function fetchCustomerPreference() {
+  return apiFetch("/api/public/customer-visit-links/portal/preferences", {
+    retry: false,
+    schema: CustomerPreferenceSchema,
+  });
+}
+
+export function fetchCustomerLinkPreference(token: string) {
+  return apiFetch(
+    `/api/public/customer-visit-links/${encodeURIComponent(token)}/portal/preferences`,
+    {
+      retry: false,
+      schema: CustomerPreferenceSchema,
+    },
+  );
+}
+
+export function saveCustomerPreference(input: CustomerPreferenceInput) {
+  return apiFetch("/api/public/customer-visit-links/portal/preferences", {
+    method: "PUT",
+    body: input,
+    retry: false,
+    schema: CustomerPreferenceSchema,
+  });
+}
+
+export function deleteCustomerPreference(expectedVersion: number, sessionBinding: string) {
+  return apiFetch(
+    `/api/public/customer-visit-links/portal/preferences?expectedVersion=${expectedVersion}`,
+    {
+      method: "DELETE",
+      headers: { "X-Customer-Portal-Binding": sessionBinding },
+      retry: false,
+      schema: CustomerPreferenceSchema,
+    },
+  );
 }
 
 export function fetchCustomerPortalRequest(coordinationId: number, signal?: AbortSignal) {

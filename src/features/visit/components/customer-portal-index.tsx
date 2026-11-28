@@ -7,6 +7,10 @@ import { Badge } from "@/shared/components/ui/badge";
 import { Button, ButtonLink } from "@/shared/components/ui/button";
 import { fetchCustomerPortalIndex, logoutCustomerPortalIndex } from "../api/follow.api";
 import { statusLabel, statusTone } from "../model/labels";
+import {
+  CustomerPortalPreferences,
+  CUSTOMER_PREFERENCE_QUERY_KEY,
+} from "./customer-portal-preferences";
 
 const QUERY_KEY = ["customer-visit-portal-index"] as const;
 
@@ -25,6 +29,7 @@ export function CustomerPortalIndex() {
         queryClient.cancelQueries({ queryKey: QUERY_KEY }),
         queryClient.cancelQueries({ queryKey: ["customer-visit-portal"] }),
         queryClient.cancelQueries({ queryKey: ["customer-portal-request"] }),
+        queryClient.cancelQueries({ queryKey: CUSTOMER_PREFERENCE_QUERY_KEY }),
       ]);
       queryClient.setQueryData(QUERY_KEY, { available: false, verified: false, items: [] });
       queryClient.setQueriesData(
@@ -32,6 +37,7 @@ export function CustomerPortalIndex() {
         { available: true, verified: false, items: [] },
       );
       queryClient.removeQueries({ queryKey: ["customer-portal-request"] });
+      queryClient.removeQueries({ queryKey: CUSTOMER_PREFERENCE_QUERY_KEY });
     },
   });
 
@@ -64,6 +70,7 @@ export function CustomerPortalIndex() {
         </div>
       ) : (
         <>
+          <CustomerPortalPreferences />
           <div className="rounded-card border border-line bg-white p-5">
             {requests.data.items.length === 0 ? (
               <p className="text-caption text-ink-2">현재 확인할 방문 요청이 없습니다.</p>

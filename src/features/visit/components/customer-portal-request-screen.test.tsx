@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { http, HttpResponse } from "msw";
@@ -33,6 +33,64 @@ function renderRequest(id: number) {
 }
 
 describe("고객 포털 방문 요청", () => {
+  it("인증된 포털 요청에서 선호 요일만 불러와 날짜를 제안하고 자동 제출하지 않는다", async () => {
+    let submissions = 0;
+    let releasePreview: () => void = () => undefined;
+    let previewReturned = false;
+    const previewGate = new Promise<void>((resolve) => {
+      releasePreview = resolve;
+    });
+    server.use(
+      http.get("*/api/public/customer-visit-links/portal/requests/:id", () =>
+        HttpResponse.json(getMockVisitFollowState().customerLink),
+      ),
+      http.get("*/api/public/customer-visit-links/portal/preferences", () =>
+        HttpResponse.json({
+          exists: true,
+          version: 1,
+          preferredWeekdays: ["MONDAY"],
+          preferredStartTime: null,
+          preferredEndTime: null,
+          confirmedAt: "2026-11-10T00:00:00Z",
+          retentionUntil: "2026-12-31",
+          noticeVersion: "1.0",
+          preferenceDisclosureVersion: "1.0",
+      preferenceDisclosureText: "수집 항목: 선호 요일과 선호 시간대.",
+      sessionBinding: "test-session-binding",
+        }),
+      ),
+      http.get("*/api/public/customer-visit-links/portal/requests/:id/reusable-times", async () => {
+        await previewGate;
+        previewReturned = true;
+        return HttpResponse.json({
+          timeSlots: [
+            { startsAt: "2026-11-12T10:00:00+09:00", endsAt: "2026-11-12T11:00:00+09:00" },
+          ],
+        });
+      }),
+      http.post("*/api/public/customer-visit-links/portal/requests/:id/available-times", () => {
+        submissions += 1;
+        return HttpResponse.json({});
+      }),
+    );
+    const user = userEvent.setup();
+    renderRequest(71);
+    await user.click(
+      await screen.findByRole("button", { name: "기본 선호를 이번 요청에 표시하기" }),
+    );
+    expect(await screen.findByText(/선호 요일에 맞는 날짜를 표시했습니다/)).not.toBeNull();
+    expect(screen.getByRole("button", { name: /11월 16일/ }).getAttribute("aria-pressed")).toBe(
+      "true",
+    );
+    releasePreview();
+    await waitFor(() => expect(previewReturned).toBe(true));
+    expect(screen.getByRole("button", { name: /11월 16일/ }).getAttribute("aria-pressed")).toBe(
+      "true",
+    );
+    expect(screen.getByText(/선호 요일에 맞는 날짜를 표시했습니다/)).not.toBeNull();
+    expect(submissions).toBe(0);
+  });
+
   it("중개보조원 신분과 개인정보 요청 경로를 보존한다", async () => {
     server.use(
       http.get("*/api/public/customer-visit-links/portal/requests/:id", () =>
