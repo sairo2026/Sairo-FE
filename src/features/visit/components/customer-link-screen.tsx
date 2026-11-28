@@ -23,6 +23,8 @@ import {
   fetchCustomerConfirmed,
   fetchCustomerLink,
   fetchCustomerPortalRequests,
+  fetchCustomerLinkPreference,
+  fetchCustomerPreference,
   logoutCustomerPortal,
   previewBrowserReusableCustomerTimes,
   previewCustomerPortalTimes,
@@ -49,11 +51,13 @@ import {
   listWindowDates,
   parseSubmittedSlots,
   rangesToBlocks,
+  slotStartTimes,
   toSubmitSlots,
   acceptsCustomerResponse,
   validateSlots,
 } from "../model/customer-times";
 import type { SelectedBlocks } from "../model/customer-times";
+import type { CustomerPreference } from "../api/follow.api";
 import { toKstIso } from "../model/time";
 import { CustomerTimeSelect } from "./customer-time-select";
 import { previousCustomerToken, safeReusableBlocks } from "../model/reuse-link";
@@ -113,19 +117,36 @@ function initialBlocks(link: PublicVisitLinkResponse): SelectedBlocks {
 }
 
 type ReusableSlot = { startsAt: string; endsAt: string };
+const PREFERENCE_WEEKDAYS: Record<string, { index: number; label: string }> = {
+  SUNDAY: { index: 0, label: "일" },
+  MONDAY: { index: 1, label: "월" },
+  TUESDAY: { index: 2, label: "화" },
+  WEDNESDAY: { index: 3, label: "수" },
+  THURSDAY: { index: 4, label: "목" },
+  FRIDAY: { index: 5, label: "금" },
+  SATURDAY: { index: 6, label: "토" },
+};
 
 function CustomerPortalPanel({
   token,
   onReuse,
+  onApplyPreference,
 }: {
   token: string;
   onReuse?: (slots: ReusableSlot[]) => void;
+  onApplyPreference?: (preference: CustomerPreference) => void;
 }) {
   const queryClient = useQueryClient();
   const [code, setCode] = useState("");
   const existing = useQuery({
     queryKey: ["customer-visit-portal", token],
     queryFn: () => fetchCustomerPortalRequests(token),
+    retry: false,
+  });
+  const preference = useQuery({
+    queryKey: ["customer-visit-preference", token],
+    queryFn: () => fetchCustomerLinkPreference(token),
+    enabled: Boolean(onReuse) && existing.data?.verified === true,
     retry: false,
   });
   const send = useMutation({ mutationFn: () => sendCustomerPortalCode(token) });
@@ -143,6 +164,10 @@ function CustomerPortalPanel({
       return { requests, reusable };
     },
     onSuccess: ({ requests, reusable }) => {
+      queryClient.removeQueries({ queryKey: ["customer-visit-portal"] });
+      queryClient.removeQueries({ queryKey: ["customer-visit-portal-index"] });
+      queryClient.removeQueries({ queryKey: ["customer-portal-request"] });
+      queryClient.removeQueries({ queryKey: ["customer-visit-preference"] });
       queryClient.setQueryData(["customer-visit-portal", token], requests);
       onReuse?.(reusable.timeSlots);
       setCode("");
@@ -151,13 +176,11 @@ function CustomerPortalPanel({
   const leave = useMutation({
     mutationFn: () => logoutCustomerPortal(token),
     onSuccess: () => {
-      queryClient.setQueryData(["customer-visit-portal", token], {
-        available: true,
-        verified: false,
-        items: [],
-      });
+      queryClient.removeQueries({ queryKey: ["customer-visit-portal"] });
+      queryClient.removeQueries({ queryKey: ["customer-visit-portal-index"] });
       queryClient.removeQueries({ queryKey: ["customer-portal-request"] });
       queryClient.removeQueries({ queryKey: ["customer-visit-portal-index"] });
+      queryClient.removeQueries({ queryKey: ["customer-visit-preference"] });
       setCode("");
     },
   });
@@ -188,6 +211,30 @@ function CustomerPortalPanel({
           </ul>
           {onReuse ? (
             <>
+              {preference.data?.exists ? (
+                <div className="space-y-2 text-caption text-ink-2">
+                  <p>
+                    저장한 기본 선호:{" "}
+                    {preference.data.preferredWeekdays
+                      .map((day) => PREFERENCE_WEEKDAYS[day]?.label)
+                      .join("·") || "요일 미지정"}
+                    {preference.data.preferredStartTime && preference.data.preferredEndTime
+                      ? ` · ${preference.data.preferredStartTime.slice(0, 5)}~${preference.data.preferredEndTime.slice(0, 5)}`
+                      : ""}
+                  </p>
+                  {onApplyPreference ? (
+                    <Button
+                      size="sm"
+                      variant="outlined"
+                      onClick={() => {
+                        if (preference.data) onApplyPreference(preference.data);
+                      }}
+                    >
+                      기본 선호를 이번 요청에 표시하기
+                    </Button>
+                  ) : null}
+                </div>
+              ) : null}
               <Button
                 size="sm"
                 variant="outlined"
@@ -290,6 +337,12 @@ export function TimeForm({
   const submissionStarted = useRef(false);
   const isClosed = !acceptsCustomerResponse(link.coordinationStatus, link.linkExpiresAt);
   const isResubmit = initial.length > 0;
+  const portalPreference = useQuery({
+    queryKey: ["customer-visit-preference"],
+    queryFn: fetchCustomerPreference,
+    enabled: portalCoordinationId !== undefined && !isClosed,
+    retry: false,
+  });
   const { mutate: loadBrowserTimes } = useMutation({
     mutationFn: () => previewBrowserReusableCustomerTimes(token ?? ""),
     onSuccess: ({ timeSlots }) => {
@@ -481,10 +534,97 @@ export function TimeForm({
     return Date.parse(toKstIso(date, `${hour}:${minute}`)) <= Date.now();
   }
 
+  function applyPreference(preference: CustomerPreference) {
+    const hasTime = Boolean(preference.preferredStartTime && preference.preferredEndTime);
+    const start = hasTime
+      ? Number((preference.preferredStartTime ?? "00:00").slice(0, 2)) * 60 +
+        Number((preference.preferredStartTime ?? "00:00").slice(3, 5))
+      : 0;
+    const end = hasTime
+      ? Number((preference.preferredEndTime ?? "24:00").slice(0, 2)) * 60 +
+        Number((preference.preferredEndTime ?? "24:00").slice(3, 5))
+      : 24 * 60;
+    const weekdays = new Set(
+      preference.preferredWeekdays.map((day) => PREFERENCE_WEEKDAYS[day]?.index),
+    );
+    const matching =
+      weekdays.size > 0
+        ? dates
+            .filter(
+              (date) =>
+                date >= todayKst() && weekdays.has(new Date(`${date}T00:00:00Z`).getUTCDay()),
+            )
+            .slice(0, 7)
+        : [activeDate];
+    if (!hasTime) {
+      userChangedTimes.current = true;
+      userChangedDate.current = true;
+      autoApplied.current = true;
+      const firstDate = matching[0];
+      if (firstDate) setActiveDate(firstDate);
+      setReuseNotice(
+        firstDate
+          ? "선호 요일에 맞는 날짜를 표시했습니다. 실제 가능한 시간을 선택하고 이번 요청을 제출해 주세요."
+          : "이번 요청 기간에는 선호 요일이 없습니다. 가능한 날짜와 시간을 직접 선택해 주세요.",
+      );
+      return;
+    }
+    const blocks: SelectedBlocks = {};
+    for (const date of matching) {
+      const available = slotStartTimes().filter(
+        (minute) => minute >= start && minute + 30 <= end && !isPast(date, minute),
+      );
+      if (available.length > 0) blocks[date] = available;
+    }
+    if (Object.keys(blocks).length === 0) {
+      setReuseNotice(
+        "이번 요청 기간에 기본 선호와 맞는 시간이 없습니다. 가능한 시간을 직접 선택해 주세요.",
+      );
+      return;
+    }
+    userChangedTimes.current = true;
+    autoApplied.current = true;
+    setSelected((current) => {
+      const merged = { ...current };
+      for (const [date, minutes] of Object.entries(blocks)) {
+        merged[date] = [...new Set([...(current[date] ?? []), ...minutes])].sort(
+          (left, right) => left - right,
+        );
+      }
+      return merged;
+    });
+    const firstDate = Object.keys(blocks).sort()[0];
+    if (firstDate && !userChangedDate.current) setActiveDate(firstDate);
+    setReuseNotice(
+      weekdays.size > 0
+        ? "기본 선호에 맞는 가까운 날짜 최대 7개의 시간을 표시했습니다. 실제 가능 여부를 확인·수정한 뒤 제출해 주세요."
+        : "현재 선택한 날짜에 기본 선호 시간을 표시했습니다. 실제 가능 여부를 확인·수정한 뒤 제출해 주세요.",
+    );
+  }
+
   return (
     <div className="flex flex-col gap-4">
+      {!isClosed && portalCoordinationId !== undefined && portalPreference.data?.exists ? (
+        <section className={cn(SURFACE_CARD, "space-y-2")} aria-label="저장한 기본 방문 선호">
+          <p className="text-body font-semibold text-ink">저장한 기본 방문 선호</p>
+          <p className="text-caption text-ink-2">
+            이번 요청의 실제 가능 시간은 직접 확인해야 합니다. 기존 선호는 자동 제출되지 않습니다.
+          </p>
+          <Button
+            variant="outlined"
+            size="sm"
+            onClick={() => applyPreference(portalPreference.data)}
+          >
+            기본 선호를 이번 요청에 표시하기
+          </Button>
+        </section>
+      ) : null}
       {!isClosed && isResubmit && token ? (
-        <CustomerPortalPanel token={token} onReuse={reuseVerifiedTimes} />
+        <CustomerPortalPanel
+          token={token}
+          onReuse={reuseVerifiedTimes}
+          onApplyPreference={applyPreference}
+        />
       ) : null}
       {!isClosed && !isResubmit && token ? (
         <section
@@ -494,7 +634,11 @@ export function TimeForm({
           <h2 id="reuse-time-title" className="text-body font-semibold text-ink">
             이전 시간 불러오기
           </h2>
-          <CustomerPortalPanel token={token} onReuse={reuseVerifiedTimes} />
+          <CustomerPortalPanel
+            token={token}
+            onReuse={reuseVerifiedTimes}
+            onApplyPreference={applyPreference}
+          />
           <p className="text-caption text-ink-2">
             같은 사무소에서 받은 이전 방문 링크가 아직 열려 있다면, 유효한 시간만 추가할 수
             있습니다. 이번 요청에 제출하기 전에 확인·수정해 주세요.

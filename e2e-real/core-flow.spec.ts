@@ -398,8 +398,20 @@ test("실제 이메일 인증 후 방문 요청 목록을 새로고침에도 유
   await expect(page.getByRole("list", { name: "내 방문 요청 목록" })).toContainText(
     `방문 요청 #${coordinationId}`,
   );
+  await expect(page.getByRole("heading", { name: "기본 방문 선호" })).toBeVisible();
+  await page.getByRole("checkbox", { name: "월요일" }).check();
+  await page.getByRole("checkbox", { name: "금요일" }).check();
+  await page.getByLabel("선호 시작 시간").fill("10:00");
+  await page.getByLabel("선호 종료 시간").fill("18:00");
+  await page
+    .getByRole("checkbox", { name: "기본 방문 선호 저장 안내를 확인했습니다. (필수)" })
+    .check();
+  await page.getByRole("button", { name: "선호 저장" }).click();
+  await expect(page.getByText("기본 선호를 저장했습니다.")).toBeVisible();
   await page.screenshot({ path: "test-results/customer-portal-real.png", fullPage: true });
   await page.reload();
+  await expect(page.getByRole("checkbox", { name: "월요일" })).toBeChecked();
+  await expect(page.getByLabel("선호 시작 시간")).toHaveValue("10:00");
   await expect(page.getByRole("list", { name: "내 방문 요청 목록" })).toContainText(
     `방문 요청 #${coordinationId}`,
   );
@@ -434,6 +446,8 @@ test("실제 이메일 인증 후 방문 요청 목록을 새로고침에도 유
   await page.getByRole("link", { name: "가능한 시간 확인·수정" }).first().click();
   await expect(page).toHaveURL(new RegExp(`/visit/portal/${secondId}$`));
   await expect(page.getByText(/이전에 확인한 유효한 시간을 표시했습니다/)).toBeVisible();
+  await page.getByRole("button", { name: "기본 선호를 이번 요청에 표시하기" }).click();
+  await expect(page.getByText(/기본 선호에 맞는 가까운 날짜/)).toBeVisible();
   await expect(page.getByRole("button", { name: "10:00", exact: true })).toHaveAttribute(
     "aria-pressed",
     "true",
@@ -447,6 +461,11 @@ test("실제 이메일 인증 후 방문 요청 목록을 새로고침에도 유
   await expect(staffPage.getByText("조율 가능").first()).toBeVisible();
   await page.getByRole("link", { name: /내 방문 요청으로 돌아가기/ }).click();
   await expect(page).toHaveURL(/\/visit\/portal$/);
+  await expect(page.getByRole("checkbox", { name: "금요일" })).toBeChecked();
+  await page.getByRole("button", { name: "저장한 선호 삭제" }).click();
+  await page.getByRole("button", { name: "삭제하기" }).click();
+  await expect(page.getByText("기본 선호를 삭제했습니다.")).toBeVisible();
+  await expect(page.getByRole("checkbox", { name: "월요일" })).not.toBeChecked();
   await page.getByRole("button", { name: "이 기기에서 보기 종료" }).click();
   await expect(page.getByText(/방문 요청 링크에서 이메일 인증을 완료하면/)).toBeVisible();
   await page.reload();
