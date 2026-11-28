@@ -28,7 +28,7 @@ describe("PC 설치 화면", () => {
     expect(screen.getByRole("link", { name: "회원가입하러 가기" }).getAttribute("href")).toBe(
       "/signup",
     );
-    expect(screen.getByText(/설치 파일 없이 Chrome·Edge에서/)).toBeTruthy();
+    expect(screen.getByText(/Chrome·Edge에서 설치하면 앱 창으로 열립니다/)).toBeTruthy();
   });
 
   it("브라우저 설치 이벤트가 있으면 버튼 한 번으로 설치 창을 연다", async () => {
@@ -44,12 +44,12 @@ describe("PC 설치 화면", () => {
 
     expect(openPrompt).toHaveBeenCalledOnce();
     expect(event.defaultPrevented).toBe(true);
-    expect(screen.getByRole("status").textContent).toContain("설치가 진행 중이에요");
+    expect(screen.getByRole("status").textContent).toContain("설치가 진행 중입니다");
     const pendingButton = screen.getByRole("button", { name: "설치 진행 중" });
     expect(pendingButton.getAttribute("aria-disabled")).toBe("true");
     await user.click(pendingButton);
     expect(openPrompt).toHaveBeenCalledOnce();
-    expect(screen.getByRole("status").textContent).toContain("설치가 진행 중이에요");
+    expect(screen.getByRole("status").textContent).toContain("설치가 진행 중입니다");
 
     act(() => window.dispatchEvent(new Event("appinstalled")));
     expect(screen.getByRole("status").textContent).toContain("설치된 사이로 앱");
@@ -109,7 +109,7 @@ describe("PC 설치 화면", () => {
 
     await user.click(screen.getByRole("button", { name: "PC에 설치하기" }));
 
-    expect(screen.getByRole("status").textContent).toContain("설치 창을 열지 못했어요");
+    expect(screen.getByRole("status").textContent).toContain("설치 창을 열지 못했습니다");
   });
 
   it("브라우저 메뉴에서 설치했을 때 현재 포커스를 빼앗지 않는다", () => {

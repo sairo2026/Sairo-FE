@@ -5,7 +5,7 @@ import { InstallAction } from "./install-action";
 
 export const metadata: Metadata = {
   title: "사이로 시작하기",
-  description: "사이로를 PC에 설치하거나 웹에서 바로 이용하세요.",
+  description: "사이로를 PC에 설치하거나 웹에서 바로 이용할 수 있습니다.",
 };
 
 export default function InstallPage() {
