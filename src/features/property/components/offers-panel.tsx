@@ -256,7 +256,7 @@ function DealTypePanel({
             <Badge tone={toneOf(OFFER_STATUS_TONE, activeOffer.status)}>
               {labelOf(OFFER_STATUS_LABEL, activeOffer.status)}
             </Badge>
-            <p className="text-h2 font-semibold text-ink">{formatOfferPrice(activeOffer)}</p>
+            <p className="text-h3 font-semibold text-ink">{formatOfferPrice(activeOffer)}</p>
             {activeOffer.premiumAmount !== null ? (
               <span className="text-caption text-ink-2">
                 합의 프리미엄 {formatWonCompact(activeOffer.premiumAmount)}

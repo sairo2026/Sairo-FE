@@ -203,7 +203,7 @@ export function ScheduleTag({
       )}
     >
       <span className="text-body font-medium">{label}</span>
-      <span className="text-h2 font-semibold">{count}건</span>
+      <span className="text-h3 font-semibold">{count}건</span>
     </span>
   );
 }

@@ -174,7 +174,7 @@ export function MemoPanel({ yearMonth }: { yearMonth: string }) {
       aria-labelledby="memo-title"
       className="rounded-card border border-line bg-white px-7 py-6"
     >
-      <h2 id="memo-title" className="mb-4 text-h2 font-semibold text-ink">
+      <h2 id="memo-title" className="mb-4 text-h3 font-semibold text-ink">
         월간 메모
       </h2>
       <QueryGate query={query} loadingLabel="메모를 불러오는 중입니다.">

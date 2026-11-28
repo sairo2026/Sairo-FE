@@ -140,7 +140,7 @@ function CreateForm({
   const noTables = tables.length === 0;
   return (
     <section aria-labelledby="export-section-1" className="flex flex-col gap-4">
-      <h2 id="export-section-1" className="text-h2 font-semibold text-ink">
+      <h2 id="export-section-1" className="text-h3 font-semibold text-ink">
         {COPY.createTitle}
       </h2>
       <div className="flex flex-col gap-5">
@@ -226,7 +226,7 @@ function PolicyPanel({ tables }: { tables: ExportAllowedTablesResponse["tables"]
 
   return (
     <section aria-labelledby="export-section-2" className="flex flex-col gap-4">
-      <h2 id="export-section-2" className="text-h2 font-semibold text-ink">
+      <h2 id="export-section-2" className="text-h3 font-semibold text-ink">
         {COPY.policyTitle}
       </h2>
       <div className="flex flex-col gap-4">
@@ -274,7 +274,7 @@ function History({ onSelect }: { onSelect: (exportId: number) => void }) {
   const query = useExports({ page: page - 1, size });
   return (
     <section aria-labelledby="export-section-3" className="flex flex-col gap-4">
-      <h2 id="export-section-3" className="text-h2 font-semibold text-ink">
+      <h2 id="export-section-3" className="text-h3 font-semibold text-ink">
         {COPY.historyTitle}
       </h2>
       <p className="mb-3 text-caption text-ink-2">{COPY.historyNote}</p>
@@ -360,7 +360,7 @@ export function ExportsScreen() {
       </QueryGate>
       {exportId !== null ? (
         <section aria-labelledby="export-section-4" className="flex flex-col gap-4">
-          <h2 id="export-section-4" className="text-h2 font-semibold text-ink">
+          <h2 id="export-section-4" className="text-h3 font-semibold text-ink">
             {"내보내기 진행"}
           </h2>
           <ExportStatusPanel exportId={exportId} />

@@ -167,8 +167,8 @@ describe("모달과 사이드 메뉴 규격", () => {
         <SideNavItem href="/b" label="나" size="md" />
       </>,
     );
-    expect(screen.getByRole("link", { name: "가" }).className).toContain("lg:text-h2");
-    expect(screen.getByRole("link", { name: "나" }).className).toContain("lg:text-h3");
+    expect(screen.getByRole("link", { name: "가" }).className).toContain("lg:text-h3");
+    expect(screen.getByRole("link", { name: "나" }).className).toContain("text-body");
   });
 
   it("사무소 레이아웃은 사이드바 폭 220을 쓰고 홈 본문은 흰 바탕을 쓴다", () => {
@@ -196,6 +196,6 @@ describe("모달과 사이드 메뉴 규격", () => {
         <p>운영 본문</p>
       </OpsLayout>,
     );
-    expect(screen.getByRole("link", { name: "운영 홈" }).className).toContain("lg:text-h3");
+    expect(screen.getByRole("link", { name: "운영 홈" }).className).toContain("text-body");
   });
 });

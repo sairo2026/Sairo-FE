@@ -335,7 +335,7 @@ export function LifecycleSection({ detail }: { detail: Detail }) {
   const isPartial = items.some((item) => item.result !== "SCHEDULED");
   return (
     <section className="flex flex-col gap-3" aria-labelledby="lifecycle-title" id="lifecycle">
-      <h2 id="lifecycle-title" className="text-h2 font-semibold text-ink">
+      <h2 id="lifecycle-title" className="text-h3 font-semibold text-ink">
         재조율과 취소
       </h2>
       {isReadOnly ? (

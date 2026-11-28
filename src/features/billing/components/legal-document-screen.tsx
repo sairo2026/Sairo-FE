@@ -76,7 +76,7 @@ export function LegalIndexScreen() {
               className="block rounded-card-flat border border-line bg-white px-6 py-5 hover:border-primary"
             >
               <span className="flex flex-wrap items-baseline justify-between gap-2">
-                <span className="text-h2 font-semibold text-ink">{item.title}</span>
+                <span className="text-h3 font-semibold text-ink">{item.title}</span>
                 <span className="text-caption text-ink-2">시행 버전 {item.version}</span>
               </span>
               <span className="mt-1 block text-body text-ink-2">{item.summary}</span>
