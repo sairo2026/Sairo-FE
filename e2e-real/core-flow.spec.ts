@@ -784,14 +784,16 @@ test("가운데 방문만 재승인하고 양쪽 확정 방문과 홈 캘린더�
     }
 
     const candidates = (await detail()).candidateProperties;
-    const candidateId = (name: string) => {
+    const candidateFor = (name: string) => {
       const candidate = candidates.find((entry) => entry.propertyName === name);
       if (!candidate) throw new Error(`Missing candidate ${name}`);
-      return candidate.candidatePropertyId;
+      return candidate;
     };
-    for (const visit of visits) {
+    for (const [index, visit] of visits.entries()) {
+      const candidate = candidateFor(visit.name);
+      expect(candidate.travelDurationMinutes).toBe(index === 2 ? 0 : 15);
       const result = await pageApi<{ status: string }>(page, "POST", `${apiPath}/visit-requests`, {
-        candidatePropertyId: candidateId(visit.name),
+        candidatePropertyId: candidate.candidatePropertyId,
         requestedStartAt: dateTime(visit.start),
         requestedEndAt: dateTime(visit.end),
         expectedDurationMinutes: 30,
@@ -809,11 +811,18 @@ test("가운데 방문만 재승인하고 양쪽 확정 방문과 홈 캘린더�
     expect(confirmed.status).toBe("CONFIRMED");
     const activeVisit = (current: VisitCoordinationDetailResponse, name: string) => {
       const item = current.scheduleItems?.find(
-        (entry) => entry.candidatePropertyId === candidateId(name) && entry.result === "SCHEDULED",
+        (entry) =>
+          entry.candidatePropertyId === candidateFor(name).candidatePropertyId &&
+          entry.result === "SCHEDULED",
       );
       if (!item) throw new Error(`Missing scheduled visit ${name}`);
       return item;
     };
+    for (const visit of visits) {
+      const scheduled = activeVisit(confirmed, visit.name);
+      expect(Date.parse(scheduled.scheduledStartAt ?? "")).toBe(Date.parse(dateTime(visit.start)));
+      expect(Date.parse(scheduled.scheduledEndAt ?? "")).toBe(Date.parse(dateTime(visit.end)));
+    }
     const middle = visits[1].name;
     const originalMiddle = activeVisit(confirmed, middle);
     const middleApproval = approvalLinks.get(middle);
@@ -887,6 +896,8 @@ test("가운데 방문만 재승인하고 양쪽 확정 방문과 홈 캘린더�
       );
     }
 
+    const confirmedCalendarCount = await homeVisitCount();
+    expect(confirmedCalendarCount).toBe(initialCalendarCount + (visibleInHomeCalendar ? 3 : 0));
     await applyMiddleCondition(middleApproval, "18:30", "19:00");
     await page.reload();
     const affectedRow = middleRow.filter({ hasText: `${day} 18:15` });
@@ -925,11 +936,11 @@ test("가운데 방문만 재승인하고 양쪽 확정 방문과 홈 캘린더�
     await expect(calendar).toBeVisible();
     const month = Number(day.slice(5, 7));
     const date = Number(day.slice(8));
+    expect(await homeVisitCount()).toBe(confirmedCalendarCount);
     if (visibleInHomeCalendar) {
-      expect(await homeVisitCount()).toBe(initialCalendarCount + 3);
       await expect(
         calendar.getByRole("gridcell", {
-          name: new RegExp(`^${month}월 ${date}일 방문 ${initialCalendarCount + 3}건`),
+          name: new RegExp(`^${month}월 ${date}일 방문 ${confirmedCalendarCount}건`),
         }),
       ).toBeVisible();
     } else {
@@ -937,7 +948,6 @@ test("가운데 방문만 재승인하고 양쪽 확정 방문과 홈 캘린더�
         type: "coverage",
         description: "방문일이 다음 달입니다. 이번 달 홈 캘린더에 잘못 표시되지 않는지 확인합니다.",
       });
-      expect(await homeVisitCount()).toBe(initialCalendarCount);
       await expect(
         calendar.getByRole("gridcell", { name: new RegExp(`^${month}월 ${date}일`) }),
       ).toHaveCount(0);

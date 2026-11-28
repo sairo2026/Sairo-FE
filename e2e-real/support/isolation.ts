@@ -12,12 +12,17 @@ export async function protectLocalContext(context: BrowserContext) {
       return;
     }
     try {
-      // A local Next server can reset a static asset connection during navigation.
-      const isStaticAsset =
+      // Retry only cacheable assets and read-only schedule queries after a local reset.
+      const isStaticAsset = url.pathname.startsWith("/_next/static/");
+      const isScheduleRead =
+        url.pathname === "/api/home" ||
+        /^\/api\/visit-coordinations\/\d+$/.test(url.pathname) ||
+        /^\/api\/public\/approver-property-links\/[^/]+\/confirmed-schedules$/.test(url.pathname);
+      const retryableRead =
         request.method() === "GET" &&
         url.origin === FRONT_ORIGIN &&
-        url.pathname.startsWith("/_next/static/");
-      const response = await route.fetch({ maxRedirects: 0, maxRetries: isStaticAsset ? 2 : 0 });
+        (isStaticAsset || isScheduleRead);
+      const response = await route.fetch({ maxRedirects: 0, maxRetries: retryableRead ? 2 : 0 });
       const location = response.headers()["location"];
       if (response.status() >= 300 && response.status() < 400 && location) {
         const target = new URL(location, url);
