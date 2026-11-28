@@ -15,7 +15,7 @@ export function PageHeader({ title, description, actions, breadcrumb }: PageHead
         <h1 className="text-h1 font-bold text-ink">{title}</h1>
         {description ? <p className="text-body text-ink-2">{description}</p> : null}
       </div>
-      {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
+      {actions ? <div className="flex h-9 items-center gap-3">{actions}</div> : null}
     </header>
   );
   if (!breadcrumb || breadcrumb.length === 0) return header;

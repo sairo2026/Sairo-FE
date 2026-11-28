@@ -69,6 +69,10 @@ describe("Card와 PageHeader", () => {
     expect(screen.getByRole("heading", { level: 1, name: "매물 관리" })).toBeTruthy();
     expect(screen.getByText("설명").parentElement?.className).toContain("gap-4");
     expect(screen.getByText("설명").className).toContain("text-body");
+    expect(screen.getByRole("button", { name: "등록" }).parentElement?.className).toContain("h-9");
+    expect(screen.getByRole("button", { name: "등록" }).parentElement?.className).toContain(
+      "gap-3",
+    );
     expect(screen.getByRole("heading", { level: 2, name: "요약" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "등록" })).toBeTruthy();
   });
@@ -257,9 +261,14 @@ describe("Toast", () => {
   function ToastHarness() {
     const { showToast } = useToast();
     return (
-      <button type="button" onClick={() => showToast("저장했습니다.", "success")}>
-        저장
-      </button>
+      <>
+        <button type="button" onClick={() => showToast("저장했습니다.", "success")}>
+          저장
+        </button>
+        <button type="button" onClick={() => showToast("저장하지 못했습니다.", "error")}>
+          오류 표시
+        </button>
+      </>
     );
   }
 
@@ -281,5 +290,17 @@ describe("Toast", () => {
       vi.advanceTimersByTime(5100);
     });
     expect(screen.queryByRole("status")).toBeNull();
+  });
+
+  it("오류 토스트도 전역 브랜드 색을 사용하고 경고 역할을 유지한다", async () => {
+    render(
+      <ToastProvider>
+        <ToastHarness />
+      </ToastProvider>,
+    );
+    await userEvent.click(screen.getByRole("button", { name: "오류 표시" }));
+    const alert = screen.getByRole("alert");
+    expect(alert.className).toContain("bg-primary text-white");
+    expect(alert.textContent).toContain("저장하지 못했습니다.");
   });
 });

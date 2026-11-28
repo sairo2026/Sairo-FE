@@ -26,9 +26,6 @@ export default function InstallPage() {
         </div>
 
         <h1 className="mt-8 break-keep text-h1 font-bold">사이로 시작하기</h1>
-        <p className="mt-4 break-keep text-body text-ink-2">
-          PC에 앱으로 설치하거나 설치 없이 웹에서 바로 이용할 수 있습니다.
-        </p>
 
         <section
           className="mt-8 rounded-card-flat border border-line bg-surface p-5 sm:p-6"
