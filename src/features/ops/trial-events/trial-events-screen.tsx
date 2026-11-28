@@ -23,7 +23,6 @@ import {
   EMPTY_TRIAL_FORM,
   FREE_END_MODE_LABELS,
   FREE_END_MODE_OPTIONS,
-  NAME_MAX,
   STOP_NOTICE_TEXT,
   TRIAL_RULE_TEXTS,
   TRIAL_STATUS,
@@ -102,7 +101,6 @@ function CreateCard() {
           label="이벤트명"
           value={form.name}
           error={errors.name}
-          hint={`${form.name.trim().length}/${NAME_MAX}자`}
           onValueChange={(name) => patch({ name })}
         />
         <RadioGroup

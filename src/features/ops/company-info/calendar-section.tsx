@@ -87,7 +87,6 @@ function CalendarDialog({
         rows={3}
         value={reason}
         error={errors.reason}
-        hint={`${reason.length}/${CALENDAR_REASON_MAX}자`}
         onValueChange={setReason}
       />
     </ActionDialog>
