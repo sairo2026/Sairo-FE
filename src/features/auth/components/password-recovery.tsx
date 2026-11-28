@@ -54,16 +54,15 @@ export function PasswordResetRequestForm({
   }
 
   return (
-    <AuthFrame title={title} variant="form">
+    <AuthFrame title={title} description={description} variant="form">
       <form
         noValidate
-        className="flex flex-col gap-7"
+        className="flex flex-col gap-8"
         onSubmit={(event) => {
           event.preventDefault();
           void submit();
         }}
       >
-        <p className="text-body text-ink-2">{description}</p>
         <TextField
           label="가입한 이메일 주소"
           value={email}
@@ -86,7 +85,7 @@ export function PasswordResetRequestForm({
             사용할 수 있고, 다시 요청하면 이전 링크는 사라집니다.
           </FormNotice>
         ) : null}
-        <div className="mt-4 flex justify-center gap-4">
+        <div className="mt-2 flex justify-center gap-4">
           <Link
             href="/login"
             className="inline-flex h-12 min-w-[120px] items-center justify-center rounded-control bg-primary-soft px-10 font-medium text-ink-2 hover:bg-primary-line"

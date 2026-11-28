@@ -67,7 +67,7 @@ function StatCard({
           className={`flex items-center justify-between font-bold text-ink ${icon ? "text-h1" : "text-h2"}`}
         >
           {title}
-          <span aria-hidden="true" className="clickable-arrow text-ink-3">
+          <span aria-hidden="true" className="clickable-arrow text-ink-2">
             {icon ? (
               <svg
                 viewBox="0 0 18 36"

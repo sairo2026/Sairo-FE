@@ -295,6 +295,9 @@ describe("비밀번호 찾기와 재설정", () => {
   it("이메일 형식이 틀리면 요청하지 않는다", async () => {
     const user = userEvent.setup();
     render(<PasswordResetRequestForm />);
+    const explanation = screen.getByText(/가입한 이메일 주소를 입력하면/);
+    expect(explanation.className).toContain("mt-4");
+    expect(explanation.nextElementSibling?.className).toContain("mt-14");
     await user.type(screen.getByLabelText("가입한 이메일 주소"), "bad");
     await user.click(screen.getByRole("button", { name: "재설정 링크 받기" }));
     expect(await screen.findByText("이메일 주소를 올바르게 입력해 주세요.")).not.toBeNull();

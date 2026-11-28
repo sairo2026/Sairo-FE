@@ -139,7 +139,7 @@ export function CustomerListScreen() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title="고객 관리" description="고객을 관리할 수 있습니다." />
+      <PageHeader title="고객 관리" />
       <div className="flex flex-wrap items-center gap-4">
         <CreateLink href="/customers/new" isDisabled={isReadOnly}>
           고객 등록
