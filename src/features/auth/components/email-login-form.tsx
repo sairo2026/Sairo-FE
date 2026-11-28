@@ -79,7 +79,7 @@ export function EmailLoginForm({ next }: { next?: string }) {
       tagline="사이로 계정으로 로그인해 업무를 이어갈 수 있습니다."
     >
       <form noValidate onSubmit={submit} className="flex flex-col">
-        <div className="flex flex-col gap-7">
+        <div className="flex flex-col gap-8">
           <Controller
             name="email"
             control={control}
@@ -115,7 +115,7 @@ export function EmailLoginForm({ next }: { next?: string }) {
         {mismatch && !isLocked ? (
           <div
             role="alert"
-            className="mt-5 flex flex-col gap-1 rounded-control border border-danger bg-white px-5 py-4 text-left text-danger"
+            className="mt-5 flex flex-col gap-1 rounded-control border border-danger bg-white p-5 text-left text-danger"
           >
             <p className="text-caption font-semibold">{mismatch.lead}</p>
             <p className="text-caption">{mismatch.count}</p>
@@ -124,7 +124,7 @@ export function EmailLoginForm({ next }: { next?: string }) {
         {isLocked ? (
           <div
             role="alert"
-            className="mt-5 flex flex-col gap-1 rounded-control border border-danger bg-white px-5 py-4 text-left text-danger"
+            className="mt-5 flex flex-col gap-1 rounded-control border border-danger bg-white p-5 text-left text-danger"
           >
             <p className="text-caption font-semibold">{LOGIN_LOCKED_LEAD}</p>
             <p className="text-caption">
@@ -140,7 +140,7 @@ export function EmailLoginForm({ next }: { next?: string }) {
             회원가입
           </Link>
         </div>
-        <div className="mt-11 flex items-center justify-center gap-4">
+        <div className="mt-10 flex items-center justify-center gap-4">
           <Link
             href="/login"
             className="inline-flex h-12 min-w-[120px] items-center justify-center rounded-control bg-primary-soft px-10 font-medium text-ink-2 hover:bg-primary-line"

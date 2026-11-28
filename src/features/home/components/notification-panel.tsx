@@ -64,7 +64,7 @@ export function NotificationPanel({ onClose, onNavigate }: NotificationPanelProp
     <aside
       role="dialog"
       aria-label="알림"
-      className="fixed top-0 right-0 z-40 flex h-dvh w-[308px] max-w-full flex-col gap-5 overflow-y-auto border border-line bg-white px-7 pt-[25px] pb-10 shadow-panel"
+      className="fixed top-0 right-0 z-40 flex h-dvh w-[308px] max-w-full flex-col gap-5 overflow-y-auto border border-line bg-white px-5 pt-6 pb-10 shadow-panel"
     >
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
