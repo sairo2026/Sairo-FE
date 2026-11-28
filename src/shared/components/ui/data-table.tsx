@@ -56,6 +56,8 @@ export type DataTableProps<Row> = {
   isLoading?: boolean;
   errorMessage?: string;
   onRetry?: () => void;
+  /** 오류일 때 재시도 버튼 대신 표시할 작업. */
+  errorAction?: ReactNode;
   emptyMessage?: string;
   /** 주면 행 전체가 그 주소로 들어가는 눌림 영역이 되고 호버 배경과 오른쪽 화살표가 붙는다. */
   getRowHref?: (row: Row) => string | undefined;
@@ -92,6 +94,7 @@ export function DataTable<Row>({
   isLoading = false,
   errorMessage,
   onRetry,
+  errorAction,
   emptyMessage = "표시할 내용이 없습니다.",
   getRowHref,
   selection,
@@ -257,11 +260,12 @@ export function DataTable<Row>({
           {errorMessage ? (
             <div role="alert" className="flex flex-col items-center gap-3 px-4 py-12 text-center">
               <p className="text-body text-ink">{errorMessage}</p>
-              {onRetry ? (
-                <Button variant="outlined" size="sm" onClick={onRetry}>
-                  다시 시도
-                </Button>
-              ) : null}
+              {errorAction ??
+                (onRetry ? (
+                  <Button variant="outlined" size="sm" onClick={onRetry}>
+                    다시 시도
+                  </Button>
+                ) : null)}
             </div>
           ) : null}
           {!errorMessage && !isLoading && rows.length === 0 ? (

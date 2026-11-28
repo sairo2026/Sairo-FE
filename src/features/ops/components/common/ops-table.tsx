@@ -2,6 +2,7 @@
 
 import type { UseQueryResult } from "@tanstack/react-query";
 import { useState } from "react";
+import { ApiError } from "@/shared/api/api-error";
 import { DataTable } from "@/shared/components/ui/data-table";
 import type { DataTableColumn, PageSize } from "@/shared/components/ui/data-table";
 import { describeOpsError } from "../../model/ops-errors";
@@ -39,6 +40,8 @@ export function OpsTable<Row>({
   paging: ReturnType<typeof useOpsPaging>;
   emptyMessage?: string;
 }) {
+  const loginRequired =
+    query.isError && query.error instanceof ApiError && query.error.isSessionExpired;
   return (
     <DataTable
       caption={caption}
@@ -54,7 +57,17 @@ export function OpsTable<Row>({
       errorMessage={
         query.isError ? describeOpsError(query.error, "목록을 불러오지 못했습니다.") : undefined
       }
-      onRetry={() => void query.refetch()}
+      onRetry={loginRequired ? undefined : () => void query.refetch()}
+      errorAction={
+        loginRequired ? (
+          <a
+            href="/ops/login"
+            className="inline-flex h-9 items-center rounded-control border border-line px-4 text-body font-semibold text-ink hover:bg-surface"
+          >
+            운영자 로그인
+          </a>
+        ) : undefined
+      }
       emptyMessage={emptyMessage}
     />
   );
