@@ -6,6 +6,7 @@ import { ApiError } from "@/shared/api/api-error";
 import { DataTable } from "@/shared/components/ui/data-table";
 import type { DataTableColumn, PageSize } from "@/shared/components/ui/data-table";
 import { describeOpsError } from "../../model/ops-errors";
+import { OpsSessionLoginLink } from "./ops-query-failure";
 
 type PagedData<Row> = { items: Row[]; totalElements: number };
 
@@ -58,16 +59,7 @@ export function OpsTable<Row>({
         query.isError ? describeOpsError(query.error, "목록을 불러오지 못했습니다.") : undefined
       }
       onRetry={loginRequired ? undefined : () => void query.refetch()}
-      errorAction={
-        loginRequired ? (
-          <a
-            href="/ops/login"
-            className="inline-flex h-9 items-center rounded-control border border-line px-4 text-body font-semibold text-ink hover:bg-surface"
-          >
-            운영자 로그인
-          </a>
-        ) : undefined
-      }
+      errorAction={loginRequired ? <OpsSessionLoginLink /> : undefined}
       emptyMessage={emptyMessage}
     />
   );
