@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 import { settle } from "../support/app";
 
 const PHONE = "010-1234-5678";
@@ -56,7 +56,10 @@ export async function emailAndPhoneVerified(page: Page): Promise<void> {
 }
 
 export async function agreeAllTerms(page: Page): Promise<void> {
-  await page.getByLabel(/필수 약관 전체 동의/).check({ force: true });
+  const checkbox = page.getByRole("checkbox", { name: /필수 약관 전체 동의/ });
+  await expect(checkbox).toBeEnabled();
+  await checkbox.check();
+  await expect(checkbox).toBeChecked();
 }
 
 export async function openTermsPopup(page: Page): Promise<void> {
