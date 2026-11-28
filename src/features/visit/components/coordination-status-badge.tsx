@@ -1,6 +1,11 @@
 import { Badge } from "@/shared/components/ui/badge";
 import { cn } from "@/shared/lib/cn";
-import { statusLabel, statusTone } from "../model/labels";
+import {
+  COORDINATION_STATUS_GROUP,
+  isCoordinationStatus,
+  statusLabel,
+  statusTone,
+} from "../model/labels";
 
 const COMPACT = "h-8 min-w-0 px-3 text-caption";
 
@@ -17,7 +22,11 @@ export function CoordinationStatusBadge({
   className?: string;
 }) {
   return (
-    <Badge tone={statusTone(status)} className={cn(compact && COMPACT, className)}>
+    <Badge
+      tone={statusTone(status)}
+      statusGroup={isCoordinationStatus(status) ? COORDINATION_STATUS_GROUP[status] : undefined}
+      className={cn(compact && COMPACT, className)}
+    >
       {label ?? statusLabel(status)}
     </Badge>
   );

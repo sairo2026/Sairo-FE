@@ -3,7 +3,7 @@ import { act, cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { Badge, DDayTag, TradeTypeTag } from "./badge";
+import { Badge, DDayTag, ScheduleTag, TradeTypeTag } from "./badge";
 import { Card } from "./card";
 import { DataTable } from "./data-table";
 import type { DataTableColumn, PageSize, SortState } from "./data-table";
@@ -36,6 +36,13 @@ describe("Badge 계열", () => {
     const badge = screen.getByText(label);
     expect(badge.getAttribute("data-status-group")).toBe(group);
     expect(badge.className).toContain(`bg-status-${group}-bg`);
+  });
+
+  it("상태 코드를 지정한 타일은 표시 문구가 달라도 의미 그룹을 유지한다", () => {
+    render(<ScheduleTag tone="red" label="일부 확정" count={2} statusGroup="progress" />);
+    const tile = screen.getByText("일부 확정").parentElement;
+    expect(tile?.getAttribute("data-status-group")).toBe("progress");
+    expect(tile?.className).toContain("bg-status-progress-bg");
   });
 
   it("거래유형 태그를 표시한다", () => {
@@ -84,7 +91,9 @@ describe("Card와 PageHeader", () => {
     expect(screen.getByRole("heading", { level: 1, name: "매물 관리" })).toBeTruthy();
     expect(screen.getByText("설명").parentElement?.className).toContain("gap-4");
     expect(screen.getByText("설명").className).toContain("text-body");
-    expect(screen.getByRole("button", { name: "등록" }).parentElement?.className).toContain("h-9");
+    expect(screen.getByRole("button", { name: "등록" }).parentElement?.className).toContain(
+      "min-h-12",
+    );
     expect(screen.getByRole("button", { name: "등록" }).parentElement?.className).toContain(
       "gap-3",
     );

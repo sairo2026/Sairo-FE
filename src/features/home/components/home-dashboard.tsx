@@ -64,7 +64,7 @@ function StatCard({
           </svg>
         ) : null}
         <span
-          className={`flex items-center justify-between font-bold text-ink ${icon ? "text-h1" : "text-h2"}`}
+          className={`flex items-center justify-between font-bold text-ink ${icon ? "text-h1" : "text-h3"}`}
         >
           {title}
           <span aria-hidden="true" className="clickable-arrow text-ink-2">

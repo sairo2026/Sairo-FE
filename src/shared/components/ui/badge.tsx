@@ -43,7 +43,7 @@ const semanticStatusClass = {
   neutral: "bg-status-neutral-bg text-status-neutral-text",
 } as const;
 
-type SemanticStatus = keyof typeof semanticStatusClass;
+export type SemanticStatus = keyof typeof semanticStatusClass;
 
 /** 상태가 아닌 역할·거래유형 태그는 기존 색을 유지한다. */
 const STATUS_LABELS: Record<SemanticStatus, readonly string[]> = {
@@ -60,7 +60,15 @@ const STATUS_LABELS: Record<SemanticStatus, readonly string[]> = {
     "체험",
   ],
   success: ["확정 완료", "확정", "방문 완료", "체결", "인증 완료", "구독 중", "완료"],
-  warning: ["재조율 필요", "보완 요청", "만기 도래", "확인 필요", "미납 유예", "일부 지급"],
+  warning: [
+    "재조율 필요",
+    "보완 요청",
+    "만기 도래·확인 필요",
+    "만기 도래",
+    "확인 필요",
+    "미납 유예",
+    "일부 지급",
+  ],
   danger: ["재검증 실패", "반려", "미납 제한", "인증 중단", "무효"],
   neutral: [
     "미방문 종료",
@@ -90,11 +98,17 @@ function semanticStatus(label: string): SemanticStatus | null {
   return null;
 }
 
-export type BadgeProps = { tone: BadgeTone; children: ReactNode; className?: string };
+export type BadgeProps = {
+  tone: BadgeTone;
+  children: ReactNode;
+  className?: string;
+  statusGroup?: SemanticStatus;
+};
 
 /** 상태 표시 배지. 색만으로 뜻을 전하지 않도록 항상 글자를 함께 쓴다. */
-export function Badge({ tone, children, className }: BadgeProps) {
-  const status = typeof children === "string" ? semanticStatus(children.trim()) : null;
+export function Badge({ tone, children, className, statusGroup }: BadgeProps) {
+  const status =
+    statusGroup ?? (typeof children === "string" ? semanticStatus(children.trim()) : null);
   return (
     <span
       data-tone={tone}
@@ -154,14 +168,22 @@ export type ScheduleTagProps = {
   tone: BadgeTone;
   label: string;
   count: number;
+  statusGroup?: SemanticStatus;
   /** 링크 안에 놓아 눌러서 이동하는 타일일 때만 켠다. 호버·눌림에서 타일 색이 한 단계 진해진다. */
   isInteractive?: boolean;
   className?: string;
 };
 
 /** 홈의 조율 현황 칸. 상태 이름과 건수를 한 덩어리로 보여준다. 색만으로 뜻을 전하지 않도록 이름을 함께 쓴다. */
-export function ScheduleTag({ tone, label, count, isInteractive, className }: ScheduleTagProps) {
-  const status = semanticStatus(label);
+export function ScheduleTag({
+  tone,
+  label,
+  count,
+  statusGroup,
+  isInteractive,
+  className,
+}: ScheduleTagProps) {
+  const status = statusGroup ?? semanticStatus(label);
   return (
     <span
       data-tone={tone}

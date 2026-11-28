@@ -23,10 +23,10 @@ describe("버튼 규격", () => {
 });
 
 describe("폼 라벨 규격", () => {
-  it("라벨은 20 SemiBold이고 필수 별표는 Red2 색이며 스크린리더가 읽지 않는다", () => {
+  it("필드 라벨은 입력값보다 크지 않고 필수 별표는 스크린리더가 읽지 않는다", () => {
     render(<TextField label="이름" value="" onValueChange={() => {}} required />);
     const label = screen.getByText("이름").closest("label");
-    expect(label?.className).toContain("text-h2");
+    expect(label?.className).toContain("text-body");
     expect(label?.className).toContain("font-semibold");
     const star = label?.querySelector("span");
     expect(star?.className).toContain("text-required");
@@ -70,7 +70,7 @@ describe("폼 라벨 규격", () => {
       </>,
     );
     for (const label of container.querySelectorAll("label")) {
-      expect(label.className).toContain("text-h2");
+      expect(label.className).toContain("text-body");
       expect(label.parentElement?.className).toContain("gap-5");
     }
     expect(container.querySelectorAll(".text-required").length).toBe(3);
@@ -118,7 +118,7 @@ describe("선택 버튼과 태그 규격", () => {
     expect(tag?.className).toContain("w-[132px]");
   });
 
-  it("상태 태그 색 토큰은 디자인 값의 글자색을 쓴다", () => {
+  it("상태 태그는 다섯 의미 그룹의 디자인 토큰을 쓴다", () => {
     render(
       <>
         <Badge tone="amber">전달</Badge>
@@ -126,7 +126,7 @@ describe("선택 버튼과 태그 규격", () => {
       </>,
     );
     expect(screen.getByText("전달").className).toContain("text-tag-amber-ink");
-    expect(screen.getByText("확정").className).toContain("text-tag-teal-ink");
+    expect(screen.getByText("확정").className).toContain("text-status-success-text");
   });
 });
 
@@ -167,8 +167,8 @@ describe("모달과 사이드 메뉴 규격", () => {
         <SideNavItem href="/b" label="나" size="md" />
       </>,
     );
-    expect(screen.getByRole("link", { name: "가" }).className).toContain("text-h3");
-    expect(screen.getByRole("link", { name: "나" }).className).toContain("text-h2");
+    expect(screen.getByRole("link", { name: "가" }).className).toContain("lg:text-h2");
+    expect(screen.getByRole("link", { name: "나" }).className).toContain("lg:text-h3");
   });
 
   it("사무소 레이아웃은 사이드바 폭 220을 쓰고 홈 본문은 흰 바탕을 쓴다", () => {
@@ -196,6 +196,6 @@ describe("모달과 사이드 메뉴 규격", () => {
         <p>운영 본문</p>
       </OpsLayout>,
     );
-    expect(screen.getByRole("link", { name: "운영 홈" }).className).toContain("text-h2");
+    expect(screen.getByRole("link", { name: "운영 홈" }).className).toContain("lg:text-h3");
   });
 });
