@@ -96,7 +96,7 @@ export function LandingPage({ pricing, footer }: LandingPageProps) {
             <BrandLogo className="w-24 sm:w-28" />
           </Link>
           <nav aria-label="첫 화면 메뉴" className="hidden md:block">
-            <ul className="flex items-center gap-7 text-caption font-semibold text-ink-2">
+            <ul className="flex items-center gap-3 text-caption font-semibold text-ink-2">
               {LANDING_SECTIONS.map((section) => (
                 <li key={section.id}>
                   <a
