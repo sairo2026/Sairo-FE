@@ -22,7 +22,7 @@ export function Card({
       {...rest}
       className={cn(
         "bg-white",
-        tone === "default" && "rounded-card border border-line px-8 py-7",
+        tone === "default" && "rounded-card border border-line px-8 py-8",
         tone === "flat" && "rounded-card-flat border border-line px-6 py-5",
         tone === "elevated" &&
           cn(

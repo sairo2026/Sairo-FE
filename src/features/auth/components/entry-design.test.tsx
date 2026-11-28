@@ -87,7 +87,7 @@ describe("가입 카드 규격", () => {
     expect(card?.className).toContain("shadow-auth");
     expect(card?.className).toContain("sm:px-10");
     expect(card?.className).toContain("sm:py-12");
-    expect(screen.getByText("본문").parentElement?.className).toContain("sm:mt-11");
+    expect(screen.getByText("본문").parentElement?.className).toContain("sm:mt-12");
   });
 
   it("form 카드는 로고 없이 제목만 두고 가입 카드 그림자를 쓴다", () => {
@@ -100,6 +100,21 @@ describe("가입 카드 규격", () => {
     expect(card?.querySelector("img")).toBeNull();
     expect(card?.className).toContain("shadow-modal");
     expect(card?.className).not.toContain("shadow-auth");
+  });
+
+  it("일반 설명과 입력 영역은 48px, 비밀번호 찾기는 화면별 기준 56px을 쓴다", () => {
+    const { rerender } = render(
+      <AuthFrame title="안내" description="설명" variant="form">
+        <p>입력 영역</p>
+      </AuthFrame>,
+    );
+    expect(screen.getByText("입력 영역").parentElement?.className).toContain("mt-12");
+    rerender(
+      <AuthFrame title="안내" description="설명" variant="form" contentGap="passwordRecovery">
+        <p>입력 영역</p>
+      </AuthFrame>,
+    );
+    expect(screen.getByText("입력 영역").parentElement?.className).toContain("mt-14");
   });
 
   it("login 카드는 로고와 한 줄 소개를 두고 폭 624를 쓴다", () => {

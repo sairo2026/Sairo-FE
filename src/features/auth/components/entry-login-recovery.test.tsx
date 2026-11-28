@@ -45,7 +45,7 @@ describe("진입 화면", () => {
   it("로그인과 가입의 제목·설명·이메일 동작을 구분하고 카카오는 실제 공통 시작 경로를 쓴다", () => {
     const { unmount } = render(<AuthEntry mode="login" />);
     expect(screen.getByRole("heading", { name: "로그인" })).not.toBeNull();
-    expect(screen.getByText("사이로 계정으로 로그인해 업무를 이어가세요.")).not.toBeNull();
+    expect(screen.getByText("사이로 계정으로 로그인해 업무를 이어갈 수 있습니다.")).not.toBeNull();
     expect(screen.getByRole("link", { name: "이메일로 로그인하기" }).getAttribute("href")).toBe(
       "/login/email",
     );
@@ -53,7 +53,7 @@ describe("진입 화면", () => {
 
     render(<AuthEntry mode="signup" />);
     expect(screen.getByRole("heading", { name: "회원가입" })).not.toBeNull();
-    expect(screen.getByText("계정을 만들고 부동산 업무 관리를 시작하세요.")).not.toBeNull();
+    expect(screen.getByText("계정을 만들고 부동산 업무 관리를 시작할 수 있습니다.")).not.toBeNull();
     expect(screen.getByRole("link", { name: "이메일로 회원가입하기" }).getAttribute("href")).toBe(
       "/signup/email",
     );

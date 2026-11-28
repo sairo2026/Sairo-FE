@@ -147,7 +147,7 @@ export function CustomerListScreen() {
         <div className="min-w-[260px] max-w-[856px] flex-1">
           <SearchField
             label="고객 검색"
-            placeholder="고객 이름이나 연락처로 검색하세요."
+            placeholder="고객 이름이나 연락처를 입력해 주세요."
             value={draftKeyword}
             onValueChange={setDraftKeyword}
             onSearch={() => {

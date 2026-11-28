@@ -54,7 +54,7 @@ export function PasswordResetRequestForm({
   }
 
   return (
-    <AuthFrame title={title} description={description} variant="form">
+    <AuthFrame title={title} description={description} variant="form" contentGap="passwordRecovery">
       <form
         noValidate
         className="flex flex-col gap-8"

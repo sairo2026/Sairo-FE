@@ -321,7 +321,7 @@ export function PropertyListScreen() {
         <div className="min-w-[260px] max-w-[856px] flex-1">
           <SearchField
             label="매물 검색"
-            placeholder="매물명, 주소, 연결 고객명으로 검색하세요."
+            placeholder="매물명, 주소 또는 연결 고객명을 입력해 주세요."
             value={draft.keyword}
             onValueChange={(value) => update("keyword", value)}
             onSearch={search}
