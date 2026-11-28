@@ -8,18 +8,12 @@ export type PageHeaderProps = {
   breadcrumb?: readonly BreadcrumbItem[];
 };
 
-const LONG_DESCRIPTION_LENGTH = 80;
-
 export function PageHeader({ title, description, actions, breadcrumb }: PageHeaderProps) {
-  const isLong = (description?.length ?? 0) > LONG_DESCRIPTION_LENGTH;
   const header = (
-    <header className="flex flex-wrap items-end justify-between gap-4 pb-0">
-      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+    <header className="flex flex-wrap items-start justify-between gap-4 pb-0">
+      <div className="flex min-w-0 flex-col gap-4">
         <h1 className="text-h1 font-bold text-ink">{title}</h1>
-        {description && !isLong ? <p className="text-caption text-ink-2">{description}</p> : null}
-        {description && isLong ? (
-          <p className="basis-full text-caption text-ink-2">{description}</p>
-        ) : null}
+        {description ? <p className="text-body text-ink-2">{description}</p> : null}
       </div>
       {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
     </header>

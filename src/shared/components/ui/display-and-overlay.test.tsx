@@ -67,6 +67,8 @@ describe("Card와 PageHeader", () => {
       </>,
     );
     expect(screen.getByRole("heading", { level: 1, name: "매물 관리" })).toBeTruthy();
+    expect(screen.getByText("설명").parentElement?.className).toContain("gap-4");
+    expect(screen.getByText("설명").className).toContain("text-body");
     expect(screen.getByRole("heading", { level: 2, name: "요약" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "등록" })).toBeTruthy();
   });
@@ -270,6 +272,7 @@ describe("Toast", () => {
     );
     await userEvent.click(screen.getByRole("button", { name: "저장" }));
     expect(screen.getByRole("status").textContent).toContain("저장했습니다.");
+    expect(screen.getByRole("status").className).toContain("bg-primary text-white");
     await userEvent.click(screen.getByRole("button", { name: "알림 닫기" }));
     expect(screen.queryByRole("status")).toBeNull();
     await userEvent.click(screen.getByRole("button", { name: "저장" }));
