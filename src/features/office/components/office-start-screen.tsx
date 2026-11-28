@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useState } from "react";
 import { useOfficeAccess } from "@/shared/session/office-access-context";
 import { Button } from "@/shared/components/ui/button";
@@ -9,16 +10,18 @@ import { ButtonRow, FlowFrame, TextLink } from "@/shared/components/feedback/pag
 
 type Choice = "create" | "join";
 
-const CHOICES: Array<{ key: Choice; title: string; description: string }> = [
+const CHOICES: Array<{ key: Choice; title: string; description: string; image: string }> = [
   {
     key: "create",
     title: "새 사무소 생성",
     description: "새로운 사무소를 생성하고, 구성원을 초대할 수 있습니다.",
+    image: "/office-start/create.png",
   },
   {
     key: "join",
     title: "기존 사무소 참여",
     description: "기존에 등록된 사무소에 참여 신청을 보냅니다.",
+    image: "/office-start/join.png",
   },
 ];
 
@@ -85,9 +88,17 @@ export function OfficeStartScreen() {
                     isSelected={selected}
                     disabled={isBlocked}
                     onClick={() => setChoice(item.key)}
-                    className="flex min-h-[144px] w-full flex-col items-center justify-center gap-2 rounded-card-flat px-4 py-5 text-center md:h-[312px] md:w-[260px] md:justify-between md:gap-0 md:pt-9 md:pb-9"
+                    className="flex min-h-[144px] w-full flex-col items-center justify-center gap-2 rounded-card-flat px-4 py-5 text-center md:h-[312px] md:w-[260px] md:justify-between md:gap-0 md:pt-9 md:pb-2"
                   >
                     <span className="text-h3 font-semibold">{item.title}</span>
+                    <Image
+                      src={item.image}
+                      alt=""
+                      aria-hidden="true"
+                      width={160}
+                      height={160}
+                      className="h-16 w-16 object-contain md:h-40 md:w-40"
+                    />
                     <span className="text-body font-medium md:w-[165px]">{item.description}</span>
                   </SelectableCard>
                 );

@@ -198,6 +198,8 @@ export function ReconsentNotice() {
           <Link href={AUTH_ROUTES.support} className="clickable-link">
             지원 문의
           </Link>
+        </div>
+        <div className="mt-4 flex justify-center text-caption text-ink-2">
           <button
             type="button"
             disabled={logoutMutation.isPending}

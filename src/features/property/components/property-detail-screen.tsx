@@ -412,7 +412,7 @@ function DetailBody({ property }: { property: PropertyDetailResponse }) {
             items={[{ label: "매물 관리", href: "/properties" }, { label: "매물 상세" }]}
           />
           <h1 className="text-h1 font-bold text-ink">{property.name}</h1>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="mt-3 flex flex-wrap items-center gap-2">
             <Badge tone={toneOf(STAGE_TONE, property.registrationStage)}>
               {labelOf(STAGE_LABEL, property.registrationStage)}
             </Badge>

@@ -309,7 +309,11 @@ export function SignupEmailFlow({ token }: { token?: string }) {
 
   return (
     <>
-      <AuthFrame variant="form" title={step === "info" ? "기본 가입 정보 입력" : "비밀번호 설정"}>
+      <AuthFrame
+        variant="form"
+        title={step === "info" ? "기본 가입 정보 입력" : "비밀번호 설정"}
+        contentGap={tokenState === "failed" ? "compact" : undefined}
+      >
         {tokenState === "failed" ? (
           <div className="mb-4">
             <FormAlert>{tokenMessage}</FormAlert>

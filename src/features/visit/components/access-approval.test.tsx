@@ -41,6 +41,18 @@ async function openForm(user: ReturnType<typeof userEvent.setup>) {
 }
 
 describe("출입승인 화면", () => {
+  it("간단한 안내에서 승인자 개인정보 고지 전문을 펼쳐 확인할 수 있다", async () => {
+    const user = userEvent.setup();
+    renderOffice(<AccessApprovalScreen propertyId={501} />, { role: "OWNER" });
+    expect(await screen.findByText(/등록하기 전에 승인할 분에게/)).not.toBeNull();
+    const summary = screen.getByText("승인자 개인정보 보관 안내 자세히 보기");
+    const details = summary.closest("details");
+    expect(details?.open).toBe(false);
+    await user.click(summary);
+    expect(details?.open).toBe(true);
+    expect(details?.textContent).toContain("등록한 정보는 출입승인이 끝난 뒤");
+  });
+
   it("로딩 뒤 출입승인 이력과 활성 링크 없음 상태를 보여준다", async () => {
     renderOffice(<AccessApprovalScreen propertyId={501} />, { role: "OWNER" });
     expect(screen.getByText("매물 정보를 불러오는 중입니다.")).not.toBeNull();

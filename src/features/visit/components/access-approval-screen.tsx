@@ -434,12 +434,21 @@ function ApprovalBody({ propertyId, propertyName }: { propertyId: number; proper
         <FormNotice>승인자 링크는 승인된 대표와 소속공인중개사만 발급할 수 있습니다.</FormNotice>
       ) : (
         <FormNotice>
-          승인자 조건은 승인자가 링크로 직접 등록합니다. 링크 원문은 발급 응답에서 한 번만 보입니다.
+          승인자 조건은 승인자가 링크로 직접 등록합니다. 링크는 발급할 때 한 번만 확인할 수
+          있습니다.
         </FormNotice>
       )}
-      <FormNotice>
-        {ACCESS_APPROVAL_NOTICE_COPY.registration} {ACCESS_APPROVAL_NOTICE_COPY.duty}
-      </FormNotice>
+      <div className="flex flex-col gap-2 text-caption text-ink-2">
+        <p>{ACCESS_APPROVAL_NOTICE_COPY.registrationSummary}</p>
+        <details>
+          <summary className="w-fit cursor-pointer rounded-sm font-semibold text-primary clickable-link focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+            승인자 개인정보 보관 안내 자세히 보기
+          </summary>
+          <p className="mt-3">
+            {ACCESS_APPROVAL_NOTICE_COPY.registrationDetails} {ACCESS_APPROVAL_NOTICE_COPY.duty}
+          </p>
+        </details>
+      </div>
       <Card>
         <QueryGate query={approvals} loadingLabel="출입승인 이력을 불러오는 중입니다.">
           {(data) =>

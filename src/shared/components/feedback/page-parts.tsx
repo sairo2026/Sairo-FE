@@ -36,12 +36,20 @@ export function StatusBadge({ tone, label }: { tone: BadgeTone; label: string })
   return <Badge tone={tone}>{label}</Badge>;
 }
 
-export function DetailList({ items }: { items: Array<{ label: string; value: ReactNode }> }) {
+export function DetailList({
+  items,
+  alignLabels = false,
+}: {
+  items: Array<{ label: string; value: ReactNode }>;
+  alignLabels?: boolean;
+}) {
   return (
     <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-[160px_1fr]">
       {items.map((item) => (
         <div key={item.label} className="contents">
-          <dt className="text-caption font-semibold text-ink-2">{item.label}</dt>
+          <dt className={cn("text-caption font-semibold text-ink-2", alignLabels && "self-center")}>
+            {item.label}
+          </dt>
           <dd className="text-body text-ink">{item.value}</dd>
         </div>
       ))}
