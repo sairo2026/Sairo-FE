@@ -240,7 +240,7 @@ export function RequestsSection({
   return (
     <section id="requests" className="flex flex-col gap-3" aria-labelledby="requests-title">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 id="requests-title" className="text-h2 font-semibold text-ink">
+        <h2 id="requests-title" className="text-h3 font-semibold text-ink">
           방문 신청
         </h2>
         <Link
@@ -420,7 +420,7 @@ export function ChangeSection({ detail }: { detail: Detail }) {
   if (items.length === 0) return null;
   return (
     <section className="flex flex-col gap-3" aria-labelledby="change-title">
-      <h2 id="change-title" className="text-h2 font-semibold text-ink">
+      <h2 id="change-title" className="text-h3 font-semibold text-ink">
         확정 방문 변경과 재승인
       </h2>
       <p className="text-caption text-ink-2">

@@ -942,20 +942,20 @@ export function CustomerLinkScreen({ token }: { token: string | undefined }) {
   const tab = pickedTab ?? (isConfirmed || isArranging ? "confirmed" : "times");
   return (
     <div className="flex flex-col gap-4">
-      <header className="flex flex-col gap-2">
-        <h1 className="text-h2 font-bold text-ink">
+      <header className="flex flex-col gap-4">
+        <h1 className="text-h1 font-bold text-ink">
           {isConfirmed
             ? "방문 일정이 확정되었습니다"
             : isArranging
               ? "방문 일정을 조율하고 있습니다"
-              : "방문 가능한 시간을 알려주세요"}
+              : "방문 가능한 시간을 알려 주세요"}
         </h1>
-        <p className="text-caption text-ink-2">
+        <p className="text-body text-ink-2">
           {isConfirmed
-            ? "확정 일정 탭에서 방문 순서와 시각을 확인해 주세요. 제출한 가능한 시간은 가능한 시간 탭에서 볼 수 있으며 더 이상 고칠 수 없습니다."
+            ? "확정 일정과 제출한 가능 시간은 각 탭에서 확인할 수 있습니다. 시간 변경은 사무소에 문의해 주세요."
             : isArranging
-              ? "담당자가 매물 주인의 승인을 받아 일정을 확정하는 중입니다. 확정된 방문은 확정 일정 탭에서 볼 수 있고, 시간을 고치려면 사무소에 문의해 주세요."
-              : "보러 갈 수 있는 시간을 모두 골라 주세요. 담당자가 동선을 짜서 다시 안내해 드립니다."}
+              ? "승인 후 방문 일정이 확정됩니다. 시간 변경은 사무소에 문의해 주세요."
+              : "방문할 수 있는 시간을 모두 골라 주세요. 담당자가 일정을 확인해 안내합니다."}
         </p>
       </header>
       <section aria-label="안내 사무소" className={cn(SURFACE_CARD, "flex flex-col gap-3")}>

@@ -74,7 +74,7 @@ export const PRIVACY_COPY = {
   typeRequired: "요청 유형을 선택해 주세요.",
   contentLabel: "요청 내용",
   contentRequired: "요청 내용을 입력해 주세요.",
-  contentHint: "주민등록번호, 전체 계좌번호, 카드번호는 입력하지 마세요.",
+  contentHint: "주민등록번호, 전체 계좌번호, 카드번호는 입력하지 말아 주세요.",
   scopeLabel: "요청 범위 (선택)",
   scopeHint: "열람이나 삭제를 원하는 개인정보와 처리 범위를 적어 주세요.",
   submit: "요청 접수",

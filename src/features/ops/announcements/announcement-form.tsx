@@ -11,10 +11,8 @@ import { FailureNotice } from "../content-common/notice-banner";
 import { SeoulDateTimeInput } from "../content-common/seoul-date-time-input";
 import {
   AUDIENCE_OPTIONS,
-  CONTENT_MAX,
   IMPORTANCE_OPTIONS,
   SUBSCRIPTION_STATUS_OPTIONS,
-  TITLE_MAX,
   toAnnouncementRequest,
   validateAnnouncementForm,
 } from "./announcement-model";
@@ -63,14 +61,12 @@ export function AnnouncementFormView({
         value={form.title}
         error={errors.title}
         onValueChange={(title) => patch({ title })}
-        hint={`${form.title.trim().length}/${TITLE_MAX}자`}
       />
       <TextAreaField
         label="본문"
         value={form.content}
         error={errors.content}
         onValueChange={(content) => patch({ content })}
-        hint={`${form.content.length}/${CONTENT_MAX}자`}
       />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <SelectField

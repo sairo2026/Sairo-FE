@@ -159,7 +159,7 @@ export function PromotionPeriodsScreen() {
                   <Card>
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
-                        <h2 className="text-h2 font-semibold text-ink">{item.campaignName}</h2>
+                        <h2 className="text-h3 font-semibold text-ink">{item.campaignName}</h2>
                         <p className="text-body text-ink-2">
                           {formatSeoulDate(item.periodStart)} ~ {formatSeoulDate(item.periodEnd)}
                         </p>

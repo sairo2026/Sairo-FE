@@ -266,7 +266,7 @@ export function ContactEmailVerify({ token }: { token: string | null }) {
       <AuthFrame title="이메일을 바꿨습니다" width="sm">
         <div className="flex flex-col gap-4">
           <FormNotice>
-            이전 이메일로 변경 알림을 보냈습니다. 다음 로그인부터 새 이메일을 쓰세요.
+            이전 이메일로 변경 알림을 보냈습니다. 다음 로그인부터 새 이메일을 사용해 주세요.
           </FormNotice>
           <Link
             href="/settings/contact"

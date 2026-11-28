@@ -119,6 +119,7 @@ function ContactCard({ me }: { me: MeResponse }) {
     <Card title={COPY.contactTitle}>
       <div className="flex flex-col gap-4">
         <DetailList
+          alignLabels
           items={[
             {
               label: COPY.email,

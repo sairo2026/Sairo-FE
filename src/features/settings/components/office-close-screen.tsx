@@ -30,26 +30,32 @@ function Summary() {
   // 상태를 주지 않으면 백엔드가 승인 구성원만 돌려주므로 전체 건수가 승인 구성원 수다(첫 페이지만 세면 25명에서 잘린다).
   const approved = members.data?.totalElements;
   return (
-    <DetailList
-      items={[
-        {
-          label: COPY.closeMembers,
-          value: members.isError
-            ? "불러오지 못했습니다"
-            : approved === undefined
-              ? "불러오는 중"
-              : `${approved}명`,
-        },
-        {
-          label: COPY.closeSubscription,
-          value: subscription.isError
-            ? "불러오지 못했습니다"
-            : subscription.data
-              ? (SUBSCRIPTION_LABEL[subscription.data.status] ?? subscription.data.status)
-              : "불러오는 중",
-        },
-      ]}
-    />
+    <div className="flex flex-col gap-10 text-left">
+      <DetailList
+        items={[
+          {
+            label: COPY.closeMembers,
+            value: members.isError
+              ? "불러오지 못했습니다"
+              : approved === undefined
+                ? "불러오는 중"
+                : `${approved}명`,
+          },
+        ]}
+      />
+      <DetailList
+        items={[
+          {
+            label: COPY.closeSubscription,
+            value: subscription.isError
+              ? "불러오지 못했습니다"
+              : subscription.data
+                ? (SUBSCRIPTION_LABEL[subscription.data.status] ?? subscription.data.status)
+                : "불러오는 중",
+          },
+        ]}
+      />
+    </div>
   );
 }
 

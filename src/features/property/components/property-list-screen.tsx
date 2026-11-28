@@ -313,7 +313,7 @@ export function PropertyListScreen() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title="매물 관리" description="등록된 매물을 관리할 수 있습니다." />
+      <PageHeader title="매물 관리" />
       <div className="flex flex-wrap items-center gap-6">
         <CreateLink href="/properties/new" isDisabled={isReadOnly}>
           매물 등록
@@ -321,7 +321,7 @@ export function PropertyListScreen() {
         <div className="min-w-[260px] max-w-[856px] flex-1">
           <SearchField
             label="매물 검색"
-            placeholder="매물명, 주소, 연결 고객명으로 검색하세요."
+            placeholder="매물명, 주소 또는 연결 고객명을 입력해 주세요."
             value={draft.keyword}
             onValueChange={(value) => update("keyword", value)}
             onSearch={search}
@@ -522,8 +522,8 @@ export function PropertyListScreen() {
           applied.archived
             ? "보관된 매물이 없습니다."
             : hasActiveFilter(applied)
-              ? "조건에 맞는 매물이 없습니다. 검색어나 조건을 바꾸거나 초기화해 보세요."
-              : "등록된 매물이 없습니다. 매물 등록 버튼으로 첫 매물을 등록해 보세요."
+              ? "조건에 맞는 매물이 없습니다. 검색어나 조건을 바꾸거나 초기화해 주세요."
+              : "등록된 매물이 없습니다. 매물 등록 버튼으로 첫 매물을 등록해 주세요."
         }
       />
       {isArchiveOpen ? (

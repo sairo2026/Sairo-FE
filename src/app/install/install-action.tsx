@@ -86,12 +86,12 @@ export function InstallAction() {
               await event.prompt();
               const choice = await event.userChoice;
               if (choice.outcome === "dismissed") {
-                showMessage("나중에 주소창의 설치 아이콘으로 설치할 수 있어요.");
+                showMessage("나중에 주소창의 설치 아이콘으로 설치할 수 있습니다.");
               } else {
                 if (!installedRef.current) {
                   setAccepted(true);
                   showMessage(
-                    "설치가 진행 중이에요. 완료되지 않으면 브라우저 메뉴를 확인해 주세요.",
+                    "설치가 진행 중입니다. 완료되지 않으면 브라우저 메뉴를 확인해 주세요.",
                   );
                   acceptedTimeout.current = setTimeout(() => {
                     setAccepted(false);
@@ -102,7 +102,7 @@ export function InstallAction() {
                 }
               }
             } catch {
-              showMessage("설치 창을 열지 못했어요. Chrome·Edge 메뉴의 앱 설치를 선택해 주세요.");
+              showMessage("설치 창을 열지 못했습니다. Chrome·Edge 메뉴의 앱 설치를 선택해 주세요.");
             } finally {
               setInstalling(false);
             }
@@ -118,7 +118,7 @@ export function InstallAction() {
         className={message || installed ? "mt-3 break-keep text-body text-ink-2" : "sr-only"}
       >
         <span key={messageSequence}>
-          {installed ? "설치된 사이로 앱에서 이용할 수 있어요." : message}
+          {installed ? "설치된 사이로 앱에서 이용할 수 있습니다." : message}
         </span>
       </p>
     </>

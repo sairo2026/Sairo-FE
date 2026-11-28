@@ -42,6 +42,18 @@
   --color-required: var(--required);
   --color-brand-border: #8586ee;
 
+  /* 디자인시스템 Status의 다섯 의미 그룹. 표시 문자열과 별개로 상태의 뜻을 유지한다. */
+  --color-status-progress-bg: #eeeefb;
+  --color-status-progress-text: #3335a6;
+  --color-status-success-bg: #ecfdf3;
+  --color-status-success-text: #15803d;
+  --color-status-warning-bg: #fff7e6;
+  --color-status-warning-text: #b45309;
+  --color-status-danger-bg: #fef2f2;
+  --color-status-danger-text: #c81e1e;
+  --color-status-neutral-bg: #f3f4f6;
+  --color-status-neutral-text: #3d4959;
+
   /* 상태 태그 채움색과 글자색 */
   --color-tag-blue: #cee3ff;
   --color-tag-blue-ink: #002c89;
@@ -92,24 +104,16 @@
   --text-display--line-height: 52px;
   --text-h1: 28px;
   --text-h1--line-height: 36px;
-  --text-h2: 20px;
-  --text-h2--line-height: 28px;
-  --text-h3: 24px;
-  --text-h3--line-height: 36px;
+  --text-h2: 24px;
+  --text-h2--line-height: 36px;
+  --text-h3: 20px;
+  --text-h3--line-height: 28px;
   --text-h4: 20px;
   --text-h4--line-height: 28px;
   --text-body: 16px;
   --text-body--line-height: 24px;
   --text-caption: 14px;
   --text-caption--line-height: 20px;
-}
-
-/* 업무 화면(사무소 레이아웃) 안에서만 큰 제목 두 단계를 줄인다. 공개 화면은 위 기본값을 그대로 쓴다. */
-.work-density {
-  --text-h1: 24px;
-  --text-h1--line-height: 32px;
-  --text-h3: 20px;
-  --text-h3--line-height: 28px;
 }
 
 body {
@@ -398,6 +402,11 @@ a:focus-visible > .clickable-tile {
 .clickable-tile[data-tone="crimson"] {
   --tile-hover: #9d4747;
   --tile-active: #924242;
+}
+/* 상태 색의 글자 대비를 유지한다. 기존 tone별 진한 호버 배경은 상태 칩에 적용하지 않는다. */
+.clickable-tile[data-status-group] {
+  --tile-hover: var(--surface);
+  --tile-active: var(--surface);
 }
 a:hover > .clickable-tile,
 a:focus-visible > .clickable-tile {

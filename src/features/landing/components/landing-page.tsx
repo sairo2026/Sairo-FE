@@ -177,7 +177,7 @@ export function LandingPage({ pricing, footer }: LandingPageProps) {
                   key={item.title}
                   className="rounded-card-flat border border-line bg-white px-6 py-6"
                 >
-                  <h3 className="text-h2 font-semibold text-ink">{item.title}</h3>
+                  <h3 className="text-h3 font-semibold text-ink">{item.title}</h3>
                   <p className="mt-3 text-body text-ink-2">{item.body}</p>
                 </li>
               ))}
@@ -201,7 +201,7 @@ export function LandingPage({ pricing, footer }: LandingPageProps) {
                   key={item.title}
                   className="flex flex-col rounded-card-flat border border-line bg-white px-6 py-6"
                 >
-                  <h3 className="text-h2 font-semibold text-ink">{item.title}</h3>
+                  <h3 className="text-h3 font-semibold text-ink">{item.title}</h3>
                   <p className="mt-3 text-body text-ink-2">{item.body}</p>
                   <ul className="mt-4 flex flex-col gap-2 border-t border-line pt-4">
                     {item.points.map((point) => (
@@ -235,7 +235,7 @@ export function LandingPage({ pricing, footer }: LandingPageProps) {
                   >
                     {index + 1}
                   </span>
-                  <h3 className="mt-4 break-keep text-h2 font-semibold text-ink">{item.title}</h3>
+                  <h3 className="mt-4 break-keep text-h3 font-semibold text-ink">{item.title}</h3>
                   <p className="mt-3 text-body text-ink-2">{item.body}</p>
                 </li>
               ))}

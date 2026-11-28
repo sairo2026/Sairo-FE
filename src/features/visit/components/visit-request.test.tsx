@@ -90,7 +90,7 @@ describe("방문 신청", () => {
       ),
     ).not.toBeNull();
     await openForm(user);
-    expect(screen.getByText("고객의 이름과 연락처는 넣지 마세요.")).not.toBeNull();
+    expect(screen.getByText("고객의 이름과 연락처는 넣지 말아 주세요.")).not.toBeNull();
     await pickSlot(user);
     await user.click(screen.getByRole("button", { name: "방문 신청 제출" }));
     expect(await screen.findByText(/방문 신청을 제출했습니다/)).not.toBeNull();

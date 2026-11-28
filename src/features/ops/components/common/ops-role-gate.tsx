@@ -8,7 +8,7 @@ import { useHasOpsRole } from "../../model/ops-session";
 export function OpsForbiddenNotice({ roles }: { roles: readonly OpsRole[] }) {
   return (
     <section role="alert" className="rounded-card-flat border border-line bg-white px-6 py-10">
-      <h2 className="text-h2 font-semibold text-ink">이 화면을 볼 수 있는 운영 역할이 아닙니다</h2>
+      <h2 className="text-h3 font-semibold text-ink">이 화면을 볼 수 있는 운영 역할이 아닙니다</h2>
       {roles.length > 0 ? (
         <p className="mt-2 text-body text-ink-2">
           필요한 역할: {roles.map((role) => OPS_ROLE_LABELS[role]).join(", ")}

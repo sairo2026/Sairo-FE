@@ -23,7 +23,6 @@ import {
   NO_OVERWRITE_TEXT,
   POLICY_STATUS,
   PRICING_NOTICE_TEXT,
-  SUMMARY_MAX,
   VERSION_MAX,
   describePolicyPublishError,
   toPolicyRequest,
@@ -91,7 +90,6 @@ function CreateCard({ onCreated }: { onCreated: (message: string) => void }) {
           rows={3}
           value={form.changeSummary}
           error={errors.changeSummary}
-          hint={`${form.changeSummary.length}/${SUMMARY_MAX}자`}
           onValueChange={(changeSummary) => patch({ changeSummary })}
         />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

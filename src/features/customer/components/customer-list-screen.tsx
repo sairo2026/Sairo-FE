@@ -139,7 +139,7 @@ export function CustomerListScreen() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title="고객 관리" description="고객을 관리할 수 있습니다." />
+      <PageHeader title="고객 관리" />
       <div className="flex flex-wrap items-center gap-4">
         <CreateLink href="/customers/new" isDisabled={isReadOnly}>
           고객 등록
@@ -147,7 +147,7 @@ export function CustomerListScreen() {
         <div className="min-w-[260px] max-w-[856px] flex-1">
           <SearchField
             label="고객 검색"
-            placeholder="고객 이름이나 연락처로 검색하세요."
+            placeholder="고객 이름이나 연락처를 입력해 주세요."
             value={draftKeyword}
             onValueChange={setDraftKeyword}
             onSearch={() => {
@@ -235,8 +235,8 @@ export function CustomerListScreen() {
           archived
             ? "보관된 고객이 없습니다."
             : keyword.trim() !== "" || roleFilter !== ""
-              ? "조건에 맞는 고객이 없습니다. 검색어나 조건을 바꿔 보세요."
-              : "등록된 고객이 없습니다. 고객 등록 버튼으로 첫 고객을 등록해 보세요."
+              ? "조건에 맞는 고객이 없습니다. 검색어나 조건을 바꿔 주세요."
+              : "등록된 고객이 없습니다. 고객 등록 버튼으로 첫 고객을 등록해 주세요."
         }
       />
     </div>

@@ -182,7 +182,7 @@ export function RequestForm({
         label="요청사항 (선택)"
         value={values.note}
         maxLength={NOTE_MAX_LENGTH + 50}
-        hint="고객의 이름과 연락처는 넣지 마세요."
+        hint="고객의 이름과 연락처는 넣지 말아 주세요."
         onValueChange={(value) => set("note", value)}
         error={errors.note}
       />

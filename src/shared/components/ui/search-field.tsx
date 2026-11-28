@@ -28,7 +28,7 @@ export function SearchField({
     <form
       role="search"
       onSubmit={handleSubmit}
-      className="flex h-[58px] items-center gap-4 rounded-control border border-line bg-surface px-5 focus-within:border-primary focus-within:bg-white"
+      className="flex h-[58px] items-center gap-4 rounded-control border border-control bg-white px-5 focus-within:border-primary"
     >
       <label htmlFor={id} className="sr-only">
         {label}

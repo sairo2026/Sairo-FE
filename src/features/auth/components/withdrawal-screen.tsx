@@ -35,7 +35,7 @@ function RetainedItemsTable({ items }: { items: WithdrawalPreviewResponse["retai
   if (items.length === 0) return null;
   return (
     <section aria-label={WITHDRAWAL_COPY.retainedTitle} className="flex flex-col gap-3">
-      <h2 className="text-h2 font-semibold text-ink">{WITHDRAWAL_COPY.retainedTitle}</h2>
+      <h2 className="text-h3 font-semibold text-ink">{WITHDRAWAL_COPY.retainedTitle}</h2>
       <p className="text-caption text-ink-2">{WITHDRAWAL_COPY.retainedIntro}</p>
       <TableScroll
         label={WITHDRAWAL_COPY.retainedTitle}

@@ -52,7 +52,7 @@ export function CardGuideScreen() {
     : null;
   return (
     <FlowFrame
-      title="카드를 등록해 두세요"
+      title="카드 등록"
       description={date ? COPY.regTopWithDate(date) : COPY.regTop}
       width="md"
     >

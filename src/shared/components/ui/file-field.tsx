@@ -43,8 +43,8 @@ export function FileField({
       </div>
       <div
         className={cn(
-          "flex h-[58px] items-center gap-4 rounded-control border bg-surface px-5",
-          error ? "border-danger" : "border-line",
+          "flex h-[58px] items-center gap-4 rounded-control border bg-white px-5",
+          error ? "border-danger" : "border-control",
         )}
       >
         <input

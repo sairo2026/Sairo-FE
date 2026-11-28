@@ -72,12 +72,12 @@ function ExecSummaryCard({ summary }: { summary: NonNullable<OpsHomeResponse["ex
         {counts.map(([label, value]) => (
           <div key={label}>
             <dt className="text-caption font-semibold text-ink-2">{label}</dt>
-            <dd className="mt-1 text-h2 font-bold text-ink">{formatCount(value)}곳</dd>
+            <dd className="mt-1 text-h3 font-bold text-ink">{formatCount(value)}곳</dd>
           </div>
         ))}
         <div>
           <dt className="text-caption font-semibold text-ink-2">당월 순수납</dt>
-          <dd className="mt-1 text-h2 font-bold text-ink">
+          <dd className="mt-1 text-h3 font-bold text-ink">
             {formatKrw(summary.netCollectedAmount)}
           </dd>
         </div>
@@ -158,7 +158,7 @@ function PriceNoticeCard() {
       ) : null}
       {count !== null ? (
         <>
-          <p className={`text-h2 font-bold ${count > 0 ? "text-danger" : "text-ink"}`}>
+          <p className={`text-h3 font-bold ${count > 0 ? "text-danger" : "text-ink"}`}>
             응답 기한이 지난 안내 {count}건{isTruncated ? " 이상" : ""}
           </p>
           <p className="mt-1 text-caption text-ink-2">

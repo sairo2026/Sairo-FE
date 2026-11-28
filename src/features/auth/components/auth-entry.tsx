@@ -40,8 +40,8 @@ export function AuthEntry({
             <h1 className="text-h1 font-bold text-ink">{isLogin ? "로그인" : "회원가입"}</h1>
             <p className="mt-4 text-body text-ink-2">
               {isLogin
-                ? "사이로 계정으로 로그인해 업무를 이어가세요."
-                : "계정을 만들고 부동산 업무 관리를 시작하세요."}
+                ? "사이로 계정으로 로그인해 업무를 이어갈 수 있습니다."
+                : "계정을 만들고 부동산 업무 관리를 시작할 수 있습니다."}
             </p>
           </div>
           <div className="mx-auto flex w-full max-w-[360px] flex-col gap-3">

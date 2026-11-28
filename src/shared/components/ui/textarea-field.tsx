@@ -45,8 +45,8 @@ export function TextAreaField({
         aria-describedby={error || hint ? messageId : undefined}
         onChange={(event) => onValueChange(event.target.value)}
         className={cn(
-          "rounded-control border bg-surface px-5 py-4 text-body font-medium text-ink focus:border-primary focus:bg-white disabled:cursor-not-allowed disabled:text-ink-3",
-          error ? "border-danger" : "border-line",
+          "rounded-control border bg-white px-5 py-4 text-body font-medium text-ink focus:border-primary disabled:cursor-not-allowed disabled:text-ink-3",
+          error ? "border-danger" : "border-control",
           className,
         )}
       />

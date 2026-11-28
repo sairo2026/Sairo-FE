@@ -50,7 +50,7 @@ function MonthNav({ yearMonth, earliest }: { yearMonth: string; earliest: string
       >
         이전 달
       </Button>
-      <span className="min-w-28 text-center text-h2 font-semibold text-ink">
+      <span className="min-w-28 text-center text-h3 font-semibold text-ink">
         {yearMonth.replace("-", "년 ")}월
       </span>
       <Button
@@ -152,7 +152,7 @@ function SettlementBody({ yearMonth }: { yearMonth: string }) {
                   aria-label={group.title}
                   className="flex h-full flex-col gap-3 rounded-card border border-line bg-white px-6 py-6"
                 >
-                  <h2 className="text-h2 font-semibold text-ink">{group.title}</h2>
+                  <h2 className="text-h3 font-semibold text-ink">{group.title}</h2>
                   {group.metrics.map((def) => (
                     <Link
                       key={def.key}
@@ -161,7 +161,7 @@ function SettlementBody({ yearMonth }: { yearMonth: string }) {
                       className="flex items-baseline justify-between gap-3 rounded-control px-2 py-1 hover:bg-primary-soft"
                     >
                       <span className="text-body text-ink-2">{def.label}</span>
-                      <span className="shrink-0 whitespace-nowrap text-h2 font-bold text-primary">
+                      <span className="shrink-0 whitespace-nowrap text-h3 font-bold text-primary">
                         {formatValue(def, data[def.key])}
                       </span>
                     </Link>

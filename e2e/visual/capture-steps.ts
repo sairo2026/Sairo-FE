@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 import { settle } from "../support/app";
 
 const PHONE = "010-1234-5678";
@@ -56,7 +56,10 @@ export async function emailAndPhoneVerified(page: Page): Promise<void> {
 }
 
 export async function agreeAllTerms(page: Page): Promise<void> {
-  await page.getByLabel(/필수 약관 전체 동의/).check({ force: true });
+  const checkbox = page.getByRole("checkbox", { name: /필수 약관 전체 동의/ });
+  await expect(checkbox).toBeEnabled();
+  await checkbox.check();
+  await expect(checkbox).toBeChecked();
 }
 
 export async function openTermsPopup(page: Page): Promise<void> {
@@ -94,7 +97,7 @@ export async function wrongPasswordLogin(page: Page): Promise<void> {
   await page.getByPlaceholder("이메일 주소를 입력해 주세요.").fill("agent@example.com");
   await page.getByPlaceholder("비밀번호를 입력해 주세요.").fill("wrong-password-1");
   await page.getByRole("button", { name: "로그인하기", exact: true }).click();
-  await page.getByText("연속 1회 실패 · 남은 시도 4회").waitFor();
+  await page.getByText("남은 시도 4회").waitFor();
 }
 
 export async function lockedLogin(page: Page): Promise<void> {

@@ -48,7 +48,7 @@ function StatCard({
     <Link
       href={href}
       aria-label={`${title} ${value}${label}`}
-      className={`group flex flex-col rounded-card border border-line bg-white px-6 py-6 clickable-card ${icon ? "gap-10 lg:h-[214px]" : "gap-8"}`}
+      className={`group flex flex-col rounded-card border border-line bg-white px-6 py-6 clickable-card ${icon ? "gap-10 lg:min-h-[214px]" : "gap-8"}`}
     >
       <span className="flex flex-col gap-3">
         {icon ? (
@@ -64,10 +64,10 @@ function StatCard({
           </svg>
         ) : null}
         <span
-          className={`flex items-center justify-between font-bold text-ink ${icon ? "text-h1" : "text-h2"}`}
+          className={`flex items-center justify-between font-bold text-ink ${icon ? "text-h1" : "text-h3"}`}
         >
           {title}
-          <span aria-hidden="true" className="clickable-arrow text-ink-3">
+          <span aria-hidden="true" className="clickable-arrow text-ink-2">
             {icon ? (
               <svg
                 viewBox="0 0 18 36"
@@ -134,7 +134,7 @@ function FirstUseGuide({ isOwner, needsCard }: { isOwner: boolean; needsCard: bo
       className="flex flex-col gap-4 rounded-card border border-line bg-white px-6 py-5"
     >
       <div className="flex flex-col gap-1">
-        <h2 id="home-first-use" className="text-h2 font-semibold text-ink">
+        <h2 id="home-first-use" className="text-h3 font-semibold text-ink">
           첫 사용 안내
         </h2>
         <p className="text-caption text-ink-2">
@@ -182,20 +182,6 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
           }
         />
       </div>
-      {needsCard && !isEmptyOffice ? (
-        <div
-          role="status"
-          className="rounded-control bg-primary-soft px-5 py-4 text-caption text-ink-2"
-        >
-          결제 카드가 등록되지 않았습니다.{" "}
-          <Link
-            href="/billing/card-guide"
-            className="font-semibold text-primary underline clickable-link"
-          >
-            카드 등록 안내
-          </Link>
-        </div>
-      ) : null}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-[repeat(3,minmax(0,292px))]">
         <StatCard
           href="/coordinations"
@@ -224,7 +210,7 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
       {isEmptyOffice ? <FirstUseGuide isOwner={isOwner} needsCard={needsCard} /> : null}
       <section aria-labelledby="home-visit-requests" className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 id="home-visit-requests" className="text-h2 font-semibold text-ink">
+          <h2 id="home-visit-requests" className="text-h3 font-semibold text-ink">
             방문 신청 현황
           </h2>
           <Link
@@ -265,7 +251,7 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
           className="flex flex-col gap-5 rounded-card border border-line bg-white p-6"
         >
           <div className="flex items-center justify-between gap-3">
-            <h2 id="home-tasks" className="text-h2 font-semibold text-ink">
+            <h2 id="home-tasks" className="text-h3 font-semibold text-ink">
               오늘 업무 리스트
             </h2>
             <button
@@ -400,7 +386,7 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
             aria-labelledby="home-status"
             className="rounded-card border border-line bg-white p-6"
           >
-            <h2 id="home-status" className="mb-4 text-h2 font-semibold text-ink">
+            <h2 id="home-status" className="mb-4 text-h3 font-semibold text-ink">
               방문 조율 현황
             </h2>
             <ul className="flex flex-wrap gap-3">
@@ -422,7 +408,7 @@ function HomeBody({ summary }: { summary: HomeSummary }) {
             aria-labelledby="home-calendar"
             className="rounded-card border border-line bg-white p-6"
           >
-            <h2 id="home-calendar" className="mb-4 text-h2 font-semibold text-ink">
+            <h2 id="home-calendar" className="mb-4 text-h3 font-semibold text-ink">
               캘린더
             </h2>
             <MiniCalendar days={summary.calendarDays} />

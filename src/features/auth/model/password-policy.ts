@@ -20,9 +20,13 @@ const COMMON_PASSWORDS = new Set([
   "iloveyou",
 ]);
 
+const WHITESPACE = /[\p{White_Space}\uFEFF\u001C-\u001F]/u;
+const WHITESPACE_ONLY = /^[\p{White_Space}\uFEFF\u001C-\u001F]+$/u;
+
 export function validatePasswordInput(value: string): string | null {
   const length = countCodePoints(value);
-  if (length === 0 || value.trim() === "") return "비밀번호를 입력해 주세요.";
+  if (length === 0 || WHITESPACE_ONLY.test(value)) return "비밀번호를 입력해 주세요.";
+  if (WHITESPACE.test(value)) return "비밀번호에 공백을 사용할 수 없습니다.";
   if (length < PASSWORD_MIN) return `${PASSWORD_MIN}~${PASSWORD_MAX}자 이내로 설정해 주십시오.`;
   if (length > PASSWORD_MAX) return `${PASSWORD_MIN}~${PASSWORD_MAX}자 이내로 설정해 주십시오.`;
   if (COMMON_PASSWORDS.has(value.toLowerCase())) {

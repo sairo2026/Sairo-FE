@@ -187,9 +187,7 @@ function DisputeModal({ item, onClose }: { item: ReceivedItem; onClose: () => vo
             className="min-h-24 rounded-control border border-line px-3 py-2 text-body text-ink"
             aria-invalid={errors.reasonText ? true : undefined}
           />
-          <p className="text-caption text-muted">
-            {reasonText.length}/{DISPUTE_TEXT_LIMIT}자 · 고객 이름과 연락처를 넣지 마세요.
-          </p>
+          <p className="text-caption text-muted">고객 이름과 연락처를 넣지 말아 주세요.</p>
           {errors.reasonText ? (
             <p role="alert" className="text-caption text-danger">
               {errors.reasonText}

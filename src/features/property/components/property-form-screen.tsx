@@ -94,7 +94,7 @@ const DETAIL_SECTION_ID = "property-detail-fields";
 function Section({ id, title, children }: { id?: string; title: string; children: ReactNode }) {
   return (
     <section id={id} className="flex flex-col gap-5 pt-4">
-      <h2 className="text-h2 font-semibold text-ink">{title}</h2>
+      <h2 className="text-h3 font-semibold text-ink">{title}</h2>
       {children}
     </section>
   );
@@ -619,7 +619,15 @@ export function PropertyForm(props: FormProps) {
             </button>
           }
         />
-        <FormNotice>{PROPERTY_ENTRY_COPY.responsibility}</FormNotice>
+        <div className="rounded-control bg-primary-soft px-4 py-3 text-caption text-ink-2">
+          <p>{PROPERTY_ENTRY_COPY.responsibilitySummary}</p>
+          <details className="mt-2">
+            <summary className="w-fit cursor-pointer rounded-sm font-semibold text-primary clickable-link focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+              개인정보 입력 안내 자세히 보기
+            </summary>
+            <p className="mt-3">{PROPERTY_ENTRY_COPY.responsibilityDetails}</p>
+          </details>
+        </div>
         {isReadOnly ? (
           <FormNotice>
             결제가 지연되어 읽기만 가능합니다. 저장하려면 결제를 먼저 마쳐 주세요.
@@ -659,21 +667,25 @@ export function PropertyForm(props: FormProps) {
         </div>
 
         <div className={FORM_GRID_CLASS}>
-          <TextField
-            label="매물명"
-            placeholder="매물을 간단하게 저장할 이름을 입력해 주세요."
-            required
-            value={values.name}
-            maxLength={100}
-            onValueChange={(value) => setField("name", value)}
-            error={errors.name}
-          />
-          <DealPriceFields
-            values={values}
-            errors={errors}
-            disabled={isReadOnly || isOfferLocked}
-            onChange={setField}
-          />
+          <div className="lg:col-span-2 lg:max-w-[510px]">
+            <TextField
+              label="매물명"
+              placeholder="매물을 간단하게 저장할 이름을 입력해 주세요."
+              required
+              value={values.name}
+              maxLength={100}
+              onValueChange={(value) => setField("name", value)}
+              error={errors.name}
+            />
+          </div>
+          <div className="lg:col-span-2 lg:max-w-[510px]">
+            <DealPriceFields
+              values={values}
+              errors={errors}
+              disabled={isReadOnly || isOfferLocked}
+              onChange={setField}
+            />
+          </div>
           <CustomerNamePicker
             label={OWNER_OCCUPANT_ROLE_LABEL.OWNER}
             placeholder="매물 소유자의 이름을 입력해 주세요."

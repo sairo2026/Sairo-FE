@@ -65,7 +65,7 @@ export const IMPORT_COPY = {
   resultHeadline: (total: number, succeeded: number, failed: number, skipped: number) =>
     `전체 ${total}건 중 성공 ${succeeded}건, 실패 ${failed}건, 제외 ${skipped}건입니다.`,
   failedGuide:
-    "실패한 줄은 아래에서 원인을 보고 값을 고쳐 저장한 뒤 '실패한 줄만 다시 처리'를 누르세요. 이미 성공한 줄은 다시 만들지 않습니다. 파일에서 고치려면 실패한 줄을 내려받아 고친 뒤 같은 원본 시스템 이름으로 새로 올리세요. 이미 이전된 줄은 자동으로 제외됩니다.",
+    "실패한 줄은 아래에서 원인을 보고 값을 고쳐 저장한 뒤 '실패한 줄만 다시 처리'를 눌러 주세요. 이미 성공한 줄은 다시 만들지 않습니다. 파일에서 고치려면 실패한 줄을 내려받아 고친 뒤 같은 원본 시스템 이름으로 새로 올려 주세요. 이미 이전된 줄은 자동으로 제외됩니다.",
   readyToRetry: "고친 값을 저장했습니다. 위의 '실패한 줄만 다시 처리'를 누르면 이 줄이 이전됩니다.",
   correctionNothing: "바꾼 값이 없습니다. 값을 고친 뒤 저장해 주세요.",
   fixInFile:
