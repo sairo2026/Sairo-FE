@@ -948,7 +948,7 @@ export function CustomerLinkScreen({ token }: { token: string | undefined }) {
             ? "방문 일정이 확정되었습니다"
             : isArranging
               ? "방문 일정을 조율하고 있습니다"
-              : "방문 가능한 시간을 알려주세요"}
+              : "방문 가능한 시간을 알려 주세요"}
         </h1>
         <p className="text-body text-ink-2">
           {isConfirmed

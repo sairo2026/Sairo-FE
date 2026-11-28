@@ -46,7 +46,7 @@ export function CustomerPortalRequestScreen({ coordinationId }: { coordinationId
         내 방문 요청으로 돌아가기
       </ButtonLink>
       <header className="space-y-4">
-        <h1 className="text-h1 font-bold text-ink">방문 가능한 시간을 알려주세요</h1>
+        <h1 className="text-h1 font-bold text-ink">방문 가능한 시간을 알려 주세요</h1>
         <p className="text-body text-ink-2">
           {data.officeName}의 방문 요청입니다. 유효한 기존 시간을 확인·수정한 뒤 제출해 주세요.
         </p>
